@@ -148,32 +148,40 @@
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-20.工具类/博客/github+hexo博客搭建" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-8.python爬虫/3.scrapy框架/数据格式化输出" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/10/17/20.工具类/博客/github+hexo博客搭建/">githubpage + hexo + yilia 搭建个人博客</a>
-    </h1>
-  
-
-        
-        <a href="/2018/10/17/20.工具类/博客/github+hexo博客搭建/" class="archive-article-date">
-  	<time datetime="2018-10-17T11:23:11.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-10-17</time>
-</a>
-        
-      </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h4 id="0-本博客的由来"><a href="#0-本博客的由来" class="headerlink" title="0.本博客的由来"></a>0.本博客的由来</h4><p>本来感觉写博客很费时间，但是最近感觉这两年攒手里的笔记太多了，不方便整理和分享</p>
-<p>所以打算以后就干脆直接将笔记整理到github，这样也比自己维护一个博客省心</p>
-<p>下面就将搭建本博客的步骤也同步上来，当做一个hello-world吧。</p>
-        
-          <a class="article-more-a" href="/2018/10/17/20.工具类/博客/github+hexo博客搭建/#more">more >></a>
-        
+        <p>数据格式化输出<br>自动格式化输出文件<br>scrapy支持的格式化输出文件格式<br>json<br>jsonlines<br>csv<br>xml<br>通过配置setting中属性，来定义存储方式<br>FEED_URI   存储路径，必须配置，如果不配置，需要在启动时候指定路径<br>示例：file://tmp/export.csv<br>备注：<br>路径的名称可以格式化，例如：</p>
+<p>FEED_FORMAT   用于序列化输出的文件格式，就是上面的几种<br>FEED_EXPORT_ENCODING   文件编码格式，一般默认utf-8，json默认是安全编码格式<br>FEED_EXPORT_FIELDS    定义输出文件中包含的字段，为列表格式<br>FEED_EXPORT_INDENT    定义输出内容的缩进，默认为0,<br>0和负数表示内容会放在一行上<br>None会选择最紧凑的方式，将数据进行摆放<br>其他，将会按照指定的缩进，对对象的成员进行格式化显示<br>FEED_STORE_EMPTY     如果没输出是否会导出文件，默认为False<br>FEED_STORAGES_BASE    字典类型，包含所有支持存储方式模板引擎， 一般不需要手动配置<br>默认为</p>
+<p>FEED_STORAGES     一个字典类型，可以手动添加存储方式的模板引擎<br>默认为 { }<br>如果想要禁用某一个模板文件类型的引擎，可以将上面对应字段值设置为None<br>FEED_EXPORTERS_BASE    字典类型，包含了所有支持的格式文件处理引擎， 一般不需要手动配置<br>默认为</p>
+<p>FEED_EXPORTERS      一个字典类型，可以手动添加文件处理引擎<br>默认为{ }<br>如果想要禁用某一个模板文件类型的引擎，可以将上面对应字段值设置为None<br>scrapy手动输出指定csv格式文件<br>目标：<br>获取如下格式的csv文件<br>配置的步骤</p>
+<ol>
+<li><p>在scrapy的spiders同层目录，新建my_project_csv_item_exporter.py文件内容如下（文件名可改，目录定死）<br>   ​    from scrapy.conf import settings<br>   ​    from scrapy.contrib.exporter import CsvItemExporter</p>
+<pre><code>class MyProjectCsvItemExporter(CsvItemExporter):
+
+def __init__(self, *args, **kwargs):
+    delimiter = settings.get(&apos;CSV_DELIMITER&apos;, &apos;,&apos;)
+    kwargs[&apos;delimiter&apos;] = delimiter
+
+    fields_to_export = settings.get(&apos;FIELDS_TO_EXPORT&apos;, [])
+    if fields_to_export :
+        kwargs[&apos;fields_to_export&apos;] = fields_to_export
+
+    super(MyProjectCsvItemExporter, self).__init__(*args, **kwargs)
+</code></pre></li>
+<li><p>在同层目录，settings.py文件新增如下内容（指定item,field顺序）<br>   ​    FEED_EXPORTERS = {<br>   ​        ‘csv’: ‘my_project.my_project_csv_item_exporter.MyProjectCsvItemExporter’,<br>   ​    } #这里假设你的project名字为my_project</p>
+<pre><code>FIELDS_TO_EXPORT = [
+    &apos;id&apos;,
+    &apos;name&apos;,
+    &apos;email&apos;,
+    &apos;address&apos;
+</code></pre></li>
+<li><p>在同层目录，settings.py文件指定分隔符<br>CSV_DELIMITER = “\t”<br>4.启动项目<br>全部设定完后，执行scrapy crawl spider -o spider.csv的时候，字段就按顺序来了。</p>
+</li>
+</ol>
+
       
 
       
@@ -181,33 +189,11 @@
     <div class="article-info article-info-index">
       
       
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">博客</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
       
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/工具类//" class="article-tag-list-link color4">工具类</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
 
       
         <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/17/20.工具类/博客/github+hexo博客搭建/">展开全文 >></a>
+          <a class="article-more-a" href="/2018/10/18/8.python爬虫/3.scrapy框架/数据格式化输出/">展开全文 >></a>
         </p>
       
 
@@ -237,32 +223,18 @@
 
 
   
-    <article id="post-12.Docker容器技术/Docker/搭建Registry私有库" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-8.python爬虫/3.scrapy框架/Scrapy框架介绍" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/10/17/12.Docker容器技术/Docker/搭建Registry私有库/">搭建Registry 私有库</a>
-    </h1>
-  
-
-        
-        <a href="/2018/10/17/12.Docker容器技术/Docker/搭建Registry私有库/" class="archive-article-date">
-  	<time datetime="2018-10-17T11:23:11.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-10-17</time>
-</a>
-        
-      </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="1-关于Registry仓库"><a href="#1-关于Registry仓库" class="headerlink" title="1.关于Registry仓库"></a><strong>1.关于Registry仓库</strong></h3><p>官方的<a href="https://hub.docker.com/" target="_blank" rel="noopener">Docker hub</a>是一个用于管理公共镜像的好地方，我们可以在上面找到我们想要的镜像，也可以把我们自己的镜像推送上去。但是，有时候，我们的使用场景需要我们拥有一个私有的镜像仓库用于管理我们自己的镜像。这个可以通过开源软件Registry来达成目的。</p>
-<p> Registry在github上有两份代码：<a href="https://github.com/docker/docker-registry" target="_blank" rel="noopener">老代码库</a>和<a href="https://github.com/docker/distribution" target="_blank" rel="noopener">新代码库</a>。老代码是采用python编写的，存在pull和push的性能问题，出到0.9.1版本之后就标志为deprecated，不再继续开发。从2.0版本开始就到在新代码库进行开发，新代码库是采用go语言编写，修改了镜像id的生成算法、registry上镜像的保存结构，大大优化了pull和push镜像的效率。</p>
-<p> 官方在Docker hub上提供了registry的镜像（<a href="https://hub.docker.com/_/registry/" target="_blank" rel="noopener">详情</a>），我们可以直接使用该registry镜像来构建一个容器，搭建我们自己的私有仓库服务。Tag为latest的registry镜像是0.9.1版本的，我们直接采用2.1.1版本。</p>
-        
-          <a class="article-more-a" href="/2018/10/17/12.Docker容器技术/Docker/搭建Registry私有库/#more">more >></a>
-        
+        <p>scrapy框架介绍<br>scrapy框架的介绍<br>什么是scrapy框架<br>Scrapy是一个为了爬取网站数据，提取结构性数据而编写的应用框架，我们只需要实现少量的代码，就能够快速的抓取<br>Scrapy 使用了 Twisted[‘twɪstɪd]异步网络框架，可以加快我们的下载速度和数据在模块中间的转载速度。<br><a href="http://scrapy-chs.readthedocs.io/zh_CN/1.0/intro/overview.html" target="_blank" rel="noopener">http://scrapy-chs.readthedocs.io/zh_CN/1.0/intro/overview.html</a><br>异步和非阻塞的概念<br>非阻塞<br>关注的是程序在等待调用结果（消息，返回值）时的状态，指在不能立刻得到结果之前，该调用不会阻塞当前线程。<br>异步<br>如果整个程序没有中介的等待过程，我们就说整个过程是一个异步的过程<br>多线程爬取数据的流程</p>
+<p>scrapy的爬虫流程</p>
+<p>scrapy框架各模块功能</p>
+<p>创建爬虫项目（命令）<br>创建项目<br>命令<br>scrapy startproject +&lt;项目名字&gt;<br>创建后项目目录结构</p>
+<p>创建爬虫<br>命令<br>scrapy genspider  +&lt;爬虫名字&gt; + &lt;允许爬取的域名&gt;          生成普通的spider爬虫<br>scrapy genspider -t crawl &lt;爬虫名字&gt;  &lt;允许爬取的域名&gt;        生成crawl_Spider爬虫<br>示例：<br>scrapy genspider itcast “itcast.cn”<br>爬虫应用创建的位置</p>
+<p>启动爬虫应用<br>命令<br>scrapy crawl 爬虫名   执行单个爬虫<br>-o: 将爬虫的item输出存储到文件中.<br>quotes.jl : 将每一个item输出为一行的jsonline<br>quotes.csv: 将每一个item输出为每一行的csv格式文件<br>quotes.pickle: 存储为二进制文件<br>Scrapy–scrapy shell<br>什么是scrapy shell<br>Scrapy shell是一个交互终端，我们可以在未启动spider的情况下尝试及调试代码，也可以用来测试XPath表达式<br>查看实例属性/方法<br>在scrapy shell中查看<br>进行请求<br>scrapy shell ‘url’   对url地址进行请求获取响应<br>查看请求的属性<br>可使用任意scrapy实例 + TAB查看实例有哪些属性或者方法<br>response.url：当前响应的url地址<br>response.request.url：当前响应对应的请求的url地址<br>response.headers：响应头<br>response.body：响应体，也就是html代码，默认是byte类型<br>response.requests.headers：当前响应的请求头<br>response.meta: 下载延迟，请求深度等信息<br>response.xpath(***).extract()    验证xpath的正确性<br>在程序中<br>print（dir（实例对象））  查看实例对象的所有属性和方法</p>
+
       
 
       
@@ -270,37 +242,11 @@
     <div class="article-info article-info-index">
       
       
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Docker</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
       
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Docker容器技术//" class="article-tag-list-link color1">Docker容器技术</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Docker容器技术/Docker//" class="article-tag-list-link color2">Docker</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
 
       
         <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/17/12.Docker容器技术/Docker/搭建Registry私有库/">展开全文 >></a>
+          <a class="article-more-a" href="/2018/10/18/8.python爬虫/3.scrapy框架/Scrapy框架介绍/">展开全文 >></a>
         </p>
       
 
@@ -330,6 +276,552 @@
 
 
   
+    <article id="post-8.python爬虫/3.scrapy框架/scrapy对接splash" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>scrapy对接splash<br>Scrapy 对接 Splash<br>环境准备<br>首先在这之前请确保已经正确安装好了Splash并正常运行，同时安装好了ScrapySplash库<br>Scrapy-Splash文档<br><a href="https://github.com/scrapy-plugins/scrapy-splash" target="_blank" rel="noopener">https://github.com/scrapy-plugins/scrapy-splash</a><br>Scrapy-splash的配置<br>新建项目和spider<br>scrapy startproject scrapysplashtest     新建项目<br>scrapy genspider taobao <a href="http://www.taobao.com" target="_blank" rel="noopener">www.taobao.com</a>     新建spider<br>修改setting.py文件, 添加splash配置<br>SPLASH_URL = ‘<a href="http://localhost:8050&#39;" target="_blank" rel="noopener">http://localhost:8050&#39;</a>         添加splash服务的地址<br>DUPEFILTER_CLASS = ‘scrapy_splash.SplashAwareDupeFilter’       配置去重类<br>HTTPCACHE_STORAGE = ‘scrapy_splash.SplashAwareFSCacheStorage’     还需要配置一个Cache存储HTTPCACHE_STORAGE<br>添加splash中间件<br>DOWNLOADER_MIDDLEWARES = {<br>‘scrapy_splash.SplashCookiesMiddleware’: 723,<br>‘scrapy_splash.SplashMiddleware’: 725,<br>‘scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware’: 810,<br>}<br>SPIDER_MIDDLEWARES = {<br>‘scrapy_splash.SplashDeduplicateArgsMiddleware’: 100,<br>}<br>SplashRequest请求的使用<br>使用splash请求的说明<br>配置完成之后我们就可以利用Splash来抓取页面了，例如我们可以直接生成一个SplashRequest对象并传递相应的参数，Scrapy会将此请求转发给Splash<br>Splash对页面进行渲染加载，然后再将渲染结果传递回来，此时Response的内容就是渲染完成的页面结果了，最后交给Spider解析即可。<br>使用请求的方法<br>第一种方法<br>通过SplashRequest发送请求</p>
+<p>第二种方法<br>scrapy.Request对象发送请求给splash服务器，只需将配置属性给meta参数即可</p>
+<p>通过lua源码控制splash服务的示例<br>我们把Lua脚本定义成长字符串，通过SplashRequest的args来传递参数，同时接口修改为execute，另外args参数里还有一个lua_source字段用于指定Lua脚本内容，这样我们就成功构造了一个SplashRequest，对接Splash的工作就完成了。<br>​                                from scrapy import Spider<br>​                                from urllib.parse import quote<br>​                                from scrapysplashtest.items import ProductItem<br>​                                from scrapy_splash import SplashRequest</p>
+<pre><code>script = &quot;&quot;&quot;
+function main(splash, args)
+splash.images_enabled = false
+assert(splash:go(args.url))
+assert(splash:wait(args.wait))
+js = string.format(&quot;document.querySelector(&apos;#mainsrp-pager div.form &gt; input&apos;).value=%d;document.querySelector(&apos;#mainsrp-pager div.form &gt; span.btn.J_Submit&apos;).click()&quot;, args.page)
+splash:evaljs(js)
+assert(splash:wait(args.wait))
+return splash:html()
+end
+&quot;&quot;&quot;
+
+class TaobaoSpider(Spider):
+name = &apos;taobao&apos;
+allowed_domains = [&apos;www.taobao.com&apos;]
+base_url = &apos;https://s.taobao.com/search?q=&apos;
+
+def start_requests(self):
+for keyword in self.settings.get(&apos;KEYWORDS&apos;):
+for page in range(1, self.settings.get(&apos;MAX_PAGE&apos;) + 1):
+url = self.base_url + quote(keyword)
+yield SplashRequest(
+        url,
+        callback=self.parse,
+        endpoint=&apos;execute&apos;,
+        args={&apos;lua_source&apos;: script, &apos;page&apos;: page, &apos;wait&apos;: 7})
+</code></pre><p>使用scrapy-splash比使用selenium的优点<br>由于Splash和Scrapy都支持异步处理，我们可以看到同时会有多个抓取成功的结果，而Selenium的对接过程中每个页面渲染下载过程是在Downloader Middleware里面完成的，所以整个过程是堵塞式的，Scrapy会等待这个过程完成后再继续处理和调度其他请求，影响了爬取效率。<br>使用Splash，是在中间件中将请求和渲染等工作交给了splash服务器, 各请求之间是异步的，因此使用Splash爬取效率上比Selenium高出很多。<br>因此，在Scrapy中要处理JavaScript渲染的页面建议使用Splash，这样不会破坏Scrapy中的异步处理过程，会大大提高爬取效率，而且Splash的安装和配置比较简单，通过API调用的方式也实现了模块分离，大规模爬取时部署起来也更加方便。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/18/8.python爬虫/3.scrapy框架/scrapy对接splash/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-8.python爬虫/3.scrapy框架/scrapy_redis框架" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>scrapy_redis框架<br>scrapy_redis的介绍<br>scrapy_redis的官方介绍<br>基于redis的scrapy组件<br>使用scrapy_redis要安装scrapy_redis组件（pip install scrapy_redis）<br>scrapy_redis使用场景<br>增量式抓取、分布式抓取、持久化抓取<br>scrapy_redis实现的功能及与原生scrapy的区别<br>request去重<br>scrapy：可以实现去重，但是scrapy去重不能实现持久化，即当下次如果再次运行程序，会再次存储之前存储过得内容<br>scrapy_redis：会将请求过的指纹集合保存起来，用来判断重复我请求，即便重新运行程序，已经请求过的请求，也不会进入待请求对列中<br>爬虫持久化<br>scrapy：每次运行爬虫都是一次全新的开始<br>scrapy_redis：会将待请求的序列化后的request对象保存起来，这样每次运行程序都会从待请求列队中读取request对象进行请求，即使终止程序，再次运行，依然会从待请求对列中获取请求对象<br>分布式爬虫<br>scrapy：不能实现分布式<br>scrapy_redis：可以通过redis存储爬取的状态（已爬取，和待爬取），让多台机器上的爬虫程序，共用一个redis服务器，这样数据是共享的，实现了分布式的爬虫<br>分布式和集群的区别（备注）：<br>分布式：一个业务拆分成多个子业务，部署在不同的服务器上<br>集群，同一个业务，部署在多个服务器上<br>scrapy_redis的爬虫工作流程</p>
+<p>Scrapy_redis和scrapy框架使用的区别<br>克隆scrapy_redis的示例代码<br>克隆 github上的scrapy-redis源码文件<br>git clone <a href="https://github.com/rolando/scrapy-redis.git" target="_blank" rel="noopener">https://github.com/rolando/scrapy-redis.git</a><br>打开example-project的scrapy_redis示例源代码<br>mv scrapy-redis/example-project    项目目录<br>example-project项目目录结构如下</p>
+<p>redis_scrapy代码上和普通scrapy爬虫的区别<br>一、spider爬虫文件<br>第一种Scrapy爬虫（如示例dmoz.py）<br>区别：<br>和普通的爬虫文件没有区别<br>文件主要内容：</p>
+<p>第二种RedisSpider爬虫（如示例的myspider_redis.py）<br>区别<br>爬虫类继承自RedisSpider<br>要指定爬虫类的redis_key类属性，指定reids中存储start_url的位置<br>新增了爬虫类的方法<br>def make_request_from_data(self, data):   # data 为接收到额redis_key传递过来的url，我们可以自行拼接成想要的url进行请求<br>search_key = data<br>url = self.URL_MAIN % (search_key, 1)<br>result_item = SearchInfoResultItem()<br>result_item[“task_value”] = search_key<br>return Request(url, meta={“result_item”: result_item}, dont_filter=True)<br>作用<br>防止分布式爬虫在不同的程序中，都会去请求该start_url，这样会造成请求的重复，响应也会重复的交给解析函数去处理，从redis中取出的start_url第一次被爬虫取出之后便会删除掉，不会造成重复的请求<br>在持久化和去重的功能上实现了RedisSpider爬虫才实现了分布式<br>代码示例：</p>
+<p>第三种RedisCrawSpider爬虫（如示例的myspider_redis.py）<br>区别<br>爬虫类继承自RedisCrawlSpider<br>比RedisSpider爬虫就多了一个rules过滤功能<br>作用<br>在持久化和去重的功能上实现了RedisSpider爬虫才实现了分布式<br>另外可以实现自动的对响应中的连接进行匹配，进行请求<br>代码示例</p>
+<p>二、setting文件<br>区别：<br>设置了三个新的属性<br>DUPEFILTER_CLASS = “scrapy_redis.dupefilter.RFPDupeFilter”<br>指定爬虫给request对象去重的方法<br>SCHEDULER = “scrapy_redis.scheduler.Scheduler”<br>指定爬虫处理请求列队的方法<br>SCHEDULER_PERSIST = True<br>列队中的内容是否持久保存，为False的时候，在关闭程序的时候，清空redis<br>添加了一个处理item的pipeline<br> ‘scrapy_redis.pipelines.RedisPipeline’: 400<br>用来将items自动保存到reids中，我们可以取消，不用reids来保存<br>设置了redis的地址<br>REDIS_URL = ‘redis://192.168.207.130: 6379’<br>不写使用哪个数据库的话，默认使用0数据库<br>文件主要内容：</p>
+<p>三、运行爬虫后，reids数据库的中多出的键（运行程序后）<br>redis数据库多个三个键<br>爬虫名：dupefilter   用来存储爬取过的request指纹集合，数据类型为set类型<br>爬虫名：requests  用来存储已经序列化的待请求对象，数据类型为zset类型<br>爬虫名：items    用来存储爬取出来的数据，数据类型为list类型<br>每个键存储的内容：</p>
+<p>Scrapy_redis功能实现的方法(Scrapy_redis的源码)<br>scrapy_redis之redispipeline（实现item数据自动存储redis数据库）<br>文件位置<br>/python3.5/site-packages/scrapy_redis/pipelines/RedisPipeline<br>源码主要功能<br>实现将item存储在redis中<br>源码片段</p>
+<p>scrapy_redis之RFPDupeFilter（主要实现去重）<br>文件位置<br>/python3.5/site-packages/scrapy_redis、dupefilter/RFPDpeFilter<br>源码主要功能<br>判断请求是否存在内存中，如果不存在<br>对请求进行一系列操作后，将其转化为指纹<br>将指纹存储在内存中<br>主要实现去重功能<br>源码片段</p>
+<p>加密指纹生成过程<br>  import hashlib<br>  fp = hashlib.sha1()<br>  fp.update(url)<br>  fp.update(request.method)<br>  fp.update(request.body or b””)<br>  return fp.hexdiget()  #sha1结果的16进制的字符串<br>scrapy_redis之Scheduler（主要实现持久化）<br>文件位置<br>/python3.5/site-packages/scrapy_redis/scheduler/Scheduler<br>代码主要功能<br>判断取消过滤是否为true<br>判断url地址是否是第一次看到<br>如果过滤，且是第一次看到的请求，那么将会进入待请求的列队<br>主要实现持久化功能<br>源码片段</p>
+<p>scrapy_redis的总结<br>scrapy_redis与scrapy的区别<br>本质区别<br>scrapy_redis_spider相比于之前的scrapy_spider多了持久化和持久化去重的功能<br>主要是因为scrapy_redis将指纹和请求进行了在redis中的存储,正是redis实现了持久化<br>代码区别<br>仅仅是在setting中增加了五行代码<br>拓展：<br>scrapy_redis实现了请求的增量式爬虫，还可以实现内容增量式爬虫<br>可以将dont_filter设置不进行过滤<br>会将每条数据根据发帖人，发帖时间，帖子更新时间等使用md5算法生成指纹<br>在进行存储的时候 进行判断是否已经存在，以及是否更新<br>如果不存在那么便插入<br>如果存在但是更新时间已经更新，那么便更新<br>工作场景常用的数据存储模式<br>优点<br>可以利用redis的读取快速的特点，进行数据的快速读取<br>可以实现读取和存储分离，防止锁表的产生<br>存储数据用mysql或者mongodb<br>先将爬取到的数据去重后存储到mysql或mongodb中<br>也可以先存储到数据库中，在对数据库进行数据的去重<br>redis应用其速度快的特点，用来展示数据<br>定期从mysql或者mongodb中将去重后的数据读取到redis中<br>读取数据从redis中读取，其速度远远优于mysql和mongodb</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/18/8.python爬虫/3.scrapy框架/scrapy_redis框架/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-8.python爬虫/3.scrapy框架/scrapyd部署总结" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>scrapyd部署总结<br>二、环境安装<br>安装scprayd，网址：<a href="https://github.com/scrapy/scrapyd" target="_blank" rel="noopener">https://github.com/scrapy/scrapyd</a><br>安装scrapyd-client，网址：<a href="https://github.com/scrapy/scrapyd-client" target="_blank" rel="noopener">https://github.com/scrapy/scrapyd-client</a><br>建议从github上下载最新源码，然后用python setup.py install安装，因为pip安装源有可能不是最新版的。</p>
+<p>三、验证安装成功<br>在命令框中输入scrapyd，输出如下说明安装成功</p>
+<p>打开<a href="http://localhost:6800/" target="_blank" rel="noopener">http://localhost:6800/</a> 可以看到</p>
+<p>点击jobs可以查看爬虫运行情况。</p>
+<p>接下来就是让人很头疼的scrapyd-deploy问题了，查看官方文档上说用<br>scrapyd-deploy -l<br>可以看到当前部署的爬虫项目，但是当我输入这段命令的时候显示这个命令不存在或者有错误、不合法之类的。<br>解决方案：<br>在你的python目录下的Scripts文件夹中，我的路径是“D:\program files\python2.7.0\Scripts”，增加一个scrapyd-deploy.bat文件。<br>内容为：<br>@echo off<br>“D:\program files\python2.7.0\python.exe” “D:\program files\python2.7.0\Scripts\scrapyd-deploy” %*<br>然后重新打开命令框，再运行scrapyd-deploy -l 就可以了。</p>
+<p>四、发布工程到scrapyd<br>scrapyd-deploy <target> -p <project><br>target为你的服务器命令，project是你的工程名字。<br>首先对你要发布的爬虫工程的scrapy.cfg 文件进行修改，我这个文件的内容如下：<br>[deploy:scrapyd1]<br>url = <a href="http://localhost:6800/" target="_blank" rel="noopener">http://localhost:6800/</a><br>project = baidu</project></target></p>
+<p>因此我输入的命令是：<br>scrapyd-deploy scrapyd1 -p baidu</p>
+<p>输出如下</p>
+<p>五、启动爬虫<br>使用如下命令启动一个爬虫<br>curl <a href="http://localhost:6800/schedule.json" target="_blank" rel="noopener">http://localhost:6800/schedule.json</a> -d project=PROJECT_NAME -d spider=SPIDER_NAME<br>PROJECT_NAME填入你爬虫工程的名字，SPIDER_NAME填入你爬虫的名字<br>我输入的代码如下：<br>curl <a href="http://localhost:6800/schedule.json" target="_blank" rel="noopener">http://localhost:6800/schedule.json</a> -d project=baidu -d spider=baidu</p>
+<p>因为这个测试爬虫写的非常简单，一下子就运行完了。查看网站的jobs可以看到有一个爬虫已经运行完，处于Finished一列中</p>
+<p>六、停止一个爬虫<br>curl <a href="http://localhost:6800/cancel.json" target="_blank" rel="noopener">http://localhost:6800/cancel.json</a> -d project=PROJECT_NAME -d job=JOB_ID<br>更多API可以查看官网：<a href="http://scrapyd.readthedocs.io/en/latest/api.html" target="_blank" rel="noopener">http://scrapyd.readthedocs.io/en/latest/api.html</a></p>
+<p>七、远程开启服务器上的爬虫<br>前提: 已安装scrapyd-client<br>代码如下：<br>[cpp] view plain<br>copy</p>
+<h1 id="coding-utf-8"><a href="#coding-utf-8" class="headerlink" title="coding=utf-8"></a>coding=utf-8</h1><p>import urllib<br>import urllib2  </p>
+<h1 id="启动爬虫"><a href="#启动爬虫" class="headerlink" title="启动爬虫"></a>启动爬虫</h1><p>test_data = {‘project’:’baidu’, ‘spider’:’baidu’}<br>test_data_urlencode = urllib.urlencode(test_data)  </p>
+<p>requrl = “<a href="http://localhost:6800/schedule.json&quot;" target="_blank" rel="noopener">http://localhost:6800/schedule.json&quot;</a>  </p>
+<h1 id="以下是post请求"><a href="#以下是post请求" class="headerlink" title="以下是post请求"></a>以下是post请求</h1><p>req = urllib2.Request(url = requrl, data = test_data_urlencode)  </p>
+<p>res_data = urllib2.urlopen(req)<br>res = res_data.read()  # res 是str类型<br>print res  </p>
+<h1 id="查看日志"><a href="#查看日志" class="headerlink" title="查看日志"></a>查看日志</h1><h1 id="以下是get请求"><a href="#以下是get请求" class="headerlink" title="以下是get请求"></a>以下是get请求</h1><p>myproject = “baidu”<br>requrl = “<a href="http://localhost:6800/listjobs.json?project=&quot;" target="_blank" rel="noopener">http://localhost:6800/listjobs.json?project=&quot;</a> + myproject<br>req = urllib2.Request(requrl)  </p>
+<p>res_data = urllib2.urlopen(req)<br>res = res_data.read()<br>print res  </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/18/8.python爬虫/3.scrapy框架/scrapyd部署总结/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-8.python爬虫/3.scrapy框架/Scrapy-settinglog信息" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Scrapy-setting/log信息<br>配置scrapy的setting文件<br>为什么需要配置文件<br>配置文件存放一些公共的变量（比如数据库的地址，账号密码等）方便自己和别人的使用和修改<br>为了方便识别，一般配置文件中变量的命名都为大写，例如：SQL_HOST = ‘192.168.0.1’<br>在pider和pipeline中访问setting内容<br>在spider中访问setting的内容<br>​         class Myspider(scrapy.Spider):<br>​            name = ‘myspider’<br>​            start_urls = [‘http://<strong>*</strong>‘;]<br>​            def parse(self, response):<br>​                # 可以直接通过访问实例属性的方法，访问setting文件中的内容<br>​                                # self.settings 返回的是一个字典，里面按照键值对存储所有的配置参数<br>​                key = self.settings.attributes.get(‘KEY’，None)<br>在pipeline文件中访问setting的内容<br>​         class Mypipeline(object):<br>​             def open_spider(self, spider):<br>​                  # 可以通过传递过来的spider实例来访问setting中的内容<br>​                  BOT_NAME = spider.setting.get(‘KEY’, None)<br>配置文件的常用的配置<br>​        BOT_NAME = ‘<strong><em>‘   项目名称<br>​        SPIDER_MOUDLES = [‘ys.spiders’]     # 爬虫创建的位置<br>​        NEWSPIDER_MOUDLE = ‘yg.spiders’    # 新建爬虫的位置<br>​        USER_AGENT =’</em></strong>‘      # 设置主句名称，用来告诉服务器请求的身份，注意，scrapy不能将USER_AGENT配置在        HEADERS中<br>​       ITEM_PIPLINES   # 管道<br>​        DOWNLOAD_MIDDLEWARES    # 下载中间件<br>​       OBEY_ROBOTFILES = False    # 是否遵守robots协议<br>​        SPIDER_MIDDLEWARES    # 爬虫中间件<br>​        DEAFAULT_REQUEAT_HEADERS = { ***}   # 配置scrapy 默认的请求头，不能包含USER-AGRNT和cookies、refer<br>​        #  使用增量式，或分布式爬虫需要配置<br>​        DUPEFILTER_CLASS = “scrapy_redis.dupefilter.RFPDupeFilter”<br>​        SCHEDULER = “scrapy_redis.scheduler.Scheduler”<br>​        SCHEDULER_PERSIST = True<br>​        ITEM_PIPELINES = {<br>​            ‘scrapy_redis.pipelines.RedisPipeline’: 400<br>​            }<br>​        REDIS_URL = ‘redis://127.0.0.1: 6379’<br>​<br>       RETRY_HTTP_CODES = []    # 设置会retry的状态码响应<br>        HTTPERROR_ALLOWED_CODES = [302,]    # 设置来指定spider能处理的response返回值<br>        LOG_LEVEL = “WARNING”     # 设置log提示的等级，log的从高到低的级别分别为：error、warning、info、debug<br>        RETRY_ENABLED = False     开启请求失败重新请求，默认是开启的<br>        RETRY_TIMES = 3        设置重新请求的次数<br>        DOWNLOAD_TIMEOUT = 6     设置请求最大等待时间<br>        COOKIES_ENABLE = True        #  是否启用cookie中间件，如果关闭是不会向服务器发送cookie的<br>        COOKIES_DEBUG = True        # 可以看带cookie在函数中传递的过程<br>        DOWNLOAD_DELAY = 3   # 请求延时<br>        CONCURRENT_REQUESTS = 16   # 并发数量，默认值为16<br>        CONCURRENT_REQUESTS_PRE_DOMAIN = 16   # 每个域名最大并发<br>        CONCURRENT_REQUESTS_PR_IP = 16    # 每个ip最大的并发<br>         AUTOTHROTTLE_ENABLED = True    # 动态调整下载延时<br>        CONCURRENT_REQUESTS_PRE_DOMAIN = 1  # 设置允许对同一域名发起请求的并发数量限制<br>        JOBDIR = ‘路径’     # 配置记录爬虫状态目录的文件，使爬虫中途停止再启动的时候会接着上一次的状态继续爬取<br>log的配置与scrapy的debug信息<br>scrapy-log相关的配置<br>log的作用<br>为了让我们自己希望输出到终端的内容能容易看一些<br>配置log的显示等级<br>在setting中设置log显示的级别<br>​            LOG_LEVEL = “WARNING”        #  在setting文件中添加一行<br>log的从高到低的级别分别为：error、warning、info、debug<br>自定义log日志的方法<br>在想要显示log的位置添加log的输出<br>第一种打印方式：（不带log产生的位置）</p>
+<p>第二种打印方式：（带log产生的具体文件）</p>
+<p>在普通的py文件中配置logger日志的方法<br>作用<br>我们配置完了logger的输出文件后，我们可以在任何其他的程序后，可以导入logger模块，帮助我们来可以看到错误产生的位置和时间等信息<br>我们还可以将log存储的文件命名为每日的日期，这样方便我们分别存储我们每日的bug<br>示例：<br>​                    import logging<br>​                           # 配置logger的输出格式，和输出内容<br>​                    logging.basicConfig(<br>​                                    level=logging.INFO,<br>​                                    format=’%(levelname)s : %(filename)s ‘<br>​                                           ‘[%(lineno)d] : %(message)s’<br>​                                           ‘ - %(asctime)s’, datefmt=’[%d-%b-%Y %H:%M:%S]’<br>​                                            filename=’./logdebug.log’)<br>​<br>                    if <strong>name</strong> == ‘<strong>main</strong>‘:<br>                        logger = logging.getLogger(<strong>name</strong>)<br>                        log_message = ‘error’<br>                        logger.warning(log_message）<br>输出的格式</p>
+<p>详细示例</p>
+<p>常见的scrapy的debug信息</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/18/8.python爬虫/3.scrapy框架/Scrapy-settinglog信息/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-8.python爬虫/3.scrapy框架/Scrapy-pipeline" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Scrapy-pipeline<br>pipeline的配置<br>pipeline类的作用<br>接收引擎传递过来的数据，对数据进行处理<br>配置pipeline类（在pipelines文件中）<br>​    class Myspiderpipline(object):<br>​        def process_item(self, item, spider):   # 实现数据处理的方法，方法名不能修改<br>​            with open(‘temp.txt’, ‘a’) as f:<br>​                json.dump( item, f, ensure_ascii=False, indent=2)<br>​                        # 将item打印，并将item传递给后面的pipeline，实现数据在管道pipeline之间的传递<br>​                    return item<br>注意：<br>process_item方法中的spider参数，表示传递参数过来的爬虫对象<br>spider： 传递数据的爬虫对象，spider.name可以返回爬虫的名称<br>item：传递过来的数据<br>setting文件中的设置开启pipeline<br>​    ITEM_PIPELINE = {<br>​        ‘myspider.pipelines.MyspiderPipeline’: 300,<br>​    }<br>注意：<br>‘muspider.pipelines.MyspiderPipeline’是pipeline文件的路径<br>300  是pipeline的权重，pipeline的权重越小，其优先级越高，可以理解为距离引擎的远近<br>如果权重相同的两个pipeline，scrapy会自动的将键值进行排序，根据排序结果定义访问顺序<br>pipeline的方法<br>​      form pymongo import MongoClient<br>​      class Myspiderpipline(object):<br>​            # open_spider在爬虫开启请求start_url前的时候只执行一次，一般用于导入数据库<br>​             def open_spider(self,  spider):<br>​                    # 实例化一个mongoclient<br>​                   con = MongoClient(spider.settings.get(‘HOST’), spider.settings.get(‘PORT’))<br>​                   db = con[spider.settings.get(‘DB’)]<br>​                   self.collection = db[spider.settings.get(‘COLLECTON’)]<br>​         </p>
+<pre><code># close_spider在爬虫关闭的时候只执行 一次，一般用于需要关闭的数据库关闭
+def close_spider(self,  spider):
+        print(&apos;关闭pipeline&apos;)
+        return item      
+# from_crawler连接到setting.py的配置文件
+def from_crawler(cls, crawler):
+        return  cls(mongo_uri=crawler.settings.get(&apos;MGONGO_URI&apos;))
+</code></pre><p>备注：<br>一个项目会有多个spider，不同的pipeline处理不同的item的内容<br>一个spider的内容可能要做不同的操作，比如存入不同的数据库中<br>pipeline向mongoDB中插入数据<br>在pipeline类的外部定义使用的mongodb集合<br>​     from pymongo import MongoClient<br>​     client = MongoClient(host=’127.0.0.1’, port=27017)    # 实例化mongodb客户端<br>​     collection = client[‘myspider’][‘yangguang’]<br>在pipeline类open_spider中导入mongodb<br>​    form pymongo import MongoClient<br>​    class Myspiderpipline(object):<br>​        # open_spider在爬虫开启的时候只执行一次<br>​        def open_spider(self,  spider):<br>​            # 实例化一个mongoclient<br>​            con = MongoClient(spider.settings.get(‘HOST’), spider.settings.get(‘PORT’))<br>​            db = con[spider.settings.get(‘DB’)]<br>​            self.collection = db[spider.settings.get(‘COLLECTON’)]<br>向集合中插入数据<br>​            def process_item(self, item, spider):<br>​                item[‘collection_text’] = <em>**</em><br>​                collection.insert(dict(item))   # 向mongodb中插入数据<br>​                return item<br>向Mongodb中插入数据<br>要在setting中配置<br>MONGO_URI = ‘127.0.0.1’<br>MONGO_DATABASE = ‘数据库名’</p>
+<p>pipeline向Mysql中存入数据<br>数据同步的方式写入Mysql</p>
+<p>数据异步的方式写入Mysql</p>
+<p>数据自动导出json文件<br>自定义形式导出</p>
+<p>使用scrapy自带exportor导出</p>
+<p>将爬取去到的图片地址对应的图片进行存储<br>setting文件中设置图片存储位置</p>
+<p>pipeline中对图片进行下载</p>
+<p>ArticleImagePipeline类的方法<br>get_media_requests(self, item, info)<br>该方法实现将item字段中的url字段取出来，然后直接生成Request对象，请求对象会加入到对列中，等待执行下载<br>file_path(self, request, response=None, info=None)<br>这个方法用来返回保存的文件名<br>item_completed(self, results, item, info)<br>当单个item完成下载后的处理方法<br>results参数就是该item对应的下载结果，它是一个列表形式，列表的每一个元素就是一个元组，其中包含了下载成功或者失败的信息<br>附件：<br>Desktop.zip</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/18/8.python爬虫/3.scrapy框架/Scrapy-pipeline/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-8.python爬虫/3.scrapy框架/Scrapy-middleware" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Scrapy-middleware<br>中间件使用方法<br>使用方法<br>在middlewares文件中编写一个Downloader Middlewares的类，定义中间件<br>在setting中开启Downloader Middlewares，数值越小权限越大<br>request会先经过权限大的中间件，response会先经过权限小的中间件<br>​                SPIDER_MIDDLEWARES = {<br>​                    # 开启middleware，写清楚middleware所在的路径<br>​                    ‘login.middlewares.LoginSpiderMiddleware’: 543,<br>​                     }<br>常用自定义中间件<br>Downloader Middlewares（下载中间件）的方法<br>process_request(self, request, spider)<br>作用<br>当每个请求通过下载中间件时，该方法被调用,必须返回如下值的其中一个<br>返回内容<br>返回None<br>Scrapy将继续处理该请求，执行其他的中间件的相应方法，直到合适的下载器处理函数（下载处理程序）被调用，该请求被执行（其响应被下载）<br>返回Request对象<br>如果其返回 Request 对象，Scrapy则停止调用 process_request方法并重新调度返回的request。当新返回的request被执行后， 相应地中间件链将会根据下载的response被调用。<br>返回Response对象<br>Scrapy将不会调用任何其他的 process_request或 process_exception方法，或相应地下载函数； 将返回该response,已安装的中间件的 process_response() 方法则会在每个response返回时被调用。<br>抛出异常（包括抛出一个IgnoreRequest异常）<br>停止调用 process_request，下载中间件的 process_exception方法会被调用。如果没有任何一个方法处理该异常， 则request的errback(Request.errback)方法会被调用。如果没有代码处理抛出的异常， 则该异常被忽略且不记录(不同于其他异常那样)。<br>process_response（self, request, response, spider）<br>作用<br>当响应通过每个下载中间件的时候，调用方法，必须返回如下之一<br>返回内容<br>返回Response对象（可以与传入的响应相同，也可以是全新的对象）<br>该响应将被在链中的其他中间件的process_response方法处理。<br>返回Request对象<br>中间件链停止，返回的请求将被重新调度下载。处理类似于process_request()返回请求所做的那样。<br>产生异常（包括抛出一个IgnoreRequest异常）<br>停止调用 process_response，下载中间件链的 process_exception方法会被调用，如果没有任何一个方法处理该异常，则调用请求的errback（Request.errback）。如果没有代码处理抛出的异常，则该异常被忽略且不记录（不同于其他异常那样）。<br>process_exception(self, request，exception, spider)<br>作用：<br>当下载处理器（下载处理程序）、下载中间件的方法抛出异常（包括IgnoreRequest异常）时，Scrapy调用process_exception,返回如下几个参数之一<br>返回内容：<br>返回None：Scrapy将会继续处理该异常，调用接着已安装的其他中间件的process_exception方法，直到所有中间件都被调用完毕，则调用默认的异常处理。<br>返回Request对象，则返回的请求将被重新调用下载。这将停止中间件的process_exception方法执行，就如返回一个响应的那样。<br>常设置的中间件<br>给请求添加请求头的内容<br>​      from .settings import USER_AGENTS<br>​       class RandomUserAgent(object):    # 配置下载中间件<br>​           def process_request(self, request, spider):<br>​                ug_list = USER_AGENTS<br>​                user_agent = random.choice(ug_list)<br>​                # 在requests请求前添加自定义的USER_AGENT<br>​                request.headers[‘User-Agent’] = user_agent<br>给请求添加代理ip<br>​        class RandomProxy(object):<br>​               def process_request(self, request, spider):<br>​                    proxy = random.choice(PROXIES)</p>
+<pre><code>if proxy[&apos;user_passwd&apos;] is None:
+        # 没有代理账户验证的代理使用方式
+        request.meta[&apos;proxy&apos;] = &quot;http://&quot; + proxy[&apos;ip_port&apos;]
+else:
+        # 对账户密码进行base64编码转换
+        base64_userpasswd = base64.b64encode(proxy[&apos;user_passwd&apos;])
+       # 对应到代理服务器的信令格式里
+       request.headers[&apos;Proxy-Authorization&apos;] = &apos;Basic &apos; + base64_userpasswd
+request.meta[&apos;proxy&apos;] = &quot;https://&quot; + proxy[&apos;ip_port&apos;]
+</code></pre><p>将跳转（302）等状态码不是200的响应，重新发起请求（只适用于scrapy，不适用与scrapy-redis）<br>​    class Forbidden302Middleware(object):<br>​        def process_response(self, request, response, spider):<br>​            if response.status != 200:<br>​                print(‘捕获到一个相应状态码不是200的请求:’, request.url, ‘: ‘, response.status_code)<br>​                return request<br>​            return response<br>给请求添加cookie的中间件<br>​    import random<br>​    class CookiesMiddleware(object):<br>​        def process_request(self,request,spider):<br>​            cookie = random.choice(cookie_pool)  # cookie_poll是通过其他模块定期爬取获得的COOKIE集合<br>​            request.cookies = cooki<br>在下载中间件中通过selenium实现模拟登录</p>
+<p>所有内置下载中间件<br>关闭内置中间件的方法<br>示例：’scrapy.downloadermiddlewares.retry.RetryMiddleware’: None<br>​    DOWNLOADER_MIDDLEWARES = {<br>​        # Engine side<br>​        ‘scrapy.downloadermiddlewares.robotstxt.RobotsTxtMiddleware’: 100,<br>​        ‘scrapy.downloadermiddlewares.httpauth.HttpAuthMiddleware’: 300,<br>​        ‘scrapy.downloadermiddlewares.downloadtimeout.DownloadTimeoutMiddleware’: 350,<br>​        ‘scrapy.downloadermiddlewares.defaultheaders.DefaultHeadersMiddleware’: 400,<br>​        ‘scrapy.downloadermiddlewares.useragent.UserAgentMiddleware’: 500,<br>​        ‘scrapy.downloadermiddlewares.retry.RetryMiddleware’: 550,<br>​        ‘scrapy.downloadermiddlewares.ajaxcrawl.AjaxCrawlMiddleware’: 560,<br>​        ‘scrapy.downloadermiddlewares.redirect.MetaRefreshMiddleware’: 580,<br>​        # 对压缩(gzip, deflate)数据的支持<br>​        ‘scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware’: 590,<br>​        ‘scrapy.downloadermiddlewares.redirect.RedirectMiddleware’: 600,<br>​        ‘scrapy.downloadermiddlewares.cookies.CookiesMiddleware’: 700,<br>​        ‘scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware’: 750,<br>​        ‘scrapy.downloadermiddlewares.stats.DownloaderStats’: 850,<br>​        ‘scrapy.downloadermiddlewares.httpcache.HttpCacheMiddleware’: 900,<br>​<br>常用的伪造User-Agent<br>user_agent_list = [<br>​    “Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1”,<br>​    “Mozilla/5.0 (X11; CrOS i686 2268.111.0) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11”,<br>​    “Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1092.0 Safari/536.6”,<br>​    “Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.6 (KHTML, like Gecko) Chrome/20.0.1090.0 Safari/536.6”,<br>​    “Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/19.77.34.5 Safari/537.1”,<br>​    “Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.9 Safari/536.5”,<br>​    “Mozilla/5.0 (Windows NT 6.0) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.36 Safari/536.5”,<br>​    “Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3”,<br>​    “Mozilla/5.0 (Windows NT 5.1) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3”,<br>​    “Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_0) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1063.0 Safari/536.3”,<br>​    “Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3”,<br>​    “Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1062.0 Safari/536.3”,<br>​    “Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3”,<br>​    “Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3”,<br>​    “Mozilla/5.0 (Windows NT 6.1) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.1 Safari/536.3”,<br>​    “Mozilla/5.0 (Windows NT 6.2) AppleWebKit/536.3 (KHTML, like Gecko) Chrome/19.0.1061.0 Safari/536.3”,<br>​    “Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24”,<br>​    “Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24”,<br>​    “Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/531.21.8 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10”,<br>​    “Mozilla/5.0 (Windows; U; Windows NT 5.2; en-US) AppleWebKit/533.17.8 (KHTML, like Gecko) Version/5.0.1 Safari/533.17.8”,<br>​    “Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/533.19.4 (KHTML, like Gecko) Version/5.0.2 Safari/533.18.5”,<br>​    “Mozilla/5.0 (Windows; U; Windows NT 6.1; en-GB; rv:1.9.1.17) Gecko/20110123 (like Firefox/3.x) SeaMonkey/2.0.12”,<br>​    “Mozilla/5.0 (Windows NT 5.2; rv:10.0.1) Gecko/20100101 Firefox/10.0.1 SeaMonkey/2.7.1”,<br>​    “Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_8; en-US) AppleWebKit/532.8 (KHTML, like Gecko) Chrome/4.0.302.2 Safari/532.8”,<br>​    “Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_4; en-US) AppleWebKit/534.3 (KHTML, like Gecko) Chrome/6.0.464.0 Safari/534.3”,<br>​    “Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_5; en-US) AppleWebKit/534.13 (KHTML, like Gecko) Chrome/9.0.597.15 Safari/534.13”,<br>​    “Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_2) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.835.186 Safari/535.1”,<br>​    “Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/535.2 (KHTML, like Gecko) Chrome/15.0.874.54 Safari/535.2”,<br>​    “Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.36 Safari/535.7”,<br>​    “Mozilla/5.0 (Macintosh; U; Mac OS X Mach-O; en-US; rv:2.0a) Gecko/20040614 Firefox/3.0.0 “,<br>​    “Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10.5; en-US; rv:1.9.0.3) Gecko/2008092414 Firefox/3.0.3”,<br>​    “Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.1) Gecko/20090624 Firefox/3.5”,<br>​    “Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.14) Gecko/20110218 AlexaToolbar/alxf-2.0 Firefox/3.6.14”,<br>​    “Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10.5; en-US; rv:1.9.2.15) Gecko/20110303 Firefox/3.6.15”,<br>​    “Mozilla/5.0 (Macintosh; Intel Mac OS X 10.6; rv:2.0.1) Gecko/20100101 Firefox/4.0.1”<br>​    ]<br>代理ip代码示例<br>proxy_ip.pyrandomproxymiddleware.py<br>获取cookie_pool(cookie_list)的模块<br>get_cookie_list.py</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/18/8.python爬虫/3.scrapy框架/Scrapy-middleware/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-8.python爬虫/3.scrapy框架/Scrapy-items&amp;spider" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Scrapy-items/spider</p>
+<p>Items的配置<br>定义Item的作用<br>提前定义需要获取的数据，可以很清楚想要爬取的信息<br>没有定义的item属性不能被spider使用，键命名错误会报错，可以防止使用错误的键来存储数据<br>不同的爬虫使用不同的Item来存放不同的数据，在把数据交给pipeline的时候，可以通过isinstance(item, MyspiderItem) 来判断数据是属于哪个item，进行不同的数据(item)处理方式<br>item实例对象可以通过和字典相同的数据处理方式，来处理item对象的属性，所以我们可以直接将Myspider理解为一个字典<br>定义Item的方法（在item文件中）<br>​    class MyspiderItem(scrapy.Item):  # 创建一个item类<br>​        name = scrapy.Field()    # scrapy.Field( )只是占了一个位，并没有值<br>​                title = scrapy.Field( )<br>在Spider中使用item的方法（在spider文件中）<br>​    from Python import MyspiderItem<br>​    item = MyspiderItem()    # 创建一个自定义的item实例，item的操作和字典是一样的<br>​    item[‘title’] = ###     # 向item对象中插入数据<br>实现item对象和字典类型数据的转化<br>dict(item)      将item对象转化为dict类型数据<br>在将数据进行写入文件中的时候，一定要将其转化为json字符串，所以要先转化为字典<br>spider爬虫文件Spider类<br>scrapy_spider类的作用<br>传递给引擎request对象，或者需要处理的数据，接收引擎传递过来的response对象<br>配置spider类及类属性（在spider文件中）<br>​    class PythonSpider(scrapy.Spider)     # 自定义spider类，继承自scrapy.Spider类<br>​        name = ‘python’       # 创建爬虫时候的名字，不可以修改，和爬虫文件名称一致<br>​        # 创建爬虫时允许爬虫爬取范围，防止爬虫爬取到其他的网站，可以在一个列表中放置多个域名<br>​               #  从start_url后面爬取的url地址，必须要属于allow_domin域名下的地址<br>​        allowed_domain = [‘python.cn’]<br>​         # 定义开始爬取的网址，默认是可以被反复请求的<br>​        start_urls =  ‘<a href="http://www.itcast.cn/channel/teacher.shtml&#39;" target="_blank" rel="noopener">http://www.itcast.cn/channel/teacher.shtml&#39;</a>;<br>配置<strong>init</strong>方法（使用Redis_spider框架爬虫类继承crawlredisSpider的时候要动态获取allow_domin）<br>​        # 增加<strong>init</strong>()方法，根据从redis中获取的start_url动态设置allow_domin的方法<br>​    def <strong>init</strong>(self, <em>args, **kwargs):<br>​        domain = kwargs.pop(‘domain’, ‘’)<br>​        self.allowed_domains = filter(None, domain.split(‘,’))<br>​            # 要继承上方定义的爬虫类的原始的<strong>init</strong>方法<br>​        super(youyuanSpider, self).<strong>init</strong>(</em>args, **kwargs)<br>配置spider类的实例方法实现请求下一页<br>​    def parse(self,  response):  # 定义数据提取的方法，接收中间件传递过来的response对象（方法名不能改）<br>​       tr_list = response.xpath(“//table[@class=’tablelist’]/tr”)[1:-1]          # xpath分组提取<br>​              for tr in tr_list:<br>​                      item = {}<br>​                      item[“title”] = tr.xpath(“./td[1]/a/text()”).extract_first()<br>​                      item[“position_categary”] = tr.xpath(“./td[2]/text()”).extract_first()<br>​                      item[“url”] = response.url<br>​                      yield item        # 将item通过引擎传递给pipeline进行处理</p>
+<pre><code>   next_url_temp = response.xpath(&quot;//a[@id=&apos;next&apos;]/@href&quot;).extract_first()
+   if next_url_temp is not None and next_url_temp != &quot;javascript:;&quot;:
+           next_url = &quot;http://hr.tencent.com/&quot;; + next_url_temp
+
+# scrapy.Request构造requests对象给引擎，callback表示response交给哪个函数处理
+yield scrapy.Request(next_page_url, callback=self.parse)  
+</code></pre><p>多个解析函数中如何传递参数示例<br>​    def parse(self, response):<br>​        tr_list = response.xpath(‘//div[@class=”greyframe”]/table//table/tr’)   # xpath分组提取<br>​        for i in tr_list:<br>​            item = MyspiderItem（）  # 实例化item对象<br>​            ……..<br>​            …….<br>​                        #   将item参数封装成request对象通过引擎传递给调度器，引擎传递回来的Response对象给get_content函数<br>​            yield scrapy.Request(item[“href”],  callback=self.get_content,  meta{“item”:item})   </p>
+<pre><code>def get_content(self, response):
+    item = response.meta[&apos;item&apos;]    # 获取response.meta属性的item对象
+    item[&apos;text&apos;] = response.xpath(&quot;//div[@class=&apos;content_text14_2&apos;]//text( )&quot;).extract( )
+    yield  item    # 统一将数据传递给pipeline
+</code></pre><p>start_requests方法<br>作用：<br>我们定义的start_urls都是默认交给start_requests处理的，所以如果我们想要在处理在请求之前处理request对象，那么我们可以重写start_requests方法，实现指定其响应的解析函数等功能<br>示例：<br>​         import scrapy<br>​            def start_requests(self):<br>​               for url in self.start_urls:<br>​                    yield scrapy.Request(<br>​                        url,<br>​                        callback = self.parse<br>​                )<br>​            def parse(self, response)<br>​                self.settings.get(‘KEY’, ‘’)<br>​                pass<br>spider中用到的方法/属性：<br>response对象的属性<br>response.url：当前响应的url地址<br>response.request.url：当前响应对应的请求的url地址<br>response.status: 响应的状态码<br>response.headers：获取响应头<br>response.request.headers：当前响应的请求头<br>response.body：响应体，也就是html代码，默认是bytes类型<br>response.meta: 解析函数之间传递的数据，字典类型<br>response.request.headers.getlist(‘Cookie’)    请求的cookie<br>response.headers.getlist(‘Set-Cookie’)   响应的cookie<br>response.xpath( )   方法<br>xpath( )  response.xpath( )  返回的是一个含有多个匹配结果的selector对象的列表，其具有如下方法<br>extract( )返回一个包含字符串数据的列表，将列表中所有select对象中的data属性的值提取出来<br>如果xpath（）提取的数据不存在，返回一个空列表<br>extract_first  返回列表中的第一个字符串，将列表第一个对象元素的data属性值提取出来<br>如果xpath（）提取的数据不存在，返回一个None类型数据<br>scrapy.Request(url, callback, method=’GET’, headers, body, cookies, meta, dont_filter=False )   get请求方法<br>url必须传递，为请求的url，将请求的结果作为响应传递给callback解析函数<br>callback: 指定传入的参数交给那个解析函数去处理<br>meta: 在不同的解析函数中传递数据， meta默认还会携带部分信息， 比如下载延迟，请求深度等<br>cookiejar ： 给对应的request一个cookiejar表示，任意的数字，在之后的request也携带该标示，那么将会自动把request对象携带对应的request的获取到的所有cookie内容<br>dont_filter: 默认url会经过allow_domain过滤，如果dont_filter设置为True，则已经爬过的地址不会被过滤<br>scrapy默认有url去重的功能,该功能对需要重复请求的url有重要用途<br>如果请求的页面是实时在变的，在有需要要抓实时的页面内容的时候，需要设置为true<br>start_urls的请求，dont_filter参数默认为true<br>method： 请求的方法，当使用POST的时候要传递body参数，在scrapy中body为字符串的形式<br>cookies： 传递的cookie，注意，在scrapy中cookie不能放在header中进行传递<br>headers： 使用自定义的header，优先级高于在setting中设置的默认headers<br>body：请求体，当使用post请求，发送数据的时候使用，并且当发送payload类型参数的时候，一定要使用<br>并且还要加上请求头 ： ‘Content-Type’: ‘application/json’<br>注意：<br>当请求被重定向后，redict中间件会自动进行重定向请求，并返回重定向后的响应<br>yield<br>将数据返回给引擎，并将方法挂起；<br>原理上，让这个函数成为一个生成器，每次遍历的时候会将每个结果读取到内存中，不会导致没存的占用量瞬间变高<br>yield只能返回[BaseItem， dict， None， Request ]类型的数据；<br>yield 的不是Request对象，表示将变量的数据传递给pipeline，接scrapy.Request方法表示将request传递给调度器，进行请求返回给callback函数response<br>scrapy.FormRequest（）      post表单提交<br>formdata：携带的post请求的参数，字典类型，只能发送formdata类型的参数<br>其他参数和scrapy.Request（）方法的参数使用基本一致<br>scrapy.FormRequest.from_resopnse（）    对响应中的表单自动进行表单提交<br>response：   解析函数接收到的响应<br>formdata：  需要填写的表单内容，，只能发送formdata类型的参数<br>其他参数和scrapy.Request（）方法的参数使用基本一致<br>Scrapy中的CrawlSpider类<br>CrawlSpider的作用<br>是scrapy的一个子类，应用CrawlSpider，我们可以从start_url返回的response中自动提取url地址<br>scrapy会自动的构造requests请求，发送给引擎，进行请求<br>还可以指定response是否传递给解析函数，或者是否需要继续提取响应中的url进行请求<br>使用CrawlSpider的方法<br>CrawlSpider和普通爬虫的区别<br>CrawlSpider爬虫类继承自CrawlSpide<br>在爬虫中定义一个rules对象，scrapy会自动根据rules定义的规则，过滤出符合规则的url，自动进行请求，将响应传递给解析函数，或者继续经过rules过滤符合规律的url进行请求获取响应<br>不需要自定义parse方法，因为scrapy自动的使用parse方法去请求rules过滤出来的url地址<br>生成crawlspider的命令<br>scrapy genspider -t crawl &lt;爬虫名字&gt;  &lt;允许爬取的域名&gt;<br>配置CrawlSpider爬虫示例<br>​         form scrapy.linkextractors import LinkExtractor<br>​         from scrapy.spiders import CrawSpider, Rule</p>
+<pre><code>class CsdnspiderSpider(CrawlSpider):      # CrawlSpider要继承CrawlSpider
+               name = &apos;csdnspider&apos;
+               allowed_domains = [&apos;suning.com&apos;]
+               start_urls = [&apos;http://snbook.suning.com/web/trd-fl/100301/46.htm&apos;]
+
+               # 提取url，自动构造请求，把请求交给引擎获取响应
+               rules = (
+                     Rule(linkExtractor(allow=r&apos;/web/trd-fl/\d+.htm$&apos;), callback=&apos;parse_next_url&apos; follow=True),
+                     Rule(linkExtractor(allow=r&apos;/web/prd/\d+.htm$&apos;), callback=&apos;parse_item&apos; follow=True),
+</code></pre><p>spiders.Rule常见参数<br>linkextractor：是 一个Link Extractor对象，用于定义需要提取的链接，交给parse方法；<br>linkextractor可以接收正则、xpath、css等匹配连接方式，可以查看linkextractor的源码来查看其可以接收的匹配方式<br>callback：从link_extractor中每获取到连接的时候，参数所指定的值作为回调函数<br>follow：是一个布尔值，指定了根据改规则从response提取的链接是否需要linkextractor继续跟进（如果callback为None，follow默认设置为True，否则默认为False）<br>process_links：指定该spider中哪个函数将会被调用，从link_extractor中获取到连接列表时将会调用该函数，该方法主要用来过滤url<br>process_request：指定该Spider中哪个函数将会被调用，当构造完request列表时都会调用该函数，用来过滤request，必须返回request\None<br>LinkExtracort常见的参数<br>allow：满足括号中正则匹配的url会被提取，如果为空，则全部匹配(也可以是xpath匹配)<br>可以使用其他参数，可以是xpath、css等匹配方法<br>restrict_xpaths：使用xpath表达式，和allow共同作用过滤链接，及xpath满足范围内的url地址会被提取<br>deny：满足括号中的正则表达式的url一定不提取（优先级高于allow）<br>allow_domains：会被提取的连接的domain<br>deny_domains: 一定不会被提取连接的domains<br>使用ScrawlSpider注意点<br>当LinkExtractor提取到一个满足匹配规则的URL地址，后面的规则讲不会匹配该url地址，所以，注意不要将前面url地址匹配规则写的太详细，会被前面的的规则提取完不会经过后面的规则提取；<br>scrapy会自动的将LinkExtractor提取到的所有url地址给补全协议和域名、端口等，进行请求，不需要我们手动补全；<br>scrapy模拟登录<br>scrapy模拟登录有两种方法<br>直接携带cookie<br>找到发送post请求的url地址，带上信息，发送请求<br>使用scrapy框架自动登录<br>使用scrapy模拟登录注意点<br>当需要获取登录后才能获取到数据的时候<br>一个cookie一般对一个网站访问的时候，服务器可能设置阈值，这时候我们要限制访问的延时<br>注意有时候服务器会对我们的ip和cookie对应结果做判断，所以我们最好不要频繁的更换ip和cookie的搭配关系<br>如果想要持续的状态保持可以在setting中设置COOKIES_ENABLE = True<br>如果想要使用多cookie，多ip对数据进行爬取，可以使用分布式，一个ip搭配一个cookie对数据进行请<br>scrapy携带cookie模拟登录<br>应用场景<br>1、cookie过期时间很长，常见于一些不规范的网站<br>2、能在cookie过期之前把搜有的数据拿到<br>3、配合其他程序使用，比如其使用selenium把登陆之后的cookie获取到保存到本地，scrapy发送请求之前先读取本地cookie<br>模拟登录的示例（使用start_request来使请求携带cookie）<br>​        import scrapy<br>​                import re<br>​                class RenrenSpider(scrapy.Spider):<br>​                        name = ‘renren’<br>​                        allowed_domains = [‘renren.com’]<br>​                        start_urls = [‘<a href="http://www.renren.com/327550029/profile&#39;;]" target="_blank" rel="noopener">http://www.renren.com/327550029/profile&#39;;]</a></p>
+<pre><code>def start_requests(self):                # 0.在start_process中对start_urls进行请求
+        cookies_str = &quot;*******&quot;         # 1.获取到cookie,一般情况下我们也可以使用selenium进行获取
+        cookies = {i.split(&quot;=&quot;)[0]:i.split(&quot;=&quot;)[-1] for i in cookies_str.split(&quot;; &quot;)}
+        yield scrapy.Request(
+                self.start_urls[0],
+                callback=self.parse,
+                cookies=cookies            # 2.直接带上cookie进行页面的请求
+                )
+def parse(self, response):          # 接下来的请求scrapy会直接将其带上cookie
+    ret = re.findall(r&quot;你瞅啥&quot;,response.body.decode())
+    print(ret)
+    yield scrapy.Request(
+            &quot;http://www.renren.com/327550029/profile?v=info_timeline&quot;;,
+            callback=self.parse1
+</code></pre><p>scrapy发送post请求模拟登录<br>使用场景<br>模拟的POST请求可以获取到请求参数和实际请求的URL地址（可以在之前请求的响应找到，或者可以通过解析js等方式获取到post请求的所需参数）<br>发送post请求获取cookie的示例<br>​        import scrapy<br>​        import re<br>​        class GithubSpider(scrapy.Spider):<br>​            name = ‘github’<br>​            allowed_domains = [‘github.com’]<br>​            start_urls = [‘<a href="https://github.com/login&#39;;;]" target="_blank" rel="noopener">https://github.com/login&#39;;;]</a><br>​            def parse(self, response):<br>​                form_data = {}<br>​                # 1.获取并构建post请求需要的参数<br>​                form_data[“authenticity_token”] =      # 可以在之前的响应中获取，或js解析<br>​                   response.xpath(“//input[@name=’authenticity_token’]/@value”).extract_first()<br>​                form_data[“commit”] = “Sign in”<br>​                form_data[“utf8”] = “✓”<br>​                form_data[“login”] = “noobpythoner”<br>​                form_data[“password”] = “zhoudawei123”<br>​            </p>
+<pre><code>    # 2.使用scrapy.FormRequest携带参数对登录的url地址进行请求
+    yield scrapy.FormRequest(
+       &quot;https://github.com/session&quot;,      #post请求的url地址
+        formdata = form_data,
+        callback = self.after_login
+    )
+def after_login(self,response):
+    ret = re.findall(r&quot;noobpythoner&quot;,response.body.decode())
+    print(ret)
+</code></pre><p>scrapy自动模拟登录<br>使用场景<br>在进行提交post请求的表单中，的form表单具有action属性<br>可以使用scrapy.FormRequest.from_resopnse方法，会自动帮我们获取form表单的提交地址<br>我们提供表单中需要填写的内容，可表单提交请求的响应交给哪个函数处理<br>scrapy自动模拟登录示例<br>​            import scrapy<br>​            import re<br>​            class RenrenSpider(scrapy.Spider):<br>​                 name = ‘renren’<br>​                 allowed_domains = [‘renren.com’]<br>​                 start_urls = [‘<a href="http://www.renren.com/327550029/profile&#39;]" target="_blank" rel="noopener">http://www.renren.com/327550029/profile&#39;]</a></p>
+<pre><code>def parse(self, response):
+                # 使用FormRequest.from_resopnse对表单地址进行请求
+yield scrapy.FormRequest.from_resopnse(
+     # 传入包含post请求表单的响应，表单内容，回调函数
+     response,
+     formdata={&apos;email&apos;: &apos;user_name&apos;, &apos;password&apos;: &apos;password&apos;},
+     callback=self.parse_page
+     )
+def parse_page(self, response):
+    print(response.url, &apos;*&apos;, * 100, response.starus)
+    print(&apos;*&apos; * 100)
+    print(re.findall(r&apos;user_name&apos;, response.body.decode()))                    
+</code></pre><p>设置cookie允许在函数中传递<br>在setting中配置cookie的传递<br>​            COOKIES_ENABLE = True       # 设置允许cookie在不同的解析函数中传递，默认是允许的<br>​            COOKIES_DEBUG = True        # 可以看带cookie在函数中传递的过程</p>
+<p>终端效果如下</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/18/8.python爬虫/3.scrapy框架/Scrapy-items&spider/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-8.python爬虫/3.scrapy框架/Gerapy的介绍" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Gerapy的介绍<br>Gerapy的介绍<br>分布式的爬虫部署和管理工具，基于scrapy、scrapyd、scrapyd-API、Django、Vue.js<br>Gerapy的使用<br>Gerapy的安装<br>pip3 install gerapy<br>Gerapy应用步骤<br>1.初始化Gerapy<br>gerapy init<br>执行完毕之后，本地便会生成一个名字为 gerapy 的文件夹，接着进入该文件夹，可以看到有一个 projects 文件夹，我们后面会用到。<br>2.初始化数据库<br>cd gerapy<br>gerapy migrate<br>会在 gerapy 目录下生成一个 SQLite 数据库，同时建立数据库表。<br>3.启动Gerapy<br>gerapy runserver<br>这样我们就可以看到 Gerapy 已经在 8000 端口上运行了。接下来我们在浏览器中打开 <a href="http://localhost:8000/，就可以看到" target="_blank" rel="noopener">http://localhost:8000/，就可以看到</a> Gerapy 的主界面了<br>使用Gerapy管理项目<br>主机管理<br>我们可以点击左侧 Clients 选项卡，即主机管理页面，添加我们的 Scrapyd 远程服务，点击右上角的创建按钮即可添加我们需要管理的 Scrapyd 服务。<br>需要添加 IP、端口，以及名称，点击创建即可完成添加，点击返回即可看到当前添加的 Scrapyd 服务列表<br>添加主机前后<br>这样我们可以在状态一栏看到各个 Scrapyd 服务是否可用，同时可以一目了然当前所有 Scrapyd 服务列表，另外我们还可以自由地进行编辑和删除。</p>
+<p>项目管理<br>Gerapy 的核心功能当然是项目管理，在这里我们可以自由地配置、编辑、部署我们的 Scrapy 项目，点击左侧的 Projects ，即项目管理选项，我们可以看到如下空白的页面：</p>
+<p>将项目拖动到刚才 gerapy 运行目录的 projects 文件夹下，例如我这里写好了一个 Scrapy 项目，这时刷新页面，我们便可以看到 Gerapy 检测到了这个项目，同时它是不可配置、没有打包的</p>
+<p>这时我们可以点击部署按钮进行打包和部署，在右下角我们可以输入打包时的描述信息，类似于 Git 的 commit 信息，然后点击打包按钮，即可发现 Gerapy 会提示打包成功，同时在左侧显示打包的结果和打包名称<br>打包成功之后，我们便可以进行部署了，我们可以选择需要部署的主机，点击后方的部署按钮进行部署，同时也可以批量选择主机进行部署，示例如下</p>
+<p>监控任务<br>部署完毕之后就可以回到主机管理页面进行任务调度了，任选一台主机，点击调度按钮即可进入任务管理页面，此页面可以查看当前 Scrapyd 服务的所有项目、所有爬虫及运行状态<br>我们可以通过点击新任务、停止等按钮来实现任务的启动和停止等操作，同时也可以通过展开任务条目查看日志详情</p>
+<p>编辑项目<br>同时 Gerapy 还支持项目编辑功能，有了它我们不再需要 IDE 即可完成项目的编写，我们点击项目的编辑按钮即可进入到编辑页面，如图所示</p>
+<p>CrawlSpider代码自动生成<br>在 Scrapy 中，其实提供了一个可配置化的爬虫 CrawlSpider，它可以利用一些规则来完成爬取规则和解析规则的配置，这样可配置化程度就非常高，这样我们只需要维护爬取规则、提取逻辑就可以了。如果要新增一个爬虫，我们只需要写好对应的规则即可，这类爬虫就叫做可配置化爬虫。<br>Gerapy 可以做到：我们写好爬虫规则，它帮我们自动生成 Scrapy 项目代码。<br>我们可以点击项目页面的右上角的创建按钮，增加一个可配置化爬虫，接着我们便可以在此处添加提取实体、爬取规则、抽取规则了，例如这里的解析器，我们可以配置解析成为哪个实体，每个字段使用怎样的解析方式，如 XPath 或 CSS 解析器、直接获取属性、直接添加值等多重方式，另外还可以指定处理器进行数据清洗，或直接指定正则表达式进行解析等等，通过这些流程我们可以做到任何字段的解析。</p>
+<p>再比如爬取规则，我们可以指定从哪个链接开始爬取，允许爬取的域名是什么，该链接提取哪些跟进的链接，用什么解析方法来处理等等配置。通过这些配置，我们可以完成爬取规则的设置。</p>
+<p>最后点击生成按钮即可完成代码的生成。</p>
+<p>生成的代码示例结果如图所示，可见其结构和 Scrapy 代码是完全一致的。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/18/8.python爬虫/3.scrapy框架/Gerapy的介绍/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+  
+    <nav id="page-nav">
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+    </nav>
   
 
 
@@ -436,11 +928,11 @@ MathJax.Hub.Queue(function() {
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">博客</a>
+                <a href="javascript:void(0)" class="js-tag color2">Docker</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">Docker</a>
+                <a href="javascript:void(0)" class="js-tag color3">博客</a>
               </li>
             
             <div class="clearfix"></div>

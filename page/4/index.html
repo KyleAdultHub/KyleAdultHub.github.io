@@ -154,61 +154,6 @@
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-8.python爬虫/5.爬虫特殊反反爬/参数伪造" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>参数伪造<br>携程反爬中的Eleven参数-反爬与反反爬的奇技淫巧<br>今天我们要聊点什么呢，之前说要聊去哪儿的，不过暂且咱们再放一放，先聊一聊去哪儿的干爹携程吧，上次我记得看了携程工程师霸气回应说懂爬虫的来去哪儿，懂反爬的来携程。我觉得特别棒，这种开放的心态和自信，正是一个开放的互联网环境所需要的。<br>所以今天这节课虽然咱们以携程为例，但是我们还是以学习的目的为主，因此我不会把完整的代码放出来，大家掌握思路，拿到渔网比直接copy代码有用的多。<br>上篇文章用邮箱加密给大家演示了爬虫中简单的JS对抗，今天这节课咱们就用携程的Eleven参数来演示下复杂的JS对抗。<br>对了，这个题图，主要是因为携程给他们这个反爬的JS起了一个名字叫oceanball-海洋球，不明觉厉啊。<br>好了，言归正传。做过携程酒店爬虫的朋友，估计都研究过这个eleven参数，这个参数到底是哪里的呢，我们先看下页面请求：</p>
-<p>就是这样一个页面，打开一个酒店页面会发现实际的酒店房型列表是一个ajax请求，如下：<br><a href="http://hotels.ctrip.com/Domestic/tool/AjaxHote1RoomListForDetai1.aspx?psid=&amp;MasterHotelID=441351&amp;hotel=441351&amp;EDM=F&amp;roomId=&amp;IncludeRoom=&amp;city=2&amp;showspothotel=T&amp;supplier=&amp;IsDecoupleSpotHotelAndGroup=F&amp;contrast=0&amp;brand=0&amp;startDate=2017-08-28&amp;depDate=2017-08-29&amp;IsFlash=F&amp;RequestTravelMoney=F&amp;hsids=&amp;IsJustConfirm=&amp;contyped=0&amp;priceInfo=-1&amp;equip=&amp;filter=&amp;productcode=&amp;couponList=&amp;abForHuaZhu=&amp;defaultLoad=T&amp;TmFromList=F&amp;eleven=c4350e460862b69d9d76724e1325a0a54ef23c2e0648636c855a329418018a85&amp;callback=CASuBCgrghIfIUqemNE&amp;_=1503884369495" target="_blank" rel="noopener">http://hotels.ctrip.com/Domestic/tool/AjaxHote1RoomListForDetai1.aspx?psid=&amp;MasterHotelID=441351&amp;hotel=441351&amp;EDM=F&amp;roomId=&amp;IncludeRoom=&amp;city=2&amp;showspothotel=T&amp;supplier=&amp;IsDecoupleSpotHotelAndGroup=F&amp;contrast=0&amp;brand=0&amp;startDate=2017-08-28&amp;depDate=2017-08-29&amp;IsFlash=F&amp;RequestTravelMoney=F&amp;hsids=&amp;IsJustConfirm=&amp;contyped=0&amp;priceInfo=-1&amp;equip=&amp;filter=&amp;productcode=&amp;couponList=&amp;abForHuaZhu=&amp;defaultLoad=T&amp;TmFromList=F&amp;eleven=c4350e460862b69d9d76724e1325a0a54ef23c2e0648636c855a329418018a85&amp;callback=CASuBCgrghIfIUqemNE&amp;_=1503884369495</a><br>前面咱说过，出于对反爬工程师工作的尊重，我们今天的文章不去完整介绍整个携程爬虫的做法，其实除了这eleven参数，携程还是在代码了下了不少毒的。<br>一般来说，一个ajax请求，如果没有做cookie限制的话，最难的问题就是能把所有的参数拼接完整，这个请求中最难的就是这个eleven参数的获取，那咱们遇到这种问题，应该具体如何处理，同时对于反爬工作来说，又有什么可以借鉴的地方呢。<br>一、反反爬中遇到复杂JS请求的处理流程<br>凡是题目总有一个解题思路，反反爬也不例外，解题思路很重要。不然就像没头苍蝇一样到处乱撞，今天这篇文章最重要的就是说说这个解题思路。<br>1.查看发起这个请求的JS来源<br>首先，Ajax请求大多都是由JS发起的（今天我们不讨论flash或者其他情况，不常见），我们使用Chrome工具，将鼠标移动到这个请求的Initiator这一栏上，就可以看到完整的调用栈，非常清晰。</p>
-<p>2.确认核心JS文件<br>可以看到调用栈中有非常多的JS，那具体我们要分析哪个呢？一般来说我们可以首先排除掉VM开头的和常见库如jQuery这类，当然也不绝对，有些JS也会把自己注册到VM中去，这个另说，携程这里的情况挺明显，一眼就看到了那个不寻常的oceanball，看着就不是一般人，就他了。<br>3.分析JS文件<br>点击这个oceanball咱们就可以看到完整了源码了，下面也是最难的一步，分析JS文件。上一篇文章已经简单说了一些，首先，可读性非常重要，咱们复制完整的JS，贴进Snippet中，咱们大概看下，文件太大，没办法贴到文章中来：<br>一看就是在代码里面下毒，携程反爬工程师不简单啊。</p>
-<p>不过呢，咱们看到这种很多数字的其实不要害怕，特别是在看到eval函数和String.fromCharCode，因为这就是把代码加密了一下，这种加密就跟没加密一样，咱们把eval函数直接换成console.log函数，运行一下这个Snippet。在控制台就可以看到原始代码。解密后如下：</p>
-<p>看来这个是毒中毒啊，解密后的代码虽然比刚刚的可读性大为增加，但是依然可读性不强，不过根据经验，这样的文件已经没有一个特别简单的方案可以一举解密，只能逐行分析加部分替换了。当然直接Debug也是一个最省力的方案。</p>
-<p>通过Debug调试，我们可以看到很多变量的中间值，这中间最重要的莫过于这最后一行，我们可以看到Eleven参数这个时候已经算出来了，而向CASttwHNetheyMWqSJ这个函数中传入一串实现，而这个实现正式返回eleven的值（这段代码是要把人绕死的节奏吗），所以我们只需要构造一个假的CASttwHNetheyMWqSJ来接收这段实现即可，而CASttwHNetheyMWqSJ这个函数名也是通过url传入的，好了，基本上大体的分析搞定了，下面就是构造这个代码的运行环境了。<br>4.构造运行环境<br>重要的话要重复很多遍：写爬虫最好的语言就是JS，因为JS对抗是爬虫中最难的部分，而一个合适的JS环境则可以事半功倍。全球最好的JS爬虫框架-在线网络爬虫/大数据分析/机器学习开发平台-神箭手云。<br>有了JS运行环境，我们其实只需要构造一个函数接受Eleven参数，请求oceanball，并直接运行他就可以了。我们看下我们构造的CASttwHNetheyMWqSJ函数：<br>var callbackFunc = randomCallback(15); var getEleven; eval(“var “+callbackFunc+” = function(a){getEleven = a}”);<br>这里对于初学者可能还是有点绕，简单说明下，首先我们随机了一个函数名，然后我们定义了一个空函数来接受oceanball中的返回eleven参数的函数实现，然后我把这个函数名定义为接受new Function的实现，这样我们后面就可以用getEleven来直接获取eleven参数了。<br>这里还得说下普通JS环境的缺陷，由于在普通JS环境中（非浏览器中）缺少一些重要的内置变量，如window，document等等，导致很多JS是运行不了的，这里我们补上这些变量：<br>var Image = function(){}; var window = {}; window.document = {}; var document = window.document; window.navigator = {“appCodeName”:”Mozilla”, “appName”:”Netscape”, “language”:”zh-CN”, “platform”:”Win”}; window.navigator.userAgent = site.getUserAgent(); var navigator = window.navigator; window.location = {}; window.location.href = “<a href="http://hotels.ctrip.com/hotel/&quot;+hotel_id+&quot;.html&quot;" target="_blank" rel="noopener">http://hotels.ctrip.com/hotel/&quot;+hotel_id+&quot;.html&quot;</a>; var location = window.location;<br>JS如果比较熟悉的话，应该能看出来这里有一个变量不常规，就是第一行的Image变量。这又是携程下的毒啊，我们回到刚刚oceanball的代码看下：</p>
-<p>代码中有一句尝试new一个Image对象，如果失败了，则把某一个参数+1，而这个参数正是eleven参数中的某一位，也就是说eleven参数中有一位记录了JS运行环境是否支持new Image，我们这种伪造的浏览器环境当然不支持，所以我们得补上。<br>5.大功告成<br>好了，解了这么多毒，咱们终于可以获取到了eleven参数，当然这只是漫漫长征第一步，后面请求到的结果中，还有更深更辣的毒等着大家：</p>
-<p>二、反爬中可以借鉴的地方<br>首先非常感谢携程反爬工程师给了一个教科书般的JS反爬案例，从这个例子我们也可以看出反爬中使用JS代码加密混淆的威力，基本上如果不是JS熟手，或者不熟悉解题思路的话，就是束手无策。JS混淆的方案有很多，大家可以到网上搜一搜，这里还是很推荐携程这种ajax配合回调+js二次混淆的方案，可以说极大提升了反反爬难度的同时也做到了基本不影响性能。但是这个方案依然对于直接渲染JS页面效果一般，还是建议配合之前文章提到的css:content的方案，这样处理之后那对于反反爬工程师的酸爽绝对够得上100桶统一老坛。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/18/8.python爬虫/5.爬虫特殊反反爬/参数伪造/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
     <article id="post-8.python爬虫/5.爬虫特殊反反爬/CssContent字体破解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -706,6 +651,54 @@
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2018/10/18/8.python爬虫/4.爬虫常见反反爬/图片验证码-Tesseract破解/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-8.python爬虫/4.爬虫常见反反爬/代理池的搭建" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>代理池的搭建<br>代理池的介绍<br>应用模块<br>aiohttp、requests、redis-py、pyquery、Flask<br>代理池模块<br>存储模块、获取代理模块、检测模块、接口模块、调度模块<br>各模块的功能<br>存储模块<br>负责存储抓取下来的代理，并对代理去重<br>获取模块<br>需要定时抓取代理，代理可以是免费抓取的代理，也可以是调用付费代理商购买的代理<br>检测模块<br>需要定时检测数据库中的代理，对效果不好的代理及时进行删除<br>接口模块<br>需要用API来提供对外的服务接口。外界通过访问接口的方式来获取代理<br>调度模块<br>调度前面的所有模块，使之协调工作<br>各模块的设计<br>存储模块<br>使用Redis有序集合，集合的每一个元素都是不重复的<br>每个元素都有一个分数字段，分数是可以重复的，数值小的排在前面，数值大的排在后面<br>每个代理100分为最高分，表示可用，0分为最低分，代表最不可用，自动进行移除<br>获取随机代理的逻辑，先随机获取最高分代理，如果不存在最高分代理，按照排名获取<br>获取模块<br>从各代理商处爬取或购买调用接口获得代理<br>调用存储模块，向数据库中添加代理，初始的分数是10<br>检测模块<br>不断的检测代理的可用性(检测的目标网站可以自定义)，进行代理的加分和减分或者移除<br>检测到代理可用，分数立即置为100分，检测到代理请求失败，则减少一分<br>接口模块<br>定义接口模块的随机获取代理，统计代理数量等方法<br>调度模块<br>通过配置每个模块的开关来设置调度模块的启动功能<br>通过多进程启动每一个模块<br>代码示例<br>ProxyPool.zip</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/18/8.python爬虫/4.爬虫常见反反爬/代理池的搭建/">展开全文 >></a>
         </p>
       
 

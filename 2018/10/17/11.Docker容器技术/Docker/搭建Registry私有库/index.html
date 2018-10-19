@@ -6,16 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://blog.kyleliu.cn">
-  <title>刘小恺(Kyle) 的个人博客</title>
+  <title>搭建Registry 私有库 | 刘小恺(Kyle) 的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="article">
-<meta property="og:title" content="刘小恺(Kyle) 的个人博客">
-<meta property="og:url" content="http://blog.kyleliu.cn/2018/10/19/20.工具类/test/index.html">
+  <meta name="description" content="1.关于Registry仓库官方的Docker hub是一个用于管理公共镜像的好地方，我们可以在上面找到我们想要的镜像，也可以把我们自己的镜像推送上去。但是，有时候，我们的使用场景需要我们拥有一个私有的镜像仓库用于管理我们自己的镜像。这个可以通过开源软件Registry来达成目的。  Registry在github上有两份代码：老代码库和新代码库。老代码是采用python编写的，存在pull和pu">
+<meta name="keywords" content="Docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="搭建Registry 私有库">
+<meta property="og:url" content="http://blog.kyleliu.cn/2018/10/17/11.Docker容器技术/Docker/搭建Registry私有库/index.html">
 <meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="1.关于Registry仓库官方的Docker hub是一个用于管理公共镜像的好地方，我们可以在上面找到我们想要的镜像，也可以把我们自己的镜像推送上去。但是，有时候，我们的使用场景需要我们拥有一个私有的镜像仓库用于管理我们自己的镜像。这个可以通过开源软件Registry来达成目的。  Registry在github上有两份代码：老代码库和新代码库。老代码是采用python编写的，存在pull和pu">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-10-19T01:58:17.714Z">
+<meta property="og:updated_time" content="2018-10-19T03:22:50.122Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="刘小恺(Kyle) 的个人博客">
+<meta name="twitter:title" content="搭建Registry 私有库">
+<meta name="twitter:description" content="1.关于Registry仓库官方的Docker hub是一个用于管理公共镜像的好地方，我们可以在上面找到我们想要的镜像，也可以把我们自己的镜像推送上去。但是，有时候，我们的使用场景需要我们拥有一个私有的镜像仓库用于管理我们自己的镜像。这个可以通过开源软件Registry来达成目的。  Registry在github上有两份代码：老代码库和新代码库。老代码是采用python编写的，存在pull和pu">
   
     <link rel="alternative" href="/atom.xml" title="刘小恺(Kyle) 的个人博客" type="application/atom+xml">
   
@@ -153,12 +157,61 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-20.工具类/test" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-11.Docker容器技术/Docker/搭建Registry私有库" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      搭建Registry 私有库
+    </h1>
+  
+
+        
+        <a href="/2018/10/17/11.Docker容器技术/Docker/搭建Registry私有库/" class="archive-article-date">
+  	<time datetime="2018-10-17T11:23:11.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-10-17</time>
+</a>
+        
+      </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <h3 id="1-关于Registry仓库"><a href="#1-关于Registry仓库" class="headerlink" title="1.关于Registry仓库"></a><strong>1.关于Registry仓库</strong></h3><p>官方的<a href="https://hub.docker.com/" target="_blank" rel="noopener">Docker hub</a>是一个用于管理公共镜像的好地方，我们可以在上面找到我们想要的镜像，也可以把我们自己的镜像推送上去。但是，有时候，我们的使用场景需要我们拥有一个私有的镜像仓库用于管理我们自己的镜像。这个可以通过开源软件Registry来达成目的。</p>
+<p> Registry在github上有两份代码：<a href="https://github.com/docker/docker-registry" target="_blank" rel="noopener">老代码库</a>和<a href="https://github.com/docker/distribution" target="_blank" rel="noopener">新代码库</a>。老代码是采用python编写的，存在pull和push的性能问题，出到0.9.1版本之后就标志为deprecated，不再继续开发。从2.0版本开始就到在新代码库进行开发，新代码库是采用go语言编写，修改了镜像id的生成算法、registry上镜像的保存结构，大大优化了pull和push镜像的效率。</p>
+<p> 官方在Docker hub上提供了registry的镜像（<a href="https://hub.docker.com/_/registry/" target="_blank" rel="noopener">详情</a>），我们可以直接使用该registry镜像来构建一个容器，搭建我们自己的私有仓库服务。Tag为latest的registry镜像是0.9.1版本的，我们直接采用2.1.1版本。</p>
+<a id="more"></a>
+<h3 id="2-Registry的部署"><a href="#2-Registry的部署" class="headerlink" title="2.Registry的部署"></a>2.Registry的部署</h3><p><strong>运行下面命令获取registry镜像</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> sudo docker pull registry:2.1.1</span><br></pre></td></tr></table></figure>
+<p><strong>然后启动一个容器</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> sudo docker run -d -v /opt/data/registry/:/var/lib/registry -p 5000:5000 --restart=always --name registry registry:2.1.1</span><br></pre></td></tr></table></figure>
+<p><strong>验证服务是否启动成功</strong></p>
+<p>说明我们已经启动了registry服务，打开浏览器输入<a href="http://127.0.0.1:5000/v2" target="_blank" rel="noopener">http://127.0.0.1:5000/v2</a></p>
+<h3 id="3-验证"><a href="#3-验证" class="headerlink" title="3.验证"></a>3.验证</h3><p><strong>向仓库中push镜像</strong></p>
+<p>现在我们通过将镜像push到registry来验证一下。我的机器上有个hello-world的镜像，我们要通过docker tag将该镜像标志为要推送到私有仓库，</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> sudo docker tag hello-world 127.0.0.1:5000/hello-world</span><br></pre></td></tr></table></figure>
+<p>接下来，我们运行docker push将hello-world镜像push到我们的私有仓库中，</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> sudo docker push 127.0.0.1:5000/hello-world</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">The push refers to a repository [127.0.0.1:5000/hello-world] (len: 1)</span><br><span class="line"></span><br><span class="line">975b84d108f1: Image successfully pushed</span><br><span class="line"></span><br><span class="line">3f12c794407e: Image successfully pushed</span><br><span class="line"></span><br><span class="line">latest: digest: sha256:1c7adb1ac65df0bebb40cd4a84533f787148b102684b74cb27a1982967008e4b size: 2744</span><br></pre></td></tr></table></figure>
+<p>现在我们可以查看我们本地/opt/registry目录下已经有了刚推送上来的hello-world。我们也在浏览器中输入<a href="http://127.0.0.1:5000/v2/_catalog，如下图所示，" target="_blank" rel="noopener">http://127.0.0.1:5000/v2/_catalog，如下图所示，</a></p>
+<p><strong>从镜像库中拉取镜像</strong></p>
+<p>现在我们可以先将我们本地的127.0.0.1:5000/hello-world和hello-world先删除掉，</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> sudo docker rmi hello-world</span><br><span class="line"></span><br><span class="line"><span class="meta">$</span> sudo docker rmi 127.0.0.1:5000/hello-world</span><br></pre></td></tr></table></figure>
+<p>然后使用docker pull从我们的私有仓库中获取hello-world镜像，</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> sudo docker pull 127.0.0.1:5000/hello-world</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">Using default tag: latest</span><br><span class="line"></span><br><span class="line">latest: Pulling from hello-world</span><br><span class="line"></span><br><span class="line">b901d36b6f2f: Pull complete</span><br><span class="line"></span><br><span class="line">0a6ba66e537a: Pull complete</span><br><span class="line"></span><br><span class="line">Digest: sha256:1c7adb1ac65df0bebb40cd4a84533f787148b102684b74cb27a1982967008e4b</span><br><span class="line"></span><br><span class="line">Status: Downloaded newer image for 127.0.0.1:5000/hello-world:latest</span><br><span class="line"></span><br><span class="line">lienhua34@lienhua34-Compaq-Presario-CQ35-Notebook-PC ~ $ sudo docker images</span><br><span class="line"></span><br><span class="line">REPOSITORY TAG IMAGE ID CREATED VIRTUAL SIZE</span><br><span class="line"></span><br><span class="line">registry 2.1.1 b91f745cd233 5 days ago 220.1 MB</span><br><span class="line"></span><br><span class="line">ubuntu 14.04 a5a467fddcb8 6 days ago 187.9 MB</span><br><span class="line"></span><br><span class="line">127.0.0.1:5000/hello-world latest 0a6ba66e537a 2 weeks ago 960 B</span><br></pre></td></tr></table></figure>
+<h3 id="4-查询镜像库"><a href="#4-查询镜像库" class="headerlink" title="4.查询镜像库"></a>4.查询镜像库</h3><p><strong>查询镜像库中的镜像</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://10.0.110.218:5000/v2/_catalog</span><br></pre></td></tr></table></figure>
+<h3 id="5-错误排查"><a href="#5-错误排查" class="headerlink" title="5.错误排查"></a>5.错误排查</h3><p><strong>错误描述</strong></p>
+<p>在push 到docker registry时，可能会报错：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">The push refers to a repository [192.168.1.100:5000/registry]</span><br><span class="line"></span><br><span class="line">Get https://192.168.1.100:5000/v1/_ping: http: server gave HTTP response to HTTPS client</span><br></pre></td></tr></table></figure>
+<p>这个问题可能是由于客户端采用https，docker registry未采用https服务所致。一种处理方式是把客户对地址“192.168.1.100:5000”请求改为http。</p>
+<p>目前很多文章都是通过修改docker的配置文件“etc/systemconfig/docker”，重启docker来解决这个问题。但发现docker1.12.3版本并无此文件，根据网上创建此文件，并填入相应内容，重启docker无效果，仍然报此错误。</p>
+<p> <strong>解决办法</strong></p>
+<p>在”/etc/docker/“目录下，创建”daemon.json“文件。在文件中写入：</p>
+<p>{ “insecure-registries”:[“192.168.1.100:5000”] }</p>
+<p>保存退出后，重启docker。</p>
+
       
 
       
@@ -166,7 +219,33 @@
     <div class="article-info article-info-index">
       
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Docker</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
       
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Docker容器技术//" class="article-tag-list-link color1">Docker容器技术</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Docker容器技术/Docker//" class="article-tag-list-link color2">Docker</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
 
       
 
@@ -216,8 +295,8 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="http://qr.liantu.com/api.php?text=http://blog.kyleliu.cn/2018/10/19/20.工具类/test/" alt="微信分享二维码">
-      <!-- <img src="//pan.baidu.com/share/qrcode?url=http://blog.kyleliu.cn/2018/10/19/20.工具类/test/" alt="微信分享二维码"> -->
+      <img src="http://qr.liantu.com/api.php?text=http://blog.kyleliu.cn/2018/10/17/11.Docker容器技术/Docker/搭建Registry私有库/" alt="微信分享二维码">
+      <!-- <img src="//pan.baidu.com/share/qrcode?url=http://blog.kyleliu.cn/2018/10/17/11.Docker容器技术/Docker/搭建Registry私有库/" alt="微信分享二维码"> -->
     </div>
 </div>
 
@@ -231,9 +310,18 @@
   
 <nav id="article-nav">
   
+    <a href="/2018/10/18/8.python爬虫/4.爬虫常见反反爬/ADSL代理服务器搭建&代理池/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          (no title)
+        
+      </div>
+    </a>
   
-    <a href="/2018/10/18/8.python爬虫/3.scrapy框架/数据格式化输出/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title"></div>
+  
+    <a href="/2018/10/17/20.开发工具/博客/github+hexo博客搭建/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">githubpage + hexo + yilia 搭建个人博客</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -260,7 +348,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    目录，已阵亡…
+                    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-关于Registry仓库"><span class="toc-number">1.</span> <span class="toc-text">1.关于Registry仓库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Registry的部署"><span class="toc-number">2.</span> <span class="toc-text">2.Registry的部署</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-验证"><span class="toc-number">3.</span> <span class="toc-text">3.验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-查询镜像库"><span class="toc-number">4.</span> <span class="toc-text">4.查询镜像库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-错误排查"><span class="toc-number">5.</span> <span class="toc-text">5.错误排查</span></a></li></ol>
                     </div>
                 </span>
             </div>

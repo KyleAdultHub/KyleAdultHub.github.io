@@ -154,6 +154,74 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-8.python爬虫/1.爬虫基础/Puppeteer动态爬取" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Puppeteer简介<br>Puppeteer介绍<br>Puppeteer 是一个node库，他提供了一组用来操纵Chrome的API, 通俗来说就是一个 headless chrome浏览器 (当然你也可以配置成有UI的，默认是没有的)。既然是浏览器，那么我们手工可以在浏览器上做的事情 Puppeteer 都能胜任, 另外，Puppeteer 翻译成中文是”木偶”意思，所以听名字就知道，操纵起来很方便，你可以很方便的操纵她去实现：<br>运行环境</p>
+<ol>
+<li>Nodejs 的版本不能低于 v7.6.0, 需要支持 async, await.</li>
+<li><p>需要最新的 chrome driver, 这个你在通过 npm 安装 Puppeteer 的时候系统会自动下载的<br>npm install puppeteer<br>3.安装pyppeteer<br>pip install pyppeteer<br>Puppeteer的官方文档<br><a href="https://github.com/miyakogi/pyppeteer" target="_blank" rel="noopener">https://github.com/miyakogi/pyppeteer</a><br>知识前提<br>Puppeteer 几乎所有的操作都是 异步的, 为了使用大量的 then 使得代码的可读性降低，本文所有 demo 代码都是用 async, await 方式实现<br>由于文档上大量使用async和await关键字,  需要提前了解Async/Await 异步编程<br>Puppeteer的基本用法<br>python示例</p>
+</li>
+<li><p>先通过launch() 创建一个浏览器实例 Browser 对象</p>
+</li>
+<li>然后通过 Browser 对象创建页面 Page 对象</li>
+<li>然后 page.goto() 跳转到指定的页面</li>
+<li>调用 page.screenshot() 对页面进行截图</li>
+<li>关闭浏览器<br>Puppeteer的常用属性/方法/对象<br>launch(options)方法<br>介绍<br>使用launch 方法会返回一个browser对象, 创建browser对象的时候可以选择性的配置如下选项<br>常用参数</li>
+</ol>
+<p>Browser对象<br>介绍<br>Browser对象相当于selenium的driver对象, 常用的有如下方法<br>当返回值是promise的时候, 在python中返回的是异步函数, 需要这样的函数需要使用await关键字调用<br>常用方法</p>
+<p>browser.userAgent()    设置browser的请求头<br>Page对象<br>介绍<br>Page对象相当于selenium的每一个标签页<br>我们对页面的元素进行操作就是操作page对象<br>常用方法<br>常用方法<br>page.content()     获取页面的源码<br>page.cookies(…urls)      获取当前的cookies<br>page.goto()     请求某个页面<br>page.click(selector[, options])     点击元素<br>page.focus(selector)    聚焦某元素<br>page.close(options)     关闭当前标签页<br>page.url()   当前页面的url<br>page.reload(options)     重新加载页面<br>page.type(selector, text[, options])    向聚焦的元素框中输入内容<br>获取元素<br>Page.quirySelector()      选择一个元素<br>Page.querySelectorAll()     选择一组元素<br>Page.xpath()     通过xpath选择元素<br>evaluate()方法(运行js脚本/获取元素的属性)<br>evaluate接收字符串为参数， 字符串的内容可以使javascript的原生函数， 或者是表达式， 当字符串的内容是表达式的时候我们通常可以用来获取元素的属性， 当字符串的内容是js函数的时候通常可以用来在当前页面执行js代码<br>当字符串的内容是表达式的时候可以用force_expr属性来强调, 不然可能会识别失败报错<br>示例：</p>
+<p>修改driver的配置</p>
+<ol>
+<li>Page.setViewport() 修改浏览器视窗大小</li>
+<li>Page.setUserAgent() 设置浏览器的 UserAgent 信息</li>
+<li>Page.emulateMedia() 更改页面的CSS媒体类型，用于进行模拟媒体仿真。 可选值为 “screen”, “print”, “null”, 如果设置为 null 则表示禁用媒体仿真。<br>键盘keyboard<br>keyboard.down(key[, options]) 触发 keydown 事件<br>keyboard.press(key[, options]) 按下某个键，key 表示键的名称，比如 ‘ArrowLeft’ 向左键，详细的键名映射请戳这里<br>keyboard.sendCharacter(char) 输入一个字符<br>keyboard.type(text, options) 输入一个字符串<br>keyboard.up(key) 触发 keyup 事件<br>鼠标mouse<br>mouse.click(x, y, [options]) 移动鼠标指针到指定的位置，然后按下鼠标，这个其实 mouse.move 和 mouse.down 或 mouse.up 的快捷操作<br>mouse.down([options]) 触发 mousedown 事件，options 可配置:<br>options.button 按下了哪个键，可选值为[left, right, middle], 默认是 left, 表示鼠标左键<br>options.clickCount 按下的次数，单击，双击或者其他次数<br>delay 按键延时时间<br>mouse.move(x, y, [options]) 移动鼠标到指定位置， options.steps 表示移动的步长<br>mouse.up([options]) 触发 mouseup 事件<br>waitFor()等待方法<br>page.waitFor(selectorOrFunctionOrTimeout[, options[, …args]]) 下面三个的综合 API<br>page.waitForFunction(pageFunction[, options[, …args]]) 等待 pageFunction 执行完成之后<br>page.waitForNavigation(options) 等待页面基本元素加载完之后，比如同步的 HTML, CSS, JS 等代码<br>page.waitForSelector(selector[, options]) 等待某个选择器的元素加载之后，这个元素可以是异步加载的，这个 API 非常有用，你懂的。<br>事件的监听<br>使用方法<br>Page.on(“event”, callback)<br>event: 事件名称<br>callback: 监听到事件后执行的回调函数<br>所有可以监听的事件</li>
+</ol>
+<p>官方文档介绍的Python使用Puppeteer的区别<br>Keyword arguments for options<br>Puppeteer uses object (dictionary in python) for passing options to functions/methods. Pyppeteer accepts both dictionary and keyword arguments for options.<br>Dictionary style option (similar to puppeteer):<br>browser = await launch({‘headless’: True})<br>Keyword argument style option (more pythonic, isn’t it?):<br>browser = await launch(headless=True)<br>Element selector method name ($ -&gt; querySelector)<br>In python, $ is not usable for method name. So pyppeteer usesPage.querySelector()/Page.querySelectorAll()/Page.xpath() instead of Page.$()/Page.$$()/Page.$x(). Pyppeteer also has shorthands for these methods, Page.J(), Page.JJ(), and Page.Jx().<br>Arguments of Page.evaluate() and Page.querySelectorEval()<br>Puppeteer’s version of evaluate() takes JavaScript raw function or string of JavaScript expression, but pyppeteer takes string of JavaScript. JavaScript strings can be function or expression. Pyppeteer tries to automatically detect the string is function or expression, but sometimes it fails. If expression string is treated as function and error is raised, add force_expr=True option, which force pyppeteer to treat the string as expression.<br>Example to get page content:<br>content = await page.evaluate(‘document.body.textContent’, force_expr=True)<br>Example to get element’s inner text:<br>element = await page.querySelector(‘h1’)<br>title = await page.evaluate(‘(element) =&gt; element.textContent’, element)<br>python实现puppeteer同步使用库<br>github  ：  <a href="https://github.com/issacLiuUp/puppeteer" target="_blank" rel="noopener">https://github.com/issacLiuUp/puppeteer</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/18/8.python爬虫/1.爬虫基础/Puppeteer动态爬取/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-8.python爬虫/2.爬虫扩展功能/数据快速写入Csv文件" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -682,57 +750,6 @@ if __name__ == &apos;__main__&apos;:
 
 
   
-    <article id="post-8.python爬虫/5.爬虫特殊反反爬/破解诡异字体" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>破解诡异字体</p>
-<p>爬虫与诡异的字体-反爬与反反爬的奇技淫巧<br>从今天这篇文章开始，主要给大家过一些小众的反爬策略以及其中的利弊，所以一般来说都会有一个特定的示例，比如今天的反爬策略就来自反爬界大神之一的去哪儿（当然也是爬虫界的）手机版。<br>我们先来用chrome的手机模式开一下去哪儿的机票:</p>
-<p>看着叫一个干净整洁，完全没毛病。但是！当我们掀开被子看源码的时候 震惊了：</p>
-<p>不知道大家能不能看清图，我码字注解一下，显示的价格是560，而源码中的价格则是540！<br>我们这篇文章就来看看去哪儿手机版是怎么做到的（当然偷偷剧透下，下篇文章咱们主角还是去哪儿）<br>其实同学们只要智商在线，看到标题就知道，这是用字体实现，我们看右侧的css面板也可以看到，这个dom元素的字体是单独设置的。也就是去哪儿通过修改字体，让4显示成了6。<br>1.为什么字体可以反爬<br>感觉从这篇文章开始这个套路快进行不下去了。为什么字体可以反爬？ 首先这个迷惑性太大，很多马虎的工程师以为可以了，直接就爬下来，当然就是被老板骂的体无完肤了，对反反爬工程师的精神可以造成1万点伤害。同时呢，去哪儿这个字体是动态生成的字体，也就是说你也不知道下一次刷出来的4到底是几显示出来的。这个道行就比较高了。<br>2.怎么做好字体反爬？<br>这种反爬策略用在数字上确实天衣无缝，非常优雅。唯一值得提的就是一点，如何动态生成字体和页面来做好对应关系。其实这是一个工程性的问题，大部分编程语言都含有生成字体的库，如果对网站整体性能比较自信的话，完全可以每次请求都动态生成，当然这样确实会比较慢，比较推荐是通过定时任务，去更新一个字体池。每次有请求过来，从字体池中随机拿一个字体，换一个随机的名字（可以通过url rewrite来实现），并和现在的数字做一次映射，调整页面显示后整体输出，就可以在尽量不影响性能的情况下搞死反反爬。<br>当然使用字体也是有局限的，其中最大的问题莫过于@font-face的兼容性问题，所以去哪儿只在移动端采用这个反爬策略，可能也有兼容性的考虑吧，相比之下，去哪儿的pc端的反爬写法则丑陋很多。<br>3.遇到字体反爬怎么办？<br>好了，万一我就是要爬去哪儿机票了怎么办呢？其实字体反爬处理也并不复杂，就像前面说到的，大部分语言都有字体处理类库，而这种情况大概率来讲只有10个数字的字体，我们将字体解析后只要能找到对应关系，就简单了。这里如果是Java工程师的话，推荐用Apache.Fontbox，贴一段解析的代码，注意这段代码不保证现在可用，仅做参考：<br>int[] digits = null;<br>BASE64Decoder decoder = new BASE64Decoder();<br>TTFParser parser = new TTFParser();<br>try {<br>byte[] bytes = decoder.decodeBuffer(fontBase64);<br>InputStream inputStream = new ByteArrayInputStream(bytes);<br>TrueTypeFont ttf = parser.parse(inputStream);<br>if(ttf != null &amp;&amp; ttf.getCmap() != null &amp;&amp;<br>ttf.getCmap().getCmaps() != null &amp;&amp;<br>ttf.getCmap().getCmaps().length &gt; 0){<br>digits = new int[10];<br>CmapSubtable[] tables = ttf.getCmap().getCmaps();<br>CmapSubtable table = tables[0];// No matter what<br>for(int i =0;i&lt;10;i++){<br>digits[i] = table.getGlyphId(i+48)-1;<br>}<br>}<br>} catch (IOException e) {<br>digits = null;<br>}<br>return digits;</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/18/8.python爬虫/5.爬虫特殊反反爬/破解诡异字体/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/4/">Next &raquo;</a>
@@ -843,11 +860,15 @@ MathJax.Hub.Queue(function() {
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">Docker</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">机器学习</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">Docker</a>
+                <a href="javascript:void(0)" class="js-tag color5">梯度下降</a>
               </li>
              
               <li class="article-tag-list-item">

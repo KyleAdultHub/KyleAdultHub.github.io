@@ -154,6 +154,58 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-8.python爬虫/4.爬虫常见反反爬/图片验证码-Tesseract破解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>图片验证码-Tesseract破解<br>图像的翻译-Tesseract<br>文字识别<br>文字识别-机器视觉的一个分支，将图像翻译成文字一般被称为 光学文字识别(Optical Character Recognition, OCR)。可以实现OCR的底层库并不多,目前很多库都是使用共同的几个底层 OCR 库,或者是在上面 进行定制<br>ORC库的概念<br>在读取和处理图像、图像相关的机器学习以及创建图像等任务中，Python 一直都是非常出色的语言。虽然有很多库可以进行图像处理，但在这里我们只重点介绍： Tesseract<br>作用<br>Tesseract是一个将图像翻译成文字的OCR库(光学文字识别，Optical Character Recognition)，可以翻译图片中的文字内容，目前由 Google 赞助(Google 也是一家以 OCR 和机器学习技术闻名于世的公司)。Tesseract 是目前公认最优秀、最精确的开源 OCR 系统，除了极高的精确度，Tesseract 也具有很高的灵活性。它可以通过训练识别出任何字体，也可以识别出任何 Unicode 字符。<br>tesseract处理的文字规范<br>tesseract处理的文字大都是格式规范的，格式规范的文字具有以下特点:<br>使用一个标准字体(不包含手写体、草书,或者十分“花哨的”字体)<br>即使被复印或拍照，字体还是很清晰，没有多余的痕迹或污点<br>排列整齐，没有歪歪斜斜的字<br>没有超出图片范围，也没有残缺不全，或紧紧贴在图片的边缘<br>怎么将图片格式化<br>文字的一些格式问题在图片预处理时可以进行解决。例如,可以把图片转换成灰度图，调整亮度和对比度，还可以根据需要进行裁剪和旋转（详情需要了解图像与信号处理）等<br>使用步骤<br>安装tesseract和tensor-ocr<br>windows下安装<br>先下载tesseract-ocr<br>下载地址: <a href="https://digi.bib.uni-mannheim.de/tesseract" target="_blank" rel="noopener">https://digi.bib.uni-mannheim.de/tesseract</a><br>下载 pytenseract<br>pip install pytesseract pillow<br>ubuntu下安装<br>sudo apt-get install -y tesseract-ocr libtesseract-dev libleptonica-dev<br>pip install pytesseract pillow<br>centos下安装<br>yum install -y tesseract<br>pip install pytesseract pillow<br>在终端中使用tesseract<br>tesseract  test.jpg  text      将翻译结果保存在text.txt中<br>tesseract chi_sim  text.png  paixu    将翻译结果保存在paixu.txt中（可以翻译中文简体）<br>tesseract –list-langs    查看当前支持的语言</p>
+<p>在Python中使用tesesract<br>import pytesseract<br>from PIL import Image<br>image = Image.open(jpg)       获取图片<br>text = pytesseract.image_to_string(image, lang=’chi_sim’)       对图片的内容进行翻译<br>import subprocess<br>subprocess.call([‘tessetact’, ‘-1’, ‘chi_sim’, filePath, ‘paixu’])     使用终端命令进行翻译<br>pytesseract.file_to_text(‘image.png’)       直接对图片进行识别<br>使用tesseract识别代码(包含图片处理)<br>import pytesseract<br>from PIL import Image<br>image = Image.open(‘code2.jpg’)</p>
+<h1 id="图片灰度化处理"><a href="#图片灰度化处理" class="headerlink" title="图片灰度化处理"></a>图片灰度化处理</h1><p>image = image.convert(‘L’) </p>
+<h1 id="图片二值化处理"><a href="#图片二值化处理" class="headerlink" title="图片二值化处理"></a>图片二值化处理</h1><p>threshold = 127        设置二值化阈值<br>filter_func = lambda x: 0 if x &lt; threshold else 1<br>image = image.point(filter_func, ‘1’)<br>image.show()<br>result = pytesseract.image_to_text(image)     对处理后的图片进行识别<br>print(result)<br>对tesseract进行训练<br>训练的目的<br>tesseract一般只能识别符合文字规范的字体，其他的稍微复杂的字很难识别，tesseract可以通过训练对一种格式字体的反复训练，来实现字体的高精度识别<br>训练tesseract的方法<br>要训练 Tesseract 识别一种文字，无论是晦涩难懂的字体还是验证码，你都需要向 Tesseract 提供每个字符不同形式的样本。<br>首先要收集大量的验证码样本，样本的数量和复杂程度，会决定训练的效果。第二步是准确地告诉 Tesseract 一张图片中的每个字符是什么，以及每个字符的具体位置。<br>这里需要创建一些矩形定位文件(box file)，一个验证码图片生成一个矩形定位文件，也可以通过jTessBoxEditor软件来修改矩形的定位。<br>一个图片的矩形定位文件如下所示:</p>
+<p>第一列符号是图片中的每个字符，后面的 4 个数字分别是包围这个字符的最小矩形的坐标 (图片左下角是原点 (0，0)，4 个数字分别对应每个字符的左下角 x 坐标、左下角 y 坐标、右上角 x 坐标和右上角 y 坐标)，最后一个数字“0”表示图片样本的编号。<br>矩形定位文件必须保存在一个 .box 后缀的文本文件中，(例如 4MmC3.box)。<br>tesseract训练教程<br><a href="http://www.cnblogs.com/mjorcen/p/3800739.html?utm_source=tuicool&amp;utm_medium=referral" target="_blank" rel="noopener">http://www.cnblogs.com/mjorcen/p/3800739.html?utm_source=tuicool&amp;utm_medium=referral</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/18/8.python爬虫/4.爬虫常见反反爬/图片验证码-Tesseract破解/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-8.python爬虫/4.爬虫常见反反爬/代理池的搭建" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -323,99 +375,6 @@
 
 
   
-    <article id="post-11.Docker容器技术/Docker/搭建Registry私有库" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/10/17/11.Docker容器技术/Docker/搭建Registry私有库/">搭建Registry 私有库</a>
-    </h1>
-  
-
-        
-        <a href="/2018/10/17/11.Docker容器技术/Docker/搭建Registry私有库/" class="archive-article-date">
-  	<time datetime="2018-10-17T11:23:11.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-10-17</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="1-关于Registry仓库"><a href="#1-关于Registry仓库" class="headerlink" title="1.关于Registry仓库"></a><strong>1.关于Registry仓库</strong></h3><p>官方的<a href="https://hub.docker.com/" target="_blank" rel="noopener">Docker hub</a>是一个用于管理公共镜像的好地方，我们可以在上面找到我们想要的镜像，也可以把我们自己的镜像推送上去。但是，有时候，我们的使用场景需要我们拥有一个私有的镜像仓库用于管理我们自己的镜像。这个可以通过开源软件Registry来达成目的。</p>
-<p> Registry在github上有两份代码：<a href="https://github.com/docker/docker-registry" target="_blank" rel="noopener">老代码库</a>和<a href="https://github.com/docker/distribution" target="_blank" rel="noopener">新代码库</a>。老代码是采用python编写的，存在pull和push的性能问题，出到0.9.1版本之后就标志为deprecated，不再继续开发。从2.0版本开始就到在新代码库进行开发，新代码库是采用go语言编写，修改了镜像id的生成算法、registry上镜像的保存结构，大大优化了pull和push镜像的效率。</p>
-<p> 官方在Docker hub上提供了registry的镜像（<a href="https://hub.docker.com/_/registry/" target="_blank" rel="noopener">详情</a>），我们可以直接使用该registry镜像来构建一个容器，搭建我们自己的私有仓库服务。Tag为latest的registry镜像是0.9.1版本的，我们直接采用2.1.1版本。</p>
-        
-          <a class="article-more-a" href="/2018/10/17/11.Docker容器技术/Docker/搭建Registry私有库/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Docker</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Docker容器技术//" class="article-tag-list-link color1">Docker容器技术</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Docker容器技术/Docker//" class="article-tag-list-link color2">Docker</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/17/11.Docker容器技术/Docker/搭建Registry私有库/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
     <article id="post-20.开发工具/博客/github+hexo博客搭建" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -480,6 +439,99 @@
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2018/10/17/20.开发工具/博客/github+hexo博客搭建/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-11.Docker容器技术/Docker/搭建Registry私有库" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/10/17/11.Docker容器技术/Docker/搭建Registry私有库/">搭建Registry 私有库</a>
+    </h1>
+  
+
+        
+        <a href="/2018/10/17/11.Docker容器技术/Docker/搭建Registry私有库/" class="archive-article-date">
+  	<time datetime="2018-10-17T11:23:11.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-10-17</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="1-关于Registry仓库"><a href="#1-关于Registry仓库" class="headerlink" title="1.关于Registry仓库"></a><strong>1.关于Registry仓库</strong></h3><p>官方的<a href="https://hub.docker.com/" target="_blank" rel="noopener">Docker hub</a>是一个用于管理公共镜像的好地方，我们可以在上面找到我们想要的镜像，也可以把我们自己的镜像推送上去。但是，有时候，我们的使用场景需要我们拥有一个私有的镜像仓库用于管理我们自己的镜像。这个可以通过开源软件Registry来达成目的。</p>
+<p> Registry在github上有两份代码：<a href="https://github.com/docker/docker-registry" target="_blank" rel="noopener">老代码库</a>和<a href="https://github.com/docker/distribution" target="_blank" rel="noopener">新代码库</a>。老代码是采用python编写的，存在pull和push的性能问题，出到0.9.1版本之后就标志为deprecated，不再继续开发。从2.0版本开始就到在新代码库进行开发，新代码库是采用go语言编写，修改了镜像id的生成算法、registry上镜像的保存结构，大大优化了pull和push镜像的效率。</p>
+<p> 官方在Docker hub上提供了registry的镜像（<a href="https://hub.docker.com/_/registry/" target="_blank" rel="noopener">详情</a>），我们可以直接使用该registry镜像来构建一个容器，搭建我们自己的私有仓库服务。Tag为latest的registry镜像是0.9.1版本的，我们直接采用2.1.1版本。</p>
+        
+          <a class="article-more-a" href="/2018/10/17/11.Docker容器技术/Docker/搭建Registry私有库/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Docker</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Docker容器技术//" class="article-tag-list-link color1">Docker容器技术</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Docker容器技术/Docker//" class="article-tag-list-link color2">Docker</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/17/11.Docker容器技术/Docker/搭建Registry私有库/">展开全文 >></a>
         </p>
       
 
@@ -619,11 +671,15 @@ MathJax.Hub.Queue(function() {
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">Docker</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">机器学习</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color2">Docker</a>
+                <a href="javascript:void(0)" class="js-tag color5">梯度下降</a>
               </li>
              
               <li class="article-tag-list-item">

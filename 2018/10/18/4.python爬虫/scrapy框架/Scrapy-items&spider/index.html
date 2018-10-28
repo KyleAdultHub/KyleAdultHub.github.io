@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="刘小恺" />
+
+
+
+<meta name="description" content="Scrapy-items/spider Items的配置定义Item的作用提前定义需要获取的数据，可以很清楚想要爬取的信息没有定义的item属性不能被spider使用，键命名错误会报错，可以防止使用错误的键来存储数据不同的爬虫使用不同的Item来存放不同的数据，在把数据交给pipeline的时候，可以通过isinstance(item, MyspiderItem) 来判断数据是属于哪个item，进">
+<meta property="og:type" content="article">
+<meta property="og:title" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:url" content="http://blog.kyleliu.cn/2018/10/18/4.python爬虫/scrapy框架/Scrapy-items&spider/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="Scrapy-items/spider Items的配置定义Item的作用提前定义需要获取的数据，可以很清楚想要爬取的信息没有定义的item属性不能被spider使用，键命名错误会报错，可以防止使用错误的键来存储数据不同的爬虫使用不同的Item来存放不同的数据，在把数据交给pipeline的时候，可以通过isinstance(item, MyspiderItem) 来判断数据是属于哪个item，进">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-10-18T12:03:02.898Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="刘小恺(Kyle) 的个人博客">
+<meta name="twitter:description" content="Scrapy-items/spider Items的配置定义Item的作用提前定义需要获取的数据，可以很清楚想要爬取的信息没有定义的item属性不能被spider使用，键命名错误会报错，可以防止使用错误的键来存储数据不同的爬虫使用不同的Item来存放不同的数据，在把数据交给pipeline的时候，可以通过isinstance(item, MyspiderItem) 来判断数据是属于哪个item，进">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="刘小恺(Kyle) 的个人博客" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>刘小恺(Kyle) 的个人博客</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: 
+    }
+</script>
+
+
+    <script> yiliaConfig.jquery_ui = [false]; </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/avatar.png" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">刘小恺</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">Python 、  Machine learning 、 Docker、 爬虫</p>
+        
+
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">主页</a></li>
+                        
+                            <li><a href="/archives/">所有文章</a></li>
+                        
+                            <li><a href="/tags/">标签云</a></li>
+                        
+                            <li><a href="/about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="mailto:123@123.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" href="#" title="GitHub"></a>
+                            
+                                <a class="fa RSS" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Docker/">Docker</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/octave/">octave</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/博客/">博客</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/机器学习/">机器学习</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/梯度下降/">梯度下降</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">专注于前端</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">刘小恺</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/avatar.png" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">刘小恺</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">Python 、  Machine learning 、 Docker、 爬虫</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">主页</a></li>
+                
+                    <li><a href="/archives/">所有文章</a></li>
+                
+                    <li><a href="/tags/">标签云</a></li>
+                
+                    <li><a href="/about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="mailto:123@123.com" title="Email"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="#" title="GitHub"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="/atom.xml" title="RSS"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-4.python爬虫/scrapy框架/Scrapy-items&amp;spider" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2018/10/18/4.python爬虫/scrapy框架/Scrapy-items&spider/" class="article-date">
+      <time datetime="2018-10-18T12:22:23.365Z" itemprop="datePublished">2018-10-18</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>Scrapy-items/spider</p>
+<p>Items的配置<br>定义Item的作用<br>提前定义需要获取的数据，可以很清楚想要爬取的信息<br>没有定义的item属性不能被spider使用，键命名错误会报错，可以防止使用错误的键来存储数据<br>不同的爬虫使用不同的Item来存放不同的数据，在把数据交给pipeline的时候，可以通过isinstance(item, MyspiderItem) 来判断数据是属于哪个item，进行不同的数据(item)处理方式<br>item实例对象可以通过和字典相同的数据处理方式，来处理item对象的属性，所以我们可以直接将Myspider理解为一个字典<br>定义Item的方法（在item文件中）<br>​    class MyspiderItem(scrapy.Item):  # 创建一个item类<br>​        name = scrapy.Field()    # scrapy.Field( )只是占了一个位，并没有值<br>​                title = scrapy.Field( )<br>在Spider中使用item的方法（在spider文件中）<br>​    from Python import MyspiderItem<br>​    item = MyspiderItem()    # 创建一个自定义的item实例，item的操作和字典是一样的<br>​    item[‘title’] = ###     # 向item对象中插入数据<br>实现item对象和字典类型数据的转化<br>dict(item)      将item对象转化为dict类型数据<br>在将数据进行写入文件中的时候，一定要将其转化为json字符串，所以要先转化为字典<br>spider爬虫文件Spider类<br>scrapy_spider类的作用<br>传递给引擎request对象，或者需要处理的数据，接收引擎传递过来的response对象<br>配置spider类及类属性（在spider文件中）<br>​    class PythonSpider(scrapy.Spider)     # 自定义spider类，继承自scrapy.Spider类<br>​        name = ‘python’       # 创建爬虫时候的名字，不可以修改，和爬虫文件名称一致<br>​        # 创建爬虫时允许爬虫爬取范围，防止爬虫爬取到其他的网站，可以在一个列表中放置多个域名<br>​               #  从start_url后面爬取的url地址，必须要属于allow_domin域名下的地址<br>​        allowed_domain = [‘python.cn’]<br>​         # 定义开始爬取的网址，默认是可以被反复请求的<br>​        start_urls =  ‘<a href="http://www.itcast.cn/channel/teacher.shtml&#39;" target="_blank" rel="noopener">http://www.itcast.cn/channel/teacher.shtml&#39;</a>;<br>配置<strong>init</strong>方法（使用Redis_spider框架爬虫类继承crawlredisSpider的时候要动态获取allow_domin）<br>​        # 增加<strong>init</strong>()方法，根据从redis中获取的start_url动态设置allow_domin的方法<br>​    def <strong>init</strong>(self, <em>args, **kwargs):<br>​        domain = kwargs.pop(‘domain’, ‘’)<br>​        self.allowed_domains = filter(None, domain.split(‘,’))<br>​            # 要继承上方定义的爬虫类的原始的<strong>init</strong>方法<br>​        super(youyuanSpider, self).<strong>init</strong>(</em>args, **kwargs)<br>配置spider类的实例方法实现请求下一页<br>​    def parse(self,  response):  # 定义数据提取的方法，接收中间件传递过来的response对象（方法名不能改）<br>​       tr_list = response.xpath(“//table[@class=’tablelist’]/tr”)[1:-1]          # xpath分组提取<br>​              for tr in tr_list:<br>​                      item = {}<br>​                      item[“title”] = tr.xpath(“./td[1]/a/text()”).extract_first()<br>​                      item[“position_categary”] = tr.xpath(“./td[2]/text()”).extract_first()<br>​                      item[“url”] = response.url<br>​                      yield item        # 将item通过引擎传递给pipeline进行处理</p>
+<pre><code>   next_url_temp = response.xpath(&quot;//a[@id=&apos;next&apos;]/@href&quot;).extract_first()
+   if next_url_temp is not None and next_url_temp != &quot;javascript:;&quot;:
+           next_url = &quot;http://hr.tencent.com/&quot;; + next_url_temp
+
+# scrapy.Request构造requests对象给引擎，callback表示response交给哪个函数处理
+yield scrapy.Request(next_page_url, callback=self.parse)  
+</code></pre><p>多个解析函数中如何传递参数示例<br>​    def parse(self, response):<br>​        tr_list = response.xpath(‘//div[@class=”greyframe”]/table//table/tr’)   # xpath分组提取<br>​        for i in tr_list:<br>​            item = MyspiderItem（）  # 实例化item对象<br>​            ……..<br>​            …….<br>​                        #   将item参数封装成request对象通过引擎传递给调度器，引擎传递回来的Response对象给get_content函数<br>​            yield scrapy.Request(item[“href”],  callback=self.get_content,  meta{“item”:item})   </p>
+<pre><code>def get_content(self, response):
+    item = response.meta[&apos;item&apos;]    # 获取response.meta属性的item对象
+    item[&apos;text&apos;] = response.xpath(&quot;//div[@class=&apos;content_text14_2&apos;]//text( )&quot;).extract( )
+    yield  item    # 统一将数据传递给pipeline
+</code></pre><p>start_requests方法<br>作用：<br>我们定义的start_urls都是默认交给start_requests处理的，所以如果我们想要在处理在请求之前处理request对象，那么我们可以重写start_requests方法，实现指定其响应的解析函数等功能<br>示例：<br>​         import scrapy<br>​            def start_requests(self):<br>​               for url in self.start_urls:<br>​                    yield scrapy.Request(<br>​                        url,<br>​                        callback = self.parse<br>​                )<br>​            def parse(self, response)<br>​                self.settings.get(‘KEY’, ‘’)<br>​                pass<br>spider中用到的方法/属性：<br>response对象的属性<br>response.url：当前响应的url地址<br>response.request.url：当前响应对应的请求的url地址<br>response.status: 响应的状态码<br>response.headers：获取响应头<br>response.request.headers：当前响应的请求头<br>response.body：响应体，也就是html代码，默认是bytes类型<br>response.meta: 解析函数之间传递的数据，字典类型<br>response.request.headers.getlist(‘Cookie’)    请求的cookie<br>response.headers.getlist(‘Set-Cookie’)   响应的cookie<br>response.xpath( )   方法<br>xpath( )  response.xpath( )  返回的是一个含有多个匹配结果的selector对象的列表，其具有如下方法<br>extract( )返回一个包含字符串数据的列表，将列表中所有select对象中的data属性的值提取出来<br>如果xpath（）提取的数据不存在，返回一个空列表<br>extract_first  返回列表中的第一个字符串，将列表第一个对象元素的data属性值提取出来<br>如果xpath（）提取的数据不存在，返回一个None类型数据<br>scrapy.Request(url, callback, method=’GET’, headers, body, cookies, meta, dont_filter=False )   get请求方法<br>url必须传递，为请求的url，将请求的结果作为响应传递给callback解析函数<br>callback: 指定传入的参数交给那个解析函数去处理<br>meta: 在不同的解析函数中传递数据， meta默认还会携带部分信息， 比如下载延迟，请求深度等<br>cookiejar ： 给对应的request一个cookiejar表示，任意的数字，在之后的request也携带该标示，那么将会自动把request对象携带对应的request的获取到的所有cookie内容<br>dont_filter: 默认url会经过allow_domain过滤，如果dont_filter设置为True，则已经爬过的地址不会被过滤<br>scrapy默认有url去重的功能,该功能对需要重复请求的url有重要用途<br>如果请求的页面是实时在变的，在有需要要抓实时的页面内容的时候，需要设置为true<br>start_urls的请求，dont_filter参数默认为true<br>method： 请求的方法，当使用POST的时候要传递body参数，在scrapy中body为字符串的形式<br>cookies： 传递的cookie，注意，在scrapy中cookie不能放在header中进行传递<br>headers： 使用自定义的header，优先级高于在setting中设置的默认headers<br>body：请求体，当使用post请求，发送数据的时候使用，并且当发送payload类型参数的时候，一定要使用<br>并且还要加上请求头 ： ‘Content-Type’: ‘application/json’<br>注意：<br>当请求被重定向后，redict中间件会自动进行重定向请求，并返回重定向后的响应<br>yield<br>将数据返回给引擎，并将方法挂起；<br>原理上，让这个函数成为一个生成器，每次遍历的时候会将每个结果读取到内存中，不会导致没存的占用量瞬间变高<br>yield只能返回[BaseItem， dict， None， Request ]类型的数据；<br>yield 的不是Request对象，表示将变量的数据传递给pipeline，接scrapy.Request方法表示将request传递给调度器，进行请求返回给callback函数response<br>scrapy.FormRequest（）      post表单提交<br>formdata：携带的post请求的参数，字典类型，只能发送formdata类型的参数<br>其他参数和scrapy.Request（）方法的参数使用基本一致<br>scrapy.FormRequest.from_resopnse（）    对响应中的表单自动进行表单提交<br>response：   解析函数接收到的响应<br>formdata：  需要填写的表单内容，，只能发送formdata类型的参数<br>其他参数和scrapy.Request（）方法的参数使用基本一致<br>Scrapy中的CrawlSpider类<br>CrawlSpider的作用<br>是scrapy的一个子类，应用CrawlSpider，我们可以从start_url返回的response中自动提取url地址<br>scrapy会自动的构造requests请求，发送给引擎，进行请求<br>还可以指定response是否传递给解析函数，或者是否需要继续提取响应中的url进行请求<br>使用CrawlSpider的方法<br>CrawlSpider和普通爬虫的区别<br>CrawlSpider爬虫类继承自CrawlSpide<br>在爬虫中定义一个rules对象，scrapy会自动根据rules定义的规则，过滤出符合规则的url，自动进行请求，将响应传递给解析函数，或者继续经过rules过滤符合规律的url进行请求获取响应<br>不需要自定义parse方法，因为scrapy自动的使用parse方法去请求rules过滤出来的url地址<br>生成crawlspider的命令<br>scrapy genspider -t crawl &lt;爬虫名字&gt;  &lt;允许爬取的域名&gt;<br>配置CrawlSpider爬虫示例<br>​         form scrapy.linkextractors import LinkExtractor<br>​         from scrapy.spiders import CrawSpider, Rule</p>
+<pre><code>class CsdnspiderSpider(CrawlSpider):      # CrawlSpider要继承CrawlSpider
+               name = &apos;csdnspider&apos;
+               allowed_domains = [&apos;suning.com&apos;]
+               start_urls = [&apos;http://snbook.suning.com/web/trd-fl/100301/46.htm&apos;]
+
+               # 提取url，自动构造请求，把请求交给引擎获取响应
+               rules = (
+                     Rule(linkExtractor(allow=r&apos;/web/trd-fl/\d+.htm$&apos;), callback=&apos;parse_next_url&apos; follow=True),
+                     Rule(linkExtractor(allow=r&apos;/web/prd/\d+.htm$&apos;), callback=&apos;parse_item&apos; follow=True),
+</code></pre><p>spiders.Rule常见参数<br>linkextractor：是 一个Link Extractor对象，用于定义需要提取的链接，交给parse方法；<br>linkextractor可以接收正则、xpath、css等匹配连接方式，可以查看linkextractor的源码来查看其可以接收的匹配方式<br>callback：从link_extractor中每获取到连接的时候，参数所指定的值作为回调函数<br>follow：是一个布尔值，指定了根据改规则从response提取的链接是否需要linkextractor继续跟进（如果callback为None，follow默认设置为True，否则默认为False）<br>process_links：指定该spider中哪个函数将会被调用，从link_extractor中获取到连接列表时将会调用该函数，该方法主要用来过滤url<br>process_request：指定该Spider中哪个函数将会被调用，当构造完request列表时都会调用该函数，用来过滤request，必须返回request\None<br>LinkExtracort常见的参数<br>allow：满足括号中正则匹配的url会被提取，如果为空，则全部匹配(也可以是xpath匹配)<br>可以使用其他参数，可以是xpath、css等匹配方法<br>restrict_xpaths：使用xpath表达式，和allow共同作用过滤链接，及xpath满足范围内的url地址会被提取<br>deny：满足括号中的正则表达式的url一定不提取（优先级高于allow）<br>allow_domains：会被提取的连接的domain<br>deny_domains: 一定不会被提取连接的domains<br>使用ScrawlSpider注意点<br>当LinkExtractor提取到一个满足匹配规则的URL地址，后面的规则讲不会匹配该url地址，所以，注意不要将前面url地址匹配规则写的太详细，会被前面的的规则提取完不会经过后面的规则提取；<br>scrapy会自动的将LinkExtractor提取到的所有url地址给补全协议和域名、端口等，进行请求，不需要我们手动补全；<br>scrapy模拟登录<br>scrapy模拟登录有两种方法<br>直接携带cookie<br>找到发送post请求的url地址，带上信息，发送请求<br>使用scrapy框架自动登录<br>使用scrapy模拟登录注意点<br>当需要获取登录后才能获取到数据的时候<br>一个cookie一般对一个网站访问的时候，服务器可能设置阈值，这时候我们要限制访问的延时<br>注意有时候服务器会对我们的ip和cookie对应结果做判断，所以我们最好不要频繁的更换ip和cookie的搭配关系<br>如果想要持续的状态保持可以在setting中设置COOKIES_ENABLE = True<br>如果想要使用多cookie，多ip对数据进行爬取，可以使用分布式，一个ip搭配一个cookie对数据进行请<br>scrapy携带cookie模拟登录<br>应用场景<br>1、cookie过期时间很长，常见于一些不规范的网站<br>2、能在cookie过期之前把搜有的数据拿到<br>3、配合其他程序使用，比如其使用selenium把登陆之后的cookie获取到保存到本地，scrapy发送请求之前先读取本地cookie<br>模拟登录的示例（使用start_request来使请求携带cookie）<br>​        import scrapy<br>​                import re<br>​                class RenrenSpider(scrapy.Spider):<br>​                        name = ‘renren’<br>​                        allowed_domains = [‘renren.com’]<br>​                        start_urls = [‘<a href="http://www.renren.com/327550029/profile&#39;;]" target="_blank" rel="noopener">http://www.renren.com/327550029/profile&#39;;]</a></p>
+<pre><code>def start_requests(self):                # 0.在start_process中对start_urls进行请求
+        cookies_str = &quot;*******&quot;         # 1.获取到cookie,一般情况下我们也可以使用selenium进行获取
+        cookies = {i.split(&quot;=&quot;)[0]:i.split(&quot;=&quot;)[-1] for i in cookies_str.split(&quot;; &quot;)}
+        yield scrapy.Request(
+                self.start_urls[0],
+                callback=self.parse,
+                cookies=cookies            # 2.直接带上cookie进行页面的请求
+                )
+def parse(self, response):          # 接下来的请求scrapy会直接将其带上cookie
+    ret = re.findall(r&quot;你瞅啥&quot;,response.body.decode())
+    print(ret)
+    yield scrapy.Request(
+            &quot;http://www.renren.com/327550029/profile?v=info_timeline&quot;;,
+            callback=self.parse1
+</code></pre><p>scrapy发送post请求模拟登录<br>使用场景<br>模拟的POST请求可以获取到请求参数和实际请求的URL地址（可以在之前请求的响应找到，或者可以通过解析js等方式获取到post请求的所需参数）<br>发送post请求获取cookie的示例<br>​        import scrapy<br>​        import re<br>​        class GithubSpider(scrapy.Spider):<br>​            name = ‘github’<br>​            allowed_domains = [‘github.com’]<br>​            start_urls = [‘<a href="https://github.com/login&#39;;;]" target="_blank" rel="noopener">https://github.com/login&#39;;;]</a><br>​            def parse(self, response):<br>​                form_data = {}<br>​                # 1.获取并构建post请求需要的参数<br>​                form_data[“authenticity_token”] =      # 可以在之前的响应中获取，或js解析<br>​                   response.xpath(“//input[@name=’authenticity_token’]/@value”).extract_first()<br>​                form_data[“commit”] = “Sign in”<br>​                form_data[“utf8”] = “✓”<br>​                form_data[“login”] = “noobpythoner”<br>​                form_data[“password”] = “zhoudawei123”<br>​            </p>
+<pre><code>    # 2.使用scrapy.FormRequest携带参数对登录的url地址进行请求
+    yield scrapy.FormRequest(
+       &quot;https://github.com/session&quot;,      #post请求的url地址
+        formdata = form_data,
+        callback = self.after_login
+    )
+def after_login(self,response):
+    ret = re.findall(r&quot;noobpythoner&quot;,response.body.decode())
+    print(ret)
+</code></pre><p>scrapy自动模拟登录<br>使用场景<br>在进行提交post请求的表单中，的form表单具有action属性<br>可以使用scrapy.FormRequest.from_resopnse方法，会自动帮我们获取form表单的提交地址<br>我们提供表单中需要填写的内容，可表单提交请求的响应交给哪个函数处理<br>scrapy自动模拟登录示例<br>​            import scrapy<br>​            import re<br>​            class RenrenSpider(scrapy.Spider):<br>​                 name = ‘renren’<br>​                 allowed_domains = [‘renren.com’]<br>​                 start_urls = [‘<a href="http://www.renren.com/327550029/profile&#39;]" target="_blank" rel="noopener">http://www.renren.com/327550029/profile&#39;]</a></p>
+<pre><code>def parse(self, response):
+                # 使用FormRequest.from_resopnse对表单地址进行请求
+yield scrapy.FormRequest.from_resopnse(
+     # 传入包含post请求表单的响应，表单内容，回调函数
+     response,
+     formdata={&apos;email&apos;: &apos;user_name&apos;, &apos;password&apos;: &apos;password&apos;},
+     callback=self.parse_page
+     )
+def parse_page(self, response):
+    print(response.url, &apos;*&apos;, * 100, response.starus)
+    print(&apos;*&apos; * 100)
+    print(re.findall(r&apos;user_name&apos;, response.body.decode()))                    
+</code></pre><p>设置cookie允许在函数中传递<br>在setting中配置cookie的传递<br>​            COOKIES_ENABLE = True       # 设置允许cookie在不同的解析函数中传递，默认是允许的<br>​            COOKIES_DEBUG = True        # 可以看带cookie在函数中传递的过程</p>
+<p>终端效果如下</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2018/10/18/4.python爬虫/scrapy框架/Scrapy-items&spider/"></a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">刘小恺</a></p>
+        <p><span>发布时间:</span>2018-10-18, 20:22:23</p>
+        <p><span>最后更新:</span>2018-10-18, 20:03:02</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2018/10/18/4.python爬虫/scrapy框架/Scrapy-items&spider/" title="">http://blog.kyleliu.cn/2018/10/18/4.python爬虫/scrapy框架/Scrapy-items&amp;spider/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://blog.kyleliu.cn/2018/10/18/4.python爬虫/scrapy框架/Scrapy-items&amp;spider/　　作者: 刘小恺" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="/2018/10/18/4.python爬虫/scrapy框架/Scrapy-middleware/">
+                    
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="/2018/10/18/4.python爬虫/scrapy框架/Gerapy的介绍/">
+                    
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-3 i,
+        .toc-level-3 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"　| 刘小恺(Kyle) 的个人博客　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2018/10/18/4.python爬虫/scrapy框架/Scrapy-middleware/" title="上一篇: ">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="/2018/10/18/4.python爬虫/scrapy框架/Gerapy的介绍/" title="下一篇: ">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2018/10/26/10.机器学习/基础内容/octave 基础操作/">Octave基础操作</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/20/10.机器学习/基础内容/线型回归/">线型回归 & 梯度下降</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/19/10.机器学习/基础内容/机器学习介绍/">机器学习介绍</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/scrapy框架/数据格式化输出/">4.python爬虫/scrapy框架/数据格式化输出</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/scrapy框架/Scrapy框架介绍/">4.python爬虫/scrapy框架/Scrapy框架介绍</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/scrapy框架/scrapy对接splash/">4.python爬虫/scrapy框架/scrapy对接splash</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/scrapy框架/scrapy_redis框架/">4.python爬虫/scrapy框架/scrapy_redis框架</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/scrapy框架/scrapyd部署总结/">4.python爬虫/scrapy框架/scrapyd部署总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/scrapy框架/Scrapy-settinglog信息/">4.python爬虫/scrapy框架/Scrapy-settinglog信息</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/scrapy框架/Scrapy-pipeline/">4.python爬虫/scrapy框架/Scrapy-pipeline</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/scrapy框架/Scrapy-middleware/">4.python爬虫/scrapy框架/Scrapy-middleware</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/scrapy框架/Scrapy-items&spider/">4.python爬虫/scrapy框架/Scrapy-items&spider</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/scrapy框架/Gerapy的介绍/">4.python爬虫/scrapy框架/Gerapy的介绍</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫基础/网络爬虫介绍/">4.python爬虫/爬虫基础/网络爬虫介绍</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫基础/爬虫相关工具列表/">4.python爬虫/爬虫基础/爬虫相关工具列表</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫基础/正则表达式/">4.python爬虫/爬虫基础/正则表达式</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫基础/数据提取 json  Xpath/">4.python爬虫/爬虫基础/数据提取 json  Xpath</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫基础/多线程爬虫/">4.python爬虫/爬虫基础/多线程爬虫</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫基础/Splash动态爬取/">4.python爬虫/爬虫基础/Splash动态爬取</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫基础/Selenium动态爬取/">4.python爬虫/爬虫基础/Selenium动态爬取</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫基础/Request模块使用/">4.python爬虫/爬虫基础/Request模块使用</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫基础/Puppeteer动态爬取/">4.python爬虫/爬虫基础/Puppeteer动态爬取</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫扩展功能/数据快速写入Csv文件/">4.python爬虫/爬虫扩展功能/数据快速写入Csv文件</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫扩展功能/数据去重方法-HashBloom/">4.python爬虫/爬虫扩展功能/数据去重方法-HashBloom</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫扩展功能/mitmproxy&mitmdump手机爬虫/">4.python爬虫/爬虫扩展功能/mitmproxy&mitmdump手机爬虫</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫扩展功能/Fiddler抓包工具安装、配置/">4.python爬虫/爬虫扩展功能/Fiddler抓包工具安装、配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫扩展功能/Fiddler在ios上配置/">4.python爬虫/爬虫扩展功能/Fiddler在ios上配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫扩展功能/Fiddler在Android上配置/">4.python爬虫/爬虫扩展功能/Fiddler在Android上配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫扩展功能/Crontab定时执行爬虫/">4.python爬虫/爬虫扩展功能/Crontab定时执行爬虫</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫扩展功能/Charles抓包工具安装、配置/">4.python爬虫/爬虫扩展功能/Charles抓包工具安装、配置</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫扩展功能/Appium手机爬虫/">4.python爬虫/爬虫扩展功能/Appium手机爬虫</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫特殊反反爬/破解诡异字体/">4.python爬虫/爬虫特殊反反爬/破解诡异字体</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫特殊反反爬/参数伪造/">4.python爬虫/爬虫特殊反反爬/参数伪造</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫特殊反反爬/CssContent字体破解/">4.python爬虫/爬虫特殊反反爬/CssContent字体破解</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫特殊反反爬/CloudFlare邮箱加密(cfemail)/">4.python爬虫/爬虫特殊反反爬/CloudFlare邮箱加密(cfemail)</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/celery分布式爬虫/分布式任务队列Celery/">4.python爬虫/celery分布式爬虫/分布式任务队列Celery</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/celery分布式爬虫/Celery构建一个分布式爬虫：理论篇/">4.python爬虫/celery分布式爬虫/Celery构建一个分布式爬虫：理论篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/celery分布式爬虫/Celery构建一个分布式爬虫：基础篇/">4.python爬虫/celery分布式爬虫/Celery构建一个分布式爬虫：基础篇</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/celery分布式爬虫/celery分布式：监控界面/">4.python爬虫/celery分布式爬虫/celery分布式：监控界面</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/celery分布式爬虫/Celery&flower 后台运行部署/">4.python爬虫/celery分布式爬虫/Celery&flower 后台运行部署</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫常见反反爬/滑动验证码识别/">4.python爬虫/爬虫常见反反爬/滑动验证码识别</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫常见反反爬/图片验证码-Tesseract破解/">4.python爬虫/爬虫常见反反爬/图片验证码-Tesseract破解</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫常见反反爬/代理池的搭建/">4.python爬虫/爬虫常见反反爬/代理池的搭建</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫常见反反爬/Js压缩、混淆、加密及破解/">4.python爬虫/爬虫常见反反爬/Js压缩、混淆、加密及破解</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/18/4.python爬虫/爬虫常见反反爬/ADSL代理服务器搭建&代理池/">4.python爬虫/爬虫常见反反爬/ADSL代理服务器搭建&代理池</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/17/20.开发工具/博客/github+hexo博客搭建/">githubpage + hexo + yilia 搭建个人博客</a></li><li class="post-list-item"><a class="post-list-link" href="/2018/10/17/11.Docker容器技术/Docker/搭建Registry私有库/">搭建Registry 私有库</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2016-2018 刘小恺
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            var iPad = window.navigator.userAgent.indexOf('iPad');
+            if (iPad > -1 || $(".left-col").css("display") === "none") {
+                var bgColorList = ["#9db3f4", "#414141", "#e5a859", "#f5dfc6", "#c084a0", "#847e72", "#cd8390", "#996731"];
+                var bgColor = Math.ceil(Math.random() * (bgColorList.length - 1));
+                $("body").css({"background-color": bgColorList[bgColor], "background-size": "cover"});
+            }
+            else {
+                var backgroundnum = 5;
+                var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+                $("body").css({"background": backgroundimg, "background-attachment": "fixed", "background-size": "cover"});
+            }
+        })
+    </script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+</body>
+</html>

@@ -6,16 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://blog.kyleliu.cn">
-  <title>archives | 刘小恺(Kyle) 的个人博客</title>
+  <title>刘小恺(Kyle) 的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="archives">
-<meta property="og:url" content="http://blog.kyleliu.cn/archives/index.html">
+  <meta name="description" content="多线程爬虫所需应用Queue（对列对象）介绍QueueQueue是python中的标准库，可以直接import Queue引用;队列是线程间最常用的交换数据的形式。Queue的作用python下多线程对于资源的处理，加锁是个重要的环节，因为python原生的list,dict等，都是not thread safe的，所以使用Queue，可以不用手动添加资源锁就能解决资源竞争的问题。在使用Queue">
+<meta property="og:type" content="website">
+<meta property="og:title" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:url" content="http://blog.kyleliu.cn/8.python爬虫/爬虫基础/多线程爬虫.html">
 <meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="多线程爬虫所需应用Queue（对列对象）介绍QueueQueue是python中的标准库，可以直接import Queue引用;队列是线程间最常用的交换数据的形式。Queue的作用python下多线程对于资源的处理，加锁是个重要的环节，因为python原生的list,dict等，都是not thread safe的，所以使用Queue，可以不用手动添加资源锁就能解决资源竞争的问题。在使用Queue">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-10-18T08:50:02.476Z">
+<meta property="og:updated_time" content="2018-10-18T11:51:12.956Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="archives">
+<meta name="twitter:title" content="刘小恺(Kyle) 的个人博客">
+<meta name="twitter:description" content="多线程爬虫所需应用Queue（对列对象）介绍QueueQueue是python中的标准库，可以直接import Queue引用;队列是线程间最常用的交换数据的形式。Queue的作用python下多线程对于资源的处理，加锁是个重要的环节，因为python原生的list,dict等，都是not thread safe的，所以使用Queue，可以不用手动添加资源锁就能解决资源竞争的问题。在使用Queue">
   
     <link rel="alternative" href="/atom.xml" title="刘小恺(Kyle) 的个人博客" type="application/atom+xml">
   
@@ -156,24 +159,10 @@
             <article id="page-" class="article article-type-page " itemscope itemprop="blogPost">
   <div class="article-inner">
     
-      <header class="article-header">
-        
-  
-    <h1 class="article-title" itemprop="name">
-      archives
-    </h1>
-  
-
-        
-        <a href="/archives/index.html" class="archive-article-date">
-  	<time datetime="2018-10-18T08:49:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-10-18</time>
-</a>
-        
-      </header>
-    
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <p>多线程爬虫所需应用<br>Queue（对列对象）<br>介绍Queue<br>Queue是python中的标准库，可以直接import Queue引用;队列是线程间最常用的交换数据的形式。<br>Queue的作用<br>python下多线程对于资源的处理，加锁是个重要的环节，因为python原生的list,dict等，都是not thread safe的，所以使用Queue，可以不用手动添加资源锁就能解决资源竞争的问题。<br>在使用Queue进行参数传递的时候，只有Queue列队中有数据，线程就可以获得并执行任务，不需要等待其他线程对数据的处理并传递，更方便数据的传递和处理；<br>使用方法<br>创建队列对象<br>from queue import Queue<br>queue = Queue(maxsize = n)        创建一个最大容量为n的queue列队<br>将一个数值放在队列中<br>queue.put( )      向列队中添加任务，列队满后会阻塞等待<br>myqueue.put_nowait( )    想列队中添加任务，列队满后会报错<br>将一个数值从队列中取出<br>queue.get( )     从列队中取出任务<br>queue.get([block[, timeout]])        从列队中取出任务，超时后会报错<br>备注：从列队取出任务后，列队计数并不会减一，需要标记任务task_done<br>任务完成，列队技术减一<br>queue.task_done( )      列队计数减一<br>列队任务计数不为0时，阻塞线程<br>Queue.join( )                 列队如果不为空，阻塞主线程<br>其他查询列队状态的方法<br>Queue.qsize()              返回队列当前计数大小<br>Queue.empty()           如果队列为空，返回True,反之False<br>Queue.full()                  如果队列满了，返回True,反之False<br>Queue.full                    与 maxsize 大小对应<br>线程的使用（复习）<br>创建子线程<br>import threading<br>t1 = threading.Thread(target=function, args=(, ))<br>将子线程设置为守护进程<br>t1.setDeamon(True)<br>启动子线程<br>t1.start( )<br>线程的使用策略<br>使用策略<br>创建不同功能任务需求的列队<br>在处理时间较长的功能函数处，使用比较多的线程<br>在处理时间比较快的函数处，使用比较少的线程<br>少创建一些线程，线程之间会进行资源的竞争，导致请求失败率增加<br>多设置一些最大请求次数，增加请求成功的几率<br>将失败的请求，任务，防止到一个列表/对列中，单独再对失败的进程进行统一执行<br>断点续爬的思想<br>场景<br>在我们爬取数据的时候，想要先停止爬取，将爬取的状态和数据保存，并想要下次爬取的时候再接着当前的状态继续爬取<br>实现方法<br>可以保存当前的所有的queue列队，在程序结束之前将queue对象存储到redis中<br>当下次启动程序的时候，从redis数据库中读取上次停止之前的queue对象<br>程序判断queue对象的状态，是否全部为空，如果不为空，那么便不需要再重新获取参数想queue列队中添加，直接接着之前的queue的装填进行爬取<br>多线程爬虫代码实例</p>
+
       
 
       
@@ -231,8 +220,8 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="http://qr.liantu.com/api.php?text=http://blog.kyleliu.cn/archives/" alt="微信分享二维码">
-      <!-- <img src="//pan.baidu.com/share/qrcode?url=http://blog.kyleliu.cn/archives/" alt="微信分享二维码"> -->
+      <img src="http://qr.liantu.com/api.php?text=http://blog.kyleliu.cn/8.python爬虫/爬虫基础/多线程爬虫.html" alt="微信分享二维码">
+      <!-- <img src="//pan.baidu.com/share/qrcode?url=http://blog.kyleliu.cn/8.python爬虫/爬虫基础/多线程爬虫.html" alt="微信分享二维码"> -->
     </div>
 </div>
 
@@ -275,6 +264,16 @@
 </aside>
 
 
+
+  
+  
+  
+
+  
+
+  
+
+  
 
 
           </div>

@@ -6,16 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://blog.kyleliu.cn">
-  <title>archives | 刘小恺(Kyle) 的个人博客</title>
+  <title>刘小恺(Kyle) 的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="archives">
-<meta property="og:url" content="http://blog.kyleliu.cn/archives/index.html">
+  <meta name="description" content="分布式任务队列Celery 分布式任务队列CeleryCelery （芹菜）是基于Python开发的分布式任务队列。它支持使用任务队列的方式在分布的机器／进程／线程上执行任务调度。结构核心部件 broker消息队列，由第三方消息中间件完成常见有RabbitMQ, Redis, MongoDB等 worker任务执行器可以有多个worker进程worker又可以起多个queue来并行消费消息 bac">
+<meta property="og:type" content="website">
+<meta property="og:title" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:url" content="http://blog.kyleliu.cn/8.python爬虫/celery分布式爬虫/分布式任务队列Celery.html">
 <meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="分布式任务队列Celery 分布式任务队列CeleryCelery （芹菜）是基于Python开发的分布式任务队列。它支持使用任务队列的方式在分布的机器／进程／线程上执行任务调度。结构核心部件 broker消息队列，由第三方消息中间件完成常见有RabbitMQ, Redis, MongoDB等 worker任务执行器可以有多个worker进程worker又可以起多个queue来并行消费消息 bac">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-10-18T08:50:02.476Z">
+<meta property="og:updated_time" content="2018-10-18T12:12:42.477Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="archives">
+<meta name="twitter:title" content="刘小恺(Kyle) 的个人博客">
+<meta name="twitter:description" content="分布式任务队列Celery 分布式任务队列CeleryCelery （芹菜）是基于Python开发的分布式任务队列。它支持使用任务队列的方式在分布的机器／进程／线程上执行任务调度。结构核心部件 broker消息队列，由第三方消息中间件完成常见有RabbitMQ, Redis, MongoDB等 worker任务执行器可以有多个worker进程worker又可以起多个queue来并行消费消息 bac">
   
     <link rel="alternative" href="/atom.xml" title="刘小恺(Kyle) 的个人博客" type="application/atom+xml">
   
@@ -156,24 +159,73 @@
             <article id="page-" class="article article-type-page " itemscope itemprop="blogPost">
   <div class="article-inner">
     
-      <header class="article-header">
-        
-  
-    <h1 class="article-title" itemprop="name">
-      archives
-    </h1>
-  
-
-        
-        <a href="/archives/index.html" class="archive-article-date">
-  	<time datetime="2018-10-18T08:49:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-10-18</time>
-</a>
-        
-      </header>
-    
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <p>分布式任务队列Celery</p>
+<p>分布式任务队列Celery<br>Celery （芹菜）是基于Python开发的分布式任务队列。它支持使用任务队列的方式在分布的机器／进程／线程上执行任务调度。<br>结构<br>核心部件</p>
+<p>broker<br>消息队列，由第三方消息中间件完成<br>常见有RabbitMQ, Redis, MongoDB等</p>
+<p>worker<br>任务执行器<br>可以有多个worker进程<br>worker又可以起多个queue来并行消费消息</p>
+<p>backend<br>后端存储，用于持久化任务执行结果<br>功能部件</p>
+<p>beat<br>定时器，用于周期性调起任务</p>
+<p>flower<br>web管理界面<br>任务<br>基本用法是在程序里引用celery，并将函数方法绑定到task</p>
+<p>from celery import Celery</p>
+<p>app = Celery(‘tasks’, backend=’amqp’, broker=’amqp://guest@localhost//‘)<br>app.conf.CELERY_RESULT_BACKEND = ‘db+sqlite:///results.sqlite’</p>
+<p>@app.task<br>def add(x, y):<br>return x + y<br>然后调用相应方法即可(delay与apply_async都是异步调用)<br>from tasks import add<br>import time<br>result = add.delay(4,4)<br>while not result.ready():<br>print “not ready yet”<br>time.sleep(5)</p>
+<p>print result.get()<br>由于是采用消息队列，因此任务提交之后，程序立刻返回一个任务ID。<br>之后可以通过该ID查询该任务的执行状态和结果。<br>关联任务<br>执行1个任务，完成后再执行第2个，第一个任务的结果做第二个任务的入参<br>add.apply_async((2, 2), link=add.s(16))<br>结果：2+2+16=20<br>还可以做错误处理<br>@app.task(bind=True)<br>def error_handler(self, uuid):<br>result = self.app.AsyncResult(uuid)<br>print(‘Task {0} raised exception: {1!r}\n{2!r}’.format(<br>uuid, result.result, result.traceback))</p>
+<p>add.apply_async((2, 2), link_error=error_handler.s())<br>定时任务<br>让任务在指定的时间执行，与下文叙述的周期性任务是不同的。<br>ETA, 指定任务执行时间,注意时区<br>countdown, 倒计时,单位秒<br>from datetime import datetime, timedelta<br>tomorrow = datetime.utcnow() + timedelta(seconds=3)<br>add.apply_async((2, 2), eta=tomorrow)<br>result = add.apply_async((2, 2), countdown=3)<br>tip<br>任务的信息是保存在broker中的，因此关闭worker并不会丢失任务信息<br>回收任务(revoke)并非是将队列中的任务删除，而是在worker的内存中保存回收的任务task-id，不同worker之间会自动同步上述revoked task-id。<br>由于信息是保存在内存当中的，因此如果将所有worker都关闭了，revoked task-id信息就丢失了，回收过的任务就又可以执行了。要防治这点，需要在启动worker时指定一个文件用于保存信息<br>celery -A app.celery worker –loglevel=info &amp;&gt; celery_worker.log –statedb=/var/tmp/celery_worker.state<br>过期时间<br>expires单位秒，超过过期时间还未开始执行的任务会被回收<br>add.apply_async((10, 10), expires=60)<br>重试<br>max_retries:最大重试次数<br>interval_start:重试等待时间<br>interval_step:每次重试叠加时长，假设第一重试等待1s，第二次等待1＋n秒</p>
+<p>interval_max:最大等待时间</p>
+<p>add.apply_async((2, 2), retry=True, retry_policy={<br>‘max_retries’: 3,<br>‘interval_start’: 0,<br>‘interval_step’: 0.2,<br>‘interval_max’: 0.2,<br>})</p>
+<p>序列化<br>将任务结果按照一定格式序列化处理，支持pickle, JSON, YAML and msgpack<br>add.apply_async((10, 10), serializer=’json’)<br>压缩<br>将任务结果压缩<br>add.apply_async((2, 2), compression=’zlib’)<br>任务路由<br>使用-Q参数为队列(queue)命名，然后调用任务时可以指定相应队列<br>$ celery -A proj worker -l info -Q celery,priority.high</p>
+<p>add.apply_async(queue=’priority.high’)<br>工作流<br>按照一定关系一次调用多个任务<br>group: 并行调度<br>chain: 串行调度<br>chord: 类似group，但分header和body2个部分，header可以是一个group任务，执行完成后调用body的任务<br>map: 映射调度，通过输入多个入参来多次调度同一个任务<br>starmap: 类似map，入参类似＊args<br>chunks:将任务按照一定数量进行分组<br>group<br>from celery import group</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>res = group(add.s(i, i) for i in xrange(10))()<br>res.get(timeout=1)<br>[0, 2, 4, 6, 8, 10, 12, 14, 16, 18]<br>chain<br>from celery import chain</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<h1 id="2-2-4-8"><a href="#2-2-4-8" class="headerlink" title="2 + 2 + 4 + 8"></a>2 + 2 + 4 + 8</h1><blockquote>
+<blockquote>
+<blockquote>
+<p>res = chain(add.s(2, 2), add.s(4), add.s(8))()<br>res.get()<br>16</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<p>可以用｜来表示chain</p>
+<h1 id="4-16-2-4-8"><a href="#4-16-2-4-8" class="headerlink" title="((4 + 16)  2 + 4)  8"></a>((4 + 16) <em> 2 + 4) </em> 8</h1><blockquote>
+<blockquote>
+<blockquote>
+<p>c2 = (add.s(4, 16) | mul.s(2) | (add.s(4) | mul.s(8)))</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>res = c2()<br>res.get()<br>chord<br>from celery import chord</p>
+<p>#1<em>2+2</em>2+…9*2<br>res = chord((add.s(i, i) for i in xrange(10)), xsum.s())()<br>res.get()<br>90<br>map<br>from proj.tasks import add</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>~xsum.map([range(10), range(100)])<br>[45, 4950]<br>starmap<br>~add.starmap(zip(range(10), range(10)))<br>[0, 2, 4, 6, 8, 10, 12, 14, 16, 18]<br>chunks<br>from proj.tasks import add</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>res = add.chunks(zip(range(100), range(100)), 10)()<br>res.get()<br>[[0, 2, 4, 6, 8, 10, 12, 14, 16, 18],<br>[20, 22, 24, 26, 28, 30, 32, 34, 36, 38],<br>[40, 42, 44, 46, 48, 50, 52, 54, 56, 58],<br>[60, 62, 64, 66, 68, 70, 72, 74, 76, 78],<br>[80, 82, 84, 86, 88, 90, 92, 94, 96, 98],<br>[100, 102, 104, 106, 108, 110, 112, 114, 116, 118],<br>[120, 122, 124, 126, 128, 130, 132, 134, 136, 138],<br>[140, 142, 144, 146, 148, 150, 152, 154, 156, 158],<br>[160, 162, 164, 166, 168, 170, 172, 174, 176, 178],<br>[180, 182, 184, 186, 188, 190, 192, 194, 196, 198]]<br>周期性任务<br>周期性任务就是按照一定的时间检查反复执行的任务。前面描述的定时任务值的是一次性的任务。<br>程序中引入并配置好周期性任务后，beat进程就会定期调起相关任务<br>beat进程是需要单独启动的<br>$ celery -A proj beat<br>或者在worker启动时一起拉起<br>$ celery -A proj worker -B<br>注意一套celery只能启一个beat进程<br>时区配置<br>由于python中时间默认是utc时间，因此最简便的方法是celery也用utc时区</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<p>CELERY_TIMEZONE = ‘UTC’<br>这么配置可以保证任务调度的时间是准确的，但由于服务器一般都配置时区，因此flower、以及日志中的时间可能会有偏差<br>另外一种方法，就是配置正确的时区<br>CELERY_TIMEZONE = ‘Asia/Shanghai’<br>然后任务调起时，将时间带入时区配置<br>local_tz = pytz.timezone(app.config[‘CELERY_TIMEZONE’])<br>format_eta = local_tz.localize(datetime.strptime(eta.strip(), ‘%Y/%m/%d %H:%M:%S’))<br>add.apply_async((2, 2),eta=format_eta)<br>周期性任务配置<br>from datetime import timedelta</p>
+<p>CELERYBEAT_SCHEDULE = {<br>‘add-every-30-seconds’: {<br>‘task’: ‘tasks.add’,<br>‘schedule’: timedelta(seconds=30),<br>‘args’: (16, 16)<br>},<br>}<br>周期性任务配置crontab<br>from celery.schedules import crontab</p>
+<p>CELERYBEAT_SCHEDULE = {</p>
+<h1 id="Executes-every-Monday-morning-at-7-30-A-M"><a href="#Executes-every-Monday-morning-at-7-30-A-M" class="headerlink" title="Executes every Monday morning at 7:30 A.M"></a>Executes every Monday morning at 7:30 A.M</h1><p>‘add-every-monday-morning’: {<br>‘task’: ‘tasks.add’,<br>‘schedule’: crontab(hour=7, minute=30, day_of_week=1),<br>‘args’: (16, 16),<br>},<br>}<br>本文参考官方文档</p>
+
       
 
       
@@ -231,8 +283,8 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="http://qr.liantu.com/api.php?text=http://blog.kyleliu.cn/archives/" alt="微信分享二维码">
-      <!-- <img src="//pan.baidu.com/share/qrcode?url=http://blog.kyleliu.cn/archives/" alt="微信分享二维码"> -->
+      <img src="http://qr.liantu.com/api.php?text=http://blog.kyleliu.cn/8.python爬虫/celery分布式爬虫/分布式任务队列Celery.html" alt="微信分享二维码">
+      <!-- <img src="//pan.baidu.com/share/qrcode?url=http://blog.kyleliu.cn/8.python爬虫/celery分布式爬虫/分布式任务队列Celery.html" alt="微信分享二维码"> -->
     </div>
 </div>
 
@@ -265,7 +317,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    目录，已阵亡…
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#2-2-4-8"><span class="toc-number">1.</span> <span class="toc-text">2 + 2 + 4 + 8</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-16-2-4-8"><span class="toc-number">2.</span> <span class="toc-text">((4 + 16)  2 + 4)  8</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Executes-every-Monday-morning-at-7-30-A-M"><span class="toc-number">3.</span> <span class="toc-text">Executes every Monday morning at 7:30 A.M</span></a></li></ol>
                     </div>
                 </span>
             </div>
@@ -275,6 +327,16 @@
 </aside>
 
 
+
+  
+  
+  
+
+  
+
+  
+
+  
 
 
           </div>

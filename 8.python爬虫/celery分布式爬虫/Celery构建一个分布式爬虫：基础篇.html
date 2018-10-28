@@ -6,16 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://blog.kyleliu.cn">
-  <title>archives | 刘小恺(Kyle) 的个人博客</title>
+  <title>刘小恺(Kyle) 的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="archives">
-<meta property="og:url" content="http://blog.kyleliu.cn/archives/index.html">
+  <meta name="description" content="Celery构建一个分布式爬虫：基础篇 如何构建一个分布式爬虫：基础篇首先，我们新建目录distributedspider，然后再在其中新建文件workers.py,里面内容如下from celery import Celeryapp = Celery(‘crawl_task’, include=[‘tasks’], broker=’redis://223.129.0.190:6379/1’, b">
+<meta property="og:type" content="website">
+<meta property="og:title" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:url" content="http://blog.kyleliu.cn/8.python爬虫/celery分布式爬虫/Celery构建一个分布式爬虫：基础篇.html">
 <meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="Celery构建一个分布式爬虫：基础篇 如何构建一个分布式爬虫：基础篇首先，我们新建目录distributedspider，然后再在其中新建文件workers.py,里面内容如下from celery import Celeryapp = Celery(‘crawl_task’, include=[‘tasks’], broker=’redis://223.129.0.190:6379/1’, b">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-10-18T08:50:02.476Z">
+<meta property="og:updated_time" content="2018-10-18T12:13:56.559Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="archives">
+<meta name="twitter:title" content="刘小恺(Kyle) 的个人博客">
+<meta name="twitter:description" content="Celery构建一个分布式爬虫：基础篇 如何构建一个分布式爬虫：基础篇首先，我们新建目录distributedspider，然后再在其中新建文件workers.py,里面内容如下from celery import Celeryapp = Celery(‘crawl_task’, include=[‘tasks’], broker=’redis://223.129.0.190:6379/1’, b">
   
     <link rel="alternative" href="/atom.xml" title="刘小恺(Kyle) 的个人博客" type="application/atom+xml">
   
@@ -156,24 +159,12 @@
             <article id="page-" class="article article-type-page " itemscope itemprop="blogPost">
   <div class="article-inner">
     
-      <header class="article-header">
-        
-  
-    <h1 class="article-title" itemprop="name">
-      archives
-    </h1>
-  
-
-        
-        <a href="/archives/index.html" class="archive-article-date">
-  	<time datetime="2018-10-18T08:49:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-10-18</time>
-</a>
-        
-      </header>
-    
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <p>Celery构建一个分布式爬虫：基础篇</p>
+<p>如何构建一个分布式爬虫：基础篇<br>首先，我们新建目录distributedspider，然后再在其中新建文件workers.py,里面内容如下<br>from celery import Celery<br>app = Celery(‘crawl_task’, include=[‘tasks’], broker=’redis://223.129.0.190:6379/1’, backend=’redis://223.129.0.190:6379/2’)</p>
+<h1 id="官方推荐使用json作为消息序列化方式"><a href="#官方推荐使用json作为消息序列化方式" class="headerlink" title="官方推荐使用json作为消息序列化方式"></a>官方推荐使用json作为消息序列化方式</h1><p>app.conf.update(<br>CELERY_TIMEZONE=’Asia/Shanghai’,<br>CELERY_ENABLE_UTC=True,<br>CELERY_ACCEPT_CONTENT=[‘json’],<br>CELERY_TASK_SERIALIZER=’json’,<br>CELERY_RESULT_SERIALIZER=’json’,<br>)<br>上述代码主要是做Celery实例的初始化工作，include是在初始化celery app的时候需要引入的内容，主要就是注册为网络调用的函数所在的文件。然后我们再编写任务函数，新建文件tasks.py,内容如下<br>import requests<br>from bs4 import BeautifulSoup<br>from workers import app<br>@app.task<br>def crawl(url):<br>print(‘正在抓取链接{}’.format(url))<br>resp_text = requests.get(url).text<br>soup = BeautifulSoup(resp_text, ‘html.parser’)<br>return soup.find(‘h1’).text<br>它的作用很简单，就是抓取指定的url，并且把标签为h1的元素提取出来<br>最后，我们新建文件task_dispatcher.py，内容如下<br>from workers import app<br>url_list = [<br>‘<a href="http://docs.celeryproject.org/en/latest/getting-started/introduction.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/getting-started/introduction.html&#39;</a>,<br>‘<a href="http://docs.celeryproject.org/en/latest/getting-started/brokers/index.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/getting-started/brokers/index.html&#39;</a>,<br>‘<a href="http://docs.celeryproject.org/en/latest/getting-started/first-steps-with-celery.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/getting-started/first-steps-with-celery.html&#39;</a>,<br>‘<a href="http://docs.celeryproject.org/en/latest/getting-started/next-steps.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/getting-started/next-steps.html&#39;</a>,<br>‘<a href="http://docs.celeryproject.org/en/latest/getting-started/resources.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/getting-started/resources.html&#39;</a>,<br>‘<a href="http://docs.celeryproject.org/en/latest/userguide/application.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/userguide/application.html&#39;</a>,<br>‘<a href="http://docs.celeryproject.org/en/latest/userguide/tasks.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/userguide/tasks.html&#39;</a>,<br>‘<a href="http://docs.celeryproject.org/en/latest/userguide/canvas.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/userguide/canvas.html&#39;</a>,<br>‘<a href="http://docs.celeryproject.org/en/latest/userguide/workers.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/userguide/workers.html&#39;</a>,<br>‘<a href="http://docs.celeryproject.org/en/latest/userguide/daemonizing.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/userguide/daemonizing.html&#39;</a>,<br>‘<a href="http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html&#39;</a><br>]<br>def manage_crawl_task(urls):<br>for url in urls:<br>app.send_task(‘tasks.crawl’, args=(url,))<br>if <strong>name</strong> == ‘<strong>main</strong>‘:<br>manage_crawl_task(url_list)<br>这段代码的作用主要就是给worker发送任务，任务是tasks.crawl，参数是url(元祖的形式)<br>现在，让我们在节点A(hostname为resolvewang的主机)上启动worker<br>celery -A workers worker -c 2 -l info<br>这里 -c指定了线程数为2， -l表示日志等级是info。我们把代码拷贝到节点B(节点名为wpm的主机)，同样以相同命令启动worker，便可以看到以下输出<br>两个节点<br>可以看到左边节点(A)先是all alone，表示只有一个节点；后来再节点B启动后，它便和B同步了<br>sync with celery@wpm<br>这个时候，我们运行给这两个worker节点发送抓取任务<br>python task_dispatcher.py<br>可以看到如下输出<br>分布式抓取示意图<br>可以看到两个节点都在执行抓取任务，并且它们的任务不会重复。我们再在redis里看看结果<br>backend示意图<br>可以看到一共有11条结果，说明 tasks.crawl中返回的数据都在db2(backend)中了，并且以json的形式存储了起来，除了返回的结果，还有执行是否成功等信息。<br>到此，我们就实现了一个很基础的分布式网络爬虫，但是它还不具有很好的扩展性，而且貌似太简单了…下一篇我将以微博数据采集为例来演示如何构建一个稳健的分布式网络爬虫。</p>
+
       
 
       
@@ -231,8 +222,8 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="http://qr.liantu.com/api.php?text=http://blog.kyleliu.cn/archives/" alt="微信分享二维码">
-      <!-- <img src="//pan.baidu.com/share/qrcode?url=http://blog.kyleliu.cn/archives/" alt="微信分享二维码"> -->
+      <img src="http://qr.liantu.com/api.php?text=http://blog.kyleliu.cn/8.python爬虫/celery分布式爬虫/Celery构建一个分布式爬虫：基础篇.html" alt="微信分享二维码">
+      <!-- <img src="//pan.baidu.com/share/qrcode?url=http://blog.kyleliu.cn/8.python爬虫/celery分布式爬虫/Celery构建一个分布式爬虫：基础篇.html" alt="微信分享二维码"> -->
     </div>
 </div>
 
@@ -265,7 +256,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    目录，已阵亡…
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#官方推荐使用json作为消息序列化方式"><span class="toc-number">1.</span> <span class="toc-text">官方推荐使用json作为消息序列化方式</span></a></li></ol>
                     </div>
                 </span>
             </div>
@@ -275,6 +266,16 @@
 </aside>
 
 
+
+  
+  
+  
+
+  
+
+  
+
+  
 
 
           </div>

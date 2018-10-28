@@ -6,16 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://blog.kyleliu.cn">
-  <title>archives | 刘小恺(Kyle) 的个人博客</title>
+  <title>刘小恺(Kyle) 的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="archives">
-<meta property="og:url" content="http://blog.kyleliu.cn/archives/index.html">
+  <meta name="description" content="Scrapy-pipelinepipeline的配置pipeline类的作用接收引擎传递过来的数据，对数据进行处理配置pipeline类（在pipelines文件中）​    class Myspiderpipline(object):​        def process_item(self, item, spider):   # 实现数据处理的方法，方法名不能修改​            w">
+<meta property="og:type" content="website">
+<meta property="og:title" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:url" content="http://blog.kyleliu.cn/8.python爬虫/scrapy框架/Scrapy-pipeline.html">
 <meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="Scrapy-pipelinepipeline的配置pipeline类的作用接收引擎传递过来的数据，对数据进行处理配置pipeline类（在pipelines文件中）​    class Myspiderpipline(object):​        def process_item(self, item, spider):   # 实现数据处理的方法，方法名不能修改​            w">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-10-18T08:50:02.476Z">
+<meta property="og:updated_time" content="2018-10-18T12:04:14.080Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="archives">
+<meta name="twitter:title" content="刘小恺(Kyle) 的个人博客">
+<meta name="twitter:description" content="Scrapy-pipelinepipeline的配置pipeline类的作用接收引擎传递过来的数据，对数据进行处理配置pipeline类（在pipelines文件中）​    class Myspiderpipline(object):​        def process_item(self, item, spider):   # 实现数据处理的方法，方法名不能修改​            w">
   
     <link rel="alternative" href="/atom.xml" title="刘小恺(Kyle) 的个人博客" type="application/atom+xml">
   
@@ -156,24 +159,25 @@
             <article id="page-" class="article article-type-page " itemscope itemprop="blogPost">
   <div class="article-inner">
     
-      <header class="article-header">
-        
-  
-    <h1 class="article-title" itemprop="name">
-      archives
-    </h1>
-  
-
-        
-        <a href="/archives/index.html" class="archive-article-date">
-  	<time datetime="2018-10-18T08:49:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-10-18</time>
-</a>
-        
-      </header>
-    
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <p>Scrapy-pipeline<br>pipeline的配置<br>pipeline类的作用<br>接收引擎传递过来的数据，对数据进行处理<br>配置pipeline类（在pipelines文件中）<br>​    class Myspiderpipline(object):<br>​        def process_item(self, item, spider):   # 实现数据处理的方法，方法名不能修改<br>​            with open(‘temp.txt’, ‘a’) as f:<br>​                json.dump( item, f, ensure_ascii=False, indent=2)<br>​                        # 将item打印，并将item传递给后面的pipeline，实现数据在管道pipeline之间的传递<br>​                    return item<br>注意：<br>process_item方法中的spider参数，表示传递参数过来的爬虫对象<br>spider： 传递数据的爬虫对象，spider.name可以返回爬虫的名称<br>item：传递过来的数据<br>setting文件中的设置开启pipeline<br>​    ITEM_PIPELINE = {<br>​        ‘myspider.pipelines.MyspiderPipeline’: 300,<br>​    }<br>注意：<br>‘muspider.pipelines.MyspiderPipeline’是pipeline文件的路径<br>300  是pipeline的权重，pipeline的权重越小，其优先级越高，可以理解为距离引擎的远近<br>如果权重相同的两个pipeline，scrapy会自动的将键值进行排序，根据排序结果定义访问顺序<br>pipeline的方法<br>​      form pymongo import MongoClient<br>​      class Myspiderpipline(object):<br>​            # open_spider在爬虫开启请求start_url前的时候只执行一次，一般用于导入数据库<br>​             def open_spider(self,  spider):<br>​                    # 实例化一个mongoclient<br>​                   con = MongoClient(spider.settings.get(‘HOST’), spider.settings.get(‘PORT’))<br>​                   db = con[spider.settings.get(‘DB’)]<br>​                   self.collection = db[spider.settings.get(‘COLLECTON’)]<br>​         </p>
+<pre><code># close_spider在爬虫关闭的时候只执行 一次，一般用于需要关闭的数据库关闭
+def close_spider(self,  spider):
+        print(&apos;关闭pipeline&apos;)
+        return item      
+# from_crawler连接到setting.py的配置文件
+def from_crawler(cls, crawler):
+        return  cls(mongo_uri=crawler.settings.get(&apos;MGONGO_URI&apos;))
+</code></pre><p>备注：<br>一个项目会有多个spider，不同的pipeline处理不同的item的内容<br>一个spider的内容可能要做不同的操作，比如存入不同的数据库中<br>pipeline向mongoDB中插入数据<br>在pipeline类的外部定义使用的mongodb集合<br>​     from pymongo import MongoClient<br>​     client = MongoClient(host=’127.0.0.1’, port=27017)    # 实例化mongodb客户端<br>​     collection = client[‘myspider’][‘yangguang’]<br>在pipeline类open_spider中导入mongodb<br>​    form pymongo import MongoClient<br>​    class Myspiderpipline(object):<br>​        # open_spider在爬虫开启的时候只执行一次<br>​        def open_spider(self,  spider):<br>​            # 实例化一个mongoclient<br>​            con = MongoClient(spider.settings.get(‘HOST’), spider.settings.get(‘PORT’))<br>​            db = con[spider.settings.get(‘DB’)]<br>​            self.collection = db[spider.settings.get(‘COLLECTON’)]<br>向集合中插入数据<br>​            def process_item(self, item, spider):<br>​                item[‘collection_text’] = <em>**</em><br>​                collection.insert(dict(item))   # 向mongodb中插入数据<br>​                return item<br>向Mongodb中插入数据<br>要在setting中配置<br>MONGO_URI = ‘127.0.0.1’<br>MONGO_DATABASE = ‘数据库名’</p>
+<p>pipeline向Mysql中存入数据<br>数据同步的方式写入Mysql</p>
+<p>数据异步的方式写入Mysql</p>
+<p>数据自动导出json文件<br>自定义形式导出</p>
+<p>使用scrapy自带exportor导出</p>
+<p>将爬取去到的图片地址对应的图片进行存储<br>setting文件中设置图片存储位置</p>
+<p>pipeline中对图片进行下载</p>
+<p>ArticleImagePipeline类的方法<br>get_media_requests(self, item, info)<br>该方法实现将item字段中的url字段取出来，然后直接生成Request对象，请求对象会加入到对列中，等待执行下载<br>file_path(self, request, response=None, info=None)<br>这个方法用来返回保存的文件名<br>item_completed(self, results, item, info)<br>当单个item完成下载后的处理方法<br>results参数就是该item对应的下载结果，它是一个列表形式，列表的每一个元素就是一个元组，其中包含了下载成功或者失败的信息<br>附件：<br>Desktop.zip</p>
+
       
 
       
@@ -231,8 +235,8 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="http://qr.liantu.com/api.php?text=http://blog.kyleliu.cn/archives/" alt="微信分享二维码">
-      <!-- <img src="//pan.baidu.com/share/qrcode?url=http://blog.kyleliu.cn/archives/" alt="微信分享二维码"> -->
+      <img src="http://qr.liantu.com/api.php?text=http://blog.kyleliu.cn/8.python爬虫/scrapy框架/Scrapy-pipeline.html" alt="微信分享二维码">
+      <!-- <img src="//pan.baidu.com/share/qrcode?url=http://blog.kyleliu.cn/8.python爬虫/scrapy框架/Scrapy-pipeline.html" alt="微信分享二维码"> -->
     </div>
 </div>
 
@@ -275,6 +279,16 @@
 </aside>
 
 
+
+  
+  
+  
+
+  
+
+  
+
+  
 
 
           </div>

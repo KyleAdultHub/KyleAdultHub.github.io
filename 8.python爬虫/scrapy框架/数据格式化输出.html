@@ -6,16 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://blog.kyleliu.cn">
-  <title>archives | 刘小恺(Kyle) 的个人博客</title>
+  <title>刘小恺(Kyle) 的个人博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="archives">
-<meta property="og:url" content="http://blog.kyleliu.cn/archives/index.html">
+  <meta name="description" content="数据格式化输出自动格式化输出文件scrapy支持的格式化输出文件格式jsonjsonlinescsvxml通过配置setting中属性，来定义存储方式FEED_URI   存储路径，必须配置，如果不配置，需要在启动时候指定路径示例：file://tmp/export.csv备注：路径的名称可以格式化，例如： FEED_FORMAT   用于序列化输出的文件格式，就是上面的几种FEED_EXPORT">
+<meta property="og:type" content="website">
+<meta property="og:title" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:url" content="http://blog.kyleliu.cn/8.python爬虫/scrapy框架/数据格式化输出.html">
 <meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="数据格式化输出自动格式化输出文件scrapy支持的格式化输出文件格式jsonjsonlinescsvxml通过配置setting中属性，来定义存储方式FEED_URI   存储路径，必须配置，如果不配置，需要在启动时候指定路径示例：file://tmp/export.csv备注：路径的名称可以格式化，例如： FEED_FORMAT   用于序列化输出的文件格式，就是上面的几种FEED_EXPORT">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-10-18T08:50:02.476Z">
+<meta property="og:updated_time" content="2018-10-18T12:04:10.564Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="archives">
+<meta name="twitter:title" content="刘小恺(Kyle) 的个人博客">
+<meta name="twitter:description" content="数据格式化输出自动格式化输出文件scrapy支持的格式化输出文件格式jsonjsonlinescsvxml通过配置setting中属性，来定义存储方式FEED_URI   存储路径，必须配置，如果不配置，需要在启动时候指定路径示例：file://tmp/export.csv备注：路径的名称可以格式化，例如： FEED_FORMAT   用于序列化输出的文件格式，就是上面的几种FEED_EXPORT">
   
     <link rel="alternative" href="/atom.xml" title="刘小恺(Kyle) 的个人博客" type="application/atom+xml">
   
@@ -156,24 +159,37 @@
             <article id="page-" class="article article-type-page " itemscope itemprop="blogPost">
   <div class="article-inner">
     
-      <header class="article-header">
-        
-  
-    <h1 class="article-title" itemprop="name">
-      archives
-    </h1>
-  
-
-        
-        <a href="/archives/index.html" class="archive-article-date">
-  	<time datetime="2018-10-18T08:49:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-10-18</time>
-</a>
-        
-      </header>
-    
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <p>数据格式化输出<br>自动格式化输出文件<br>scrapy支持的格式化输出文件格式<br>json<br>jsonlines<br>csv<br>xml<br>通过配置setting中属性，来定义存储方式<br>FEED_URI   存储路径，必须配置，如果不配置，需要在启动时候指定路径<br>示例：file://tmp/export.csv<br>备注：<br>路径的名称可以格式化，例如：</p>
+<p>FEED_FORMAT   用于序列化输出的文件格式，就是上面的几种<br>FEED_EXPORT_ENCODING   文件编码格式，一般默认utf-8，json默认是安全编码格式<br>FEED_EXPORT_FIELDS    定义输出文件中包含的字段，为列表格式<br>FEED_EXPORT_INDENT    定义输出内容的缩进，默认为0,<br>0和负数表示内容会放在一行上<br>None会选择最紧凑的方式，将数据进行摆放<br>其他，将会按照指定的缩进，对对象的成员进行格式化显示<br>FEED_STORE_EMPTY     如果没输出是否会导出文件，默认为False<br>FEED_STORAGES_BASE    字典类型，包含所有支持存储方式模板引擎， 一般不需要手动配置<br>默认为</p>
+<p>FEED_STORAGES     一个字典类型，可以手动添加存储方式的模板引擎<br>默认为 { }<br>如果想要禁用某一个模板文件类型的引擎，可以将上面对应字段值设置为None<br>FEED_EXPORTERS_BASE    字典类型，包含了所有支持的格式文件处理引擎， 一般不需要手动配置<br>默认为</p>
+<p>FEED_EXPORTERS      一个字典类型，可以手动添加文件处理引擎<br>默认为{ }<br>如果想要禁用某一个模板文件类型的引擎，可以将上面对应字段值设置为None<br>scrapy手动输出指定csv格式文件<br>目标：<br>获取如下格式的csv文件<br>配置的步骤</p>
+<ol>
+<li><p>在scrapy的spiders同层目录，新建my_project_csv_item_exporter.py文件内容如下（文件名可改，目录定死）<br>   ​    from scrapy.conf import settings<br>   ​    from scrapy.contrib.exporter import CsvItemExporter</p>
+<pre><code>class MyProjectCsvItemExporter(CsvItemExporter):
+
+def __init__(self, *args, **kwargs):
+    delimiter = settings.get(&apos;CSV_DELIMITER&apos;, &apos;,&apos;)
+    kwargs[&apos;delimiter&apos;] = delimiter
+
+    fields_to_export = settings.get(&apos;FIELDS_TO_EXPORT&apos;, [])
+    if fields_to_export :
+        kwargs[&apos;fields_to_export&apos;] = fields_to_export
+
+    super(MyProjectCsvItemExporter, self).__init__(*args, **kwargs)
+</code></pre></li>
+<li><p>在同层目录，settings.py文件新增如下内容（指定item,field顺序）<br>   ​    FEED_EXPORTERS = {<br>   ​        ‘csv’: ‘my_project.my_project_csv_item_exporter.MyProjectCsvItemExporter’,<br>   ​    } #这里假设你的project名字为my_project</p>
+<pre><code>FIELDS_TO_EXPORT = [
+    &apos;id&apos;,
+    &apos;name&apos;,
+    &apos;email&apos;,
+    &apos;address&apos;
+</code></pre></li>
+<li><p>在同层目录，settings.py文件指定分隔符<br>CSV_DELIMITER = “\t”<br>4.启动项目<br>全部设定完后，执行scrapy crawl spider -o spider.csv的时候，字段就按顺序来了。</p>
+</li>
+</ol>
+
       
 
       
@@ -231,8 +247,8 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="http://qr.liantu.com/api.php?text=http://blog.kyleliu.cn/archives/" alt="微信分享二维码">
-      <!-- <img src="//pan.baidu.com/share/qrcode?url=http://blog.kyleliu.cn/archives/" alt="微信分享二维码"> -->
+      <img src="http://qr.liantu.com/api.php?text=http://blog.kyleliu.cn/8.python爬虫/scrapy框架/数据格式化输出.html" alt="微信分享二维码">
+      <!-- <img src="//pan.baidu.com/share/qrcode?url=http://blog.kyleliu.cn/8.python爬虫/scrapy框架/数据格式化输出.html" alt="微信分享二维码"> -->
     </div>
 </div>
 
@@ -275,6 +291,16 @@
 </aside>
 
 
+
+  
+  
+  
+
+  
+
+  
+
+  
 
 
           </div>

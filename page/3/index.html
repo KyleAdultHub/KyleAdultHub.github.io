@@ -154,6 +154,53 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-4.python爬虫/爬虫基础/Splash动态爬取" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Splash的功能介绍和运行<br>Splash的简介<br>Splash是一个JavaScript渲染服务，是一个带有HTTP API的轻量级浏览器，同时它对接了Python中的Twisted和QT库。利用它，我们同样可以实现动态渲染页面的抓取。<br>Splash文档<br>Splash官方文档<br><a href="https://splash.readthedocs.io/en/stable/scripting-ref.html" target="_blank" rel="noopener">https://splash.readthedocs.io/en/stable/scripting-ref.html</a><br>Splash-api官方文档<br><a href="https://splash.readthedocs.io/en/stable/api.html" target="_blank" rel="noopener">https://splash.readthedocs.io/en/stable/api.html</a><br>Splash的功能<br>异步方式处理多个网页渲染过程；<br>获取渲染后的页面的源代码或截图；<br>通过关闭图片渲染或者使用Adblock规则来加快页面渲染速度；<br>可执行特定的JavaScript脚本；<br>可通过Lua脚本来控制页面渲染过程；<br>获取渲染的详细过程并通过HAR（HTTP Archive）格式呈现。<br>Splash服务的运行<br>docker run -d -p 8050:8050 scrapinghub/splash<br>打开<a href="http://localhost:8050/即可看到其Web页面" target="_blank" rel="noopener">http://localhost:8050/即可看到其Web页面</a><br>Splash-Lua脚本介绍<br>Splash的运行机制<br>Splash加载和操作渲染过程，可以理解是由一段Lua代码来操控<br>Splash留出来了一个main() 函数的接口，我们可以通过编写该段函数，操作其传入的splash对象，Splash会调用其指令并执行对应的操作<br>可以在浏览器界面编写并点击render me来启动，也可以通过调用splash-api的方式来调用<br>Splash Lua脚本示例<br>function main(splash, args)<br>assert(splash:go(args.url))         请求url<br>assert(splash:wait(0.5))       等待0.5s<br>return {       返回结果<br>html = splash:html(),            获取页面源码<br>png = splash:png(),        获取页面截图<br>har = splash:har(),        获取请求的详细har信息<br>}<br>end<br>Splash异步处理<br>Splash异步的介绍<br>在脚本内调用的wait()方法类似于Python中的sleep()，其参数为等待的秒数。当Splash执行到此方法时，它会转而去处理其他任务，然后在指定的时间过后再回来继续处理。<br>另外，这里做了加载时的异常检测。go()方法会返回加载页面的结果状态，如果页面出现4xx或5xx状态码，ok变量就为空<br>Splash异步脚本示例<br>function main(splash, args)<br>local example_urls = {“<a href="http://www.baidu.com&quot;" target="_blank" rel="noopener">www.baidu.com&quot;</a>, “<a href="http://www.taobao.com&quot;" target="_blank" rel="noopener">www.taobao.com&quot;</a>, “<a href="http://www.zhihu.com&quot;}" target="_blank" rel="noopener">www.zhihu.com&quot;}</a><br>local urls = args.urls or example_urls<br>local results = {}<br>for index, url in ipairs(urls) do<br>local ok, reason = splash:go(“http://“ .. url)<br>if ok then<br>splash:wait(2)<br>results[url] = splash:png()<br>end<br>end<br>return results<br>end<br>Splash负载均衡的配置<br>搭建多个splash服务节点<br>docker run -d -p 8050:8050 scrapinghub/splash<br>配置负载均衡服务(使用nginx)<br>nginx配置节点<br>​            http {<br>​                upstream splash {<br>​                    least_conn;<br>​                    server 41.159.27.223:8050 weight=4;<br>​                    server 41.159.27.221:8050 weight=2;<br>​                    server 41.159.27.9:8050 weight=2;<br>​                    server 41.159.117.119:8050 weight=1;<br>​                }<br>​                server {<br>​                    listen 8050;<br>​                    location / {<br>​                        proxy_pass <a href="http://splash" target="_blank" rel="noopener">http://splash</a>;<br>​                    }<br>​                }<br>​            }<br>nginx配置认证<br>现在Splash是可以公开访问的，如果不想让其公开访问，还可以配置认证，这仍然借助于Nginx。可以在server的location字段中添加auth_basic和auth_basic_user_file字段，具体配置如下：<br>这里使用的用户名和密码配置放置在/etc/nginx/conf.d目录下，我们需要使用htpasswd命令创建。例如，创建一个用户名为admin的文件，相关命令如下<br>htpasswd -c .htpasswd admin<br>接下来就会提示我们输入密码，输入两次之后，就会生成密码文件，其内容如下：<br>配置完成后，重启一下Nginx服务： sudo nginx -s reload<br>​                server {<br>​                    listen 8050;<br>​                    location / {<br>​                        proxy_pass <a href="http://splash" target="_blank" rel="noopener">http://splash</a>;<br>​                        auth_basic “Restricted”;<br>​                        auth_basic_user_file /etc/nginx/conf.d/.htpasswd;<br>​                    }<br>​                }<br>Splash对象的常用属性<br>加载参数<br>获取方法一<br>​            function main(splash, args)<br>​                local url = args.url<br>​            end<br>获取方法二<br>​            function main(splash)<br>​                local url = splash.args.url<br>​            end<br>开启关闭javascript<br>splash.js_enabled = false/true<br>设置加载的超时时间<br>splash.resource_timeout = 2<br>单位是秒。如果设置为0或nil（类似Python中的None），代表不检测超时。<br>禁止加载图片<br>splash.images_enabled = true/false<br>禁止开启插件(flash等)<br>splash.plugins_enabled = true/false<br>滚动条<br>splash.scroll_position = {x=100, y=400}<br>滚动条向右滚动100像素，向下滚动400像素<br>Splash对象常用方法<br>请求某链接<br>使用方法<br>splash:go{url, baseurl=nil, headers=nil, http_method=”GET”, body=nil, formdata=nil}<br>url：请求的URL。<br>baseurl：可选参数，默认为空，表示资源加载相对路径。<br>headers：可选参数，默认为空，表示请求头。<br>http_method：可选参数，默认为GET，同时支持POST。<br>body：可选参数，默认为空，发POST请求时的表单数据，使用的Content-type为application/json。<br>formdata：可选参数，默认为空，POST的时候的表单数据，使用的Content-type为application/x-www-form-urlencoded。<br>return: 结果ok和原因reason的组合，如果ok为空，代表网页加载出现了错误，此时reason变量中包含了错误的原因<br>使用示例<br>​            function main(splash, args)<br>​                local ok, reason = splash:go{“<a href="http://httpbin.org/post&quot;" target="_blank" rel="noopener">http://httpbin.org/post&quot;</a>, http_method=”POST”, body=”name=Germey”}<br>​                if ok then<br>​                    return splash:html()<br>​                end<br>​            end<br>设置定时任务<br>使用示例(0.2s后获取网页截图)<br>​                    function main(splash, args)<br>​                             local snapshots = {}<br>​                             local timer = splash:call_later(function()<br>​                                 snapshots[“a”] = splash:png()<br>​                                 splash:wait(1.0)<br>​                                 snapshots[“b”] = splash:png()<br>​                                 end, 0.2)<br>​                             splash:go(“<a href="https://www.taobao.com&quot;" target="_blank" rel="noopener">https://www.taobao.com&quot;</a>)<br>​                             splash:wait(3.0)<br>​                             return snapshots<br>​                    end<br>模拟发送get请求<br>使用方法<br>response = splash:http_get{url, headers=nil, follow_redirects=true}<br>url：请求URL。<br>headers：可选参数，默认为空，请求头。<br>follow_redirects：可选参数，表示是否启动自动重定向，默认为true<br>使用示例<br>​            function main(splash, args)<br>​                local treat = require(“treat”)<br>​                local response = splash:http_get(“<a href="http://httpbin.org/get&quot;" target="_blank" rel="noopener">http://httpbin.org/get&quot;</a>)<br>​                    return {<br>​                        html=treat.as_string(response.body),<br>​                        url=response.url,<br>​                        status=response.status<br>​                    }<br>​            end<br>模拟发送post请求<br>使用方法<br>response = splash:http_post{url, headers=nil, follow_redirects=true, body=nil}<br>url：请求URL。<br>headers：可选参数，默认为空，请求头。<br>follow_redirects：可选参数，表示是否启动自动重定向，默认为true。<br>body：可选参数，即表单数据，默认为空。<br>使用示例<br>​            function main(splash, args)<br>​                local treat = require(“treat”)<br>​                local json = require(“json”)<br>​                local response = splash:http_post{“<a href="http://httpbin.org/post&quot;" target="_blank" rel="noopener">http://httpbin.org/post&quot;</a>,<br>​                    body=json.encode({name=”Germey”}),<br>​                    headers={[“content-type”]=”application/json”}<br>​                }<br>​                return {<br>​                    html=treat.as_string(response.body),<br>​                    url=response.url,<br>​                    status=response.status<br>​                }<br>​            end<br>获取页面加载过程描述等信息<br>使用方法<br>splash:har()        获取加载过程详细信息<br>splash:url()        获取正在访问的url<br>页面cookie相关操作<br>使用方法<br>splash:get_cookies()       获取当前页面的cookie<br>cookies = splash:add_cookie{name, value, path=nil, domain=nil, expires=nil, httpOnly=nil, secure=nil}    给页面添加cookie<br>splash:clear_cookies()    清空当前页面所有cookie<br>设置页面大小<br>使用方法<br>splash:get_viewport_size()    获取页面宽高<br>splash:set_viewport_size(width, height)    设置页面宽高<br>splash:set_viewport_full()    设置页面铺满<br>设置User-Agent<br>使用示例<br>​                    function main(splash)<br>​                            splash:set_user_agent(‘Splash’)<br>​                            splash:go(“<a href="http://httpbin.org/get&quot;" target="_blank" rel="noopener">http://httpbin.org/get&quot;</a>)<br>​                            return splash:html()<br>​                    end<br>设置请求头<br>使用示例<br>​                    function main(splash)<br>​                        splash:set_custom_headers({<br>​                                [“User-Agent”] = “Splash”,<br>​                                [“Site”] = “Splash”,<br>​                        })<br>​                        splash:go(“<a href="http://httpbin.org/get&quot;" target="_blank" rel="noopener">http://httpbin.org/get&quot;</a>)<br>​                        return splash:html()<br>​                    end<br>节点操作<br>使用方法<br>element = splash:select(“#kw”)    通过css选择器选择元素, 返回选中的第一个元素<br>element = splash:select_all(“#kw”)    通过css选择器选择元素, 返回选中所有元素<br>element.send_text(‘test’)     向节点输入文本<br>element.mouse_click()    点击节点<br>等待wait<br>使用方法<br>ok, reason = splash:wait{time, cancel_on_redirect=false, cancel_on_error=true}<br>time：等待的秒数。<br>cancel_on_redirect：可选参数，默认为false，表示如果发生了重定向就停止等待，并返回重定向结果。<br>cancel_on_error：可选参数，默认为false，表示如果发生了加载错误，就停止等待。<br>return: 结果ok和原因reason的组合。<br>使用示例<br>​            function main(splash)<br>​                splash:go(“<a href="https://www.taobao.com&quot;" target="_blank" rel="noopener">https://www.taobao.com&quot;</a>)<br>​                splash:wait(2)<br>​                return {html=splash:html()}<br>​            end<br>调用JavaScript定义的方法<br>使用示例<br>​                    function main(splash, args)<br>​                            local get_div_count = splash:jsfunc([[<br>​                                    function () {<br>​                                    var body = document.body;<br>​                                    var divs = body.getElementsByTagName(‘div’);<br>​                                    return divs.length;<br>​                                    }<br>​                                    ]])<br>​                            splash:go(“<a href="https://www.baidu.com&quot;" target="_blank" rel="noopener">https://www.baidu.com&quot;</a>)<br>​                            return (“There are %s DIVs”):format(get_div_count())<br>​                    end<br>执行JavaScript代码(表达式类)<br>使用示例<br>local title = splash:evaljs(“document.title”)  执行JavaScript代码并返回最后一条JavaScript语句的返回结果<br>执行JavaScript代码(声明类)<br>使用示例<br>​                    function main(splash, args)<br>​                         splash:go(“<a href="https://www.baidu.com&quot;" target="_blank" rel="noopener">https://www.baidu.com&quot;</a>)<br>​                          splash:runjs(“foo = function() { return ‘bar’ }”)<br>​                          local result = splash:evaljs(“foo()”)<br>​                          return result<br>​                    end<br>加载js代码<br>使用方法<br>此方法只负责加载JavaScript代码或库，不执行任何操作。如果要执行操作，可以调用evaljs()或runjs()<br>ok, reason = splash:autoload{source_or_url, source=nil, url=nil}<br>source_or_url：JavaScript代码或者JavaScript库链接。<br>source：JavaScript代码。<br>url：JavaScript库链接<br>使用示例<br>​                    function main(splash, args)<br>​                          splash:autoload([[<br>​                                  function get_document_title(){<br>​                                         return document.title;<br>​                            }<br>​                          ]])<br>​                          splash:go(“<a href="https://www.baidu.com&quot;" target="_blank" rel="noopener">https://www.baidu.com&quot;</a>)<br>​                          return splash:evaljs(“get_document_title()”)<br>​                    end<br>页面内容的操作方法<br>使用方法<br>splash:set_content(“<html><body><h1>hello</h1></body></html>“)     添加页面内容<br>splash:html()    获取当前页面源码<br>获取png/jpeg格式的页面截图<br>使用方法<br>splash:png()<br>splash:jpeg()<br>设置代理<br>使用示例<br>​                    function main(splash, args)<br>​                           request = splash:on_request(function(request)<br>​                                    request:set_proxy{host, port, username=nil, password=nil, type=’HTTP/SOCKS5’)<br>​                                    end)<br>​                    end<br>Splash-API的使用<br>Splash API的介绍<br>Splash Lua脚本的用法，但这些脚本是在Splash页面中测试运行的<br>Splash API就是我们可以通过python程序使用Splash服务的方法<br>Splash给我们提供了一些HTTP API接口，我们只需要请求这些接口并传递相应的参数即可<br>常用Splash API<br>render.png<br>接口介绍<br>通过width和height来控制宽高，它返回的是PNG格式的图片二进制数据。示例如下<br>常用参数<br>width、height、render_all<br>使用示例<br>​                        import requests<br>​                        url = ‘<a href="http://localhost:8050/render.png?url=https://www.jd.com&amp;wait=5&amp;width=1000&amp;height=700&#39;" target="_blank" rel="noopener">http://localhost:8050/render.png?url=https://www.jd.com&amp;wait=5&amp;width=1000&amp;height=700&#39;</a><br>​                        response = requests.get(url)<br>​                        with open(‘taobao.png’, ‘wb’) as f:<br>​                               f.write(response.content)<br>render.html<br>接口介绍<br>此接口用于获取JavaScript渲染的页面的HTML代码，接口地址就是Splash的运行地址加此接口名称<br>常用参数<br>url 、baseurl、timeout、resource_timeout、wait、proxy、js、js_source、filter、allowed_domin<br>allowed_content_types、viewport、images、headers、body、heep_method、save_args、load_args<br>使用示例<br>​            import requests<br>​            url = ‘<a href="http://localhost:8050/render.html?url=https://www.baidu.com&#39;" target="_blank" rel="noopener">http://localhost:8050/render.html?url=https://www.baidu.com&#39;</a><br>​            response = requests.get(url)<br>​            print(response.text)<br>render.har<br>接口介绍<br>此接口用于获取页面加载的HAR数据<br>使用示例<br>curl <a href="http://localhost:8050/render.har?url=https://www.jd.com&amp;wait=5" target="_blank" rel="noopener">http://localhost:8050/render.har?url=https://www.jd.com&amp;wait=5</a><br>render.json<br>接口介绍<br>此接口包含了前面接口的所有功能，返回结果是JSON格式<br>以JSON形式返回了相应的请求数据<br>可以通过传入不同参数控制其返回结果。比如，传入html=1，返回结果即会增加源代码数据；传入png=1，返回结果即会增加页面PNG截图数据；传入har=1，则会获得页面HAR数据<br>使用示例<br>curl <a href="http://localhost:8050/render.json?url=https://httpbin.org" target="_blank" rel="noopener">http://localhost:8050/render.json?url=https://httpbin.org</a><br>execute<br>接口介绍<br>用此接口便可实现与Lua脚本的对接<br>可以用该接口，通过原生的Lua脚本来调用splash<br>可以通过lua_source参数传递Lua脚本给splash服务器进行请求和渲染服务<br>常用参数<br>timeout、allowed_domains、proxy、filters、save_args、load_args<br>使用示例<br>​                        import requests<br>​                        from urllib.parse import quote<br>​                        lua = ‘’’<br>​                            function main(splash)<br>​                                return ‘hello’<br>​                            end<br>​                         ‘’’<br>​                        url = ‘<a href="http://localhost:8050/execute?lua_source=&#39;" target="_blank" rel="noopener">http://localhost:8050/execute?lua_source=&#39;</a> + quote(lua)<br>​                        response = requests.get(url)<br>​                        print(response.text)</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/18/4.python爬虫/爬虫基础/Splash动态爬取/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
     <article id="post-4.python爬虫/爬虫基础/Selenium动态爬取" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -691,56 +738,6 @@ if __name__ == &apos;__main__&apos;:
 
 
   
-    <article id="post-4.python爬虫/爬虫扩展功能/Crontab定时执行爬虫" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Crontab的使用方法<br>安装cron软件<br>apt-get  install  cron<br>编辑crontab定时执行命令<br>进入crontab编辑界面<br>crontab  -e    进入编辑界面<br>crontab  -l     查看当前的定时任务<br>crontab -r    删除任务<br>编辑需要被定时执行的命令<br>编辑的格式<br>分(0-59)   小时(0-23)  日(1-31)   月(1-12)  星期(0-6)  命令(command)<br>示例<br>30  7  8  <em>  </em>  ls    指定每月的8日的7:30执行ls命令<br><em>/15  </em>  <em>  </em>  <em>  ls      每15分钟执行一次ls命令<br>0  </em>/2  <em>  </em>  *  ls     每隔两个小时执行一次ls<br>注意点</p>
-<ul>
-<li>/num 代表每隔多长时间的意思<br>当一个位置使用每隔符号的时候，其前边的时间位置，不能为<em><br>星期中0表示周日<br>使用Crontab定时爬虫<br>编辑python_spider命令<br>先把python的执行命令写入.sh脚本<br>#！/bin/sh     将脚本定义在可执行脚本目录中<br>cd <code>dirname</code> $0 || exit 1    cd到.sh文件所在目录(项目目录)，失败则退出，dirname两边的不是引号<br>所以我们要将.sh文件定义在项目目录中，执行的时候，会自动的执行cd命令<br>topython3    切换到python3的环境<br>scrapy crawl spider_name &gt;&gt; run.log 2&gt;&amp;1<br>将终端显示的内容重定向到log日志中，不会在终端显示错误、异常（2&gt;&amp;1，表示会将错误和异常也保存到日志中  ）<br>给.sh文件添加可执行权限<br>chmod  +  run.sh<br>在crontab中编辑脚本文件执行时间（注意些绝对路径）<br>0  6   </em>  <em>  </em>  /home/ubuntu/<strong><em>/myspider.sh &gt;&gt; /home/ubuntu/</em></strong> run_crontab.log 2&gt;&amp;1<br>将终端显示的内容重定向到log日志中，不会保存错误、异常（2&gt;&amp;1，表示会将错误和异常也保存到日志中  ）<br>动态查看log日志<br>tail  -f  log_name.log</li>
-</ul>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/18/4.python爬虫/爬虫扩展功能/Crontab定时执行爬虫/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/4/">Next &raquo;</a>
@@ -876,6 +873,10 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">分类问题</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">正则化</a>
               </li>
             
             <div class="clearfix"></div>

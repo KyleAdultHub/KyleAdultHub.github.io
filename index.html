@@ -154,6 +154,140 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-10.机器学习/基础内容/正则化" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/11/02/10.机器学习/基础内容/正则化/">正则化(Regularization)</a>
+    </h1>
+  
+
+        
+        <a href="/2018/11/02/10.机器学习/基础内容/正则化/" class="archive-article-date">
+  	<time datetime="2018-11-02T15:30:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-11-02</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="1-过拟合问题"><a href="#1-过拟合问题" class="headerlink" title="1.过拟合问题"></a>1.过拟合问题</h3><h4 id="过拟合问题描述"><a href="#过拟合问题描述" class="headerlink" title="过拟合问题描述"></a>过拟合问题描述</h4><p>常用的机器学习优化算法，包括线性回归和逻辑回归，它们能够有效地解决许多问题，但是当将它们应用到某些特定的机器学习应用时，会遇到过拟合(over-fitting)的问题，可能会导致它们效果很差。使用正则化技术可以减少过拟合问题。<br>如果我们有非常多的特征，我们通过学习得到的假设可能能够非常好地适应训练集（代价函数可能几乎为0），但是可能会不能推广到新的数据。<br>下图是一个回归问题的例子：</p>
+<p><img src="/img/1541172957837.png" alt="1541172957837"></p>
+<p>第一个模型是一个线性模型，欠拟合，不能很好地适应我们的训练集；第三个模型是一个四次方的模型，过于强调拟合原始数据，而丢失了算法的本质：预测新数据。我们可以看出，若给出一个新的值使之预测，它将表现的很差，是过拟合，虽然能非常好地适应我们的训练集但在新输入变量进行预测时可能会效果不好；而中间的模型似乎最合适。<br>分类问题中也存在这样的问题：</p>
+<p><img src="/img/1541173045662.png" alt="1541173045662"></p>
+<p>就以多项式理解， 的次数越高，拟合的越好，但相应的预测的能力就可能变差。</p>
+<blockquote>
+<p>如果我们发现了过拟合问题，应该如何处理？</p>
+</blockquote>
+<ol>
+<li>丢弃一些不能帮助我们正确预测的特征。可以是手工选择保留哪些特征，或者使用一些模型选择的算法来帮忙（例如PCA）</li>
+<li>正则化。 保留所有的特征，但是减少参数的大小（magnitude）。</li>
+</ol>
+<h3 id="2-代价函数"><a href="#2-代价函数" class="headerlink" title="2.代价函数"></a>2.代价函数</h3><p>上面的回归问题中如果我们的模型是：$h_θ(x) = θ_0 + θ_1x_1 + θ_2x_2^2 + θ_3x_3^3 + θ_4x_4^4$ 我们可以从之前的事例中看出，正是那些高次项导致了过拟合的产生，所以如果我们能让这些高次项的系数接近于0的话，我们就能很好的拟合了。 所以我们要做的就是在一定程度上减小这些参数 θ 的值，这就是正则化的基本方法。</p>
+<p>我们决定要减少θ3和 θ4的大小，我们要做的便是修改代价函数，在其中 θ3和 θ4 设置一点惩罚。这样做的话，我们在尝试最小化代价时也需要将这个惩罚纳入考虑中，并最终导致选择较小一些的 θ3和θ4。 修改后的代价函数如下：</p>
+<p>$\min <em>θ {1\over 2m}[h</em>θ(x^{(i)} - y^{(i)})^2 + 1000θ_3^2 + 10000θ_4^2]$</p>
+<p>通过这样的代价函数选择出的 θ3和 θ4 对预测结果的影响就比之前要小许多， 因为为了θ3和θ4的系数很大，为了优化代价函数， 其值一定会特别的小。</p>
+<p>假如我们有非常多的特征，我们并不知道其中哪些特征我们要惩罚，我们将对所有的特征进行惩罚，并且让代价函数最优化的软件来选择这些惩罚的程度。这样的结果是得到了一个较为简单的能防止过拟合问题的假设：</p>
+<blockquote>
+<p>$J_θ = {1\over 2m}[\sum_{i=1}^m(h_θ(x^{(i)}) - y^{(i)}) + λ\sum_{j=1}^nθ_j^2]$<br>其中又称为正则化参数（Regularization Parameter）。 注：根据惯例，我们不对 θ0 进行惩罚。</p>
+</blockquote>
+<p>经过正则化处理的模型与原模型的可能对比如下图所示：</p>
+<p><img src="/img/1541174343216.png" alt="1541174343216"></p>
+<p>如果选择的正则化参数λ过大，则会把所有的参数都最小化了，导致模型变成 $h_θ(x) = θ_0$，也就是上图中红色直线所示的情况，造成欠拟合。 </p>
+<p>那为什么增加的一项 $λ\sum_{j=1}^nθ_j^2$  可以使的值减小呢？ </p>
+<p>因为如果我们令 λ的值很大的话，为了使Cost Function 尽可能的小，所有的 θ 的值（不包括θ0） 都会在一定程度上减小。 但若λ的值太大了，那么不包括θ0）都会趋近于0，这样我们所得到的只能是一条平行于轴的直线。 所以对于正则化，我们要取一个合理的 λ 的值，这样才能更好的应用正则化。 回顾一下代价函数，为了使用正则化，让我们把这些概念应用到到线性回归和逻辑回归中去，那么我们就可以让他们避免过度拟合了。</p>
+<h3 id="3-正则化线性回归"><a href="#3-正则化线性回归" class="headerlink" title="3.正则化线性回归"></a>3.正则化线性回归</h3><p>对于线性回归的求解，我们之前推导了两种学习算法：一种基于梯度下降，一种基于正规方程。<br>正则化线性回归的代价函数为：</p>
+<p> $J_{(θ)} = {1\over 2m} \sum_{i=1}^m[(h_θ(x^{(i)})-y^{(i)})^2 + λ\sum_{j=1}^nθ_j^2]$</p>
+<p>如果我们要使用梯度下降法令这个代价函数最小化，因为我们未对θ进行正则化，所以梯度下降算法将分两种情形：</p>
+<p><img src="/img/1541174923066.png" alt="1541174923066"></p>
+<h3 id="4-正规方程逻辑回归"><a href="#4-正规方程逻辑回归" class="headerlink" title="4.正规方程逻辑回归"></a>4.正规方程逻辑回归</h3><p>针对逻辑回归问题，我们在之前的课程已经学习过两种优化算法：我们首先学习了使用梯度下降法来优化代价函数J(θ)，接下来学习了更高级的优化算法，这些高级优化算法需要你自己设计代价函数J(θ)。</p>
+<p><img src="/img/1541175045035.png" alt="1541175045035"></p>
+<p><strong>用Python实现</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">costReg</span><span class="params">(theta, X, y, learningRate)</span>:</span></span><br><span class="line">	theta = np.matrix(theta)</span><br><span class="line">	X = np.matrix(X)</span><br><span class="line">	y = np.matrix(y)</span><br><span class="line">	first = np.multiply(‐y, np.log(sigmoid(X*theta.T)))</span><br><span class="line">	second = np.multiply((<span class="number">1</span> ‐ y), np.log(<span class="number">1</span> ‐ sigmoid(X*theta.T)))</span><br><span class="line">	reg = (learningRate / (<span class="number">2</span> * len(X))* np.sum(np.power(theta[:,<span class="number">1</span>:theta.shape[<span class="number">1</span>]],<span class="number">2</span>))</span><br><span class="line">	<span class="keyword">return</span> np.sum(first ‐ second) / (len(X)) + reg</span><br></pre></td></tr></table></figure>
+<p><strong>要最小化该代价函数，通过求导，得出梯度下降算法为：</strong></p>
+<p><img src="/img/1541175163753.png" alt="1541175163753"></p>
+<p>注：看上去同线性回归一样，但是知道 $h_θ(x) = g(θ^TX)$ ，所以与线性回归不同。 Octave 中，我们依旧可以用fminuc 函数来求解代价函数最小化的参数，值得注意的是θ0参数的更新规则与其他情况不同。 </p>
+<blockquote>
+<p>注意：</p>
+<ol>
+<li>虽然正则化的逻辑回归中的梯度下降和正则化的线性回归中的表达式看起来一样，但由于两者hθ(x)的不同所以还是有很大差别。</li>
+<li>θ不参与其中的任何一个正则化。</li>
+</ol>
+</blockquote>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">机器学习</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">正则化</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/机器学习//" class="article-tag-list-link color5">机器学习</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/机器学习/基础内容//" class="article-tag-list-link color5">基础内容</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/11/02/10.机器学习/基础内容/正则化/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
     <article id="post-10.机器学习/基础内容/逻辑回归" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -174,7 +308,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="逻辑回归介绍"><a href="#逻辑回归介绍" class="headerlink" title="逻辑回归介绍"></a>逻辑回归介绍</h2><h3 id="1-分类问题"><a href="#1-分类问题" class="headerlink" title="1. 分类问题"></a>1. 分类问题</h3><p>在分类问题中，如果想要预测的变量y是离散的值，那么可以只用一种叫做逻辑回归(logistic regression)的算法,这是在目前最流行的一种学习算法之一。</p>
+        <h3 id="1-分类问题"><a href="#1-分类问题" class="headerlink" title="1. 分类问题"></a>1. 分类问题</h3><p>在分类问题中，如果想要预测的变量y是离散的值，那么可以只用一种叫做逻辑回归(logistic regression)的算法,这是在目前最流行的一种学习算法之一。</p>
 <p>在分类问题中，我们尝试预测的是结果是否属于某一个类（例如正确或错误）。分类问题的例子有：判断一封电子邮件是否是垃圾邮件；判断一次金融交易是否是欺诈；之前我们也谈到了肿瘤分类问题的例子，区别一个肿瘤是恶性的还是良性的。  </p>
         
           <a class="article-more-a" href="/2018/10/31/10.机器学习/基础内容/逻辑回归/#more">more >></a>
@@ -861,57 +995,6 @@ yield SplashRequest(
 
 
   
-    <article id="post-4.python爬虫/scrapy框架/Scrapy-settinglog信息" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Scrapy-setting/log信息<br>配置scrapy的setting文件<br>为什么需要配置文件<br>配置文件存放一些公共的变量（比如数据库的地址，账号密码等）方便自己和别人的使用和修改<br>为了方便识别，一般配置文件中变量的命名都为大写，例如：SQL_HOST = ‘192.168.0.1’<br>在pider和pipeline中访问setting内容<br>在spider中访问setting的内容<br>​         class Myspider(scrapy.Spider):<br>​            name = ‘myspider’<br>​            start_urls = [‘http://<strong>*</strong>‘;]<br>​            def parse(self, response):<br>​                # 可以直接通过访问实例属性的方法，访问setting文件中的内容<br>​                                # self.settings 返回的是一个字典，里面按照键值对存储所有的配置参数<br>​                key = self.settings.attributes.get(‘KEY’，None)<br>在pipeline文件中访问setting的内容<br>​         class Mypipeline(object):<br>​             def open_spider(self, spider):<br>​                  # 可以通过传递过来的spider实例来访问setting中的内容<br>​                  BOT_NAME = spider.setting.get(‘KEY’, None)<br>配置文件的常用的配置<br>​        BOT_NAME = ‘<strong><em>‘   项目名称<br>​        SPIDER_MOUDLES = [‘ys.spiders’]     # 爬虫创建的位置<br>​        NEWSPIDER_MOUDLE = ‘yg.spiders’    # 新建爬虫的位置<br>​        USER_AGENT =’</em></strong>‘      # 设置主句名称，用来告诉服务器请求的身份，注意，scrapy不能将USER_AGENT配置在        HEADERS中<br>​       ITEM_PIPLINES   # 管道<br>​        DOWNLOAD_MIDDLEWARES    # 下载中间件<br>​       OBEY_ROBOTFILES = False    # 是否遵守robots协议<br>​        SPIDER_MIDDLEWARES    # 爬虫中间件<br>​        DEAFAULT_REQUEAT_HEADERS = { ***}   # 配置scrapy 默认的请求头，不能包含USER-AGRNT和cookies、refer<br>​        #  使用增量式，或分布式爬虫需要配置<br>​        DUPEFILTER_CLASS = “scrapy_redis.dupefilter.RFPDupeFilter”<br>​        SCHEDULER = “scrapy_redis.scheduler.Scheduler”<br>​        SCHEDULER_PERSIST = True<br>​        ITEM_PIPELINES = {<br>​            ‘scrapy_redis.pipelines.RedisPipeline’: 400<br>​            }<br>​        REDIS_URL = ‘redis://127.0.0.1: 6379’<br>​<br>       RETRY_HTTP_CODES = []    # 设置会retry的状态码响应<br>        HTTPERROR_ALLOWED_CODES = [302,]    # 设置来指定spider能处理的response返回值<br>        LOG_LEVEL = “WARNING”     # 设置log提示的等级，log的从高到低的级别分别为：error、warning、info、debug<br>        RETRY_ENABLED = False     开启请求失败重新请求，默认是开启的<br>        RETRY_TIMES = 3        设置重新请求的次数<br>        DOWNLOAD_TIMEOUT = 6     设置请求最大等待时间<br>        COOKIES_ENABLE = True        #  是否启用cookie中间件，如果关闭是不会向服务器发送cookie的<br>        COOKIES_DEBUG = True        # 可以看带cookie在函数中传递的过程<br>        DOWNLOAD_DELAY = 3   # 请求延时<br>        CONCURRENT_REQUESTS = 16   # 并发数量，默认值为16<br>        CONCURRENT_REQUESTS_PRE_DOMAIN = 16   # 每个域名最大并发<br>        CONCURRENT_REQUESTS_PR_IP = 16    # 每个ip最大的并发<br>         AUTOTHROTTLE_ENABLED = True    # 动态调整下载延时<br>        CONCURRENT_REQUESTS_PRE_DOMAIN = 1  # 设置允许对同一域名发起请求的并发数量限制<br>        JOBDIR = ‘路径’     # 配置记录爬虫状态目录的文件，使爬虫中途停止再启动的时候会接着上一次的状态继续爬取<br>log的配置与scrapy的debug信息<br>scrapy-log相关的配置<br>log的作用<br>为了让我们自己希望输出到终端的内容能容易看一些<br>配置log的显示等级<br>在setting中设置log显示的级别<br>​            LOG_LEVEL = “WARNING”        #  在setting文件中添加一行<br>log的从高到低的级别分别为：error、warning、info、debug<br>自定义log日志的方法<br>在想要显示log的位置添加log的输出<br>第一种打印方式：（不带log产生的位置）</p>
-<p>第二种打印方式：（带log产生的具体文件）</p>
-<p>在普通的py文件中配置logger日志的方法<br>作用<br>我们配置完了logger的输出文件后，我们可以在任何其他的程序后，可以导入logger模块，帮助我们来可以看到错误产生的位置和时间等信息<br>我们还可以将log存储的文件命名为每日的日期，这样方便我们分别存储我们每日的bug<br>示例：<br>​                    import logging<br>​                           # 配置logger的输出格式，和输出内容<br>​                    logging.basicConfig(<br>​                                    level=logging.INFO,<br>​                                    format=’%(levelname)s : %(filename)s ‘<br>​                                           ‘[%(lineno)d] : %(message)s’<br>​                                           ‘ - %(asctime)s’, datefmt=’[%d-%b-%Y %H:%M:%S]’<br>​                                            filename=’./logdebug.log’)<br>​<br>                    if <strong>name</strong> == ‘<strong>main</strong>‘:<br>                        logger = logging.getLogger(<strong>name</strong>)<br>                        log_message = ‘error’<br>                        logger.warning(log_message）<br>输出的格式</p>
-<p>详细示例</p>
-<p>常见的scrapy的debug信息</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/18/4.python爬虫/scrapy框架/Scrapy-settinglog信息/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -1047,6 +1130,10 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">分类问题</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">正则化</a>
               </li>
             
             <div class="clearfix"></div>

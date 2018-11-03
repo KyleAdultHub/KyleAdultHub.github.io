@@ -3,6 +3,33 @@
   
     
     <entry>
+      <title>sklearn 逻辑回归</title>
+      <link href="/2018/11/03/10.%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/sklearn%20%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92/"/>
+      <url>/2018/11/03/10.%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/sklearn%20%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92/</url>
+      
+        <content type="html"><![CDATA[<h3 id="逻辑回归作用"><a href="#逻辑回归作用" class="headerlink" title="逻辑回归作用"></a>逻辑回归作用</h3><p>可以做概率预测，也可用于分类，仅能用于线性问题。通过计算真实值与预测值的概率，然后变换成损失函数，求损失函数最小值来计算模型参数，从而得出模型。</p><h3 id="sklearn调用接口"><a href="#sklearn调用接口" class="headerlink" title="sklearn调用接口"></a>sklearn调用接口</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">sklearn</span>.<span class="title">linear_model</span>.<span class="title">LogisticRegression</span><span class="params">(penalty=’l2’, dual=False, tol=<span class="number">0.0001</span>, C=<span class="number">1.0</span>, fit_intercept=True, intercept_scaling=<span class="number">1</span>, class_weight=None, *random_state=None*, solver=’liblinear‘, max_iter=<span class="number">100</span>, multi_class=’ovr’, verbose=<span class="number">0</span>, warm_start=False, n_jobs=<span class="number">1</span>)</span></span></span><br></pre></td></tr></table></figure><a id="more"></a><p>参数**</p><p>　　=&gt; <strong>penalty</strong> : str, ‘l1’ or ‘l2’　　</p><p>　　　　LogisticRegression和LogisticRegressionCV默认就带了正则化项。penalty参数可选择的值为”l1”和”l2”，分别对应L1的正则化和L2的正则化，默认是L2的正则化。</p><p>　　　　在调参时如果我们主要的目的只是为了解决过拟合，一般penalty选择L2正则化就够了。但是如果选择L2正则化发现还是过拟合，即预测效果差的时候，就可以考虑L1正则化。</p><p>　　　　另外，如果模型的特征非常多，我们希望一些不重要的特征系数归零，从而让模型系数稀疏化的话，也可以使用L1正则化。</p><p>　　　　penalty参数的选择会影响我们损失函数优化算法的选择。即参数solver的选择，如果是L2正则化，那么4种可选的算法{‘newton-cg’, ‘lbfgs’, ‘liblinear’, ‘sag’}都可以选择。</p><p>　　　　但是如果penalty是L1正则化的话，就只能选择‘liblinear’了。这是因为L1正则化的损失函数不是连续可导的，而{‘newton-cg’, ‘lbfgs’,‘sag’}这三种优化算法时都需要损失函数的一阶或者二阶连续导数。而‘liblinear’并没有这个依赖。</p><p>　　=&gt; <strong>dual</strong> : bool</p><p>　　　　对偶或者原始方法。Dual只适用于正则化相为l2 liblinear的情况，通常样本数大于特征数的情况下，默认为False</p><p>　　=&gt; <strong>tol</strong> : float, optional</p><p>　　迭代终止判据的误差范围。</p><p>　　=&gt; <strong>C</strong> : float, default: 1.0</p><p>　　　　C为正则化系数λ的倒数，通常默认为1。设置越小则对应越强的正则化。</p><p>　　=&gt; <strong>fit_intercept</strong> : bool, default: True</p><p>　　　　是否存在截距，默认存在</p><p>　　=&gt; <strong>intercept_scaling</strong> : float, default 1.</p><p>　　　　仅在正则化项为”liblinear”，且fit_intercept设置为True时有用。</p><p>　　=&gt; <strong>class_weight</strong> : dict or ‘balanced’, default: None</p><p>　　　　class_weight参数用于标示分类模型中各种类型的权重，可以不输入，即不考虑权重，或者说所有类型的权重一样。如果选择输入的话，可以选择balanced让类库自己计算类型权重，</p><p>　　　　或者我们自己输入各个类型的权重，比如对于0,1的二元模型，我们可以定义class_weight={0:0.9, 1:0.1}，这样类型0的权重为90%，而类型1的权重为10%。</p><p>　　　　如果class_weight<strong>选择**</strong>balanced**，那么类库会根据训练样本量来计算权重。某种类型样本量越多，则权重越低；样本量越少，则权重越高。</p><p>　　　　当class_weight为balanced时，类权重计算方法如下：n_samples / (n_classes * np.bincount(y))</p><p>　　　　n_samples为样本数，n_classes为类别数量，np.bincount(y)会输出每个类的样本数，例如y=[1,0,0,1,1],则np.bincount(y)=[2,3]  0,1分别出现2次和三次</p><p>　　　　<strong>那么**</strong>class_weight<strong>**有什么作用呢？</strong></p><p>​        　　在分类模型中，我们经常会遇到两类问题：</p><p>​       　　 第一种是<strong>误分类的代价很高</strong>。比如对合法用户和非法用户进行分类，将非法用户分类为合法用户的代价很高，我们宁愿将合法用户分类为非法用户，这时可以人工再甄别，但是却不愿将非法用户分类为合法用户。这时，我们可以适当提高非法用户的权重。</p><p>​      　　 第二种是<strong>样本是高度失衡的</strong>，比如我们有合法用户和非法用户的二元样本数据10000条，里面合法用户有9995条，非法用户只有5条，如果我们不考虑权重，则我们可以将所有的测试集都预测为合法用户，这样预测准确率理论上有99.95%，但是却没有任何意义。</p><p>　　　　这时，我们可以选择balanced，让类库自动提高非法用户样本的权重。</p><p>　　=&gt; <strong>random_state</strong> : int, RandomState instance or None, optional, default: None</p><p>　　　　随机数种子，默认为无，仅在正则化优化算法为sag,liblinear时有用。</p><p>　　=&gt; <strong>solver</strong> : {‘newton-cg’, ‘lbfgs’, ‘liblinear’, ‘sag’, ‘saga’}</p><p>　　　　solver参数决定了我们对逻辑回归损失函数的优化方法，有4种算法可以选择，分别是：</p><p>　　　　　　a) liblinear：使用了开源的liblinear库实现，内部使用了坐标轴下降法来迭代优化损失函数。</p><p>　　　　　　b) lbfgs：拟牛顿法的一种，利用损失函数二阶导数矩阵即海森矩阵来迭代优化损失函数。</p><p>　　　　　　c) newton-cg：也是牛顿法家族的一种，利用损失函数二阶导数矩阵即海森矩阵来迭代优化损失函数。</p><p>　　　　　　d) sag：即随机平均梯度下降，是梯度下降法的变种，和普通梯度下降法的区别是每次迭代仅仅用一部分的样本来计算梯度，适合于样本数据多的时候，SAG是一种线性收敛算法，这个速度远比SGD快。</p><p>　　　　从上面的描述可以看出，newton-cg, lbfgs和sag这三种优化算法时都需要损失函数的一阶或者二阶连续导数，因此不能用于没有连续导数的L1正则化，只能用于L2正则化。而liblinear则既可以用L1正则化也可以用L2正则化。</p><p>　　　　同时，sag每次仅仅使用了部分样本进行梯度迭代，所以当样本量少的时候不要选择它，而如果样本量非常大，比如大于10万，sag是第一选择。但是sag不能用于L1正则化，所以当你有大量的样本，又需要L1正则化的话就要自己做取舍了</p><p>　　=&gt; <strong>max_iter</strong> : int, optional</p><p>　　　　仅在正则化优化算法为newton-cg, sag and lbfgs 才有用，算法收敛的最大迭代次数。</p><p>　　=&gt; <strong>multi_class</strong> : str, {‘ovr’, ‘multinomial’}, default: ‘ovr’　　　　</p><p> 　  　　OvR的思想很简单，无论你是多少元逻辑回归，我们都可以看做二元逻辑回归。具体做法是，对于第K类的分类决策，我们把所有第K类的样本作为正例，除了第K类样本以外的所有样本都作为负例，然后在上面做二元逻辑回归，得到第K类的分类模型。</p><p>　　　　其他类的分类模型获得以此类推。</p><p>​         　 而MvM则相对复杂，这里举MvM的特例one-vs-one(OvO)作讲解。如果模型有T类，我们每次在所有的T类样本里面选择两类样本出来，不妨记为T1类和T2类，把所有的输出为T1和T2的样本放在一起，把T1作为正例，T2作为负例，进行二元逻辑回归，</p><p>　　　   得到模型参数。我们一共需要T(T-1)/2次分类。</p><p>　　　   可以看出OvR相对简单，但分类效果相对略差（这里指大多数样本分布情况，某些样本分布下OvR可能更好）。而MvM分类相对精确，但是分类速度没有OvR快。如果选择了ovr，则4种损失函数的优化方法liblinear，newton-cg,lbfgs和sag都可以选择。</p><p>　　　   但是如果选择了multinomial,则只能选择newton-cg, lbfgs和sag了。</p><p>　　=&gt; <strong>verbose</strong> : int, default: 0</p><p>　　=&gt; <strong>warm_start</strong> : bool, default: False</p><p>　　=&gt; <strong>n_jobs</strong> : int, default: 1</p><p>　　　　如果multi_class =’ovr’“，并行数等于CPU内核数量。当“solver”设置为“liblinear”时，无论是否指定“multi_class”，该参数将被忽略。如果给定值-1，则使用所有内核。</p><p>　　</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 机器学习 </category>
+          
+          <category> 机器学习 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 逻辑回归 </tag>
+            
+            <tag> sklearn </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
       <title>过拟合、正则化(Regularization)</title>
       <link href="/2018/11/02/10.%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E5%9F%BA%E7%A1%80%E5%86%85%E5%AE%B9/%E6%AD%A3%E5%88%99%E5%8C%96/"/>
       <url>/2018/11/02/10.%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E5%9F%BA%E7%A1%80%E5%86%85%E5%AE%B9/%E6%AD%A3%E5%88%99%E5%8C%96/</url>
@@ -24,6 +51,33 @@
             <tag> 机器学习 </tag>
             
             <tag> 正则化 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    <entry>
+      <title>sklearn 线型回归</title>
+      <link href="/2018/10/31/10.%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/sklearn%20%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92/"/>
+      <url>/2018/10/31/10.%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/sklearn%20%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92/</url>
+      
+        <content type="html"><![CDATA[<h2 id="简单线性回归"><a href="#简单线性回归" class="headerlink" title="简单线性回归"></a>简单线性回归</h2><p>线性回归是数据挖掘中的基础算法之一，从某种意义上来说，在学习函数的时候已经开始接触线性回归了，只不过那时候并没有涉及到误差项。线性回归的思想其实就是解一组方程，得到回归函数，不过在出现误差项之后，方程的解法就存在了改变，一般使用最小二乘法进行计算。</p><a id="more"></a><h3 id="使用sklearn-linear-model-LinearRegression进行线性回归"><a href="#使用sklearn-linear-model-LinearRegression进行线性回归" class="headerlink" title="使用sklearn.linear_model.LinearRegression进行线性回归"></a>使用sklearn.linear_model.LinearRegression进行线性回归</h3><p>sklearn对Data Mining的各类算法已经有了较好的封装，基本可以使用<code>fit</code>、<code>predict</code>、<code>score</code>来训练、评价模型，并使用模型进行预测，一个简单的例子如下：</p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sklearn <span class="keyword">import</span> linear_model</span><br><span class="line">clf = linear_model.LinearRegression()</span><br><span class="line">X = [[<span class="number">0</span>,<span class="number">0</span>],[<span class="number">1</span>,<span class="number">1</span>],[<span class="number">2</span>,<span class="number">2</span>]]</span><br><span class="line">y = [<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>]</span><br><span class="line">clf.fit(X,y)</span><br><span class="line">print(clf.coef_)</span><br><span class="line">[ <span class="number">0.5</span> <span class="number">0.5</span>]</span><br><span class="line">print(clf.intercept_)</span><br><span class="line"><span class="number">1.11022302463e-16</span></span><br></pre></td></tr></table></figure><p><code>LinearRegression</code>已经实现了多元线性回归模型，当然，也可以用来计算一元线性模型，通过使用list[list]传递数据就行。下面是<code>LinearRegression</code>的具体说明。</p><h4 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h4><h5 id="实例化"><a href="#实例化" class="headerlink" title="实例化"></a>实例化</h5><p>sklearn一直秉承着简洁为美得思想设计着估计器，实例化的方式很简单，使用<code>clf = LinearRegression()</code>就可以完成，但是仍然推荐看一下几个可能会用到的参数：</p><ul><li><code>fit_intercept</code>：是否存在截距，默认存在</li><li><code>normalize</code>：标准化开关，默认关闭</li></ul><p>还有一些参数感觉不是太有用，就不再说明了，可以去官网文档中查看。</p><h5 id="回归"><a href="#回归" class="headerlink" title="回归"></a>回归</h5><p>其实在上面的例子中已经使用了<code>fit</code>进行回归计算了，使用的方法也是相当的简单。</p><ul><li><code>fit(X,y,sample_weight=None)</code>：<code>X</code>,<code>y</code>以矩阵的方式传入，而<code>sample_weight</code>则是每条测试数据的权重，同样以<code>array</code>格式传入。</li><li><code>predict(X)</code>：预测方法，将返回预测值<code>y_pred</code></li><li><code>score(X,y,sample_weight=None)</code>：评分函数，将返回一个小于1的得分，可能会小于0</li></ul><h5 id="方程"><a href="#方程" class="headerlink" title="方程"></a>方程</h5><p><code>LinearRegression</code>将方程分为两个部分存放，<code>coef_</code>存放回归系数，<code>intercept_</code>则存放截距，因此要查看方程，就是查看这两个变量的取值。</p><h4 id="多项式回归"><a href="#多项式回归" class="headerlink" title="多项式回归"></a>多项式回归</h4><p>其实，多项式就是多元回归的一个变种，只不过是原来需要传入的是X向量，而多项式则只要一个x值就行。通过将x扩展为指定阶数的向量，就可以使用<code>LinearRegression</code>进行回归了。sklearn已经提供了扩展的方法——<code>sklearn.preprocessing.PolynomialFeatures</code>。利用这个类可以轻松的将x扩展为X向量，下面是它的使用方法：</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; from sklearn.preprocessing import PolynomialFeatures</span><br><span class="line">&gt;&gt;&gt; X_train = [[1],[2],[3],[4]]</span><br><span class="line">&gt;&gt;&gt; quadratic_featurizer = PolynomialFeatures(degree=2)</span><br><span class="line">&gt;&gt;&gt; X_train_quadratic = quadratic_featurizer.fit_transform(X_train)</span><br><span class="line">&gt;&gt;&gt; print(X_train_quadratic)</span><br><span class="line">[[ 1  1  1]</span><br><span class="line"> [ 1  2  4]</span><br><span class="line"> [ 1  3  9]</span><br><span class="line"> [ 1  4 16]]</span><br></pre></td></tr></table></figure><p>经过以上处理，就可以使用<code>LinearRegression</code>进行回归计算了。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 机器学习 </category>
+          
+          <category> 机器学习 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> sklearn </tag>
+            
+            <tag> 线型回归 </tag>
             
         </tags>
       

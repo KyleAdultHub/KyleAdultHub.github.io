@@ -154,6 +154,125 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-10.机器学习/深度学习/keras构建简单神经网络" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/11/11/10.机器学习/深度学习/keras构建简单神经网络/">keras构建简单神经网络</a>
+    </h1>
+  
+
+        
+        <a href="/2018/11/11/10.机器学习/深度学习/keras构建简单神经网络/" class="archive-article-date">
+  	<time datetime="2018-11-11T07:35:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-11-11</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="Keras-构建神经网络"><a href="#Keras-构建神经网络" class="headerlink" title="Keras 构建神经网络"></a>Keras 构建神经网络</h3><p>该示例的一般流程是首先加载数据，然后定义网络，最后训练网络。</p>
+<p>要使用 Keras，你需要知道以下几个核心概念。</p>
+<h4 id="创建神经网络序列模型"><a href="#创建神经网络序列模型" class="headerlink" title="创建神经网络序列模型"></a>创建神经网络序列模型</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> keras.models <span class="keyword">import</span> Sequential</span><br><span class="line">   <span class="comment"># Create the Sequential model</span></span><br><span class="line">   model = Sequential()</span><br></pre></td></tr></table></figure>
+<p><a href="https://link.jianshu.com?t=https%3A%2F%2Fkeras.io%2Fmodels%2Fsequential%2F" target="_blank" rel="noopener">keras.models.Sequential</a> 类是神经网络模型的封装容器。它会提供常见的函数，例如 <code>fit()</code>、<code>evaluate()</code> 和 <code>compile()</code>。我们将介绍这些函数（在碰到这些函数的时候）。我们开始研究模型的层级吧。</p>
+<h4 id="层级"><a href="#层级" class="headerlink" title="层级"></a>层级</h4><p>Keras 层级就像神经网络层级。有完全连接的层级、最大池化层级和激活层级。你可以使用模型的 add() 函数添加层级。例如，简单的模型可以如下所示：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> keras.models <span class="keyword">import</span> Sequential</span><br><span class="line"><span class="keyword">from</span> keras.layers.core <span class="keyword">import</span> Dense, Activation, Flatten</span><br><span class="line">    <span class="comment">#创建序列模型</span></span><br><span class="line">    model = Sequential()</span><br><span class="line">    <span class="comment">#第一层级 - 添加有 32 个节点的输入层</span></span><br><span class="line">    model.add(Dense, input_dim=<span class="number">32</span>)</span><br><span class="line">    <span class="comment">#第二层级 - 添加有 128 个节点的完全连接层级</span></span><br><span class="line">    model.add(Dense(<span class="number">128</span>))</span><br><span class="line">    <span class="comment">#第三层级 - 添加 softmax 激活层级</span></span><br><span class="line">    model.add(Activation(<span class="string">'softmax'</span>))</span><br><span class="line">    <span class="comment">#第四层级 - 添加完全连接的层级</span></span><br><span class="line">    model.add(Dense(<span class="number">10</span>))</span><br><span class="line">    <span class="comment">#第五层级 - 添加 Sigmoid 激活层级</span></span><br><span class="line">    model.add(Activation(<span class="string">'sigmoid'</span>))</span><br></pre></td></tr></table></figure>
+<p>Keras 将根据第一层级自动推断后续所有层级的形状。这意味着，你只需为第一层级设置输入维度。</p>
+<p>上面的第一层级 model.add(Flatten(input_dim=32)) 将维度设为 32（表示数据来自 32 维空间）。第二层级获取第一层级的输出，并将输出维度设为 128 个节点。这种将输出传递给下一层级的链继续下去，直到最后一个层级（即模型的输出）。可以看出输出维度是 10。</p>
+<h4 id="模型编译和训练"><a href="#模型编译和训练" class="headerlink" title="模型编译和训练"></a>模型编译和训练</h4><p>构建好模型后，我们就可以用以下命令对其进行编译。我们将损失函数指定为我们一直处理的 categorical_crossentropy。我们还可以指定优化程序，暂时将使用 adam。最后，我们可以指定评估模型用到的指标。我们将使用准确率。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">model.compile(loss=&quot;categorical_crossentropy&quot;, optimizer=&quot;adam&quot;, metrics = [&apos;accuracy&apos;])</span><br></pre></td></tr></table></figure>
+<p>我们可以使用以下命令来查看模型架构：</p>
+<p><code>model.summary()</code><br> 然后使用以下命令对其进行拟合，指定 epoch 次数和我们希望在屏幕上显示的信息详细程度。</p>
+<p><code>model.fit(X, y, nb_epoch=1000, verbose=0)</code><br> 注意：在 Keras 1 中，nb_epoch 会设置 epoch 次数，但是在 Keras 2 中，变成了 epochs。</p>
+<p>最后，我们可以使用以下命令来评估模型：<br> <code>model.evaluate()</code><br> 很简单，对吧？我们实践操作下。</p>
+<h3 id="练习"><a href="#练习" class="headerlink" title="练习"></a>练习</h3><p>我们从最简单的示例开始。在此测验中，你将构建一个简单的多层前向反馈神经网络以解决 XOR 问题。</p>
+<ol>
+<li>将第一层级设为 <code>Flatten()</code> 层级，并将 <code>input_dim</code> 设为 2。</li>
+<li>将第二层级设为 <code>Dense()</code> 层级，并将输出宽度设为 8。</li>
+<li>在第二层级之后使用 softmax 激活函数。</li>
+<li>将输出层级宽度设为 2，因为输出只有 2 个类别。</li>
+<li>在输出层级之后使用 softmax 激活函数。</li>
+<li>对模型运行 10 个 epoch。</li>
+</ol>
+<p>准确度应该为 50%。可以接受，当然肯定不是太理想！在 4 个点中，只有 2 个点分类正确？我们试着修改某些参数，以改变这一状况。例如，你可以增加 epoch 次数。如果准确率达到 75%，你将通过这道测验。能尝试达到 100% 吗？</p>
+<p>首先，查看关于模型和层级的 Keras 文档。 Keras <a href="https://link.jianshu.com?t=https%3A%2F%2Fgithub.com%2Ffchollet%2Fkeras%2Fblob%2Fmaster%2Fexamples%2Fmnist_mlp.py" target="_blank" rel="noopener">多层感知器</a>网络示例和你要构建的类似。请将该示例当做指南，但是注意有很多不同之处。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> keras.utils <span class="keyword">import</span> np_utils</span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line">tf.python.control_flow_ops = tf</span><br><span class="line"></span><br><span class="line"><span class="comment"># Set random seed</span></span><br><span class="line">np.random.seed(<span class="number">42</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Our data</span></span><br><span class="line">X = np.array([[<span class="number">0</span>,<span class="number">0</span>],[<span class="number">0</span>,<span class="number">1</span>],[<span class="number">1</span>,<span class="number">0</span>],[<span class="number">1</span>,<span class="number">1</span>]]).astype(<span class="string">'float32'</span>)</span><br><span class="line">y = np.array([[<span class="number">0</span>],[<span class="number">1</span>],[<span class="number">1</span>],[<span class="number">0</span>]]).astype(<span class="string">'float32'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Initial Setup for Keras</span></span><br><span class="line"><span class="keyword">from</span> keras.models <span class="keyword">import</span> Sequential</span><br><span class="line"><span class="keyword">from</span> keras.layers.core <span class="keyword">import</span> Dense, Activation, Flatten</span><br><span class="line"></span><br><span class="line"><span class="comment"># One-hot encoding the output</span></span><br><span class="line">y = np_utils.to_categorical(y)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Building the model</span></span><br><span class="line">xor = Sequential()</span><br><span class="line">xor.add(Dense(<span class="number">32</span>, input_dim=<span class="number">2</span>))</span><br><span class="line">xor.add(Activation(<span class="string">"sigmoid"</span>))</span><br><span class="line">xor.add(Dense(<span class="number">2</span>))</span><br><span class="line">xor.add(Activation(<span class="string">"sigmoid"</span>))</span><br><span class="line"></span><br><span class="line">xor.compile(loss=<span class="string">"categorical_crossentropy"</span>, optimizer=<span class="string">"adam"</span>, metrics = [<span class="string">'accuracy'</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># Uncomment this line to print the model architecture</span></span><br><span class="line"><span class="comment"># xor.summary()</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Fitting the model</span></span><br><span class="line">history = xor.fit(X, y, nb_epoch=<span class="number">100</span>, verbose=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Scoring the model</span></span><br><span class="line">score = xor.evaluate(X, y)</span><br><span class="line">print(<span class="string">"\nAccuracy: "</span>, score[<span class="number">-1</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># Checking the predictions</span></span><br><span class="line">print(<span class="string">"\nPredictions:"</span>)</span><br><span class="line">print(xor.predict_proba(X))</span><br></pre></td></tr></table></figure>
+<p>结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Using TensorFlow backend.</span><br><span class="line">4/4 [==============================] - 0s</span><br><span class="line">Accuracy:  0.75</span><br><span class="line">Predictions:</span><br><span class="line">4/4 [==============================] - 0s</span><br><span class="line">[[0.6914389  0.6965836 ]</span><br><span class="line"> [0.7073754  0.7086655 ]</span><br><span class="line"> [0.6919555  0.68419015]</span><br><span class="line"> [0.70766294 0.6967294 ]]</span><br></pre></td></tr></table></figure>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">神经网络</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">keras</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/机器学习//" class="article-tag-list-link color5">机器学习</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/机器学习/深度学习//" class="article-tag-list-link color5">深度学习</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/11/11/10.机器学习/深度学习/keras构建简单神经网络/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
     <article id="post-10.机器学习/基础内容/神经网络" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -992,58 +1111,6 @@ def __init__(self, *args, **kwargs):
 
 
   
-    <article id="post-4.python爬虫/scrapy框架/Scrapy框架介绍" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>scrapy框架介绍<br>scrapy框架的介绍<br>什么是scrapy框架<br>Scrapy是一个为了爬取网站数据，提取结构性数据而编写的应用框架，我们只需要实现少量的代码，就能够快速的抓取<br>Scrapy 使用了 Twisted[‘twɪstɪd]异步网络框架，可以加快我们的下载速度和数据在模块中间的转载速度。<br><a href="http://scrapy-chs.readthedocs.io/zh_CN/1.0/intro/overview.html" target="_blank" rel="noopener">http://scrapy-chs.readthedocs.io/zh_CN/1.0/intro/overview.html</a><br>异步和非阻塞的概念<br>非阻塞<br>关注的是程序在等待调用结果（消息，返回值）时的状态，指在不能立刻得到结果之前，该调用不会阻塞当前线程。<br>异步<br>如果整个程序没有中介的等待过程，我们就说整个过程是一个异步的过程<br>多线程爬取数据的流程</p>
-<p>scrapy的爬虫流程</p>
-<p>scrapy框架各模块功能</p>
-<p>创建爬虫项目（命令）<br>创建项目<br>命令<br>scrapy startproject +&lt;项目名字&gt;<br>创建后项目目录结构</p>
-<p>创建爬虫<br>命令<br>scrapy genspider  +&lt;爬虫名字&gt; + &lt;允许爬取的域名&gt;          生成普通的spider爬虫<br>scrapy genspider -t crawl &lt;爬虫名字&gt;  &lt;允许爬取的域名&gt;        生成crawl_Spider爬虫<br>示例：<br>scrapy genspider itcast “itcast.cn”<br>爬虫应用创建的位置</p>
-<p>启动爬虫应用<br>命令<br>scrapy crawl 爬虫名   执行单个爬虫<br>-o: 将爬虫的item输出存储到文件中.<br>quotes.jl : 将每一个item输出为一行的jsonline<br>quotes.csv: 将每一个item输出为每一行的csv格式文件<br>quotes.pickle: 存储为二进制文件<br>Scrapy–scrapy shell<br>什么是scrapy shell<br>Scrapy shell是一个交互终端，我们可以在未启动spider的情况下尝试及调试代码，也可以用来测试XPath表达式<br>查看实例属性/方法<br>在scrapy shell中查看<br>进行请求<br>scrapy shell ‘url’   对url地址进行请求获取响应<br>查看请求的属性<br>可使用任意scrapy实例 + TAB查看实例有哪些属性或者方法<br>response.url：当前响应的url地址<br>response.request.url：当前响应对应的请求的url地址<br>response.headers：响应头<br>response.body：响应体，也就是html代码，默认是byte类型<br>response.requests.headers：当前响应的请求头<br>response.meta: 下载延迟，请求深度等信息<br>response.xpath(***).extract()    验证xpath的正确性<br>在程序中<br>print（dir（实例对象））  查看实例对象的所有属性和方法</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/18/4.python爬虫/scrapy框架/Scrapy框架介绍/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -1199,6 +1266,10 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">神经网络</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">keras</a>
               </li>
             
             <div class="clearfix"></div>

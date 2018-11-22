@@ -154,80 +154,6 @@
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-4.python爬虫/scrapy框架/数据格式化输出" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>数据格式化输出<br>自动格式化输出文件<br>scrapy支持的格式化输出文件格式<br>json<br>jsonlines<br>csv<br>xml<br>通过配置setting中属性，来定义存储方式<br>FEED_URI   存储路径，必须配置，如果不配置，需要在启动时候指定路径<br>示例：file://tmp/export.csv<br>备注：<br>路径的名称可以格式化，例如：</p>
-<p>FEED_FORMAT   用于序列化输出的文件格式，就是上面的几种<br>FEED_EXPORT_ENCODING   文件编码格式，一般默认utf-8，json默认是安全编码格式<br>FEED_EXPORT_FIELDS    定义输出文件中包含的字段，为列表格式<br>FEED_EXPORT_INDENT    定义输出内容的缩进，默认为0,<br>0和负数表示内容会放在一行上<br>None会选择最紧凑的方式，将数据进行摆放<br>其他，将会按照指定的缩进，对对象的成员进行格式化显示<br>FEED_STORE_EMPTY     如果没输出是否会导出文件，默认为False<br>FEED_STORAGES_BASE    字典类型，包含所有支持存储方式模板引擎， 一般不需要手动配置<br>默认为</p>
-<p>FEED_STORAGES     一个字典类型，可以手动添加存储方式的模板引擎<br>默认为 { }<br>如果想要禁用某一个模板文件类型的引擎，可以将上面对应字段值设置为None<br>FEED_EXPORTERS_BASE    字典类型，包含了所有支持的格式文件处理引擎， 一般不需要手动配置<br>默认为</p>
-<p>FEED_EXPORTERS      一个字典类型，可以手动添加文件处理引擎<br>默认为{ }<br>如果想要禁用某一个模板文件类型的引擎，可以将上面对应字段值设置为None<br>scrapy手动输出指定csv格式文件<br>目标：<br>获取如下格式的csv文件<br>配置的步骤</p>
-<ol>
-<li><p>在scrapy的spiders同层目录，新建my_project_csv_item_exporter.py文件内容如下（文件名可改，目录定死）<br>   ​    from scrapy.conf import settings<br>   ​    from scrapy.contrib.exporter import CsvItemExporter</p>
-<pre><code>class MyProjectCsvItemExporter(CsvItemExporter):
-
-def __init__(self, *args, **kwargs):
-    delimiter = settings.get(&apos;CSV_DELIMITER&apos;, &apos;,&apos;)
-    kwargs[&apos;delimiter&apos;] = delimiter
-
-    fields_to_export = settings.get(&apos;FIELDS_TO_EXPORT&apos;, [])
-    if fields_to_export :
-        kwargs[&apos;fields_to_export&apos;] = fields_to_export
-
-    super(MyProjectCsvItemExporter, self).__init__(*args, **kwargs)
-</code></pre></li>
-<li><p>在同层目录，settings.py文件新增如下内容（指定item,field顺序）<br>   ​    FEED_EXPORTERS = {<br>   ​        ‘csv’: ‘my_project.my_project_csv_item_exporter.MyProjectCsvItemExporter’,<br>   ​    } #这里假设你的project名字为my_project</p>
-<pre><code>FIELDS_TO_EXPORT = [
-    &apos;id&apos;,
-    &apos;name&apos;,
-    &apos;email&apos;,
-    &apos;address&apos;
-</code></pre></li>
-<li><p>在同层目录，settings.py文件指定分隔符<br>CSV_DELIMITER = “\t”<br>4.启动项目<br>全部设定完后，执行scrapy crawl spider -o spider.csv的时候，字段就按顺序来了。</p>
-</li>
-</ol>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/18/4.python爬虫/scrapy框架/数据格式化输出/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-  
     <article id="post-4.python爬虫/scrapy框架/Scrapy框架介绍" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -786,6 +712,76 @@ def parse_page(self, response):
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2018/10/18/4.python爬虫/scrapy框架/Gerapy的介绍/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+    <article id="post-4.python爬虫/爬虫基础/网络爬虫介绍" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>爬虫的介绍<br>爬虫的定义<br>  模拟浏览器其发送请求，获取到和浏览器一模一样的数据<br>  浏览器能够看到的，我们爬虫才能够获取到，否则是没有办法获取到的，所以，只要浏览器能做的事情，原则上，爬虫都能做<br>爬虫获取的数据的用途<br>呈现数据，呈现在app或者在网站上<br>伪造网站请求，进行自动的访问网站<br>进行数据分析，获得结论<br>爬虫的分类<br>通用爬虫：<br>搜索引擎的爬虫，通常指搜索引擎的爬虫，通用网络爬虫利用种子url从互联网中搜集网页，采集信息，这些网页信息用于为搜索引擎建立索引从而提供支持，它决定着整个引擎系统的内容是否丰富，信息是否即时，因此其性能的优劣直接影响着搜索引擎的效果。<br>聚焦爬虫：<br>针对特定网站的爬虫，指定url进行爬取，有明确的爬取目标<br>通用爬虫工作原理<br>第一步：数据抓取<br>首先选取一部分的种子URL，将这些URL放入待抓取URL队列；<br>取出待抓取URL，解析DNS得到主机的IP，并将URL对应的网页下载下来，存储进已下载网页库中，并且将这些URL放进已抓取URL队列。<br>分析已抓取URL队列中的URL，分析其中的其他URL，并且将URL放入待抓取URL队列，从而进入下一个循环….<br>第二步：数据存储<br>搜索引擎通过爬虫爬取到的网页，将数据存入原始页面数据库。其中的页面数据与用户浏览器得到的HTML是完全一样的。<br>搜索引擎蜘蛛在抓取页面时，也做一定的重复内容检测，一旦遇到访问权重很低的网站上有大量抄袭、采集或者复制的内容，很可能就不再爬行。<br>第三步：预处理<br>搜索引擎将爬虫抓取回来的页面，进行各种步骤的预处理。<br>提取文字<br>中文分词<br>消除噪音（比如版权声明文字、导航条、广告等……）<br>索引处理<br>链接关系计算<br>特殊文件处理<br>第四步：提供检索服务，网站排名<br>搜索引擎在对信息进行组织和处理后，为用户提供关键字检索服务，将用户检索相关的信息展示给用户。<br>同时会根据页面的PageRank值（链接的访问量排名）来进行网站排名，这样Rank值高的网站在搜索结果中会排名较前，当然也可以直接使用 Money 购买搜索引擎网站排名，简单粗暴。<br>通用爬虫的局限性<br>通用搜索引擎所返回的网页里90%的内容无用。<br>图片、音频、视频多媒体的内容通用搜索引擎无能为力<br>不同用户搜索的目的不全相同，但是返回内容相同<br>聚焦爬虫的工作流程</p>
+<p>爬虫爬取哪些数据<br>教育机构：其他教育机构的开班，招生，就业，口碑<br>资讯公司：特定领域的新闻数据的爬虫<br>金融公司：关于各个公司的动态的信息，<br>酒店/旅游：携程，去哪儿的酒店价格信息/机票，景点价格，其他旅游公司价格信息<br>房地产、高铁：10大房地产楼盘门户网站，政府动态等<br>强生保健医药：医疗数据，价格，目前的市场的行情<br>Robots协议：<br>网站通过Robots协议告诉搜索引擎哪些页面可以抓取，哪些页面不能抓取。<br>这个协议之是道德层面的协议，这个协议并不能从技术上阻止去对其网站进行爬取。<br>例如：<a href="https://www.taobao.com/robots.txt" target="_blank" rel="noopener">https://www.taobao.com/robots.txt</a><br>HTTP/HTTPS协议<br>url的形式<br>url表现形式：scheme://host[:port#]/path/…/[?query-string][#anchor]<br>scheme：协议(例如：http, https, ftp)<br>host：服务器的IP地址或者域名<br>port：服务器的端口（如果是走协议默认端口，80  or    443）<br>path：访问资源的路径<br>query-string：参数，发送给http服务器的数据<br>anchor：锚（跳转到网页的指定锚点位置）<br>示例：<a href="http://localhost:4000/file/part01/1.2.htmlhttp://item.jd.com/11936238.html#product-detail" target="_blank" rel="noopener">http://localhost:4000/file/part01/1.2.htmlhttp://item.jd.com/11936238.html#product-detail</a><br>HTTP/HTTPS的区别<br>HTTP<br>超文本传输协议<br>默认端口号:80<br>HTTPS<br>HTTP + SSL(安全套接字层)<br>默认端口号：443<br>HTTP和HTTPS区别<br>浏览器默认请求服务器是以HTTP协议进行请求，如果服务器支持HTTPS协议，会返回给浏览器端一个协议相关的响应，浏览器会重新发起HTTPS协议的请求；</p>
+<p>HTTP请求报文的形式</p>
+<p>http的请求过程<br>域名—&gt;dns（拿ip）—&gt;浏览器请求ip—&gt;服务器—&gt;返回资源<br>HTTP常见的请求头</p>
+<ol>
+<li>Host (主机和端口号)<br>对应网址URL中的Web名称和端口号，用于指定被请求资源的Internet主机和端口号，通常属于URL的Host部分</li>
+<li>Connection (链接类型)<br>keep-alive  客户端携带表示支持长连接<br>keep-alive  服务器端如果回复keep-alive， 代表允许双方建立长连接<br>close： 服务器端回复close，代表不允许建立长连接，浏览器接收到响应后会主动断开连接</li>
+<li>Upgrade-Insecure-Requests (浏览器支持升级为HTTPS请求)<br>升级不安全的请求，意思是会在加载 http 资源时自动替换成 https 请求，让浏览器不再显示https页面中的http请求警报。</li>
+<li>User-Agent (浏览器名称)<br>对方的服务器通过User-Agent判断出来我们是一个手机版的浏览器还是电脑版的，同时能够判断出来浏览器的平台，型号，版本，内核版本</li>
+<li>Accept (传输文件类型)<br>Accept: <em>/</em>：表示什么都可以接收。<br>Accept：image/gif：表明客户端希望接受GIF图像格式的资源；<br>Accept：text/html：表明客户端希望接受html文本。<br>Accept: text/html, application/xhtml+xml;q=0.9, image/*;q=0.8：表示浏览器支持的 MIME 类型分别是 html文本、xhtml和xml文档、所有的图像格式资源。<br>q是权重系数，范围 0 =&lt; q &lt;= 1，q 值越大，请求越倾向于获得其“;”之前的类型表示的内容。若没有指定q值，则默认为1，按从左到右排序顺序；若被赋值为0，则用于表示浏览器不接受此内容类型。<br>text：用于标准化地表示的文本信息，文本消息可以是多种字符集和或者多种格式的；<br>application用于传输应用程序数据或者二进制数据。</li>
+<li>Referer (页面跳转处)<br>表明产生请求的网页来自于哪个URL，用户是从该 Referer页面访问到当前请求的页面。这个属性可以用来跟踪Web请求来自哪个页面，是从什么网站来的等。<br>防盗链：有时候遇到下载某网站图片，需要对应的referer，否则无法下载图片，那是因为人家做了防盗链，原理就是根据referer去判断是否是本网站的地址，如果不是，则拒绝，如果是，就可以下载。</li>
+<li>Accept-Encoding（文件编解码格式）<br>指出浏览器可以接受的编码方式。编码方式不同于文件格式，它是为了压缩文件并加速文件传递速度。浏览器在接收到Web响应之后先解码，然后再检查文件格式，许多情形下这可以减少大量的下载时间。<br>举例：Accept-Encoding:gzip;q=1.0, identity; q=0.5, *;q=0</li>
+<li>Cookie （Cookie）<br>cookies 能够记录用户信息，会在请求的时候一起传递给对方的服务器，对方的服务器能够根据cookie判断出来是否登陆过（用户的状态）</li>
+<li>x-requested-with :XMLHttpRequest  (是Ajax 异步请求)<br>10.Accept-Language   (接受语言)<br>指出浏览器可以接受的语言种类，如en或en-us指英语，zh或者zh-cn指中文，当服务器能够提供一种以上的语言版本时要用到。<br>11.Accept-Charset（字符编码）<br>指出浏览器可以接受的字符编码。<br>举例：Accept-Charset:iso-8859-1,gb2312,utf-8<br>12.Content-Type (POST数据类型)<br>Content-Type：POST请求里用来表示的内容类型。<br>举例：Content-Type = Text/XML; charset=gb2312：<br>0.请求体<br>常见的请求方法<br>GET<br>特点：请求所带参数包含在url中，显示在地址栏，请求数据可以被缓存，请求参数有长度限制，请求速度快<br>POST<br>特点：请求所带参数在请求体中，请求数据不可以被缓存，请求数据没有长度限制，请求速度慢<br>常用的响应报头</li>
+<li>Cache-Control：must-revalidate, no-cache, private。<br>告诉客户端，对资源的缓存建议；</li>
+<li>Connection：keep-alive<br>作为回应客户端的Connection：keep-alive，告诉客户端是否同意建立长连接；</li>
+<li>Content-Encoding:gzip<br>告诉客户端，服务端发送的资源是采用gzip编码的；</li>
+<li>Content-Type：text/html;charset=UTF-8<br>告诉客户端，资源文件的类型，还有字符编码；</li>
+<li>Date：Sun, 21 Sep 2016 06:18:21 GMT<br>这个是服务端发送资源时的服务器时间，GMT是格林尼治所在地的标准时间。</li>
+<li>Expires:Sun, 1 Jan 2000 01:00:00 GMT<br>告诉客户端在这个时间前，缓存的到期时间</li>
+<li>Pragma:no-cache<br>这个含义与Cache-Control等同。<br>8.Server：Tengine/1.4.6<br>这个是服务器和相对应的版本，只是告诉客户端服务器的信息。</li>
+<li>Transfer-Encoding：chunked<br>这个响应头告诉客户端，服务器发送的资源的方式是分块发送的。<br>HTTP常见响应状态码<br>100~199：表示服务器成功接收部分请求，要求客户端继续提交其余请求才能完成整个处理过程。<br>200：表示服务器成功接收请求并已完成整个处理过程<br>200~299：表示服务器成功接收请求并已完成整个处理过程。常用200（OK 请求成功）。<br>302：临时转移至新的url<br>300~399表示请求转<br>307：临时转移至新的url<br>404：not found<br>400~499：客户端的请求有错误，常用404（服务器无法找到被请求的页面）、403（服务器拒绝访问，权限不够）。<br>500：服务器内部错误<br>为什么浏览器渲染出来的页面和爬虫请求的页面不一样<br>爬虫请求结果<br>爬虫只会请求当前url地址，不会主动请求js，所以往往当前URL对应的响应和element的内容不一样<br>浏览器<br>浏览器请求服务器渲染出来的界面，以及最终的在终端element显示的内容，和爬虫爬取到的不一样，因为浏览器会对页面中的静态文件的url进行请求，将请求结果渲染到浏览器中，导致最终的网页代码和显示的结果，已经是被js文件进行修改过；<br>在哪里查看当前url地址对应的响应（不包括对静态文件请求的响应）：<br>抓包（network），network下的第一个url地址，当前url地址的response<br>右键显示网页源码</li>
+</ol>
+<p>字符串和字节（str/ bytes）<br>python3 字符串应用的字符集<br>str ：unicode的呈现形式（python3应用的unicode的子集utf-8的形式对字符串进行呈现）<br>bytes：二进制互联网上数据的都是以二进制的方式传输的，bytes是二进制格式的字符串<br>对服务器的请求，要将请求数据先转化为bytes格式；<br>获取到服务器的响应要将获取到的bytes类型的数据，进行字符串的转化<br>Unicode/UTF8/ASCII字符集的介绍<br>字符(Character)<br>各种文字和符号的总称，包括各国家文字、标点符号、图形符号、数字等<br>字符集(Character set)<br>多个字符的集合字符集包括：<br>ASCII字符集、GB2312字符集、GB18030字符集、Unicode字符集<br>ASCII编码是1个字节，而Unicode编码通常是2个字节，UTF-8是Unicode的实现方式之一，它是一种变长的编码方式，可以是1，2，3个字节（一句字符的内容而定）<br>str到bytes之间的转化（str、bytes）<br>python3中字节和字符之间转化的方法<br>从str—&gt; bytes：str使用encode方法转化为 bytes<br>从bytes—&gt; str：bytes通过decode转化为str<br>注意：<br>编码方式解码方式必须一样，否则就会出现乱码</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/18/4.python爬虫/爬虫基础/网络爬虫介绍/">展开全文 >></a>
         </p>
       
 

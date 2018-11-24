@@ -154,6 +154,53 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-4.python爬虫/爬虫常见反反爬/ADSL代理服务器搭建&amp;代理池" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>ADSL代理服务器搭建&amp;代理池<br>ADSL的介绍和使用<br>什么是ADSL<br>ADSL全称叫做Asymmetric Digital Subscriber Line，非对称数字用户环路，因为它的上行和下行带宽不对称。<br>它采用频分复用技术把普通的电话线分成了电话、上行和下行三个相对独立的信道，从而避免了相互之间的干扰。<br>有种主机叫做动态拨号VPS主机，这种主机在连接上网的时候是需要拨号的，只有拨号成功后才可以上网；<br>每拨一次号，主机就会获取一个新的IP，也就是它的IP并不是固定的，而且IP量特别大，几乎不会拨到相同的IP，如果我们用它来搭建代理，既能保证高度可用，又可以自由控制拨号切换。<br>连接ADSL服务器(推荐云代理)<br>ssh <a href="mailto:root@153.36.65.214" target="_blank" rel="noopener">root@153.36.65.214</a> -p 20063<br>ADSL服务器的使用<br>拨号初始化<br>进入之后，可以发现有一个可用的脚本文件，叫做ppp.sh，这是拨号初始化的脚本，运行它会让我们输入拨号的用户名和密码，然后它就会开始各种拨号配置，一次配置成功；<br>后面的拨号就不需要重复输入用户名和密码了；<br>都提示成功之后就可以进行拨号了。<br>拨号命令<br>adsl-start<br>停止拨号<br>adsl-stop<br>断线重播<br>先执行adsl-stop再执行adsl-start<br>将ADSL服务器设置为代理服务器<br>使用的工具<br>在Linux下搭建HTTP代理服务器，推荐TinyProxy和Squid，配置都非常简单，在这里我们以TinyProxy为例来讲解一下怎样搭建代理服务器。<br>配置步骤<br>安装TinyProxy<br>yum install -y epel-release<br>yum update -y<br>yum install -y tinyproxy<br>配置TinyProxy<br>vi /etc/tinyproxy/tinyproxy.conf<br>修改如下行<br>Port 8888      代理的端口<br>Allow 127.0.0.1     允许连接的主机，默认只允许本机连接，可以注释掉，允许所有主机连接<br>重启tinyproxy<br>service tinyproxy start<br>测试(在其他主机上操作)<br>curl -x 112.84.118.216:8888 httpbin.org/get<br>查看请求结果是不是设置的代理ip<br>动态获取IP<br>怎么动态获取ip<br>DDNS动态域名解析<br>我们需要使用一个域名来解析，也就是虽然IP是变的，但域名解析的地址可以随着IP的变化而变化。<br>它的原理其实是拨号主机向固定的服务器发出请求，服务器获取客户端的IP，然后再将域名解析到这个IP上就可以了。<br>国内比较有名的服务就是花生壳了，也提供了免费版的动态域名解析，另外DNSPOD也提供了解析接口来动态修改域名解析设置，DNSPOD，但是这样的方式都有一个通病，那就是慢！<br>自己配置ADSL代理池<br>所以根据花生壳的原理，可以完全自己实现一下动态获取IP的方法。<br>要实现这个需要两台主机，一台主机就是这台动态拨号VPS主机，另一台是具有固定公网IP的主机。<br>动态VPS主机拨号成功之后就请求远程的固定主机，远程主机获取动态VPS主机的IP，就可以得到这个代理，将代理保存下来，这样拨号主机每拨号一次，远程主机就会及时得到拨号主机的IP，如果有多台拨号VPS，也统一发送到远程主机，这样我们只需要从远程主机取下代理就好了，保准是实时可用，稳定高效的。<br>ADSL代理池远程主机和ADSL拨号服务器的功能划分<br>远程主机<br>监听主机请求，获取动态VPS主机IP<br>将VPS主机IP记录下来存入数据库，支持多个客户端<br>检测当前接收到的IP可用情况，如果不可用则删除<br>提供API接口，通过API接口可获取当前可用代理IP<br>ADSL拨号服务器<br>定时执行拨号脚本换IP<br>换IP后立即请求远程主机<br>拨号后检测是否拨号成功，如果失败立即重新拨号<br>远程主机实现<br>存储模块<br>功能设计<br>远程主机作为一台服务器，动态拨号VPS会定时请求远程主机，远程主机接收到请求后将IP记录下来存入数据库。<br>因为IP是一直在变化的，IP更新了之后，原来的IP就不能用了，所以对于一个主机来说我们可能需要多次更新一条数据。<br>另外我们不能仅限于维护一台拨号VPS主机，当然是需要支持多台维护的。在这里我们直接选用Key-Value形式的非关系型数据库存储更加方便，所以在此选用Redis数据库。<br>使用redis的Hash类型存储方式，Key就是拨号主机的名称，可以自己指定，Value就是代理的值。<br>接口模块<br>功能设计<br>使用Tornado来实现<br>实现random随机获取一个可用的动态代理功能<br>实现count获取代理池中的代理个数<br>ADSL拨号服务器实现<br>拨号模块<br>功能设计<br>定时拨号，每隔一段时间拨号一次，更新ip<br>更新前先清除远程主机数据库中的当前ip<br>更新后请求远程主机，将新的ip更新到redis散列里<br>示例代码<br>AdslProxy.zip</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/18/4.python爬虫/爬虫常见反反爬/ADSL代理服务器搭建&代理池/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
     <article id="post-20.开发工具/博客/github+hexo博客搭建" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -592,6 +639,14 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">keras</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">设计过程</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">模型评估</a>
               </li>
             
             <div class="clearfix"></div>

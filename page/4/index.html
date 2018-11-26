@@ -154,6 +154,82 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-4.python爬虫/爬虫扩展功能/数据去重方法-HashBloom" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>hash序列化过滤<br>使用hash哈希方法去重的场景<br>当数据量不大的时候，并且数据所占内存不多的时候<br>当只有几万条url去重的时候，可以直接使用hash+redis的set类型进行数据的去重<br>使用sha1-redis去重的实例<br>​        import hashlib<br>​        import redis<br>​        from redis import *</p>
+<pre><code>class Filter_hash(object):
+    # 创建redis客户端对象
+    sr = StrictRedis(host=&apos;localhost&apos;, port=6379, db=0)
+    # 定义存储hash后数据的key_name     
+    key = &apos;hash_list&apos;        
+
+    def add_hash_num(self, key_name，url):
+            # 创建一个哈希对象
+            fp = hashlib.sha1()
+            # 对url进行哈希序列化
+            fp.update(url)
+            fp_num = fp.hexdiget()
+            # 将十六进制后的序列化的hash数值进行存储
+            added = self.server.sadd(self.key, fp_num)
+            return   added   # 如果插入成功， 返回1，表示数据不重复插入成功，否则返回0
+
+            filter_cur = Filter_hash()
+
+if __name__ == &apos;__main__&apos;:
+      filter_cur.add_hash_num(&apos;url&apos;， &apos;https://www.baidu.com&apos;)
+</code></pre><p>bloom-布隆过滤<br>什么是布隆过滤器<br>是一种space efficient的概率模型数据结构，用于判断一个元素是否在集合中。<br>一个空的布隆过滤器是一个m bit的bitmap，每一位都初始化为0。布隆过滤器定义有k个hash函数，对输入的数据生成k个hash值，定义一个map函数将k个hash值映射到bitmap的k个位。<br>bitmap数据类型<br>bitmap介绍<br>Bitmap不是一个确切的数据类型，而是基于String类型定义的一系列面向位操作的方法。因为String是二进制安全的并且它们的最大长度是512MB， 所以String类型很合适去作为一个2^32长度的位数组。<br>位操作方法可以被分为两组：<br>一、对单一位的操作，比如设置某一位为1或0，或者得到这一位的值；<br>二、对一组位的操作，比方说计算一定范围内的1的个数（比如计数）<br>bitmap的应用场景<br>bitmap一个最大的优势是它通常能在存储信息的时候节省大量空间。比方说一个用增量ID来辨别用户的系统，可以用仅仅512MB的空间来标识40亿个用户是否想要接受通知。<br>使用SETBIT和GETBIT命令来对位进行置数和检索（redis中实现的bitmap类型数据的操作）</p>
+<blockquote>
+<p>setbit key 10 1<br>(integer) 1<br>getbit key 10<br>(integer) 1<br>getbit key 11<br>(integer) 0<br>返回的是该位上之前的数值<br>SETBIT 如上所示，意思是将第10位置位为1，第二个参数可为0或1。如果设置的位超出了当前String的长度，那么会自动增长。（最长2^32，下同）<br>GETBIT 如上所示，返回第10位和第11位的数据，分别是1和0。如果查找的位超出了当前String的长度，那么会返回0。<br>接下来是三个对一组位进行操作的命令:<br>BITOP 执行不同字符串之间的逐位操作。所提供的操作有AND，OR，XOR和NOT。BITCOUNT<br>BITCOUNT 计数,返回bitmap里值为1的位的个数.<br>BITPOS 返回第一个0或1的位置<br>BITPOS和BITCOUNT不仅可以作用于整个bitmap，还可以作用于一定的范围,下面是一个BITCOUNT的例子<br>布隆过滤的原理<br>布隆过滤器需要的是一个位数组(和位图类似)和K个映射函数(和Hash表类似)，在初始状态时，对于长度为m的位数组array，它的所有位被置0　</p>
+</blockquote>
+<p>对于有n个元素的集合S={S1,S2…Sn},通过k个映射函数{f1,f2,……fk}，将集合S中的每个元素Sj(1&lt;=j&lt;=n)映射为K个值{g1,g2…gk}，然后再将位数组array中相对应的array[g1],array[g2]……array[gk]置为1：　</p>
+<p>如果要查找某个元素item是否在S中，则通过映射函数{f1,f2,…fk}得到k个值{g1,g2…gk}，然后再判断array[g1],array[g2]…array[gk]是否都为1，若全为1，则item在S中，否则item不在S中。这个就是布隆过滤器的实现原理。<br>布隆过滤优点<br>相比于其它的数据结构，布隆过滤器在空间和时间方面都有巨大的优势。布隆过滤器存储空间和插入/查询时间都是常数。<br>布隆过滤器不需要存储元素本身，在某些对保密要求非常严格的场合有优势。<br>布隆过滤器可以表示全集，其它任何数据结构都不能；<br>k 和 m 相同，使用同一组 Hash 函数的两个布隆过滤器的交并差运算可以使用位操作进行。<br>缺点<br>误算率（False Positive），随着存入的元素数量增加，错判“在集合内”的概率就越大了，误算率随之增加。<br>一般情况下不能从布隆过滤器中删除元素. 我们很容易想到把位列阵变成整数数组，每插入一个元素相应的计数器加1, 这样删除元素时将计数器减掉就可以了。然而要保证安全的删除元素并非如此简单。首先我们必须保证删除的元素的确在布隆过滤器里面. 这一点单凭这个过滤器是无法保证的。另外计数器回绕也会造成问题。<br>布隆过滤器的应用场景<br>在对大量的数据进行去重的时候， 可以使用布隆过滤器判断元素是否已经在集合中，通过判断的结果，来对数据进行相应的操作<br>布隆过滤实现（包在下方）<br>构造HashMap类<br>这里新建了一个HashMap类。构造函数传入两个值，一个是m位数组的位数，另一个是种子值seed。不同的散列函数需要有不同的seed，这样可以保证不同的散列函数的结果不会碰撞。<br>在hash()方法的实现中，value是要被处理的内容。这里遍历了value的每一位，并利用ord()方法取到每一位的ASCII码值，然后混淆seed进行迭代求和运算，最终得到一个数值。这个数值的结果就由value和seed唯一确定。<br>我们再将这个数值和m进行按位与运算，即可获取到m位数组的映射结果，这样就实现了一个由字符串和seed来确定的散列函数。<br>当m固定时，只要seed值相同，散列函数就是相同的，相同的value必然会映射到相同的位置。<br>所以如果想要构造几个不同的散列函数，只需要改变其seed就好了。以上内容便是一个简易的散列函数的实现。</p>
+<p>构造BloomFilter<br>Bloom Filter里面需要用到k个散列函数，这里要对这几个散列函数指定相同的m值和不同的seed值<br>由于我们需要亿级别的数据的去重，即前文介绍的算法中的n为1亿以上，散列函数的个数k大约取10左右的量级</p>
+<p>实现判断元素是否重复和添加元素到集合的方法<br>insert方法<br>Bloom Filter算法会逐个调用散列函数对放入集合中的元素进行运算，得到在m位位数组中的映射位置，然后将位数组对应的位置置1。<br>这里代码中我们遍历了初始化好的散列函数，然后调用其hash()方法算出映射位置offset，再利用Redis的setbit()方法将该位置1。<br>exit方法<br>我们要实现判定是否重复的逻辑，方法参数value为待判断的元素。我们首先定义一个变量exist，遍历所有散列函数对value进行散列运算，得到映射位置，用getbit()方法取得该映射位置的结果，循环进行与运算。<br>这样只有每次getbit()得到的结果都为1时，最后的exist才为True，即代表value属于这个集合。如果其中只要有一次getbit()得到的结果为0，即m位数组中有对应的0位，那么最终的结果exist就为False，即代表value不属于这个集合。</p>
+<p>布隆过滤源码包<br>bloomfilter.py<br>​            </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/18/4.python爬虫/爬虫扩展功能/数据去重方法-HashBloom/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
     <article id="post-4.python爬虫/爬虫扩展功能/mitmproxy&amp;mitmdump手机爬虫" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -621,58 +697,6 @@
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2018/10/18/4.python爬虫/爬虫特殊反反爬/参数伪造/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-  
-    <article id="post-4.python爬虫/爬虫特殊反反爬/CssContent字体破解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Css:Content字体破解</p>
-<p>爬虫与汽车之家的Css:Content-反爬与反反爬的奇技淫巧<br>发布于</p>
-<p>话说感觉这个系列的我起名字越来越不走心了。越写越像哈利波特的起名套路了-爬虫与混血王子。（嗯，一点都不违和）我这个爱扯犊子的性格真是很难收敛啊。<br>话说Css自从越来越强大之后，被很多反爬工程师看上了。上篇文章介绍的字体就需要用到Css中的font-face和font-family。这节我们通过汽车之家来看看Css在反爬中另外一个妙用-content。<br>本来网页上显示的字无非两种，一种就是文本，一种就是显示在图片上的。所以之前有一种常规的反爬，就是把字当做图片替换来显示，目前百度还经常喜欢这么处理，比如百度知道，百度指数（参考天坑），当然不少的电话号码和邮箱这类重要信息，依然也再沿用这个方案。<br>然后随着css的content兼容性越来越好之后，就又有了一个性能更好的反爬，就是用css的content来代替原来文本中的文字，辅以合适的随机生成的方法，确实也不错。算是一个性能和反爬折中的方案吧，比如我们今天要提到的 汽车之家论坛 就是采用这样一个反爬方案。<br>一.为什么Css:Content能反爬。<br>事实上任何能让原来html中文本隐藏混淆加密又不影响正常用户显示的方式都可以来做反爬，比如我们上一篇文章提到的字体方式混淆，比如我们后面要提到的JS加密。而这篇文章主要是采用Css的content属性来隐藏。<br>我们简单的看下content属性使用，大家可以尝试复制这段写入一个网页的Css中<br>div:before {<br>content: “神箭手”;<br>}<br>我们会发现每一个div的开头都加入的神箭手的文字，而且这些文字还是无法复制的。再加上并不像生成图片那样会严重拖慢服务器性能，所以算是一个挺折中的方案。<br>二.如何好好利用Css:Content反爬<br>我们一起来看看汽车之家的反爬学习一下：<br>我们打开一个汽车之家论坛网页，然后直接Ctrl+A全选，就可以很明显的看到用Css的Content插入进的字符，我们掀开被子仔细研究下：</p>
-<p>可以看到，汽车之家是将一些常用的字，包括&lt;了&gt;&lt;，&gt;&lt;的&gt;&lt;九&gt;等等变换成Css，这样做优点是可以提前写好css，缺点是由于是固定的库，很容易先把映射的关系解析好，然后直接全文替换。因此比较推荐的，当然还是每次的动态生成，不过这依然产生一个工程性的优化问题，这里还是比较推荐用池的方案，或者用客户的IP做一个hash映射也不错。<br>不过汽车之家做的比较好的在于很好的隐藏了这段固定映射的Css，同时Css中的class也每次会替换一些名称部分，同时又不是每次都把所有的映射库输出出来，而是节选文章中有的文字，因此既缩小了输出大小，又隐藏了整体库，看得出工程师也是打得一手好牌啊。<br>三.如何应对Css:Content这种类型的反爬<br>我们就以汽车之家为例吧：<br>1.获取映射的Css<br>其实汽车之家这个例子来说，主要的问题并不是如何解决这种反爬，因为这种模式的反爬如果知道映射，搞起来太简单，直接正则替换就行了。这里最难的是怎么找到这个映射，汽车之家可以说隐藏的是教科书级的完美，解析方案我就不展开讲了，因为这个是Javascript对抗里的内容（后面我可能会拿出几篇文章单独讲JS对抗），重点就是解析跟在正文后面的这一段JS。</p>
-<p>好的工具等于成功的一半，想要很好的解析JS，一定要有一个好的JS解释引擎。这样可以省掉大量的破解的工作而直接运行别人的JS，在代码中整合脚本引擎相当麻烦，最完美的莫过于找一个好的JS的爬虫框架。<br>具体的Javascript对抗我在后面再讲，这里简单说下，直接运行这段代码，我们可以看到在Nl_（可变的）这个变量中存储了完整的Css映射，因此我们想办法在运行中保存该变量，带入下一步即可。</p>
-<p>2.根据映射进行内容替换<br>我们既然拥有了Css映射，那还有啥难的，直接读取CssRules，循环用正则替换把<br><span class="hs_kw4_mainYM"></span><br>这类标签直接替换成content中的文字：<br>九<br>好了，大功告成。<br>贴一下部分神箭手中运行的解析代码：<br>var code = extract(page.raw, “//div[@class=’conttxt’]/div/script”); if(code){ eval(code); var cssMapping = {}; if(rules.length &gt; 0){ for(var ri in rules){ var rule = rules[ri]; var matches1 = /content:\s*”([^”]+)”/.exec(rule) var matches2 = /.([^:]+)::before/.exec(rule) if(matches1 &amp;&amp; matches2){ cssMapping[matches2[1]] = matches1[1]; } } page.raw = page.raw.replace(/&lt;span\s+class=’(hs_kw\d+_[^’]+)’&gt;&lt;\/span&gt;/g, function(match,p1,p2){ return cssMapping[p1]; }); } } page.raw = exclude(page.raw, “//div[@class=’conttxt’]/div/script”);<br>————————————————最后说两句————————————————————<br>大家会发现，很多非常奇特的反爬措施，大多依赖Javascript加密的功力。当然有些Javascript加密可以直接通过JS渲染，如[Email Protection]，但是也有很多单纯通过渲染JS无法解决，如今天这篇文章中提到，因此也让Css的这种反爬措施有别于普通的JS加密形式，给反反爬工程师设置了更高的障碍，是我个人比较推荐的一种反爬手段。反过来对于反反爬来说：在有了好的工具前提下，熟练掌握JS则是一个必备内功之一。<br>文章导航</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/18/4.python爬虫/爬虫特殊反反爬/CssContent字体破解/">展开全文 >></a>
         </p>
       
 

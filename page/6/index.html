@@ -154,78 +154,6 @@
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-4.python爬虫/爬虫常见反反爬/Js压缩、混淆、加密及破解" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Js压缩、混淆、加密及破解<br>js压缩、混淆、加密介绍<br>三者的定义与区别<br>压缩：删除 Javascript 代码中所有注释、跳格符号、换行符号及无用的空格，从而压缩 JS 文件大小，优化页面加载速度。<br>混淆：经过编码将变量和函数原命名改为毫无意义的命名（如function(a,b,c,e,g)等），以防止他人窥视和窃取 Javascript 源代码，也有一定压缩效果。<br>加密：一般用eval方法加密，效果与混淆相似，也做到了压缩的效果。<br>三者的作用<br>压缩的主要目的是消除注释等无用字符，达到精简js代码，减小js文件大小的目的，这也是页面优化的一种方式；<br>混淆和加密的目的比较接近，都是为了防止他人直接查看源码，对代码（如重要的api等）起保护作用，但这也只是增加了阅读代码的代价，也就是所谓的防君子不防小人。<br>加密就是通过已经有的或者自己编写的加密方法，对js代码进行加密转换，但是当混淆和加密联合使用时，如先混淆在加密（或者先加密再混淆）时，破解时间就会增加。关于js的加密<br>浏览器是怎么解析混淆和加密后的js代码的<br>其实变量名只要是Unicode字符就行了，对于js引擎来说都是一样的，只是人类觉得他们不同而已。<br>是否可以破解压缩\混淆\加密后的代码<br>压缩和混淆后的js代码是不可以被还原的，但是我们可以将js加密的代码进行解密，后面的几篇是介绍如何进行js解密的。<br>常见的加密和解密方式介绍<br>加密方式的分类<br>一：最简单的加密解密<br>二：转义字符”\”的妙用<br>三：使用Microsoft出品的脚本编码器Script Encoder来进行编码   （自创简单解码）<br>四：任意添加NUL空字符（十六进制00H）    （自创）<br>五：无用内容混乱以及换行空格TAB大法<br>六：自写解密函数法<br>一、escape()和unescape()<br>加密方式的介绍<br>大家对于JAVASCRIPT函数escape()和unescape()想必是比较了解啦（很多网页加密在用它们），分别是编码和解码字符串<br>比如例子代码用escape()函数加密后变为如下格式：alert%28%22%u9ED1%u5BA2%u9632%u7EBF%22%29%3B<br>如果愿意我们可以写点JAVASCRIPT代码重新把它加密如下%61%6C%65%72%74%28%22%u9ED1%u5BA2%u9632%u7EBF%22%29%3B<br>这样加密后的代码是不能直接运行的，可以使用eval(codeString)，这个函数的作用就是检查JavaScript代码并执行，必选项 codeString 参数是包含有效 JavaScript 代码的字符串值，加上上面的解码unescape()<br>解密方式<br>直接将eval换成alert配合unescape便实现了解密<br>加密示例<br>加密方法<br>            <script language="JavaScript"><br>            varcode=unescape(“%61%6C%65%72%74%28%22%u9ED1%u5BA2%u9632%u7EBF%22%29%3B”);<br>            eval(varcode)<br>             </script><br>二、转义字符”\”加密<br>加密方式介绍<br>JavaScript提供了一些特殊字符如：\n （换行）、 \r （回车）、\’ （单引号 ）等应该是有所了解<br>其实”\”后面还可以跟八进制或十六进制的数字，如字符”a”则可以表示为：”\141”或”\x61”（注意是小写字符”x”），至于双字节字符如汉字”黑”则仅能用十六进制表示为”\u9ED1”（注意是小写字符”u”），其中字符”u”表示是双字节字符；<br>解密示例<br>直接将eval换成alert便实现了解密</p>
-<pre><code>  # 八进制转义字符串如下:  
-  &lt;SCRIPT LANGUAGE=&quot;JavaScript&quot;&gt;  
-  eval(&quot;\141\154\145\162\164\50\42\u9ED1\u5BA2\u9632\u7EBF\42\51\73&quot;)  
-  &lt;/SCRIPT&gt;
-# 十六进制转义字符串如下:  
-  &lt;SCRIPT LANGUAGE=&quot;JavaScript&quot;&gt;  
-  eval(&quot;\x61\x6C\x65\x72\x74\x28\x22\u9ED1\u5BA2\u9632\u7EBF\x22\x29\x3B&quot;)  
-  &lt;/SCRIPT&gt;
-</code></pre><p>三：使用Microsoft出品的脚本编码器Script Encoder来进行编码<br>加密方式的介绍<br>直接使用Microsoft出品的JavaScript调用控件Scripting.Encoder完成的编码！<br>如果你觉得这样编码得到的代码LANGUAGE属性是JScript.Encode，很容易让人识破，那么还有一个几乎不为人知的window对象的方法execScript()，其原形为：<br>window.execScript( sExpression, sLanguage )<br>sExpression: 必选项。字符串(String)。要被执行的代码。<br>sLanguage　: 必选项。字符串(String)。指定执行的代码的语言。默认值为 Microsoft JScript<br>解密方式<br>编码后的代码运行前IE会先对其进行解码，如果我们先把加密后的代码放入一个自定义函数如上面的decode()中，然后对自定义函数decode调用toString()方法，得到的将是解码后的代码！<br>加密示例<br>加密方法</p>
-<pre><code># 使用Scripting.Encoder
- &lt;SCRIPT LANGUAGE=&quot;JavaScript&quot;&gt;  
- var Senc=new ActiveXObject(&quot;Scripting.Encoder&quot;);  
- var code=&apos;&lt;SCRIPT LANGUAGE=&quot;JavaScript&quot;&gt;\r\nalert(&quot;黑客防线&quot;);\r\n&lt;\/SCRIPT&gt;&apos;;  
- var Encode=Senc.EncodeScriptFile(&quot;.htm&quot;,code,0,&quot;&quot;);  
- alert(Encode);  
- &lt;/SCRIPT&gt;
- #  使用execScript()
- &lt;SCRIPT LANGUAGE=&quot;JavaScript&quot;&gt;  
- execScript(&quot;#@~^FgAAAA==@#@&amp;ls DD`J黑客防线r#p@#@&amp;FgMAAA==^#~@&quot;,&quot;JScript.Encode&quot;)  
- &lt;/SCRIPT&gt;
- # 加密结果
-  &lt;SCRIPT LANGUAGE=&quot;JScript.Encode&quot;&gt;#@~^FgAAAA==@#@&amp;ls DD`J黑客防线r#p@#@&amp;FgMAAA==^#~@&lt;/SCRIPT&gt; 
-</code></pre><p>解密示例<br>解密方法<br>                        <script language="JScript.Encode"><br>                        function decode(){};<br>                        alert(decode.toString());<br>                        </script><br>四：任意添加NUL空字符（十六进制00H）<br>加密方式介绍<br>一次偶然的实验，使我发现在HTML网页中任意位置添加任意个数的”空字符”，IE照样会正常显示其中的内容，并正常执行其中的JavaScript 代码。<br>而添加的”空字符”我们在用一般的编辑器查看时，会显示形如空格或黑块，使得原码很难看懂，如用记事本查看则”空字符”会变成”空格”，利用这个原理加密结果如下：（其中显示的”空格”代表”空字符”）<br>如果不知道方法的人很难想到要去掉里面的”空字符”（00H）的<br>解密方式<br>去掉代码中的00H<br>加密示例<br>加密方法<br>            <s c="" ri="" p="" t="" l="" ang="" u="" a="" ge="    J   a    v a S    c r    i p t"><br>            a    l er    t   (“ 黑    客 防 线”)   ;    </s></p>
-<pre><code>&lt;    /    SC   R    I    P    T&gt;  
-</code></pre><p>五：无用内容混乱以及换行空格TAB大法<br>加密方式介绍<br>在JAVASCRIPT代码中我们可以加入大量的无用字符串或数字，以及无用代码和注释内容等等<br>这使真正的有用代码埋没在其中，并把有用的代码中能加入换行、空格、TAB的地方加入大量换行、空格、TAB，并可以把正常的字符串用””来进行换行，这样就会使得代码难以看懂！如我加密后的形式如下：<br>解密方式<br>慢慢的分析吧<br>加密示例<br>加密方法<br>​            <script language="JavaScript"><br>​            “xajgxsadffgds”;1234567890<br>​            625623216;var $=0;alert//@$%%&amp;<em>()(&amp;(^%^<br>​            //cctv function//<br>​            (//hhsaasajx xc<br>​            /</em><br>​            asjgdsgu<em>/<br>​            “黑<br>​             客<br>​            防线”//ashjgfgf<br>​            /</em><br>​            @#%$^&amp;%$96667r45fggbhytjty<br>​            */<br>​            //window<br>​            )<br>​            ;”#@$#%@#432hu”;212351436<br>​            </script><br>六：自写解密函数法<br>加密方式介绍<br>这个方法和一、二差不多，只不过是自己写个函数对代码进行加密<br>很多VBS病毒使用这种方法对自身进行加密，来防止特征码扫描！下面是我写的一个简单的加密解密函数，<br>加密示例<br>加密方法<br>​                            # 加密方法<br>​                            <script language="JavaScript"><br>​                            function compile(code)<br>​                            {<br>​                              var c=String.fromCharCode(code.charCodeAt(0)+code.length);<br>​                               for(var i=1;i&lt;code.length;i++){<br>​                              c+=String.fromCharCode(code.charCodeAt(i)+code.charCodeAt(i-1));<br>​                               }<br>​                               alert(escape(c));<br>​                            }<br>​                            compile(’alert(“黑客防线”);’)<br>​                            </script><br>​                            # 加密结果<br>​                            o%CD%D1%D7%E6%9CJ%u9EF3%uFA73%uF1D4%u14F1%u7EE1Kd<br>解密示例<br>解密方法<br>​                    <script language="JavaScript"><br>​                    function uncompile(code)<br>​                    {<br>​                       code=unescape(code);<br>​                       var c=String.fromCharCode(code.charCodeAt(0)-code.length);<br>​                       for(var i=1;i&lt;code.length;i++){<br>​                      c+=String.fromCharCode(code.charCodeAt(i)-c.charCodeAt(i-1));<br>​                       }<br>​                       return c;<br>​                    }<br>​                    eval(uncompile(“o%CD%D1%D7%E6%9CJ%u9EF3%uFA73%uF1D4%u14F1%u7EE1Kd”));<br>​                    </script></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/18/4.python爬虫/爬虫常见反反爬/Js压缩、混淆、加密及破解/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-  
     <article id="post-4.python爬虫/爬虫常见反反爬/ADSL代理服务器搭建&amp;代理池" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -552,6 +480,113 @@
 
 
   
+    <article id="post-4.python爬虫/爬虫基础/爬虫基础相关-介绍" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/12/4.python爬虫/爬虫基础/爬虫基础相关-介绍/">爬虫基础相关--介绍</a>
+    </h1>
+  
+
+        
+        <a href="/2017/01/12/4.python爬虫/爬虫基础/爬虫基础相关-介绍/" class="archive-article-date">
+  	<time datetime="2017-01-11T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-01-12</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <html>
+<head>
+  <title>Evernote Export</title>
+  <basefont face="微软雅黑" size="2">
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+  <meta name="exporter-version" content="Evernote Windows/307934 (zh-CN, DDL); Windows/10.0.0 (Win64);">
+  <style>
+    body, td {
+      font-family: 微软雅黑;
+      font-size: 10pt;
+    }
+  </style>
+</head>
+<body>
+<a name="558">
+
+<div>
+<span><div><font style="font-size: 14pt; background-color: rgb(255, 250, 165);-evernote-highlight:true;"><span style="background-color: rgb(255, 250, 165); font-size: 14pt; color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">爬虫的介绍</span></font></div><div><ul><li><span style="font-size: 10pt; font-weight: bold; line-height: 13.600000381469727px;">爬虫的定义</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">  模拟浏览器其发送请求，获取到和浏览器一模一样的数据</span></li><li><font style="font-size: 9pt;"><span style="font-size: 9pt; line-height: 1.45;">  浏览器能够看到的，我们爬虫才能够获取到，否则是没有办法获取到的，</span><span style="font-size: 9pt; line-height: 13.600000381469727px;">所以，只要浏览器能做的事情，原则上，爬虫都能做</span></font></li></ul><li><span style="font-size: 10pt; font-weight: bold; line-height: 1.45;">爬虫获取的数据的用途</span></li></ul></div><div><ul><ul><li><span style="font-size: 9pt; line-height: 1.45;">呈现数据，呈现在app或者在网站上</span></li><li><span style="font-size: 9pt; line-height: 13.600000381469727px;">伪造网站请求，进行自动的访问网站</span></li><li><span style="font-size: 9pt; line-height: 1.45;">进行数据分析，获得结论</span></li></ul><li><span style="font-size: 10pt; font-weight: bold; line-height: 1.45;">爬虫的分类</span></li></ul></div><div><ul><ul><li><span style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold; line-height: 1.45;">通用爬虫：</span></span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">搜索引擎的爬虫，通常指搜索引擎的爬虫</span><span style="font-size: 9pt; line-height: 1.45;">，<span style="font-size: 9pt; line-height: 1.45;">通用网络爬虫利用<span style="font-size: 9pt; line-height: 1.45; font-weight: bold;">种子url</span></span><span style="font-size: 9pt; line-height: 1.45;">从互联网中搜集网页，采集信息，这些网页信息用于为搜索引擎建立索引从而提供支持，它决定着整个引擎系统的内容是否丰富，信息是否即时，因此其性能的优劣直接影响着搜索引擎的效果。</span></span></li></ul><li><span style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold; line-height: 1.45;">聚焦爬虫：</span></span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">针对特定网站的爬虫，指定url进行爬取，有明确的爬取目标</span></li></ul></ul><li><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold; line-height: 13.600000381469727px;">通用爬虫工作原理</span></font></li><ul><li><font style="font-size: 12px;"><span style="font-size: 12px; line-height: 13.600000381469727px;">第一步：数据抓取</span></font></li><ul><li><span style="font-size: 9pt;">首先选取一部分的种子URL，将这些URL放入待抓取URL队列；</span></li><li><span style="font-size: 9pt;">取出待抓取URL，解析DNS得到主机的IP，并将URL对应的网页下载下来，存储进已下载网页库中，并且将这些URL放进已抓取URL队列。</span></li><li><span style="font-size: 9pt;">分析已抓取URL队列中的URL，分析其中的其他URL，并且将URL放入待抓取URL队列，从而进入下一个循环....</span></li></ul><li><span style="font-size: 9pt; line-height: 1.45;">第二步：数据存储</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">搜索引擎通过爬虫爬取到的网页，将数据存入原始页面数据库。其中的页面数据与用户浏览器得到的HTML是完全一样的。</span></li><li><span style="font-size: 9pt; line-height: 1.45;">搜索引擎蜘蛛在抓取页面时，也做一定的重复内容检测，一旦遇到访问权重很低的网站上有大量抄袭、采集或者复制的内容，很可能就不再爬行。</span></li></ul><li><span style="font-size: 9pt;">第三步：预处理</span></li><ul><li><span style="font-size: 9pt;">搜索引擎将爬虫抓取回来的页面，进行各种步骤的预处理。</span></li><li><span style="font-size: 9pt;">提取文字</span></li><li><span style="font-size: 9pt;">中文分词</span></li><li><span style="font-size: 9pt;">消除噪音（比如版权声明文字、导航条、广告等……）</span></li><li><span style="font-size: 9pt;">索引处理</span></li><li><span style="font-size: 9pt;">链接关系计算</span></li><li><span style="font-size: 9pt;">特殊文件处理</span></li></ul><li><span style="font-size: 9pt;">第四步：提供检索服务，网站排名</span></li><ul><li><span style="font-size: 9pt;">搜索引擎在对信息进行组织和处理后，为用户提供关键字检索服务，将用户检索相关的信息展示给用户。</span></li><li><span style="font-size: 9pt;">同时会根据页面的PageRank值（链接的访问量排名）来进行网站排名，这样Rank值高的网站在搜索结果中会排名较前，当然也可以直接使用 Money 购买搜索引擎网站排名，简单粗暴。</span></li></ul></ul><li><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold; line-height: 13.600000381469727px;">通用爬虫的局限性</span></font></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">通用搜索引擎所返回的网页里90%的内容无用。</span></li><li><span style="font-size: 9pt; line-height: 1.45;">图片、音频、视频多媒体的内容通用搜索引擎无能为力</span></li><li><span style="font-size: 9pt; line-height: 1.45;">不同用户搜索的目的不全相同，但是返回内容相同</span></li></ul><li><span style="font-weight: bold; line-height: 1.45; font-size: 10pt;">聚焦爬虫的工作流程</span></li></ul></div><div><ul><ul><li><span style="font-size: 9pt;"><img src="/E_img/爬虫基础相关-介绍_files/Image.png" type="image/png" data-filename="Image.png" width="223"></span></li></ul><li><span style="font-size: 10pt; font-weight: bold;">爬虫爬取哪些数据</span></li><ul><li><span style="font-size: 9pt;">教育机构：其他教育机构的开班，招生，就业，口碑</span></li><li><span style="font-size: 9pt;">资讯公司：特定领域的新闻数据的爬虫</span></li><li><span style="font-size: 9pt;">金融公司：关于各个公司的动态的信息，</span></li><li><span style="font-size: 9pt;">酒店/旅游：携程，去哪儿的酒店价格信息/机票，景点价格，其他旅游公司价格信息</span></li><li><span style="font-size: 9pt;">房地产、高铁：10大房地产楼盘门户网站，政府动态等</span></li><li><span style="font-size: 9pt;">强生保健医药：医疗数据，价格，目前的市场的行情</span></li></ul></ul></div><div><ul><li><span style="font-size: 10pt; font-weight: bold; line-height: 1.45;">Robots协议：</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">网站通过Robots协议告诉搜索引擎哪些页面可以抓取，哪些页面不能抓取。</span></li><li><span style="font-size: 9pt; line-height: 13.600000381469727px;">这个协议之是道德层面的协议，这个协议并不能从技术上阻止去对其网站进行爬取。</span></li><li><span style="font-size: 9pt;">例如：</span><a href="https://www.taobao.com/robots.txt" style="font-size: 9pt;" target="_blank" rel="noopener">https://www.taobao.com/robots.txt</a></li></ul></ul><div><span style="background-color: rgb(255, 250, 165); font-size: 14pt; color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">HTTP/HTTPS协议</span></div></div><div><ul><li><span style="font-size: 10pt; font-weight: bold; line-height: 13.600000381469727px;">url的形式</span></li><ul><li><span style="font-size: 9pt;">url表现形式：scheme://host[:port#]/path/…/[?query-string][#anchor]</span></li><ul><li><span style="font-size: 9pt;">scheme：协议(例如：http, https, ftp)</span></li><li><span style="font-size: 9pt;">host：服务器的IP地址或者域名</span></li><li><span style="font-size: 9pt;">port：服务器的端口（如果是走协议默认端口，80  or    443）\
+        
+          <a class="article-more-a" href="/2017/01/12/4.python爬虫/爬虫基础/爬虫基础相关-介绍/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">python爬虫</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/python爬虫//" class="article-tag-list-link color4">python爬虫</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/python爬虫/爬虫基础//" class="article-tag-list-link color5">爬虫基础</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2017/01/12/4.python爬虫/爬虫基础/爬虫基础相关-介绍/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/5/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span>
@@ -719,6 +754,10 @@ MathJax.Hub.Queue(function() {
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">模型评估</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">python爬虫</a>
               </li>
             
             <div class="clearfix"></div>

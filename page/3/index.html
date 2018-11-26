@@ -154,444 +154,75 @@
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-4.python爬虫/爬虫基础/网络爬虫介绍" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-4.python爬虫/celery分布式爬虫/分布式任务队列Celery" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>爬虫的介绍<br>爬虫的定义<br>  模拟浏览器其发送请求，获取到和浏览器一模一样的数据<br>  浏览器能够看到的，我们爬虫才能够获取到，否则是没有办法获取到的，所以，只要浏览器能做的事情，原则上，爬虫都能做<br>爬虫获取的数据的用途<br>呈现数据，呈现在app或者在网站上<br>伪造网站请求，进行自动的访问网站<br>进行数据分析，获得结论<br>爬虫的分类<br>通用爬虫：<br>搜索引擎的爬虫，通常指搜索引擎的爬虫，通用网络爬虫利用种子url从互联网中搜集网页，采集信息，这些网页信息用于为搜索引擎建立索引从而提供支持，它决定着整个引擎系统的内容是否丰富，信息是否即时，因此其性能的优劣直接影响着搜索引擎的效果。<br>聚焦爬虫：<br>针对特定网站的爬虫，指定url进行爬取，有明确的爬取目标<br>通用爬虫工作原理<br>第一步：数据抓取<br>首先选取一部分的种子URL，将这些URL放入待抓取URL队列；<br>取出待抓取URL，解析DNS得到主机的IP，并将URL对应的网页下载下来，存储进已下载网页库中，并且将这些URL放进已抓取URL队列。<br>分析已抓取URL队列中的URL，分析其中的其他URL，并且将URL放入待抓取URL队列，从而进入下一个循环….<br>第二步：数据存储<br>搜索引擎通过爬虫爬取到的网页，将数据存入原始页面数据库。其中的页面数据与用户浏览器得到的HTML是完全一样的。<br>搜索引擎蜘蛛在抓取页面时，也做一定的重复内容检测，一旦遇到访问权重很低的网站上有大量抄袭、采集或者复制的内容，很可能就不再爬行。<br>第三步：预处理<br>搜索引擎将爬虫抓取回来的页面，进行各种步骤的预处理。<br>提取文字<br>中文分词<br>消除噪音（比如版权声明文字、导航条、广告等……）<br>索引处理<br>链接关系计算<br>特殊文件处理<br>第四步：提供检索服务，网站排名<br>搜索引擎在对信息进行组织和处理后，为用户提供关键字检索服务，将用户检索相关的信息展示给用户。<br>同时会根据页面的PageRank值（链接的访问量排名）来进行网站排名，这样Rank值高的网站在搜索结果中会排名较前，当然也可以直接使用 Money 购买搜索引擎网站排名，简单粗暴。<br>通用爬虫的局限性<br>通用搜索引擎所返回的网页里90%的内容无用。<br>图片、音频、视频多媒体的内容通用搜索引擎无能为力<br>不同用户搜索的目的不全相同，但是返回内容相同<br>聚焦爬虫的工作流程</p>
-<p>爬虫爬取哪些数据<br>教育机构：其他教育机构的开班，招生，就业，口碑<br>资讯公司：特定领域的新闻数据的爬虫<br>金融公司：关于各个公司的动态的信息，<br>酒店/旅游：携程，去哪儿的酒店价格信息/机票，景点价格，其他旅游公司价格信息<br>房地产、高铁：10大房地产楼盘门户网站，政府动态等<br>强生保健医药：医疗数据，价格，目前的市场的行情<br>Robots协议：<br>网站通过Robots协议告诉搜索引擎哪些页面可以抓取，哪些页面不能抓取。<br>这个协议之是道德层面的协议，这个协议并不能从技术上阻止去对其网站进行爬取。<br>例如：<a href="https://www.taobao.com/robots.txt" target="_blank" rel="noopener">https://www.taobao.com/robots.txt</a><br>HTTP/HTTPS协议<br>url的形式<br>url表现形式：scheme://host[:port#]/path/…/[?query-string][#anchor]<br>scheme：协议(例如：http, https, ftp)<br>host：服务器的IP地址或者域名<br>port：服务器的端口（如果是走协议默认端口，80  or    443）<br>path：访问资源的路径<br>query-string：参数，发送给http服务器的数据<br>anchor：锚（跳转到网页的指定锚点位置）<br>示例：<a href="http://localhost:4000/file/part01/1.2.htmlhttp://item.jd.com/11936238.html#product-detail" target="_blank" rel="noopener">http://localhost:4000/file/part01/1.2.htmlhttp://item.jd.com/11936238.html#product-detail</a><br>HTTP/HTTPS的区别<br>HTTP<br>超文本传输协议<br>默认端口号:80<br>HTTPS<br>HTTP + SSL(安全套接字层)<br>默认端口号：443<br>HTTP和HTTPS区别<br>浏览器默认请求服务器是以HTTP协议进行请求，如果服务器支持HTTPS协议，会返回给浏览器端一个协议相关的响应，浏览器会重新发起HTTPS协议的请求；</p>
-<p>HTTP请求报文的形式</p>
-<p>http的请求过程<br>域名—&gt;dns（拿ip）—&gt;浏览器请求ip—&gt;服务器—&gt;返回资源<br>HTTP常见的请求头</p>
-<ol>
-<li>Host (主机和端口号)<br>对应网址URL中的Web名称和端口号，用于指定被请求资源的Internet主机和端口号，通常属于URL的Host部分</li>
-<li>Connection (链接类型)<br>keep-alive  客户端携带表示支持长连接<br>keep-alive  服务器端如果回复keep-alive， 代表允许双方建立长连接<br>close： 服务器端回复close，代表不允许建立长连接，浏览器接收到响应后会主动断开连接</li>
-<li>Upgrade-Insecure-Requests (浏览器支持升级为HTTPS请求)<br>升级不安全的请求，意思是会在加载 http 资源时自动替换成 https 请求，让浏览器不再显示https页面中的http请求警报。</li>
-<li>User-Agent (浏览器名称)<br>对方的服务器通过User-Agent判断出来我们是一个手机版的浏览器还是电脑版的，同时能够判断出来浏览器的平台，型号，版本，内核版本</li>
-<li>Accept (传输文件类型)<br>Accept: <em>/</em>：表示什么都可以接收。<br>Accept：image/gif：表明客户端希望接受GIF图像格式的资源；<br>Accept：text/html：表明客户端希望接受html文本。<br>Accept: text/html, application/xhtml+xml;q=0.9, image/*;q=0.8：表示浏览器支持的 MIME 类型分别是 html文本、xhtml和xml文档、所有的图像格式资源。<br>q是权重系数，范围 0 =&lt; q &lt;= 1，q 值越大，请求越倾向于获得其“;”之前的类型表示的内容。若没有指定q值，则默认为1，按从左到右排序顺序；若被赋值为0，则用于表示浏览器不接受此内容类型。<br>text：用于标准化地表示的文本信息，文本消息可以是多种字符集和或者多种格式的；<br>application用于传输应用程序数据或者二进制数据。</li>
-<li>Referer (页面跳转处)<br>表明产生请求的网页来自于哪个URL，用户是从该 Referer页面访问到当前请求的页面。这个属性可以用来跟踪Web请求来自哪个页面，是从什么网站来的等。<br>防盗链：有时候遇到下载某网站图片，需要对应的referer，否则无法下载图片，那是因为人家做了防盗链，原理就是根据referer去判断是否是本网站的地址，如果不是，则拒绝，如果是，就可以下载。</li>
-<li>Accept-Encoding（文件编解码格式）<br>指出浏览器可以接受的编码方式。编码方式不同于文件格式，它是为了压缩文件并加速文件传递速度。浏览器在接收到Web响应之后先解码，然后再检查文件格式，许多情形下这可以减少大量的下载时间。<br>举例：Accept-Encoding:gzip;q=1.0, identity; q=0.5, *;q=0</li>
-<li>Cookie （Cookie）<br>cookies 能够记录用户信息，会在请求的时候一起传递给对方的服务器，对方的服务器能够根据cookie判断出来是否登陆过（用户的状态）</li>
-<li>x-requested-with :XMLHttpRequest  (是Ajax 异步请求)<br>10.Accept-Language   (接受语言)<br>指出浏览器可以接受的语言种类，如en或en-us指英语，zh或者zh-cn指中文，当服务器能够提供一种以上的语言版本时要用到。<br>11.Accept-Charset（字符编码）<br>指出浏览器可以接受的字符编码。<br>举例：Accept-Charset:iso-8859-1,gb2312,utf-8<br>12.Content-Type (POST数据类型)<br>Content-Type：POST请求里用来表示的内容类型。<br>举例：Content-Type = Text/XML; charset=gb2312：<br>0.请求体<br>常见的请求方法<br>GET<br>特点：请求所带参数包含在url中，显示在地址栏，请求数据可以被缓存，请求参数有长度限制，请求速度快<br>POST<br>特点：请求所带参数在请求体中，请求数据不可以被缓存，请求数据没有长度限制，请求速度慢<br>常用的响应报头</li>
-<li>Cache-Control：must-revalidate, no-cache, private。<br>告诉客户端，对资源的缓存建议；</li>
-<li>Connection：keep-alive<br>作为回应客户端的Connection：keep-alive，告诉客户端是否同意建立长连接；</li>
-<li>Content-Encoding:gzip<br>告诉客户端，服务端发送的资源是采用gzip编码的；</li>
-<li>Content-Type：text/html;charset=UTF-8<br>告诉客户端，资源文件的类型，还有字符编码；</li>
-<li>Date：Sun, 21 Sep 2016 06:18:21 GMT<br>这个是服务端发送资源时的服务器时间，GMT是格林尼治所在地的标准时间。</li>
-<li>Expires:Sun, 1 Jan 2000 01:00:00 GMT<br>告诉客户端在这个时间前，缓存的到期时间</li>
-<li>Pragma:no-cache<br>这个含义与Cache-Control等同。<br>8.Server：Tengine/1.4.6<br>这个是服务器和相对应的版本，只是告诉客户端服务器的信息。</li>
-<li>Transfer-Encoding：chunked<br>这个响应头告诉客户端，服务器发送的资源的方式是分块发送的。<br>HTTP常见响应状态码<br>100~199：表示服务器成功接收部分请求，要求客户端继续提交其余请求才能完成整个处理过程。<br>200：表示服务器成功接收请求并已完成整个处理过程<br>200~299：表示服务器成功接收请求并已完成整个处理过程。常用200（OK 请求成功）。<br>302：临时转移至新的url<br>300~399表示请求转<br>307：临时转移至新的url<br>404：not found<br>400~499：客户端的请求有错误，常用404（服务器无法找到被请求的页面）、403（服务器拒绝访问，权限不够）。<br>500：服务器内部错误<br>为什么浏览器渲染出来的页面和爬虫请求的页面不一样<br>爬虫请求结果<br>爬虫只会请求当前url地址，不会主动请求js，所以往往当前URL对应的响应和element的内容不一样<br>浏览器<br>浏览器请求服务器渲染出来的界面，以及最终的在终端element显示的内容，和爬虫爬取到的不一样，因为浏览器会对页面中的静态文件的url进行请求，将请求结果渲染到浏览器中，导致最终的网页代码和显示的结果，已经是被js文件进行修改过；<br>在哪里查看当前url地址对应的响应（不包括对静态文件请求的响应）：<br>抓包（network），network下的第一个url地址，当前url地址的response<br>右键显示网页源码</li>
-</ol>
-<p>字符串和字节（str/ bytes）<br>python3 字符串应用的字符集<br>str ：unicode的呈现形式（python3应用的unicode的子集utf-8的形式对字符串进行呈现）<br>bytes：二进制互联网上数据的都是以二进制的方式传输的，bytes是二进制格式的字符串<br>对服务器的请求，要将请求数据先转化为bytes格式；<br>获取到服务器的响应要将获取到的bytes类型的数据，进行字符串的转化<br>Unicode/UTF8/ASCII字符集的介绍<br>字符(Character)<br>各种文字和符号的总称，包括各国家文字、标点符号、图形符号、数字等<br>字符集(Character set)<br>多个字符的集合字符集包括：<br>ASCII字符集、GB2312字符集、GB18030字符集、Unicode字符集<br>ASCII编码是1个字节，而Unicode编码通常是2个字节，UTF-8是Unicode的实现方式之一，它是一种变长的编码方式，可以是1，2，3个字节（一句字符的内容而定）<br>str到bytes之间的转化（str、bytes）<br>python3中字节和字符之间转化的方法<br>从str—&gt; bytes：str使用encode方法转化为 bytes<br>从bytes—&gt; str：bytes通过decode转化为str<br>注意：<br>编码方式解码方式必须一样，否则就会出现乱码</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/18/4.python爬虫/爬虫基础/网络爬虫介绍/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-  
-    <article id="post-4.python爬虫/爬虫基础/爬虫相关工具列表" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Python 爬虫的工具列表<br>爬虫网络库<br>通用<br>urllib -网络库(stdlib)。<br>requests -网络库。<br>grab – 网络库(基于pycurl)。<br>pycurl – 网络库(绑定libcurl)。<br>urllib3 – Python HTTP库，安全连接池、支持文件post、可用性高。<br>httplib2 – 网络库。<br>RoboBrowser – 一个简单的、极具Python风格的Python库，无需独立的浏览器即可浏览网页。<br>MechanicalSoup – 一个与网站自动交互Python库。<br>mechanize -有状态、可编程的Web浏览库。<br>socket – 底层网络接口(stdlib)。<br>Unirest for Python – Unirest是一套可用于多种语言的轻量级的HTTP库。<br>hyper – Python的HTTP/2客户端。<br>PySocks – SocksiPy更新并积极维护的版本，包括错误修复和一些其他的特征。作为socket模块的直接替换。<br>异步<br>treq – 类似于requests的API(基于twisted)。<br>aiohttp – asyncio的HTTP客户端/服务器(PEP-3156)。<br>网络爬虫框架<br>功能齐全的爬虫<br>grab – 网络爬虫框架(基于pycurl/multicur)。<br>scrapy – 网络爬虫框架(基于twisted)。<br>pyspider – 一个强大的爬虫系统。<br>cola – 一个分布式爬虫框架。<br>其他<br>portia – 基于Scrapy的可视化爬虫。<br>restkit – Python的HTTP资源工具包。它可以让你轻松地访问HTTP资源，并围绕它建立的对象。<br>demiurge – 基于PyQuery的爬虫微框架。<br>HTML/XML解析器<br>通用<br>lxml – C语言编写高效HTML/ XML处理库。支持XPath。<br>cssselect – 解析DOM树和CSS选择器。<br>pyquery – 解析DOM树和jQuery选择器。<br>BeautifulSoup – 低效HTML/ XML处理库，纯Python实现。<br>html5lib – 根据WHATWG规范生成HTML/ XML文档的DOM。该规范被用在现在所有的浏览器上。<br>feedparser – 解析RSS/ATOM feeds。<br>MarkupSafe – 为XML/HTML/XHTML提供了安全转义的字符串。<br>xmltodict – 一个可以让你在处理XML时感觉像在处理JSON一样的Python模块。<br>xhtml2pdf – 将HTML/CSS转换为PDF。<br>untangle – 轻松实现将XML文件转换为Python对象。<br>清理<br>Bleach – 清理HTML(需要html5lib)。<br>sanitize – 为混乱的数据世界带来清明。<br>文本处理<br>用于解析和操作简单文本的库。<br>通用<br>difflib – (Python标准库)帮助进行差异化比较。<br>Levenshtein – 快速计算Levenshtein距离和字符串相似度。<br>fuzzywuzzy – 模糊字符串匹配。<br>esmre – 正则表达式加速器。<br>ftfy – 自动整理Unicode文本，减少碎片化。<br>转换<br>unidecode – 将Unicode文本转为ASCII。<br>字符编码<br>uniout – 打印可读字符，而不是被转义的字符串。<br>chardet – 兼容 Python的2/3的字符编码器。<br>xpinyin – 一个将中国汉字转为拼音的库。<br>pangu.py – 格式化文本中CJK和字母数字的间距。<br>Slug化<br>awesome-slugify – 一个可以保留unicode的Python slugify库。<br>python-slugify – 一个可以将Unicode转为ASCII的Python slugify库。<br>unicode-slugify – 一个可以将生成Unicode slugs的工具。<br>pytils – 处理俄语字符串的简单工具(包括pytils.translit.slugify)。<br>通用解析器<br>PLY – lex和yacc解析工具的Python实现。<br>pyparsing – 一个通用框架的生成语法分析器。<br>人的名字<br>python-nameparser -解析人的名字的组件。<br>电话号码<br>phonenumbers -解析，格式化，存储和验证国际电话号码。<br>用户代理字符串<br>python-user-agents – 浏览器用户代理的解析器。<br>HTTP Agent Parser – Python的HTTP代理分析器。<br>特定格式文件处理<br>解析和处理特定文本格式的库。<br>通用<br>tablib – 一个把数据导出为XLS、CSV、JSON、YAML等格式的模块。<br>textract – 从各种文件中提取文本，比如 Word、PowerPoint、PDF等。<br>messytables – 解析混乱的表格数据的工具。<br>rows – 一个常用数据接口，支持的格式很多(目前支持CSV，HTML，XLS，TXT – 将来还会提供更多!)。<br>Office<br>python-docx – 读取，查询和修改的Microsoft Word2007/2008的docx文件。<br>xlwt / xlrd – 从Excel文件读取写入数据和格式信息。<br>XlsxWriter – 一个创建Excel.xlsx文件的Python模块。<br>xlwings – 一个BSD许可的库，可以很容易地在Excel中调用Python，反之亦然。<br>openpyxl – 一个用于读取和写入的Excel2010 XLSX/ XLSM/ xltx/ XLTM文件的库。<br>Marmir – 提取Python数据结构并将其转换为电子表格。<br>PDF<br>PDFMiner – 一个从PDF文档中提取信息的工具。<br>PyPDF2 – 一个能够分割、合并和转换PDF页面的库。<br>ReportLab – 允许快速创建丰富的PDF文档。<br>pdftables – 直接从PDF文件中提取表格。<br>Markdown<br>Python-Markdown – 一个用Python实现的John Gruber的Markdown。<br>Mistune – 速度最快，功能全面的Markdown纯Python解析器。<br>markdown2 – 一个完全用Python实现的快速的Markdown。<br>YAML<br>PyYAML – 一个Python的YAML解析器。<br>CSS<br>cssutils – 一个Python的CSS库。<br>ATOM/RSS<br>feedparser – 通用的feed解析器。<br>SQL<br>sqlparse – 一个非验证的SQL语句分析器。<br>HTTP<br>http-parser – C语言实现的HTTP请求/响应消息解析器。<br>微格式<br>opengraph – 一个用来解析Open Graph协议标签的Python模块。<br>可移植的执行体<br>pefile – 一个多平台的用于解析和处理可移植执行体(即PE)文件的模块。<br>PSD<br>psd-tools – 将Adobe Photoshop PSD(即PE)文件读取到Python数据结构。<br>自然语言处理<br>处理人类语言问题的库。<br>NLTK -编写Python程序来处理人类语言数据的最好平台。<br>Pattern – Python的网络挖掘模块。他有自然语言处理工具，机器学习以及其它。<br>TextBlob – 为深入自然语言处理任务提供了一致的API。是基于NLTK以及Pattern的巨人之肩上发展的。<br>jieba – 中文分词工具。<br>SnowNLP – 中文文本处理库。<br>loso – 另一个中文分词库。<br>genius – 基于条件随机域的中文分词。<br>langid.py – 独立的语言识别系统。<br>Korean – 一个韩文形态库。<br>pymorphy2 – 俄语形态分析器(词性标注+词形变化引擎)。<br>PyPLN – 用Python编写的分布式自然语言处理通道。这个项目的目标是创建一种简单的方法使用NLTK通过网络接口处理大语言库。<br>浏览器自动化与仿真<br>selenium – 自动化真正的浏览器(Chrome浏览器，火狐浏览器，Opera浏览器，IE浏览器)。<br>Ghost.py – 对PyQt的webkit的封装(需要PyQT)。<br>Spynner – 对PyQt的webkit的封装(需要PyQT)。<br>Splinter – 通用API浏览器模拟器(selenium web驱动，Django客户端，Zope)。<br>多重处理<br>threading – Python标准库的线程运行。对于I/O密集型任务很有效。对于CPU绑定的任务没用，因为python GIL。<br>multiprocessing – 标准的Python库运行多进程。<br>celery – 基于分布式消息传递的异步任务队列/作业队列。<br>concurrent-futures – concurrent-futures 模块为调用异步执行提供了一个高层次的接口。<br>异步<br>异步网络编程库<br>asyncio – (在Python 3.4 +版本以上的 Python标准库)异步I/O，时间循环，协同程序和任务。<br>Twisted – 基于事件驱动的网络引擎框架。<br>Tornado – 一个网络框架和异步网络库。<br>pulsar – Python事件驱动的并发框架。<br>diesel – Python的基于绿色事件的I/O框架。<br>gevent – 一个使用greenlet 的基于协程的Python网络库。<br>eventlet – 有WSGI支持的异步框架。<br>Tomorrow – 异步代码的奇妙的修饰语法。<br>队列<br>celery – 基于分布式消息传递的异步任务队列/作业队列。<br>huey – 小型多线程任务队列。<br>mrq – Mr. Queue – 使用redis &amp; Gevent 的Python分布式工作任务队列。<br>RQ – 基于Redis的轻量级任务队列管理器。<br>simpleq – 一个简单的，可无限扩展，基于Amazon SQS的队列。<br>python-gearman – Gearman的Python API。<br>云计算<br>picloud – 云端执行Python代码。<br>dominoup.com – 云端执行R，Python和matlab代码。<br>电子邮件<br>电子邮件解析库<br>flanker – 电子邮件地址和Mime解析库。<br>Talon – Mailgun库用于提取消息的报价和签名。<br>网址和网络地址操作<br>解析/修改网址和网络地址库。<br>URL<br>furl – 一个小的Python库，使得操纵URL简单化。<br>purl – 一个简单的不可改变的URL以及一个干净的用于调试和操作的API。<br>urllib.parse – 用于打破统一资源定位器(URL)的字符串在组件(寻址方案，网络位置，路径等)之间的隔断，为了结合组件到一个URL字符串，并将“相对URL”转化为一个绝对URL，称之为“基本URL”。<br>tldextract – 从URL的注册域和子域中准确分离TLD，使用公共后缀列表。<br>网络地址<br>netaddr – 用于显示和操纵网络地址的Python库。<br>网页内容提取<br>提取网页内容的库。<br>HTML页面的文本和元数据<br>newspaper – 用Python进行新闻提取、文章提取和内容策展。<br>html2text – 将HTML转为Markdown格式文本。<br>python-goose – HTML内容/文章提取器。<br>lassie – 人性化的网页内容检索工具<br>micawber – 一个从网址中提取丰富内容的小库。<br>sumy -一个自动汇总文本文件和HTML网页的模块<br>Haul – 一个可扩展的图像爬虫。<br>python-readability – arc90 readability工具的快速Python接口。<br>scrapely – 从HTML网页中提取结构化数据的库。给出了一些Web页面和数据提取的示例，scrapely为所有类似的网页构建一个分析器。<br>视频<br>youtube-dl – 一个从YouTube下载视频的小命令行程序。<br>you-get – Python3的YouTube、优酷/ Niconico视频下载器。<br>维基<br>WikiTeam – 下载和保存wikis的工具。<br>WebSocket<br>用于WebSocket的库。<br>Crossbar – 开源的应用消息传递路由器(Python实现的用于Autobahn的WebSocket和WAMP)。<br>AutobahnPython – 提供了WebSocket协议和WAMP协议的Python实现并且开源。<br>WebSocket-for-Python – Python 2和3以及PyPy的WebSocket客户端和服务器库。<br>DNS解析<br>dnsyo – 在全球超过1500个的DNS服务器上检查你的DNS。<br>pycares – c-ares的接口。c-ares是进行DNS请求和异步名称决议的C语言库。<br>计算机视觉<br>OpenCV – 开源计算机视觉库。<br>SimpleCV – 用于照相机、图像处理、特征提取、格式转换的简介，可读性强的接口(基于OpenCV)。<br>mahotas – 快速计算机图像处理算法(完全使用 C++ 实现)，完全基于 numpy 的数组作为它的数据类型。<br>代理服务器<br>shadowsocks – 一个快速隧道代理，可帮你穿透防火墙(支持TCP和UDP，TFO，多用户和平滑重启，目的IP黑名单)。<br>tproxy – tproxy是一个简单的TCP路由代理(第7层)，基于Gevent，用Python进行配置。<br>其他Python工具列表<br>awesome-python<br>pycrumbs<br>python-github-projects<br>python_reference<br>pythonidae</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/18/4.python爬虫/爬虫基础/爬虫相关工具列表/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-  
-    <article id="post-4.python爬虫/爬虫基础/数据提取 json  Xpath" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/18/4.python爬虫/爬虫基础/数据提取 json  Xpath/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-  
-    <article id="post-4.python爬虫/爬虫基础/多线程爬虫" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>多线程爬虫所需应用<br>Queue（对列对象）<br>介绍Queue<br>Queue是python中的标准库，可以直接import Queue引用;队列是线程间最常用的交换数据的形式。<br>Queue的作用<br>python下多线程对于资源的处理，加锁是个重要的环节，因为python原生的list,dict等，都是not thread safe的，所以使用Queue，可以不用手动添加资源锁就能解决资源竞争的问题。<br>在使用Queue进行参数传递的时候，只有Queue列队中有数据，线程就可以获得并执行任务，不需要等待其他线程对数据的处理并传递，更方便数据的传递和处理；<br>使用方法<br>创建队列对象<br>from queue import Queue<br>queue = Queue(maxsize = n)        创建一个最大容量为n的queue列队<br>将一个数值放在队列中<br>queue.put( )      向列队中添加任务，列队满后会阻塞等待<br>myqueue.put_nowait( )    想列队中添加任务，列队满后会报错<br>将一个数值从队列中取出<br>queue.get( )     从列队中取出任务<br>queue.get([block[, timeout]])        从列队中取出任务，超时后会报错<br>备注：从列队取出任务后，列队计数并不会减一，需要标记任务task_done<br>任务完成，列队技术减一<br>queue.task_done( )      列队计数减一<br>列队任务计数不为0时，阻塞线程<br>Queue.join( )                 列队如果不为空，阻塞主线程<br>其他查询列队状态的方法<br>Queue.qsize()              返回队列当前计数大小<br>Queue.empty()           如果队列为空，返回True,反之False<br>Queue.full()                  如果队列满了，返回True,反之False<br>Queue.full                    与 maxsize 大小对应<br>线程的使用（复习）<br>创建子线程<br>import threading<br>t1 = threading.Thread(target=function, args=(, ))<br>将子线程设置为守护进程<br>t1.setDeamon(True)<br>启动子线程<br>t1.start( )<br>线程的使用策略<br>使用策略<br>创建不同功能任务需求的列队<br>在处理时间较长的功能函数处，使用比较多的线程<br>在处理时间比较快的函数处，使用比较少的线程<br>少创建一些线程，线程之间会进行资源的竞争，导致请求失败率增加<br>多设置一些最大请求次数，增加请求成功的几率<br>将失败的请求，任务，防止到一个列表/对列中，单独再对失败的进程进行统一执行<br>断点续爬的思想<br>场景<br>在我们爬取数据的时候，想要先停止爬取，将爬取的状态和数据保存，并想要下次爬取的时候再接着当前的状态继续爬取<br>实现方法<br>可以保存当前的所有的queue列队，在程序结束之前将queue对象存储到redis中<br>当下次启动程序的时候，从redis数据库中读取上次停止之前的queue对象<br>程序判断queue对象的状态，是否全部为空，如果不为空，那么便不需要再重新获取参数想queue列队中添加，直接接着之前的queue的装填进行爬取<br>多线程爬虫代码实例</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/18/4.python爬虫/爬虫基础/多线程爬虫/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-  
-    <article id="post-4.python爬虫/爬虫基础/Splash动态爬取" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Splash的功能介绍和运行<br>Splash的简介<br>Splash是一个JavaScript渲染服务，是一个带有HTTP API的轻量级浏览器，同时它对接了Python中的Twisted和QT库。利用它，我们同样可以实现动态渲染页面的抓取。<br>Splash文档<br>Splash官方文档<br><a href="https://splash.readthedocs.io/en/stable/scripting-ref.html" target="_blank" rel="noopener">https://splash.readthedocs.io/en/stable/scripting-ref.html</a><br>Splash-api官方文档<br><a href="https://splash.readthedocs.io/en/stable/api.html" target="_blank" rel="noopener">https://splash.readthedocs.io/en/stable/api.html</a><br>Splash的功能<br>异步方式处理多个网页渲染过程；<br>获取渲染后的页面的源代码或截图；<br>通过关闭图片渲染或者使用Adblock规则来加快页面渲染速度；<br>可执行特定的JavaScript脚本；<br>可通过Lua脚本来控制页面渲染过程；<br>获取渲染的详细过程并通过HAR（HTTP Archive）格式呈现。<br>Splash服务的运行<br>docker run -d -p 8050:8050 scrapinghub/splash<br>打开<a href="http://localhost:8050/即可看到其Web页面" target="_blank" rel="noopener">http://localhost:8050/即可看到其Web页面</a><br>Splash-Lua脚本介绍<br>Splash的运行机制<br>Splash加载和操作渲染过程，可以理解是由一段Lua代码来操控<br>Splash留出来了一个main() 函数的接口，我们可以通过编写该段函数，操作其传入的splash对象，Splash会调用其指令并执行对应的操作<br>可以在浏览器界面编写并点击render me来启动，也可以通过调用splash-api的方式来调用<br>Splash Lua脚本示例<br>function main(splash, args)<br>assert(splash:go(args.url))         请求url<br>assert(splash:wait(0.5))       等待0.5s<br>return {       返回结果<br>html = splash:html(),            获取页面源码<br>png = splash:png(),        获取页面截图<br>har = splash:har(),        获取请求的详细har信息<br>}<br>end<br>Splash异步处理<br>Splash异步的介绍<br>在脚本内调用的wait()方法类似于Python中的sleep()，其参数为等待的秒数。当Splash执行到此方法时，它会转而去处理其他任务，然后在指定的时间过后再回来继续处理。<br>另外，这里做了加载时的异常检测。go()方法会返回加载页面的结果状态，如果页面出现4xx或5xx状态码，ok变量就为空<br>Splash异步脚本示例<br>function main(splash, args)<br>local example_urls = {“<a href="http://www.baidu.com&quot;" target="_blank" rel="noopener">www.baidu.com&quot;</a>, “<a href="http://www.taobao.com&quot;" target="_blank" rel="noopener">www.taobao.com&quot;</a>, “<a href="http://www.zhihu.com&quot;}" target="_blank" rel="noopener">www.zhihu.com&quot;}</a><br>local urls = args.urls or example_urls<br>local results = {}<br>for index, url in ipairs(urls) do<br>local ok, reason = splash:go(“http://“ .. url)<br>if ok then<br>splash:wait(2)<br>results[url] = splash:png()<br>end<br>end<br>return results<br>end<br>Splash负载均衡的配置<br>搭建多个splash服务节点<br>docker run -d -p 8050:8050 scrapinghub/splash<br>配置负载均衡服务(使用nginx)<br>nginx配置节点<br>​            http {<br>​                upstream splash {<br>​                    least_conn;<br>​                    server 41.159.27.223:8050 weight=4;<br>​                    server 41.159.27.221:8050 weight=2;<br>​                    server 41.159.27.9:8050 weight=2;<br>​                    server 41.159.117.119:8050 weight=1;<br>​                }<br>​                server {<br>​                    listen 8050;<br>​                    location / {<br>​                        proxy_pass <a href="http://splash" target="_blank" rel="noopener">http://splash</a>;<br>​                    }<br>​                }<br>​            }<br>nginx配置认证<br>现在Splash是可以公开访问的，如果不想让其公开访问，还可以配置认证，这仍然借助于Nginx。可以在server的location字段中添加auth_basic和auth_basic_user_file字段，具体配置如下：<br>这里使用的用户名和密码配置放置在/etc/nginx/conf.d目录下，我们需要使用htpasswd命令创建。例如，创建一个用户名为admin的文件，相关命令如下<br>htpasswd -c .htpasswd admin<br>接下来就会提示我们输入密码，输入两次之后，就会生成密码文件，其内容如下：<br>配置完成后，重启一下Nginx服务： sudo nginx -s reload<br>​                server {<br>​                    listen 8050;<br>​                    location / {<br>​                        proxy_pass <a href="http://splash" target="_blank" rel="noopener">http://splash</a>;<br>​                        auth_basic “Restricted”;<br>​                        auth_basic_user_file /etc/nginx/conf.d/.htpasswd;<br>​                    }<br>​                }<br>Splash对象的常用属性<br>加载参数<br>获取方法一<br>​            function main(splash, args)<br>​                local url = args.url<br>​            end<br>获取方法二<br>​            function main(splash)<br>​                local url = splash.args.url<br>​            end<br>开启关闭javascript<br>splash.js_enabled = false/true<br>设置加载的超时时间<br>splash.resource_timeout = 2<br>单位是秒。如果设置为0或nil（类似Python中的None），代表不检测超时。<br>禁止加载图片<br>splash.images_enabled = true/false<br>禁止开启插件(flash等)<br>splash.plugins_enabled = true/false<br>滚动条<br>splash.scroll_position = {x=100, y=400}<br>滚动条向右滚动100像素，向下滚动400像素<br>Splash对象常用方法<br>请求某链接<br>使用方法<br>splash:go{url, baseurl=nil, headers=nil, http_method=”GET”, body=nil, formdata=nil}<br>url：请求的URL。<br>baseurl：可选参数，默认为空，表示资源加载相对路径。<br>headers：可选参数，默认为空，表示请求头。<br>http_method：可选参数，默认为GET，同时支持POST。<br>body：可选参数，默认为空，发POST请求时的表单数据，使用的Content-type为application/json。<br>formdata：可选参数，默认为空，POST的时候的表单数据，使用的Content-type为application/x-www-form-urlencoded。<br>return: 结果ok和原因reason的组合，如果ok为空，代表网页加载出现了错误，此时reason变量中包含了错误的原因<br>使用示例<br>​            function main(splash, args)<br>​                local ok, reason = splash:go{“<a href="http://httpbin.org/post&quot;" target="_blank" rel="noopener">http://httpbin.org/post&quot;</a>, http_method=”POST”, body=”name=Germey”}<br>​                if ok then<br>​                    return splash:html()<br>​                end<br>​            end<br>设置定时任务<br>使用示例(0.2s后获取网页截图)<br>​                    function main(splash, args)<br>​                             local snapshots = {}<br>​                             local timer = splash:call_later(function()<br>​                                 snapshots[“a”] = splash:png()<br>​                                 splash:wait(1.0)<br>​                                 snapshots[“b”] = splash:png()<br>​                                 end, 0.2)<br>​                             splash:go(“<a href="https://www.taobao.com&quot;" target="_blank" rel="noopener">https://www.taobao.com&quot;</a>)<br>​                             splash:wait(3.0)<br>​                             return snapshots<br>​                    end<br>模拟发送get请求<br>使用方法<br>response = splash:http_get{url, headers=nil, follow_redirects=true}<br>url：请求URL。<br>headers：可选参数，默认为空，请求头。<br>follow_redirects：可选参数，表示是否启动自动重定向，默认为true<br>使用示例<br>​            function main(splash, args)<br>​                local treat = require(“treat”)<br>​                local response = splash:http_get(“<a href="http://httpbin.org/get&quot;" target="_blank" rel="noopener">http://httpbin.org/get&quot;</a>)<br>​                    return {<br>​                        html=treat.as_string(response.body),<br>​                        url=response.url,<br>​                        status=response.status<br>​                    }<br>​            end<br>模拟发送post请求<br>使用方法<br>response = splash:http_post{url, headers=nil, follow_redirects=true, body=nil}<br>url：请求URL。<br>headers：可选参数，默认为空，请求头。<br>follow_redirects：可选参数，表示是否启动自动重定向，默认为true。<br>body：可选参数，即表单数据，默认为空。<br>使用示例<br>​            function main(splash, args)<br>​                local treat = require(“treat”)<br>​                local json = require(“json”)<br>​                local response = splash:http_post{“<a href="http://httpbin.org/post&quot;" target="_blank" rel="noopener">http://httpbin.org/post&quot;</a>,<br>​                    body=json.encode({name=”Germey”}),<br>​                    headers={[“content-type”]=”application/json”}<br>​                }<br>​                return {<br>​                    html=treat.as_string(response.body),<br>​                    url=response.url,<br>​                    status=response.status<br>​                }<br>​            end<br>获取页面加载过程描述等信息<br>使用方法<br>splash:har()        获取加载过程详细信息<br>splash:url()        获取正在访问的url<br>页面cookie相关操作<br>使用方法<br>splash:get_cookies()       获取当前页面的cookie<br>cookies = splash:add_cookie{name, value, path=nil, domain=nil, expires=nil, httpOnly=nil, secure=nil}    给页面添加cookie<br>splash:clear_cookies()    清空当前页面所有cookie<br>设置页面大小<br>使用方法<br>splash:get_viewport_size()    获取页面宽高<br>splash:set_viewport_size(width, height)    设置页面宽高<br>splash:set_viewport_full()    设置页面铺满<br>设置User-Agent<br>使用示例<br>​                    function main(splash)<br>​                            splash:set_user_agent(‘Splash’)<br>​                            splash:go(“<a href="http://httpbin.org/get&quot;" target="_blank" rel="noopener">http://httpbin.org/get&quot;</a>)<br>​                            return splash:html()<br>​                    end<br>设置请求头<br>使用示例<br>​                    function main(splash)<br>​                        splash:set_custom_headers({<br>​                                [“User-Agent”] = “Splash”,<br>​                                [“Site”] = “Splash”,<br>​                        })<br>​                        splash:go(“<a href="http://httpbin.org/get&quot;" target="_blank" rel="noopener">http://httpbin.org/get&quot;</a>)<br>​                        return splash:html()<br>​                    end<br>节点操作<br>使用方法<br>element = splash:select(“#kw”)    通过css选择器选择元素, 返回选中的第一个元素<br>element = splash:select_all(“#kw”)    通过css选择器选择元素, 返回选中所有元素<br>element.send_text(‘test’)     向节点输入文本<br>element.mouse_click()    点击节点<br>等待wait<br>使用方法<br>ok, reason = splash:wait{time, cancel_on_redirect=false, cancel_on_error=true}<br>time：等待的秒数。<br>cancel_on_redirect：可选参数，默认为false，表示如果发生了重定向就停止等待，并返回重定向结果。<br>cancel_on_error：可选参数，默认为false，表示如果发生了加载错误，就停止等待。<br>return: 结果ok和原因reason的组合。<br>使用示例<br>​            function main(splash)<br>​                splash:go(“<a href="https://www.taobao.com&quot;" target="_blank" rel="noopener">https://www.taobao.com&quot;</a>)<br>​                splash:wait(2)<br>​                return {html=splash:html()}<br>​            end<br>调用JavaScript定义的方法<br>使用示例<br>​                    function main(splash, args)<br>​                            local get_div_count = splash:jsfunc([[<br>​                                    function () {<br>​                                    var body = document.body;<br>​                                    var divs = body.getElementsByTagName(‘div’);<br>​                                    return divs.length;<br>​                                    }<br>​                                    ]])<br>​                            splash:go(“<a href="https://www.baidu.com&quot;" target="_blank" rel="noopener">https://www.baidu.com&quot;</a>)<br>​                            return (“There are %s DIVs”):format(get_div_count())<br>​                    end<br>执行JavaScript代码(表达式类)<br>使用示例<br>local title = splash:evaljs(“document.title”)  执行JavaScript代码并返回最后一条JavaScript语句的返回结果<br>执行JavaScript代码(声明类)<br>使用示例<br>​                    function main(splash, args)<br>​                         splash:go(“<a href="https://www.baidu.com&quot;" target="_blank" rel="noopener">https://www.baidu.com&quot;</a>)<br>​                          splash:runjs(“foo = function() { return ‘bar’ }”)<br>​                          local result = splash:evaljs(“foo()”)<br>​                          return result<br>​                    end<br>加载js代码<br>使用方法<br>此方法只负责加载JavaScript代码或库，不执行任何操作。如果要执行操作，可以调用evaljs()或runjs()<br>ok, reason = splash:autoload{source_or_url, source=nil, url=nil}<br>source_or_url：JavaScript代码或者JavaScript库链接。<br>source：JavaScript代码。<br>url：JavaScript库链接<br>使用示例<br>​                    function main(splash, args)<br>​                          splash:autoload([[<br>​                                  function get_document_title(){<br>​                                         return document.title;<br>​                            }<br>​                          ]])<br>​                          splash:go(“<a href="https://www.baidu.com&quot;" target="_blank" rel="noopener">https://www.baidu.com&quot;</a>)<br>​                          return splash:evaljs(“get_document_title()”)<br>​                    end<br>页面内容的操作方法<br>使用方法<br>splash:set_content(“<html><body><h1>hello</h1></body></html>“)     添加页面内容<br>splash:html()    获取当前页面源码<br>获取png/jpeg格式的页面截图<br>使用方法<br>splash:png()<br>splash:jpeg()<br>设置代理<br>使用示例<br>​                    function main(splash, args)<br>​                           request = splash:on_request(function(request)<br>​                                    request:set_proxy{host, port, username=nil, password=nil, type=’HTTP/SOCKS5’)<br>​                                    end)<br>​                    end<br>Splash-API的使用<br>Splash API的介绍<br>Splash Lua脚本的用法，但这些脚本是在Splash页面中测试运行的<br>Splash API就是我们可以通过python程序使用Splash服务的方法<br>Splash给我们提供了一些HTTP API接口，我们只需要请求这些接口并传递相应的参数即可<br>常用Splash API<br>render.png<br>接口介绍<br>通过width和height来控制宽高，它返回的是PNG格式的图片二进制数据。示例如下<br>常用参数<br>width、height、render_all<br>使用示例<br>​                        import requests<br>​                        url = ‘<a href="http://localhost:8050/render.png?url=https://www.jd.com&amp;wait=5&amp;width=1000&amp;height=700&#39;" target="_blank" rel="noopener">http://localhost:8050/render.png?url=https://www.jd.com&amp;wait=5&amp;width=1000&amp;height=700&#39;</a><br>​                        response = requests.get(url)<br>​                        with open(‘taobao.png’, ‘wb’) as f:<br>​                               f.write(response.content)<br>render.html<br>接口介绍<br>此接口用于获取JavaScript渲染的页面的HTML代码，接口地址就是Splash的运行地址加此接口名称<br>常用参数<br>url 、baseurl、timeout、resource_timeout、wait、proxy、js、js_source、filter、allowed_domin<br>allowed_content_types、viewport、images、headers、body、heep_method、save_args、load_args<br>使用示例<br>​            import requests<br>​            url = ‘<a href="http://localhost:8050/render.html?url=https://www.baidu.com&#39;" target="_blank" rel="noopener">http://localhost:8050/render.html?url=https://www.baidu.com&#39;</a><br>​            response = requests.get(url)<br>​            print(response.text)<br>render.har<br>接口介绍<br>此接口用于获取页面加载的HAR数据<br>使用示例<br>curl <a href="http://localhost:8050/render.har?url=https://www.jd.com&amp;wait=5" target="_blank" rel="noopener">http://localhost:8050/render.har?url=https://www.jd.com&amp;wait=5</a><br>render.json<br>接口介绍<br>此接口包含了前面接口的所有功能，返回结果是JSON格式<br>以JSON形式返回了相应的请求数据<br>可以通过传入不同参数控制其返回结果。比如，传入html=1，返回结果即会增加源代码数据；传入png=1，返回结果即会增加页面PNG截图数据；传入har=1，则会获得页面HAR数据<br>使用示例<br>curl <a href="http://localhost:8050/render.json?url=https://httpbin.org" target="_blank" rel="noopener">http://localhost:8050/render.json?url=https://httpbin.org</a><br>execute<br>接口介绍<br>用此接口便可实现与Lua脚本的对接<br>可以用该接口，通过原生的Lua脚本来调用splash<br>可以通过lua_source参数传递Lua脚本给splash服务器进行请求和渲染服务<br>常用参数<br>timeout、allowed_domains、proxy、filters、save_args、load_args<br>使用示例<br>​                        import requests<br>​                        from urllib.parse import quote<br>​                        lua = ‘’’<br>​                            function main(splash)<br>​                                return ‘hello’<br>​                            end<br>​                         ‘’’<br>​                        url = ‘<a href="http://localhost:8050/execute?lua_source=&#39;" target="_blank" rel="noopener">http://localhost:8050/execute?lua_source=&#39;</a> + quote(lua)<br>​                        response = requests.get(url)<br>​                        print(response.text)</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/18/4.python爬虫/爬虫基础/Splash动态爬取/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-  
-    <article id="post-4.python爬虫/爬虫基础/Selenium动态爬取" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>动态HTML相关技术<br> JavaScript<br>JavaScript 是网络上最常用也是支持者最多的客户端脚本语言。它可以收集 用户的跟踪数据,不需要重载页面直接提交表单，在页面嵌入多媒体文件，甚至运行网页游戏。<br>jQuery<br>jQuery 是一个十分常见的库,70% 最流行的网站(约 200 万)和约 30% 的其他网站(约 2 亿)都在使用。一个网站使用 jQuery 的特征,就是源代码里包含了 jQuery 入口。如果你在一个网站上看到了 jQuery，那么采集这个网站数据的时候要格外小心。jQuery 可 以动态地创建 HTML 内容,只有在 JavaScript 代码执行之后才会显示。如果你用传统的方 法采集页面内容,就只能获得 JavaScript 代码执行之前页面上的内容。<br>Ajax  / DHTML<br>我们与网站服务器通信的唯一方式，就是发出 HTTP 请求获取新页面。如果提交表单之后，或从服务器获取信息之后，网站的页面不需要重新刷新，那么你访问的网站就在用Ajax 技术。<br>Ajax 其实并不是一门语言,而是用来完成网络任务(可以认为 它与网络数据采集差不多)的一系列技术。Ajax 全称是 Asynchronous JavaScript and XML(异步 JavaScript 和 XML)，网站不需要使用单独的页面请求就可以和网络服务器进行交互 (收发信息)。<br>动态HTML技术的影响<br>动态技术的效果对爬虫的影响（如下情况我们最好使用selenium来解决）<br>动态生成HTML内容，在获取内容的时候，只能获取到js处理之前的内容（可能是js再次发起异步请求，或者是对内容传输过程加密，js解密显示）<br>动态的生成url地址，在请求的时候，不知道其js的处理逻辑，不能解析js处理后的url地址<br>动态的生成请求参数，在请求的时候 ，不知道其js的处理逻辑，不知道js处理后的请求参数<br>服务器端动态生成的验证码（请求同一验证码url地址，返回图片不同），这样无法通过请求url下载图片来获取当前请求的验证码<br>怎么解决<br>直接从 JavaScript 代码里采集内容（费时费力）<br>分析js代码的功能逻辑<br>用python来重新实现其功能，完成参数或者内容的解析<br>用 Python 的 第三方库运行 JavaScript，直接模拟浏览器操作，并获取element中的js渲染后的代码内容。<br>通过使用selenium库来实现直接在浏览器上运行的效果，可以获取浏览器中elements中的源码（js解析后的内容）<br>通过模拟浏览器进行请求，不需要我们构建请求的url地址和请求参数等内容<br>获取模拟登录后的cookie等，保持登录状态<br>Selenium的使用<br>所需工具介绍<br>selenium的介绍<br>Selenium是一个Web的自动化测试工具，最初是为网站自动化测试而开发的，Selenium 可以直接运行在浏览器上，它支持所有主流的浏览器（包括PhantomJS这些无界面的浏览器），可以接收指令，让浏览器自动加载页面，获取需要的数据，甚至页面截屏<br>使用selenium的场景<br>在模拟登录的时候，可以模拟获取到动态的url、请求参数、等进行登录，还可以获取到cookie<br>获取动态HTML页面内容，即请求页面中的内容是经过js修改过动态计算生成的内容<br>各种driver的下载<br>chromedriver官网网站<br><a href="https://sites.google.com/a/chromium.org/chromedriver" target="_blank" rel="noopener">https://sites.google.com/a/chromium.org/chromedriver</a><br>chromedriver下载地址<br><a href="https://chromedriver.storage.googleapis.com/index.html" target="_blank" rel="noopener">https://chromedriver.storage.googleapis.com/index.html</a><br>geckodriver官方网址<br><a href="https://github.com/mozilla/geckodriver" target="_blank" rel="noopener">https://github.com/mozilla/geckodriver</a><br>geckodriver下载地址<br><a href="https://github.com/mozilla/geckodriver/releases" target="_blank" rel="noopener">https://github.com/mozilla/geckodriver/releases</a><br>selenium官方文档<br><a href="http://selenium-python.readthedocs.io/api.html" target="_blank" rel="noopener">http://selenium-python.readthedocs.io/api.html</a><br>创建driver对象、并设置窗口大小<br>from selenium import webdriver<br>from selenium.webdriver import ActionChains<br>from selenium.webdriver.common.by import By<br>from selenium.webdriver.support.ui import WevDriverWait<br>from selenium.webdriver.support import export expected_conditions as EC<br>from selenium.webdriver.remote.command import Command<br>driver = webdriver.PhantomJS( )<br>driver.set_window_size(width, height)      设置浏览器的窗口大小，截图可以根据窗口大小来截取<br>driver.max_windiw( )       让窗口显示最大<br>加载网页<br>driver = webdriver.PhantomJS( )      加载浏览器driver<br>driver.get(“<a href="http://www.baidu.com/&quot;" target="_blank" rel="noopener">http://www.baidu.com/&quot;</a>)    请求url地址<br>寻找元素<br>driver.find_element_by_id()                                  通过id找到元素<br>driver.find_element_by_name()                           通过name属性寻找元素<br>driver.find_element_by_xpath()                            通过xpath来寻找元素<br>driver.find_element_by_link_text()                       通过文本内容寻找a标签<br>driver.find_element_by_partial_link_text()            通过文本内容包含内容寻找a标签<br>driver.find_element_by_tag_name()                     通过标签名获取元素<br>driver.find_element_by_class_name()                  通过类型获取元素<br>driver.find_element_by_css_selector()                  通过css选择器选择元素<br>备注：<br>find_element 和find_elements的区别：find_elements用来寻找多个元素, 返回一个和返回一个列表<br>by_css_selector的用法示例： #food span.dairy.aged<br>元素的交互<br>element.send_keys(“长城”)            在input元素value中输入内容<br>element.clear()                                  清空input标签中输入的内容<br>element.click( )                                  触发元素的事件<br>动作链的使用<br>source_ele = driver.find_element_by_css_selector(‘#draggable’)<br>target_ele = driver.find_element_by_css_selector(‘#droppable’)<br>actions = ActionChains(driver)         创建动作链<br>actions.drag_and_drop(source_ele, target_ele)         调用动作链的方法<br>actions.persorm()     执行动作链<br>指定原生Js代码<br>js_code = “window.scrollTo(0, document.body.scrollHeight)”    定义js代码<br>driver.execute_script(js_code)          指定js代码<br>获取节点元素的属性和文本值等<br>element.get_attribute(‘属性名’)     可以获取元素的属性<br>element.text                                    可以获取文本内容<br>element.id                                        获取元素的id属性<br>element.size                                     获取元素的长宽<br>element.size[‘width’]                    获取元素的宽<br>element.size[‘height’]                  获取元素的高<br>element.tag_name                       获取元素的标签名称<br>element.location                           获取元素的坐标<br>切换Frame<br>driver.switch_to.frame(‘frame_id’ )            切换到iframe标签页面中<br>driver.switch_to.parent_frame()                      切换到父frame中<br>driver.switch_to.default_content()             切换到默认的frame中<br>等待<br>隐式等待<br>等待规则<br>如果selenium没有在DOM中找到节点元素，将等待一段时间<br>时间到达设定的时候后, 再次查找元素，若找不到元素则抛出找不到节点的异常，默认时间是0<br>等待设置方法<br>driver = webdriver.Chrome()<br>driver.implicity_wait(10)     给driver设置了10秒的隐式等待时间<br>driver.get(‘<a href="https://www.baidu.com&#39;" target="_blank" rel="noopener">https://www.baidu.com&#39;</a>)<br>ele = driver.find_element_by_class_name(‘kw’)      寻找元素, 找不到元素的话会等待10秒钟, 若还找不到元素则抛出异常<br>显示等待<br>等待规则<br>规定了一个最长的等待时间，如果在规定的时间内加载出来了这个节点, 就返回找到节点<br>如果没有找点节点则抛出超时异常<br>等待设置方法<br>driver = webdriver.Chrome()<br>driver.get(‘<a href="https://www.baidu.com&#39;" target="_blank" rel="noopener">https://www.baidu.com&#39;</a>)<br>wait = WebDriverWait(driver, 10)        设置了10秒的最大显示等待时间<br>ele = wait.until(EC.presence_of_element_located((By.ID, ‘kw’)))        设置等待条件，并等待寻找到节点<br>ele_1 = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ‘#bt’)))    设置等待条件，并等待寻找到节点<br>常用的等待条件<br>title_is             标题是某内容<br>title_contains             标题包含某内容<br>presence_of_element_located               节点加载出来<br>visibility_of_element_located                 节点课件, 传入定位元组<br>visibility_of                    节点可见，传入节点对象<br>presence_of_all_elements_located          所有节点加载出来<br>text_to_be_present_in_element             某个节点中包含某文字<br>text_to_be_present_in_element_value          某个节点值包含某文字<br>frame_to_be_available_and_switch_to_it      加载并切换<br>invisibility_of_element_located             节点不可见<br>element_to_be_clickable     节点可点击<br>element_to_be_seleted    节点可选择，传入节点对象<br>element_located_to_be_selected     节点可选择，传入定位元组<br>element_selection_state_to_be          传入节点对象以及状态，相等返回True, 否则返回false<br>element_located_selection_state_to_be    传入定位元组以及状态，相等返回True，否则返回False<br>alert_is_present    是否出现警告<br>其他的等待<br>driver.set_page_load_timeout(10)         设置页面加载的超时时间<br>driver.set_script_timeout(10)          设置执行script脚本的超时时间<br>鼠标的移动和点击<br>鼠标的移动<br>actions = ActionChains(driver)<br>actions.move_to_element(element).move_by_offset( lx , ly )<br>actions.perform()<br>element   移动到哪个元素里面<br>lx  相对元素左边界的距离<br>ly 相对元素上边界的距离<br>鼠标的点击<br>from selenium.webdriver.remote.command import Command<br>driver.execute(Command.MOUSE_DOWN, pamas)<br>第一个参数为时间类型<br>第二个参数为命令的附加命令，为字典类型<br>操作driver<br>页面请求参数相关<br>driver.page_source                获取浏览器中element中的内容（即页面的源码）<br>driver.current_url()                获取当前页面url地址<br>driver.back()                          退回上一个页面<br>driver.forward()                     返回到前面一个页面<br>driver.flush()                          刷新当前页面<br>driver.get_cookies()               获取所有的cookie，返回的是列表嵌套字典（存储的每个cookie信息）<br>driver.delete_cookie(“key”)    删除一条cookie<br>driver.delete_all_cookies()      删除所有的cookie内容<br>{cookie[‘name’]: cookie[‘value’] for cookie in driver.get_cookies( )}   将cookie构造请requests请求参数<br>driver.execute_script(‘window.open()’)     开启一个浏览器的选项卡<br>driver.switch_to_window(driver.window_handles[1])         切换到第二个选项卡窗口<br>窗口截图相关<br>from PIL import Image<br>driver.save_screenshot(“长城.png”)     截图浏览器，没有图形界面可以通过截图来观察界面<br>img = Image.open(io.BytesIO(driver.get_screenshot_as_png()))            获取截图并直接读取到内存<br>img_small = img.crop((x0, y0, x1, y1)).convert(‘L’)     对图片进行截图，四个参数代表(左、上、右、下)坐标，并将彩图转化为灰度图<br>img_small.save(‘–path–’)    将图片进行保存<br>width  =  img.size[0]    获取图片的宽<br>height  =  img.size[1]    获取图片的高<br>img1.load( )[ i, j ]       获取图片该像素点的rgb值<br>浏览器开关相关<br>driver.close()    关闭当前页面，当页面全部都关闭后，退出浏览器driver<br>driver.quit()      退出浏览器driver<br>selenium 的driver配置<br>代理的设置<br>phantomjs设置代理ip<br>browser=webdriver.PhantomJS(PATH_PHANTOMJS)<br>proxy=webdriver.Proxy()<br>proxy.proxy_type=ProxyType.MANUAL<br>proxy.http_proxy=’1.9.171.51:800’<br>proxy.add_to_capabilities(webdriver.DesiredCapabilities.PHANTOMJS)<br>browser.start_session(webdriver.DesiredCapabilities.PHANTOMJS)<br>browser.get(‘<a href="http://1212.ip138.com/ic.asp&#39;;" target="_blank" rel="noopener">http://1212.ip138.com/ic.asp&#39;;</a>)<br>Chrome设置代理ip</p>
-<p>firefox设置代理ip<br>方法一</p>
-<p>方法二</p>
-<p>禁用插件和无头浏览器的设置<br>chrome配置方法<br>设置无头浏览器</p>
-<p>设置禁用图片和javascript</p>
-<p>firefox配置方法<br>firefox_options = webdriver.FirefoxOptions()<br>firefox_options.set_preference(u”permissions.default.stylesheet”, 2)   # 禁用css<br>firefox_options.set_preference(u”permissions.default.image”, 2)       # 禁用图片<br>firefox_options.set_preference(u”dom.ipc.plugins.enabled.libflashplayer.so”, “false”)       # 禁用flash插件<br>firefox_options.set_headless()     # 设置为无头浏览器<br>driver = webdriver.Firefox(firefox_options=firefox_options)<br>设置请求头的方法</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/18/4.python爬虫/爬虫基础/Selenium动态爬取/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-  
-    <article id="post-4.python爬虫/爬虫基础/Request模块使用" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Request模块的介绍<br>request 库的特点<br>requests的底层实现就是urllib<br>requests在python2 和python3中通用，方法完全一样<br>requests简单易用<br>requests能够自动帮助我们解压(gzip压缩的等)网页内容<br>requests的作用<br>发送网络请求，返回响应数据<br>中文文档 API：<a href="http://docs.python-requests.org/zh_CN/latest/user/quickstart.html" target="_blank" rel="noopener">http://docs.python-requests.org/zh_CN/latest/user/quickstart.html</a><br>request/response的常用方法和属性<br>requests.get()    get请求<br>使用方法：<br>response = requests.get(url, headers=headers， params=params)    返回响应对象<br>get方法的参数<br>url：为请求的url地址<br>headers：字典形式的命名参数，传递请求头。模拟浏览器获取想获取的数据，防止反扒检测；<br>示例：headers = {“User-Agent”: “Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36”}<br>params：字典形式命名参数，传递请求参数，获取想要获取的数据<br>示例：params = {‘wd’:’长城’}<br>request.post()     post请求<br>使用方法：<br>response = requests.post(url, headers=headers, data= data)<br>post方法的参数<br>url：为请求的url地址（不包含锚点）<br>headers：字典形式的命名参数，传递请求头。模拟浏览器获取想获取的数据，防止反扒检测；<br>示例：headers = {“User-Agent”: “Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36”}<br>data：<br>当时普通的post请求的时候，传递的参数是字典形式命名参数<br>Formdata参数示例：data = {‘wd’:’长城’}<br>当时ajax异步post请求的时候，传递的的字符串形式的参数<br>Payload参数示例：data = json.dumps({‘wd’: ‘长城’})<br>还要加上请求头 ： ‘Content-Type’: ‘application/json’<br>requests.utils   工具<br>requests.utils.qoute(url)     将url编码<br>requests.utils.unqoute(url)     将url进行解码<br>parsed = requests.utils.urlparse(url)     将url进行  协议、ip+端口、文件路径、参数等的拆分<br>parsed.scheme       获取协议名<br>parsed.netloc    获取ip+端口（或者是域名+端口）<br>parsed.path    获取路径<br>parsed.params     获取问号后面的参数<br>response 响应的常用属性和方法<br>response.text               获取响应内容html字符串<br>获取html字符串，结果是<code>str</code>类型<br>其编码方式，是requests根据响应头做出的有根据的推测，尝试使用这个编码方式来解码<br>response.encoding               规定解码的格式<br>可以在使用text属性获取响应字符串之前先规定编码格式，按照设定的编码格式进行解码<br>respones.content         获取响应内容的二进制(bytes)数据<br>通常我们在获取到内容的时候尝试对二进制数据进行解码，下面三种方法能够解决后续我们100%的编解码的需求<br>response.content.deocde()           获取二进制响应内容并解码成为utf-8编码格式的字符串<br>response.content.deocde(“gbk”)         获取二进制响应内容并解码成为gbk编码格式的字符串<br>response.text      在使用content解码失败的时候，可以尝试让request去根据推测进行解码<br>response.status_code       查看响应状态码<br>response.request.headers     查看请求头<br>response.headers      查看响应头<br>response.request.url     查看响应url<br>response.url       查看请求url<br>响应的url可能与请求url不同，比如304重定向，响应的url为重定向的url</p>
-<p><strong><em>找到想要请求url和请求参数的方法</em></strong><br>寻找想要的url<br>第一种情况：表单提交请求，并且表单有action属性<br>通过form表单的action属性/a标签的href属性来找到对应的请求url<br>form表单提交时获取表单中所有的name、value键值对<br>构造成字典，通过requests函数的data参数进行请求<br>第二种情况：通过ajax异步发出的请求（非action表单提交请求）<br>查看抓包结果，存在我们想要最多的数据会是我们想要的响应，其url为主要的请求url<br>当有一些数据不存在该主要的请求中，那说明有js进行了其他异步请求获取了数据<br>我们可以先找到其他请求的响应，找到其url地址，其url地址一般有两种构建途径<br>1.一般的情况下和url相关的信息会存在主请求的响应中，我们可以通过在主响应中获取其他请求的请求url关键字，进行url的构建<br>2.有的时候url地址或参数是通过js动态生成的，这时候，我们需要去寻找对应的js文件来观察js是怎样生成的动态url和参数等（参考下面）<br>寻找想要的js文件（当不是通过form表单的action/a标签href属性提交请求的时候）<br>找到进行url请求的js文件<br>第一种方法<br>使用开发者选择工具，点击会触发请求js的元素<br>点击右边的event Listener，会获取到对应的点击事件<br>点击事件所在的js文件<br>第二种方法<br>先了解js文件中会出现的关键字，一般可以查找url中动态参数名称；<br>通过点击右上角的菜单search all file<br>查找关键字，找到后点击进入对应的js文件<br>会跳转到source界面，点击{}展开代码，显示文件全部的代码<br>找到想要找的事件函数，并在想要查看实现方法的函数前边加上断点<br>通过点击右边的调试工具，可以查看函数的具体执行步骤和实现方法<br>了解了实现的方法后，可以在爬虫请求的时候，实现同样的方法，然后生成参数和url地址，进行请求<br>使用代理获取响应<br>什么叫代理<br>在对网站爬取的时候，通过访问代理服务器，让代理服务器帮我们对目标服务器进行请求，然后通过代理服务器将响应返回给我们；<br>代理的作用<br>在需要大量的进行数据的爬取的时候<br>防止在同一时间，使用同一个ip地址对同一个服务器进行大量的访问，被反扒出来<br>在爬取网站的时候，通过代理服务器可以隐藏我们的真实ip地址，隐藏我们的身份，但是有的代理服务器不能隐匿我们的mac地址，如果想要隐匿我们的mac地址需要使用高匿代理服务器<br>代理服务器的原理</p>
-<p>正向代理/反向代理<br>正向代理<br>在我们请求代理服务器的时候，我们知道我们的最终目标ip地址，比如我们使用代理服务器爬取百度服务器的内容<br>反向代理<br>我们在请求服务器的时候，不知道最终目标ip地址，比如我们在访问nginx反向代理的服务器的时候，我们只是在访问nginx服务器，我们并不知道nginx去访问哪一个ip地址<br>requests使用代理<br>使用方法：<br>requests.get(url, proxies = proxies)<br>需要参数<br>proxies：字典类型命名参数，指定代理服务器支持的协议，和代理服务器的请求地址<br>示例：proxies = {“协议”:”协议://ip:port”}，传递代理服务器支持协议类型（http/https），和代理服务器的ip和端口<br>备注：proxies字典参数最多只能接受两个键值对，一个键是http，一个键是https，定义在进行http/https请求的时候分别使用的代理服务器<br>代理服务器注意点：<br>http的url地址要使用http的代理，https的要使用https的代理<br>透明度低的代理能够被对方服务器找到我们的真实的ip，可能会导致代理的效果不明显<br>cookie与session的请求<br>cookie和session的区别<br>cookie存在浏览器本地，session在服务端<br>cookie不安全，session不会将数据暴露在客户端，比较安全<br>session占用性能，会加长请求的时间<br>cookie存储是有上限的，session没有<br>请求带上cookies的好处<br>能够请求登陆后的页面<br>带上cookie反反扒，用登录成功的cookie来进行伪造<br>伪造请求带上cookie的不好的地方<br>使用同一个cookie，不间断的访问同一个服务器的时候，可以被对方识别为爬虫<br>解决方法：使用多个用户名密码，多账号，随机选用账号进行服务器的访问，模拟多人访问<br>模拟登录cookie/session请求的方法<br>第一种<br>session请求登录接口<br>实例化一个session对象<br>session = requests.session()<br>使用session请求登录接口，session对象会将响应中的cookie进行保存<br>session.post(url, data=data, headers=headers)<br>也可以使用get请求<br>再使用session对象请求其他需要登录的url地址，会自动带上cookie进行访问<br>response =session.get(url, params=params, headers=headers)<br>session对象的作用<br>对响应的cookie进行保存，后面的访问会自动携带cookie<br>第二种<br>要获取了登录后的cookie请求字符串<br>headers中放cookie请求头字符串<br>第三种<br>把cookie的每一个name和value组成一个字典<br>将字典传给requests请求中的cookies参数接收<br>获取response中的cookie的方法<br>获取response中的cookie对象<br>response.cookies      获取respone的cookie对象<br>response.cookies只能获取服务器主动设置的cookie，不能获取我们手动创建的cookie<br>返回的数据类型是列表嵌套字典，每一个字典包含一个cookie的所有信息<br>将cookie对象转化为字典类型的方法<br>requests.utils.dict_from_cookiejar(response.cookies)<br>将python字典类型转化为cookie对象类型<br>requests.utils.cookiejar_from_dict( {‘key’: value } )<br>requests请求常见问题<br> SSl证书验证问题<br>问题产生原因<br>请求协议为https的网站需要向机构申请证书，这样用户才能直接通过https访问，但是有的网站（比如12306）的整数是自己研发的，这样浏览器不会在进行请求的时候，会产生一个证书异常，我们需要点击浏览器上的继续访问，来请求服务器，当我们使用爬虫来进行访问的时候，会直接报出异常<br>解决办法：<br>response = requests.get(“<a href="https://www.12306.cn/mormhweb/" target="_blank" rel="noopener">https://www.12306.cn/mormhweb/</a> “, verify=False)<br>在请求非机构证书的网站的时候，我们需要在请求方法中加上verify=False 的参数，就不会报异常<br>请求超时问题<br>问题产生原因<br>当我们进行请求的时候，我们可能因为在请求摸一个url的时候产生一些异常，导致长时间没有请求成功，由于请求一直在进行，导致后面的程序无法正常执行，验证影响程序的效率或者导致程序终止<br>解决办法<br>应用到的方法<br>from retrying import retry<br>@retry(stop_max_attempt_number=n)      装饰函数，表示函数如果报错将会再次执行，直到第n次如果依然报错，那将抛出异常<br> response = requests.get(url,timeout=10)     设置请求的超时时间，如果限定时间内没有请求成功，将会抛出异常<br>assert response.status_code == m      assert为断言关键字，如果后面的条件表达式为false将会排出异常<br>示例：</p>
-<p>数据处理的技巧<br>字符串的格式化<br>“abc{}abc”.format()<br>不同于%号的格式化，{ }方式的格式化，可以接收任意类型的格式化<br>format  接收的参数与格式化{ }的数量相等<br>在通过字符串格式化构建url进行requests请求时候，尽量使用{ }来格式化，因为在浏览器会将url格式化，%有时候会按照特殊字符处理；<br> json数据与字符串之间的转化<br>import json<br>json.dumps( dict)    把python类型字典数据转化为json字符串<br>json.loads(‘json’ )    把json数据转化为python的字典类型<br>扁平化赋值表达式<br>name = “a” if lang==b else “c”<br>if后面的条件如果成立，那么就把if前的值赋给str<br>否则if否面的条件不成立，就把else后的值赋给str<br>name = a and ‘b’ or ‘c’<br>如果a为true，name等于b<br>如果a为false，name等于c<br>列表推导式和字典推导式<br>列表推倒式<br>[i for i in range(10) if i%2==0]<br>字典推导式<br>{i+1:i for i in range(10) if i%3==0}<br>注意：<br>在列表推导式中可以使用if判断，但是不能够使用else<br>tips<br>linux命令重命名<br>作用<br>可以将一段的linux命令，重名为其他比较短而且容易记忆的命令，方便我们的调用<br>设置方法<br>修改家目录下的.bashrc文件<br>添加  alias  新的命令=’原命令 -选项/参数’<br>保存退出   source .bashrc<br>已经可以使用新的命令了<br>将数据写入文件<br>文件存储内容的方法<br>with open(‘文件路径’, encoding=’utf-8’) as f:<br>f.write(content)<br>encoding 如果文件不存在，相当于我们创建一个文件进行写入，我们可以通过encoding来指定写入内容的编码格式，如果不指定，可能会报错</p>
-<p>常见的反扒思路<br>尽量减少请求的次数<br>能抓列表页不抓详细页<br>保存html页面，有利于重复使用<br>多分析一个网站的不同类型页面<br>手机极速版页面<br>wap手机版页面<br>web网页<br>app抓包软件<br>进行请求伪装<br>多带一些请求头，有的时候请求头带的不同，服务器返回的结果不同<br>代理ip，设置代理ip池，定期更新代理ip池<br>在浏览器会根据cookie内容判断爬虫的时候，携带cookie（但是注意不要一直携带同一个cookie）<br>需要获取登录之后的数据的时候，要进行模拟登录，获取cookie后，在进行数据的获取<br>利用多线程/分布式（尽可能的快速抓取）<br>在可能的情况下尽可能的使用多线程和分布式爬虫</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/18/4.python爬虫/爬虫基础/Request模块使用/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-  
-    <article id="post-4.python爬虫/爬虫基础/Puppeteer动态爬取" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Puppeteer简介<br>Puppeteer介绍<br>Puppeteer 是一个node库，他提供了一组用来操纵Chrome的API, 通俗来说就是一个 headless chrome浏览器 (当然你也可以配置成有UI的，默认是没有的)。既然是浏览器，那么我们手工可以在浏览器上做的事情 Puppeteer 都能胜任, 另外，Puppeteer 翻译成中文是”木偶”意思，所以听名字就知道，操纵起来很方便，你可以很方便的操纵她去实现：<br>运行环境</p>
-<ol>
-<li>Nodejs 的版本不能低于 v7.6.0, 需要支持 async, await.</li>
-<li><p>需要最新的 chrome driver, 这个你在通过 npm 安装 Puppeteer 的时候系统会自动下载的<br>npm install puppeteer<br>3.安装pyppeteer<br>pip install pyppeteer<br>Puppeteer的官方文档<br><a href="https://github.com/miyakogi/pyppeteer" target="_blank" rel="noopener">https://github.com/miyakogi/pyppeteer</a><br>知识前提<br>Puppeteer 几乎所有的操作都是 异步的, 为了使用大量的 then 使得代码的可读性降低，本文所有 demo 代码都是用 async, await 方式实现<br>由于文档上大量使用async和await关键字,  需要提前了解Async/Await 异步编程<br>Puppeteer的基本用法<br>python示例</p>
-</li>
-<li><p>先通过launch() 创建一个浏览器实例 Browser 对象</p>
-</li>
-<li>然后通过 Browser 对象创建页面 Page 对象</li>
-<li>然后 page.goto() 跳转到指定的页面</li>
-<li>调用 page.screenshot() 对页面进行截图</li>
-<li>关闭浏览器<br>Puppeteer的常用属性/方法/对象<br>launch(options)方法<br>介绍<br>使用launch 方法会返回一个browser对象, 创建browser对象的时候可以选择性的配置如下选项<br>常用参数</li>
-</ol>
-<p>Browser对象<br>介绍<br>Browser对象相当于selenium的driver对象, 常用的有如下方法<br>当返回值是promise的时候, 在python中返回的是异步函数, 需要这样的函数需要使用await关键字调用<br>常用方法</p>
-<p>browser.userAgent()    设置browser的请求头<br>Page对象<br>介绍<br>Page对象相当于selenium的每一个标签页<br>我们对页面的元素进行操作就是操作page对象<br>常用方法<br>常用方法<br>page.content()     获取页面的源码<br>page.cookies(…urls)      获取当前的cookies<br>page.goto()     请求某个页面<br>page.click(selector[, options])     点击元素<br>page.focus(selector)    聚焦某元素<br>page.close(options)     关闭当前标签页<br>page.url()   当前页面的url<br>page.reload(options)     重新加载页面<br>page.type(selector, text[, options])    向聚焦的元素框中输入内容<br>获取元素<br>Page.quirySelector()      选择一个元素<br>Page.querySelectorAll()     选择一组元素<br>Page.xpath()     通过xpath选择元素<br>evaluate()方法(运行js脚本/获取元素的属性)<br>evaluate接收字符串为参数， 字符串的内容可以使javascript的原生函数， 或者是表达式， 当字符串的内容是表达式的时候我们通常可以用来获取元素的属性， 当字符串的内容是js函数的时候通常可以用来在当前页面执行js代码<br>当字符串的内容是表达式的时候可以用force_expr属性来强调, 不然可能会识别失败报错<br>示例：</p>
-<p>修改driver的配置</p>
-<ol>
-<li>Page.setViewport() 修改浏览器视窗大小</li>
-<li>Page.setUserAgent() 设置浏览器的 UserAgent 信息</li>
-<li>Page.emulateMedia() 更改页面的CSS媒体类型，用于进行模拟媒体仿真。 可选值为 “screen”, “print”, “null”, 如果设置为 null 则表示禁用媒体仿真。<br>键盘keyboard<br>keyboard.down(key[, options]) 触发 keydown 事件<br>keyboard.press(key[, options]) 按下某个键，key 表示键的名称，比如 ‘ArrowLeft’ 向左键，详细的键名映射请戳这里<br>keyboard.sendCharacter(char) 输入一个字符<br>keyboard.type(text, options) 输入一个字符串<br>keyboard.up(key) 触发 keyup 事件<br>鼠标mouse<br>mouse.click(x, y, [options]) 移动鼠标指针到指定的位置，然后按下鼠标，这个其实 mouse.move 和 mouse.down 或 mouse.up 的快捷操作<br>mouse.down([options]) 触发 mousedown 事件，options 可配置:<br>options.button 按下了哪个键，可选值为[left, right, middle], 默认是 left, 表示鼠标左键<br>options.clickCount 按下的次数，单击，双击或者其他次数<br>delay 按键延时时间<br>mouse.move(x, y, [options]) 移动鼠标到指定位置， options.steps 表示移动的步长<br>mouse.up([options]) 触发 mouseup 事件<br>waitFor()等待方法<br>page.waitFor(selectorOrFunctionOrTimeout[, options[, …args]]) 下面三个的综合 API<br>page.waitForFunction(pageFunction[, options[, …args]]) 等待 pageFunction 执行完成之后<br>page.waitForNavigation(options) 等待页面基本元素加载完之后，比如同步的 HTML, CSS, JS 等代码<br>page.waitForSelector(selector[, options]) 等待某个选择器的元素加载之后，这个元素可以是异步加载的，这个 API 非常有用，你懂的。<br>事件的监听<br>使用方法<br>Page.on(“event”, callback)<br>event: 事件名称<br>callback: 监听到事件后执行的回调函数<br>所有可以监听的事件</li>
-</ol>
-<p>官方文档介绍的Python使用Puppeteer的区别<br>Keyword arguments for options<br>Puppeteer uses object (dictionary in python) for passing options to functions/methods. Pyppeteer accepts both dictionary and keyword arguments for options.<br>Dictionary style option (similar to puppeteer):<br>browser = await launch({‘headless’: True})<br>Keyword argument style option (more pythonic, isn’t it?):<br>browser = await launch(headless=True)<br>Element selector method name ($ -&gt; querySelector)<br>In python, $ is not usable for method name. So pyppeteer usesPage.querySelector()/Page.querySelectorAll()/Page.xpath() instead of Page.$()/Page.$$()/Page.$x(). Pyppeteer also has shorthands for these methods, Page.J(), Page.JJ(), and Page.Jx().<br>Arguments of Page.evaluate() and Page.querySelectorEval()<br>Puppeteer’s version of evaluate() takes JavaScript raw function or string of JavaScript expression, but pyppeteer takes string of JavaScript. JavaScript strings can be function or expression. Pyppeteer tries to automatically detect the string is function or expression, but sometimes it fails. If expression string is treated as function and error is raised, add force_expr=True option, which force pyppeteer to treat the string as expression.<br>Example to get page content:<br>content = await page.evaluate(‘document.body.textContent’, force_expr=True)<br>Example to get element’s inner text:<br>element = await page.querySelector(‘h1’)<br>title = await page.evaluate(‘(element) =&gt; element.textContent’, element)<br>python实现puppeteer同步使用库<br>github  ：  <a href="https://github.com/issacLiuUp/puppeteer" target="_blank" rel="noopener">https://github.com/issacLiuUp/puppeteer</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/18/4.python爬虫/爬虫基础/Puppeteer动态爬取/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-  
-    <article id="post-4.python爬虫/爬虫扩展功能/数据快速写入Csv文件" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>csv文件的写入<br>以列表的方式写入<br>import  csv      导入csv模块<br>with open(‘data.csv’, ‘w’, encoding=’utf-8’) as csvfile:<br>writer = csv.writer(csvfile, delimiter=’,’)    创建阅读器<br>writer.writerow([‘id’, ‘name’, ‘age’])    向csv文件中写入一行数据<br>writer.writerows([ [‘1’, ‘2’, ‘3’], [‘2’, ‘3’, ‘4’] ])     向csv文件中写入多行数据<br>以字典的方式写入<br>import  csv      导入csv模块<br>with open(‘data.csv’, ‘w’, encoding=’utf-8’) as csvfile:<br>fieldnames = [‘id’, ‘name’, ‘age’]<br>writer = csv.DictWriter(csvfile, fieldnames=fieldnames)    创建阅读器， 并指定列索引<br>writer.writeheader()      向文件中写入列的索引<br>writer.writerow({‘id’: 1, ‘name’: 2, ‘age’: 3})    向csv文件中写入一行数据<br>csv文件的读取<br>csv文件按行读取<br>import csv<br>with open(‘data.csv’, ‘r’, encoding=’utf-8’) as csvfile:<br>reader = csv.reader(csvfile)      创建阅读器<br>for row in reader:<br>print(row)</p>
+        <p>分布式任务队列Celery</p>
+<p>分布式任务队列Celery<br>Celery （芹菜）是基于Python开发的分布式任务队列。它支持使用任务队列的方式在分布的机器／进程／线程上执行任务调度。<br>结构<br>核心部件</p>
+<p>broker<br>消息队列，由第三方消息中间件完成<br>常见有RabbitMQ, Redis, MongoDB等</p>
+<p>worker<br>任务执行器<br>可以有多个worker进程<br>worker又可以起多个queue来并行消费消息</p>
+<p>backend<br>后端存储，用于持久化任务执行结果<br>功能部件</p>
+<p>beat<br>定时器，用于周期性调起任务</p>
+<p>flower<br>web管理界面<br>任务<br>基本用法是在程序里引用celery，并将函数方法绑定到task</p>
+<p>from celery import Celery</p>
+<p>app = Celery(‘tasks’, backend=’amqp’, broker=’amqp://guest@localhost//‘)<br>app.conf.CELERY_RESULT_BACKEND = ‘db+sqlite:///results.sqlite’</p>
+<p>@app.task<br>def add(x, y):<br>return x + y<br>然后调用相应方法即可(delay与apply_async都是异步调用)<br>from tasks import add<br>import time<br>result = add.delay(4,4)<br>while not result.ready():<br>print “not ready yet”<br>time.sleep(5)</p>
+<p>print result.get()<br>由于是采用消息队列，因此任务提交之后，程序立刻返回一个任务ID。<br>之后可以通过该ID查询该任务的执行状态和结果。<br>关联任务<br>执行1个任务，完成后再执行第2个，第一个任务的结果做第二个任务的入参<br>add.apply_async((2, 2), link=add.s(16))<br>结果：2+2+16=20<br>还可以做错误处理<br>@app.task(bind=True)<br>def error_handler(self, uuid):<br>result = self.app.AsyncResult(uuid)<br>print(‘Task {0} raised exception: {1!r}\n{2!r}’.format(<br>uuid, result.result, result.traceback))</p>
+<p>add.apply_async((2, 2), link_error=error_handler.s())<br>定时任务<br>让任务在指定的时间执行，与下文叙述的周期性任务是不同的。<br>ETA, 指定任务执行时间,注意时区<br>countdown, 倒计时,单位秒<br>from datetime import datetime, timedelta<br>tomorrow = datetime.utcnow() + timedelta(seconds=3)<br>add.apply_async((2, 2), eta=tomorrow)<br>result = add.apply_async((2, 2), countdown=3)<br>tip<br>任务的信息是保存在broker中的，因此关闭worker并不会丢失任务信息<br>回收任务(revoke)并非是将队列中的任务删除，而是在worker的内存中保存回收的任务task-id，不同worker之间会自动同步上述revoked task-id。<br>由于信息是保存在内存当中的，因此如果将所有worker都关闭了，revoked task-id信息就丢失了，回收过的任务就又可以执行了。要防治这点，需要在启动worker时指定一个文件用于保存信息<br>celery -A app.celery worker –loglevel=info &amp;&gt; celery_worker.log –statedb=/var/tmp/celery_worker.state<br>过期时间<br>expires单位秒，超过过期时间还未开始执行的任务会被回收<br>add.apply_async((10, 10), expires=60)<br>重试<br>max_retries:最大重试次数<br>interval_start:重试等待时间<br>interval_step:每次重试叠加时长，假设第一重试等待1s，第二次等待1＋n秒</p>
+<p>interval_max:最大等待时间</p>
+<p>add.apply_async((2, 2), retry=True, retry_policy={<br>‘max_retries’: 3,<br>‘interval_start’: 0,<br>‘interval_step’: 0.2,<br>‘interval_max’: 0.2,<br>})</p>
+<p>序列化<br>将任务结果按照一定格式序列化处理，支持pickle, JSON, YAML and msgpack<br>add.apply_async((10, 10), serializer=’json’)<br>压缩<br>将任务结果压缩<br>add.apply_async((2, 2), compression=’zlib’)<br>任务路由<br>使用-Q参数为队列(queue)命名，然后调用任务时可以指定相应队列<br>$ celery -A proj worker -l info -Q celery,priority.high</p>
+<p>add.apply_async(queue=’priority.high’)<br>工作流<br>按照一定关系一次调用多个任务<br>group: 并行调度<br>chain: 串行调度<br>chord: 类似group，但分header和body2个部分，header可以是一个group任务，执行完成后调用body的任务<br>map: 映射调度，通过输入多个入参来多次调度同一个任务<br>starmap: 类似map，入参类似＊args<br>chunks:将任务按照一定数量进行分组<br>group<br>from celery import group</p>
 <blockquote>
 <blockquote>
-<p>[‘id’, ‘name’, ‘age’]<br>使用pandas进行csv文件的写入和读取<br>读取csv文件数据的方法<br>df_obj = pd.read_csv(‘filename’, [usecols=[‘col1’, ‘col2’], skiprows=n1, skipfooter=n2, index_col=n3, engine=’python’])     返回的是DataFrame对象<br>filename：表示读取的文件名<br>usecols：表示读取文件的哪些列<br>skiprows:  表示跳过文件的前几行<br>skipfooter： 表示跳过文件的后几行<br>index_col：表示使用那一列作为索引列<br>engine： 使用的解释器引擎， 当读取中文文件的时候需要指定<br>写入csv数据的方法<br>df_obj.to_csv(“filename”)<br>filename：表示读取的文件名,要加上.csv后缀；</p>
+<blockquote>
+<p>res = group(add.s(i, i) for i in xrange(10))()<br>res.get(timeout=1)<br>[0, 2, 4, 6, 8, 10, 12, 14, 16, 18]<br>chain<br>from celery import chain</p>
 </blockquote>
 </blockquote>
+</blockquote>
+<h1 id="2-2-4-8"><a href="#2-2-4-8" class="headerlink" title="2 + 2 + 4 + 8"></a>2 + 2 + 4 + 8</h1><blockquote>
+<blockquote>
+<blockquote>
+<p>res = chain(add.s(2, 2), add.s(4), add.s(8))()<br>res.get()<br>16</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<p>可以用｜来表示chain</p>
+<h1 id="4-16-2-4-8"><a href="#4-16-2-4-8" class="headerlink" title="((4 + 16)  2 + 4)  8"></a>((4 + 16) <em> 2 + 4) </em> 8</h1><blockquote>
+<blockquote>
+<blockquote>
+<p>c2 = (add.s(4, 16) | mul.s(2) | (add.s(4) | mul.s(8)))</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>res = c2()<br>res.get()<br>chord<br>from celery import chord</p>
+<p>#1<em>2+2</em>2+…9*2<br>res = chord((add.s(i, i) for i in xrange(10)), xsum.s())()<br>res.get()<br>90<br>map<br>from proj.tasks import add</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>~xsum.map([range(10), range(100)])<br>[45, 4950]<br>starmap<br>~add.starmap(zip(range(10), range(10)))<br>[0, 2, 4, 6, 8, 10, 12, 14, 16, 18]<br>chunks<br>from proj.tasks import add</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>res = add.chunks(zip(range(100), range(100)), 10)()<br>res.get()<br>[[0, 2, 4, 6, 8, 10, 12, 14, 16, 18],<br>[20, 22, 24, 26, 28, 30, 32, 34, 36, 38],<br>[40, 42, 44, 46, 48, 50, 52, 54, 56, 58],<br>[60, 62, 64, 66, 68, 70, 72, 74, 76, 78],<br>[80, 82, 84, 86, 88, 90, 92, 94, 96, 98],<br>[100, 102, 104, 106, 108, 110, 112, 114, 116, 118],<br>[120, 122, 124, 126, 128, 130, 132, 134, 136, 138],<br>[140, 142, 144, 146, 148, 150, 152, 154, 156, 158],<br>[160, 162, 164, 166, 168, 170, 172, 174, 176, 178],<br>[180, 182, 184, 186, 188, 190, 192, 194, 196, 198]]<br>周期性任务<br>周期性任务就是按照一定的时间检查反复执行的任务。前面描述的定时任务值的是一次性的任务。<br>程序中引入并配置好周期性任务后，beat进程就会定期调起相关任务<br>beat进程是需要单独启动的<br>$ celery -A proj beat<br>或者在worker启动时一起拉起<br>$ celery -A proj worker -B<br>注意一套celery只能启一个beat进程<br>时区配置<br>由于python中时间默认是utc时间，因此最简便的方法是celery也用utc时区</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<p>CELERY_TIMEZONE = ‘UTC’<br>这么配置可以保证任务调度的时间是准确的，但由于服务器一般都配置时区，因此flower、以及日志中的时间可能会有偏差<br>另外一种方法，就是配置正确的时区<br>CELERY_TIMEZONE = ‘Asia/Shanghai’<br>然后任务调起时，将时间带入时区配置<br>local_tz = pytz.timezone(app.config[‘CELERY_TIMEZONE’])<br>format_eta = local_tz.localize(datetime.strptime(eta.strip(), ‘%Y/%m/%d %H:%M:%S’))<br>add.apply_async((2, 2),eta=format_eta)<br>周期性任务配置<br>from datetime import timedelta</p>
+<p>CELERYBEAT_SCHEDULE = {<br>‘add-every-30-seconds’: {<br>‘task’: ‘tasks.add’,<br>‘schedule’: timedelta(seconds=30),<br>‘args’: (16, 16)<br>},<br>}<br>周期性任务配置crontab<br>from celery.schedules import crontab</p>
+<p>CELERYBEAT_SCHEDULE = {</p>
+<h1 id="Executes-every-Monday-morning-at-7-30-A-M"><a href="#Executes-every-Monday-morning-at-7-30-A-M" class="headerlink" title="Executes every Monday morning at 7:30 A.M"></a>Executes every Monday morning at 7:30 A.M</h1><p>‘add-every-monday-morning’: {<br>‘task’: ‘tasks.add’,<br>‘schedule’: crontab(hour=7, minute=30, day_of_week=1),<br>‘args’: (16, 16),<br>},<br>}<br>本文参考官方文档</p>
 
       
 
@@ -604,7 +235,7 @@
 
       
         <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/18/4.python爬虫/爬虫扩展功能/数据快速写入Csv文件/">展开全文 >></a>
+          <a class="article-more-a" href="/2018/10/18/4.python爬虫/celery分布式爬虫/分布式任务队列Celery/">展开全文 >></a>
         </p>
       
 
@@ -633,41 +264,20 @@
 
 
   
-    <article id="post-4.python爬虫/爬虫扩展功能/数据去重方法-HashBloom" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-4.python爬虫/celery分布式爬虫/Celery构建一个分布式爬虫：理论篇" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>hash序列化过滤<br>使用hash哈希方法去重的场景<br>当数据量不大的时候，并且数据所占内存不多的时候<br>当只有几万条url去重的时候，可以直接使用hash+redis的set类型进行数据的去重<br>使用sha1-redis去重的实例<br>​        import hashlib<br>​        import redis<br>​        from redis import *</p>
-<pre><code>class Filter_hash(object):
-    # 创建redis客户端对象
-    sr = StrictRedis(host=&apos;localhost&apos;, port=6379, db=0)
-    # 定义存储hash后数据的key_name     
-    key = &apos;hash_list&apos;        
-
-    def add_hash_num(self, key_name，url):
-            # 创建一个哈希对象
-            fp = hashlib.sha1()
-            # 对url进行哈希序列化
-            fp.update(url)
-            fp_num = fp.hexdiget()
-            # 将十六进制后的序列化的hash数值进行存储
-            added = self.server.sadd(self.key, fp_num)
-            return   added   # 如果插入成功， 返回1，表示数据不重复插入成功，否则返回0
-
-            filter_cur = Filter_hash()
-
-if __name__ == &apos;__main__&apos;:
-      filter_cur.add_hash_num(&apos;url&apos;， &apos;https://www.baidu.com&apos;)
-</code></pre><p>bloom-布隆过滤<br>什么是布隆过滤器<br>是一种space efficient的概率模型数据结构，用于判断一个元素是否在集合中。<br>一个空的布隆过滤器是一个m bit的bitmap，每一位都初始化为0。布隆过滤器定义有k个hash函数，对输入的数据生成k个hash值，定义一个map函数将k个hash值映射到bitmap的k个位。<br>bitmap数据类型<br>bitmap介绍<br>Bitmap不是一个确切的数据类型，而是基于String类型定义的一系列面向位操作的方法。因为String是二进制安全的并且它们的最大长度是512MB， 所以String类型很合适去作为一个2^32长度的位数组。<br>位操作方法可以被分为两组：<br>一、对单一位的操作，比如设置某一位为1或0，或者得到这一位的值；<br>二、对一组位的操作，比方说计算一定范围内的1的个数（比如计数）<br>bitmap的应用场景<br>bitmap一个最大的优势是它通常能在存储信息的时候节省大量空间。比方说一个用增量ID来辨别用户的系统，可以用仅仅512MB的空间来标识40亿个用户是否想要接受通知。<br>使用SETBIT和GETBIT命令来对位进行置数和检索（redis中实现的bitmap类型数据的操作）</p>
-<blockquote>
-<p>setbit key 10 1<br>(integer) 1<br>getbit key 10<br>(integer) 1<br>getbit key 11<br>(integer) 0<br>返回的是该位上之前的数值<br>SETBIT 如上所示，意思是将第10位置位为1，第二个参数可为0或1。如果设置的位超出了当前String的长度，那么会自动增长。（最长2^32，下同）<br>GETBIT 如上所示，返回第10位和第11位的数据，分别是1和0。如果查找的位超出了当前String的长度，那么会返回0。<br>接下来是三个对一组位进行操作的命令:<br>BITOP 执行不同字符串之间的逐位操作。所提供的操作有AND，OR，XOR和NOT。BITCOUNT<br>BITCOUNT 计数,返回bitmap里值为1的位的个数.<br>BITPOS 返回第一个0或1的位置<br>BITPOS和BITCOUNT不仅可以作用于整个bitmap，还可以作用于一定的范围,下面是一个BITCOUNT的例子<br>布隆过滤的原理<br>布隆过滤器需要的是一个位数组(和位图类似)和K个映射函数(和Hash表类似)，在初始状态时，对于长度为m的位数组array，它的所有位被置0　</p>
-</blockquote>
-<p>对于有n个元素的集合S={S1,S2…Sn},通过k个映射函数{f1,f2,……fk}，将集合S中的每个元素Sj(1&lt;=j&lt;=n)映射为K个值{g1,g2…gk}，然后再将位数组array中相对应的array[g1],array[g2]……array[gk]置为1：　</p>
-<p>如果要查找某个元素item是否在S中，则通过映射函数{f1,f2,…fk}得到k个值{g1,g2…gk}，然后再判断array[g1],array[g2]…array[gk]是否都为1，若全为1，则item在S中，否则item不在S中。这个就是布隆过滤器的实现原理。<br>布隆过滤优点<br>相比于其它的数据结构，布隆过滤器在空间和时间方面都有巨大的优势。布隆过滤器存储空间和插入/查询时间都是常数。<br>布隆过滤器不需要存储元素本身，在某些对保密要求非常严格的场合有优势。<br>布隆过滤器可以表示全集，其它任何数据结构都不能；<br>k 和 m 相同，使用同一组 Hash 函数的两个布隆过滤器的交并差运算可以使用位操作进行。<br>缺点<br>误算率（False Positive），随着存入的元素数量增加，错判“在集合内”的概率就越大了，误算率随之增加。<br>一般情况下不能从布隆过滤器中删除元素. 我们很容易想到把位列阵变成整数数组，每插入一个元素相应的计数器加1, 这样删除元素时将计数器减掉就可以了。然而要保证安全的删除元素并非如此简单。首先我们必须保证删除的元素的确在布隆过滤器里面. 这一点单凭这个过滤器是无法保证的。另外计数器回绕也会造成问题。<br>布隆过滤器的应用场景<br>在对大量的数据进行去重的时候， 可以使用布隆过滤器判断元素是否已经在集合中，通过判断的结果，来对数据进行相应的操作<br>布隆过滤实现（包在下方）<br>构造HashMap类<br>这里新建了一个HashMap类。构造函数传入两个值，一个是m位数组的位数，另一个是种子值seed。不同的散列函数需要有不同的seed，这样可以保证不同的散列函数的结果不会碰撞。<br>在hash()方法的实现中，value是要被处理的内容。这里遍历了value的每一位，并利用ord()方法取到每一位的ASCII码值，然后混淆seed进行迭代求和运算，最终得到一个数值。这个数值的结果就由value和seed唯一确定。<br>我们再将这个数值和m进行按位与运算，即可获取到m位数组的映射结果，这样就实现了一个由字符串和seed来确定的散列函数。<br>当m固定时，只要seed值相同，散列函数就是相同的，相同的value必然会映射到相同的位置。<br>所以如果想要构造几个不同的散列函数，只需要改变其seed就好了。以上内容便是一个简易的散列函数的实现。</p>
-<p>构造BloomFilter<br>Bloom Filter里面需要用到k个散列函数，这里要对这几个散列函数指定相同的m值和不同的seed值<br>由于我们需要亿级别的数据的去重，即前文介绍的算法中的n为1亿以上，散列函数的个数k大约取10左右的量级</p>
-<p>实现判断元素是否重复和添加元素到集合的方法<br>insert方法<br>Bloom Filter算法会逐个调用散列函数对放入集合中的元素进行运算，得到在m位位数组中的映射位置，然后将位数组对应的位置置1。<br>这里代码中我们遍历了初始化好的散列函数，然后调用其hash()方法算出映射位置offset，再利用Redis的setbit()方法将该位置1。<br>exit方法<br>我们要实现判定是否重复的逻辑，方法参数value为待判断的元素。我们首先定义一个变量exist，遍历所有散列函数对value进行散列运算，得到映射位置，用getbit()方法取得该映射位置的结果，循环进行与运算。<br>这样只有每次getbit()得到的结果都为1时，最后的exist才为True，即代表value属于这个集合。如果其中只要有一次getbit()得到的结果为0，即m位数组中有对应的0位，那么最终的结果exist就为False，即代表value不属于这个集合。</p>
-<p>布隆过滤源码包<br>bloomfilter.py<br>​            </p>
+        <p>Celery构建一个分布式爬虫：理论篇</p>
+<p>如何构建一个分布式爬虫：理论篇<br>前言<br>本系列文章计划分三个章节进行讲述，分别是理论篇、基础篇和实战篇。理论篇主要为构建分布式爬虫而储备的理论知识，基础篇会基于理论篇的知识写一个简易的分布式爬虫，实战篇则会以微博为例，教大家做一个比较完整且足够健壮的分布式微博爬虫。通过这三篇文章，希望大家能掌握如何构建一个分布式爬虫的方法；能举一反三，将celery用于除爬虫外的其它场景。目前基本上的博客都是教大家使用scrapyd或者scrapy-redis构建分布式爬虫，本系列文章会从另外一个角度讲述如何用requests+celery构建一个健壮的、可伸缩并且可扩展的分布式爬虫。<br>本系列文章属于爬虫进阶文章，期望受众是具有一定Python基础知识和编程能力、有爬虫经验并且希望提升自己的同学。小白要是感兴趣，也可以看看，看不懂的话，可以等有了一定基础和经验后回过头来再看。<br>另外一点说明，本系列文章不是旨在构建一个分布式爬虫框架或者分布式任务调度框架，而是利用现有的分布式任务调度工具来实现分布式爬虫，所以请轻喷。<br>分布式爬虫概览<br>何谓分布式爬虫？<br>通俗的讲，分布式爬虫就是多台机器多个 spider 对多个 url 的同时处理问题，分布式的方式可以极大提高程序的抓取效率。<br>构建分布式爬虫通畅需要考虑的问题<br>（1）如何能保证多台机器同时抓取同一个URL？<br>（2）如果某个节点挂掉，会不会影响其它节点，任务如何继续？<br>（3）既然是分布式，如何保证架构的可伸缩性和可扩展性？不同优先级的抓取任务如何进行资源分配和调度？<br>基于上述问题，我选择使用celery作为分布式任务调度工具，是分布式爬虫中任务和资源调度的核心模块。它会把所有任务都通过消息队列发送给各个分布式节点进行执行，所以可以很好的保证url不会被重复抓取；它在检测到worker挂掉的情况下，会尝试向其他的worker重新发送这个任务信息，这样第二个问题也可以得到解决；celery自带任务路由，我们可以根据实际情况在不同的节点上运行不同的抓取任务（在实战篇我会讲到）。本文主要就是带大家了解一下celery的方方面面(有celery相关经验的同学和大牛可以直接跳过了)<br>Celery知识储备<br>celery基础讲解<br>按celery官网的介绍来说<br>Celery 是一个简单、灵活且可靠的，处理大量消息的分布式系统，并且提供维护这样一个系统的必需工具。它是一个专注于实时处理的任务队列，同时也支持任务调度。<br>下面几个关于celery的核心知识点<br>broker：翻译过来叫做中间人。它是一个消息传输的中间件，可以理解为一个邮箱。每当应用程序调用celery的异步任务的时候，会向broker传递消息，而后celery的worker将会取到消息，执行相应程序。这其实就是消费者和生产者之间的桥梁。<br>backend: 通常程序发送的消息，发完就完了，可能都不知道对方时候接受了。为此，celery实现了一个backend，用于存储这些消息以及celery执行的一些消息和结果。<br>worker: Celery类的实例，作用就是执行各种任务。注意在celery3.1.25后windows是不支持celery worker的！<br>producer: 发送任务，将其传递给broker<br>beat: celery实现的定时任务。可以将其理解为一个producer，因为它也是通过网络调用定时将任务发送给worker执行。注意在windows上celery是不支持定时任务的！<br>下面是关于celery的架构示意图，结合上面文字的话应该会更好理解</p>
+<p>由于celery只是任务队列，而不是真正意义上的消息队列，它自身不具有存储数据的功能，所以broker和backend需要通过第三方工具来存储信息，celery官方推荐的是 RabbitMQ和Redis，另外mongodb等也可以作为broker或者backend，可能不会很稳定，我们这里选择Redis作为broker兼backend。<br>关于redis的安装和配置可以查看这里<br>实际例子<br>先安装celery<br>pip install celery<br>我们以官网给出的例子来做说明，并对其进行扩展。首先在项目根目录下，这里我新建一个项目叫做celerystudy，然后切换到该项目目录下，新建文件tasks.py，然后在其中输入下面代码<br>from celery import Celery</p>
+<p>app = Celery(‘tasks’, broker=’redis://:<a href="mailto:&#39;&#39;@223.129.0.190" target="_blank" rel="noopener">&#39;&#39;@223.129.0.190</a>:6379/2’, backend=’redis://:<a href="mailto:&#39;&#39;@223.129.0.190" target="_blank" rel="noopener">&#39;&#39;@223.129.0.190</a>:6379/3’)</p>
+<p>@app.task<br>def add(x, y):<br>return x + y<br>这里我详细讲一下代码：我们先通过app=Celery()来实例化一个celery对象，在这个过程中，我们指定了它的broker，是redis的db 2,也指定了它的backend,是redis的db3, broker和backend的连接形式大概是这样<br>redis://:password@hostname:port/db_number<br>然后定义了一个add函数，重点是@app.task，它的作用在我看来就是<strong>将add()<br>注册为一个类似服务的东西，本来只能通过本地调用的函数被它装饰后，就可以通过网络来调用。这个tasks.py中的app就是一个worker。它可以有很多任务，比如这里的任务函数add。我们再通过在命令行切换到项目根目录</strong>，执行<br>celery -A tasks worker -l info<br>启动成功后就是下图所示的样子<br>celery的worker启动成功<br>这里我说一下各个参数的意思，-A指定的是app(即Celery实例)所在的文件模块，我们的app是放在tasks.py中，所以这里是 tasks；worker表示当前以worker的方式运行，难道还有别的方式？对的，比如运行定时任务就不用指定worker这个关键字; -l info表示该worker节点的日志等级是info，更多关于启动worker的参数(比如-c、-Q等常用的)请使用<br>celery worker –help<br>进行查看<br>将worker启动起来后，我们就可以通过网络来调用add函数了。我们在后面的分布式爬虫构建中也是采用这种方式分发和消费url的。在命令行先切换到项目根目录，然后打开python交互端<br>from tasks import add<br>rs = add.delay(2, 2) # 这里的add.delay就是通过网络调用将任务发送给add所在的worker执行<br>这个时候我们可以在worker的界面看到接收的任务和计算的结果。<br>[2017-05-19 14:22:43,038: INFO/MainProcess] Received task: tasks.add[c0dfcd0b-d05f-4285-b944-0a8aba3e7e61] # worker接收的任务<br>[2017-05-19 14:22:43,065: INFO/MainProcess] Task tasks.add[c0dfcd0b-d05f-4285-b944-0a8aba3e7e61] succeeded in 0.025274309000451467s: 4 # 执行结果<br>这里是异步调用，如果我们需要返回的结果，那么要等rs的ready状态true才行。这里add看不出效果，不过试想一下，如果我们是调用的比较占时间的io任务，那么异步任务就比较有价值了<br>rs #<br>rs.ready() # true 表示已经返回结果了<br>rs.status # ‘SUCCESS’ 任务执行状态，失败还是成功<br>rs.successful() # True 表示执行成功<br>rs.result # 4 返回的结果<br>rs.get() # 4 返回的结果<br>from tasks import add</p>
+<p>if <strong>name</strong> == ‘<strong>main</strong>‘:<br>add.delay(5, 10)<br>这时候可以在celery的worker界面看到执行的结果<br>[2017-05-19 14:25:48,039: INFO/MainProcess] Received task: tasks.add[f5ed0d5e-a337-45a2-a6b3-38a58efd9760]<br>[2017-05-19 14:25:48,074: INFO/MainProcess] Task tasks.add[f5ed0d5e-a337-45a2-a6b3-38a58efd9760] succeeded in 0.03369094600020617s: 15<br>此外，我们还可以通过send_task()来调用，将excute_tasks.py改成这样<br>from tasks import app<br>if <strong>name</strong> == ‘<strong>main</strong>‘:<br>app.send_task(‘tasks.add’, args=(10, 15),)<br>这种方式也是可以的。send_task()还可能接收到为注册（即通过@app.task装饰）的任务，这个时候worker会忽略这个消息<br>[2017-05-19 14:34:15,352: ERROR/MainProcess] Received unregistered task of type ‘tasks.adds’.<br>The message has been ignored and discarded.<br>定时任务<br>上面部分讲了怎么启动worker和调用worker的相关函数，这里再讲一下celery的定时任务。<br>爬虫由于其特殊性，可能需要定时做增量抓取，也可能需要定时做模拟登陆，以防止cookie过期，而celery恰恰就实现了定时任务的功能。在上述基础上，我们将tasks.py文件改成如下内容<br>from celery import Celery<br>app = Celery(‘add_tasks’, broker=’redis:’’//223.129.0.190:6379/2’, backend=’redis:’’//223.129.0.190:6379/3’)<br>app.conf.update(</p>
+<h1 id="配置所在时区"><a href="#配置所在时区" class="headerlink" title="配置所在时区"></a>配置所在时区</h1><p>CELERY_TIMEZONE=’Asia/Shanghai’,<br>CELERY_ENABLE_UTC=True,</p>
+<h1 id="官网推荐消息序列化方式为json"><a href="#官网推荐消息序列化方式为json" class="headerlink" title="官网推荐消息序列化方式为json"></a>官网推荐消息序列化方式为json</h1><p>CELERY_ACCEPT_CONTENT=[‘json’],<br>CELERY_TASK_SERIALIZER=’json’,<br>CELERY_RESULT_SERIALIZER=’json’,</p>
+<h1 id="配置定时任务"><a href="#配置定时任务" class="headerlink" title="配置定时任务"></a>配置定时任务</h1><p>CELERYBEAT_SCHEDULE={<br>‘my_task’: {<br>‘task’: ‘tasks.add’, # tasks.py模块下的add方法<br>‘schedule’: 60, # 每隔60运行一次<br>‘args’: (23, 12),<br>}<br>}<br>)<br>@app.task<br>def add(x, y):<br>return x + y<br>然后先通过ctrl+c停掉前一个worker，因为我们代码改了，需要重启worker才会生效。我们再次以celery -A tasks worker -l info这个命令开启worker。<br>这个时候我们只是开启了worker，如果要让worker执行任务，那么还需要通过beat给它定时发送，我们再开一个命令行，切换到项目根目录，通过<br>celery beat -A tasks -l info<br>celery beat v3.1.25 (Cipater) is starting.<br><strong> - … </strong> - _<br>Configuration -&gt;<br>. broker -&gt; redis://223.129.0.190:6379/2<br>. loader -&gt; celery.loaders.app.AppLoader<br>. scheduler -&gt; celery.beat.PersistentScheduler<br>. db -&gt; celerybeat-schedule<br>. logfile -&gt; [stderr]@%INFO<br>. maxinterval -&gt; now (0s)<br>[2017-05-19 15:56:57,125: INFO/MainProcess] beat: Starting…<br>这样就表示定时任务已经开始运行了。<br>眼尖的同学可能看到我这里celery的版本是3.1.25，这是因为celery支持的windows最高版本是3.1.25。由于我的分布式微博爬虫的worker也同时部署在了windows上，所以我选择了使用 3.1.25。如果全是linux系统，建议使用celery4。<br>此外，还有一点需要注意，在celery4后，定时任务（通过schedule调度的会这样，通过crontab调度的会马上执行）会在当前时间再过定时间隔执行第一次任务，比如我这里设置的是60秒的间隔，那么第一次执行add会在我们通过celery beat -A tasks -l info启动定时任务后60秒才执行；celery3.1.25则会马上执行该任务。<br>关于定时任务更详细的请看官方文档celery定时任务</p>
 
       
 
@@ -680,7 +290,545 @@ if __name__ == &apos;__main__&apos;:
 
       
         <p class="article-more-link">
-          <a class="article-more-a" href="/2018/10/18/4.python爬虫/爬虫扩展功能/数据去重方法-HashBloom/">展开全文 >></a>
+          <a class="article-more-a" href="/2018/10/18/4.python爬虫/celery分布式爬虫/Celery构建一个分布式爬虫：理论篇/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+    <article id="post-4.python爬虫/celery分布式爬虫/Celery构建一个分布式爬虫：基础篇" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Celery构建一个分布式爬虫：基础篇</p>
+<p>如何构建一个分布式爬虫：基础篇<br>首先，我们新建目录distributedspider，然后再在其中新建文件workers.py,里面内容如下<br>from celery import Celery<br>app = Celery(‘crawl_task’, include=[‘tasks’], broker=’redis://223.129.0.190:6379/1’, backend=’redis://223.129.0.190:6379/2’)</p>
+<h1 id="官方推荐使用json作为消息序列化方式"><a href="#官方推荐使用json作为消息序列化方式" class="headerlink" title="官方推荐使用json作为消息序列化方式"></a>官方推荐使用json作为消息序列化方式</h1><p>app.conf.update(<br>CELERY_TIMEZONE=’Asia/Shanghai’,<br>CELERY_ENABLE_UTC=True,<br>CELERY_ACCEPT_CONTENT=[‘json’],<br>CELERY_TASK_SERIALIZER=’json’,<br>CELERY_RESULT_SERIALIZER=’json’,<br>)<br>上述代码主要是做Celery实例的初始化工作，include是在初始化celery app的时候需要引入的内容，主要就是注册为网络调用的函数所在的文件。然后我们再编写任务函数，新建文件tasks.py,内容如下<br>import requests<br>from bs4 import BeautifulSoup<br>from workers import app<br>@app.task<br>def crawl(url):<br>print(‘正在抓取链接{}’.format(url))<br>resp_text = requests.get(url).text<br>soup = BeautifulSoup(resp_text, ‘html.parser’)<br>return soup.find(‘h1’).text<br>它的作用很简单，就是抓取指定的url，并且把标签为h1的元素提取出来<br>最后，我们新建文件task_dispatcher.py，内容如下<br>from workers import app<br>url_list = [<br>‘<a href="http://docs.celeryproject.org/en/latest/getting-started/introduction.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/getting-started/introduction.html&#39;</a>,<br>‘<a href="http://docs.celeryproject.org/en/latest/getting-started/brokers/index.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/getting-started/brokers/index.html&#39;</a>,<br>‘<a href="http://docs.celeryproject.org/en/latest/getting-started/first-steps-with-celery.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/getting-started/first-steps-with-celery.html&#39;</a>,<br>‘<a href="http://docs.celeryproject.org/en/latest/getting-started/next-steps.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/getting-started/next-steps.html&#39;</a>,<br>‘<a href="http://docs.celeryproject.org/en/latest/getting-started/resources.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/getting-started/resources.html&#39;</a>,<br>‘<a href="http://docs.celeryproject.org/en/latest/userguide/application.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/userguide/application.html&#39;</a>,<br>‘<a href="http://docs.celeryproject.org/en/latest/userguide/tasks.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/userguide/tasks.html&#39;</a>,<br>‘<a href="http://docs.celeryproject.org/en/latest/userguide/canvas.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/userguide/canvas.html&#39;</a>,<br>‘<a href="http://docs.celeryproject.org/en/latest/userguide/workers.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/userguide/workers.html&#39;</a>,<br>‘<a href="http://docs.celeryproject.org/en/latest/userguide/daemonizing.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/userguide/daemonizing.html&#39;</a>,<br>‘<a href="http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html&#39;" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html&#39;</a><br>]<br>def manage_crawl_task(urls):<br>for url in urls:<br>app.send_task(‘tasks.crawl’, args=(url,))<br>if <strong>name</strong> == ‘<strong>main</strong>‘:<br>manage_crawl_task(url_list)<br>这段代码的作用主要就是给worker发送任务，任务是tasks.crawl，参数是url(元祖的形式)<br>现在，让我们在节点A(hostname为resolvewang的主机)上启动worker<br>celery -A workers worker -c 2 -l info<br>这里 -c指定了线程数为2， -l表示日志等级是info。我们把代码拷贝到节点B(节点名为wpm的主机)，同样以相同命令启动worker，便可以看到以下输出<br>两个节点<br>可以看到左边节点(A)先是all alone，表示只有一个节点；后来再节点B启动后，它便和B同步了<br>sync with celery@wpm<br>这个时候，我们运行给这两个worker节点发送抓取任务<br>python task_dispatcher.py<br>可以看到如下输出<br>分布式抓取示意图<br>可以看到两个节点都在执行抓取任务，并且它们的任务不会重复。我们再在redis里看看结果<br>backend示意图<br>可以看到一共有11条结果，说明 tasks.crawl中返回的数据都在db2(backend)中了，并且以json的形式存储了起来，除了返回的结果，还有执行是否成功等信息。<br>到此，我们就实现了一个很基础的分布式网络爬虫，但是它还不具有很好的扩展性，而且貌似太简单了…下一篇我将以微博数据采集为例来演示如何构建一个稳健的分布式网络爬虫。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/18/4.python爬虫/celery分布式爬虫/Celery构建一个分布式爬虫：基础篇/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+    <article id="post-4.python爬虫/celery分布式爬虫/celery分布式：监控界面" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>celery分布式：监控界面</p>
+<p>flower监控服务器<br>flower安装与运行的方法</p>
+<p>通过浏览器打开地址</p>
+<p>可能遇到的错误<br>pymongo.errors.NotMasterError: not master<br>关闭mongodb的数据集<br>其他<br>当服务器数量较多的时候，管理起来会很不方便，可以使用python的supervisor来管理后台进程，遗憾的是它并不支持python3，不过也可以装在python2的环境<br>虽然用了supervisor可以很方便的管理python程序，但是还是得一个个登陆不同的服务器的去管理，咋办捏？<br>我在github上找到一个工具supervisor-easy，可以批量管理supervisor，如图:</p>
+<p>地址：<a href="https://github.com/trytofix/supervisor-easy" target="_blank" rel="noopener">https://github.com/trytofix/supervisor-easy</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/18/4.python爬虫/celery分布式爬虫/celery分布式：监控界面/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+    <article id="post-4.python爬虫/celery分布式爬虫/Celery&amp;flower 后台运行部署" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Celery&amp;flower 后台运行部署<br>celery在后台运行<br>在生产环境中，你可能希望在后台运行worker.下面的文档中有详细的介绍：daemonization tutorial.<br>下面的脚本使用celery multi命令在后台启动一个或多个worker.<br>$ celery multi start w1 -A proj -l info<br>celery multi v4.0.0 (0today8)</p>
+<blockquote>
+<p>Starting nodes…<br>w1.halcyon.local: OK<br>你也可以重新启动:<br>$ celery multi restart w1 -A proj -l info<br>celery multi v4.0.0 (0today8)<br>Stopping nodes…<br>w1.halcyon.local: TERM -&gt; 64024<br>Waiting for 1 node…..<br>w1.halcyon.local: OK<br>Restarting node w1.halcyon.local: OK<br>celery multi v4.0.0 (0today8)<br>Stopping nodes…<br>w1.halcyon.local: TERM -&gt; 64052<br>或者停止它:<br>$ celery multi stop w1 -A proj -l info<br>stop命令是异步的，它不会等待所有的worker真正关闭。你可能需要使用stopwait命令，这个命令会保证当前所有的任务都执行完毕。<br>$ celery multi stopwait w1 -A proj -l info<br>注:celery multi命令不会保存workers的信息，所以当重新启动时你需要使用相同的命令行参数。当停止时，只有相同的pidfile和logfile参数是必须的。</p>
+</blockquote>
+<p>默认情况下，celery会在当前目录下创建pidfile和logfile.为了防止多个worker在启动时相互影响，你可以指定一个特定的目录。<br>$ mkdir -p /var/run/celery<br>$ mkdir -p /var/log/celery<br>$ celery multi start w1 -A proj -l info –pidfile=/var/run/celery/%n.pid \<br>–logfile=/var/log/celery/%n%I.log<br>通过multi命令你可以启动多个workers,另外这个命令还支持强大的命令行语法来为不同的workers指定不同的参数。<br>$ celery multi start 10 -A proj -l info -Q:1-3 images,video -Q:4,5 data \<br>-Q default -L:4,5 debug<br>更多关闭multi的举例请参考multi模块的API手册。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/18/4.python爬虫/celery分布式爬虫/Celery&flower 后台运行部署/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+    <article id="post-20.开发工具/博客/github+hexo博客搭建" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/10/17/20.开发工具/博客/github+hexo博客搭建/">githubpage + hexo + yilia 搭建个人博客</a>
+    </h1>
+  
+
+        
+        <a href="/2018/10/17/20.开发工具/博客/github+hexo博客搭建/" class="archive-article-date">
+  	<time datetime="2018-10-17T11:23:11.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-10-17</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="0-本博客的由来"><a href="#0-本博客的由来" class="headerlink" title="0.本博客的由来"></a>0.本博客的由来</h4><p>本来感觉写博客很费时间，但是最近感觉这两年攒手里的笔记太多了，不方便整理和分享</p>
+<p>所以打算以后就干脆直接将笔记整理到github，这样也比自己维护一个博客省心</p>
+<p>下面就将搭建本博客的步骤也同步上来，当做一个hello-world吧。</p>
+        
+          <a class="article-more-a" href="/2018/10/17/20.开发工具/博客/github+hexo博客搭建/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">博客</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/开发工具//" class="article-tag-list-link color5">开发工具</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/开发工具/博客//" class="article-tag-list-link color3">博客</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/17/20.开发工具/博客/github+hexo博客搭建/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+    <article id="post-11.Docker容器技术/Docker/搭建Registry私有库" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/10/17/11.Docker容器技术/Docker/搭建Registry私有库/">搭建Registry 私有库</a>
+    </h1>
+  
+
+        
+        <a href="/2018/10/17/11.Docker容器技术/Docker/搭建Registry私有库/" class="archive-article-date">
+  	<time datetime="2018-10-17T11:23:11.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-10-17</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="1-关于Registry仓库"><a href="#1-关于Registry仓库" class="headerlink" title="1.关于Registry仓库"></a><strong>1.关于Registry仓库</strong></h3><p>官方的<a href="https://hub.docker.com/" target="_blank" rel="noopener">Docker hub</a>是一个用于管理公共镜像的好地方，我们可以在上面找到我们想要的镜像，也可以把我们自己的镜像推送上去。但是，有时候，我们的使用场景需要我们拥有一个私有的镜像仓库用于管理我们自己的镜像。这个可以通过开源软件Registry来达成目的。</p>
+<p> Registry在github上有两份代码：<a href="https://github.com/docker/docker-registry" target="_blank" rel="noopener">老代码库</a>和<a href="https://github.com/docker/distribution" target="_blank" rel="noopener">新代码库</a>。老代码是采用python编写的，存在pull和push的性能问题，出到0.9.1版本之后就标志为deprecated，不再继续开发。从2.0版本开始就到在新代码库进行开发，新代码库是采用go语言编写，修改了镜像id的生成算法、registry上镜像的保存结构，大大优化了pull和push镜像的效率。</p>
+<p> 官方在Docker hub上提供了registry的镜像（<a href="https://hub.docker.com/_/registry/" target="_blank" rel="noopener">详情</a>），我们可以直接使用该registry镜像来构建一个容器，搭建我们自己的私有仓库服务。Tag为latest的registry镜像是0.9.1版本的，我们直接采用2.1.1版本。</p>
+        
+          <a class="article-more-a" href="/2018/10/17/11.Docker容器技术/Docker/搭建Registry私有库/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">Docker</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Docker容器技术//" class="article-tag-list-link color1">Docker容器技术</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Docker容器技术/Docker//" class="article-tag-list-link color2">Docker</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/17/11.Docker容器技术/Docker/搭建Registry私有库/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+    <article id="post-4.python爬虫/爬虫基础/正则表达式" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/01/12/4.python爬虫/爬虫基础/正则表达式/">正则表达式</a>
+    </h1>
+  
+
+        
+        <a href="/2018/01/12/4.python爬虫/爬虫基础/正则表达式/" class="archive-article-date">
+  	<time datetime="2018-01-11T16:01:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-01-12</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="正则表达式介绍"><a href="#正则表达式介绍" class="headerlink" title="正则表达式介绍"></a>正则表达式介绍</h3><p><strong>什么是正则表达式</strong></p>
+<p>Regular Expression, 又称规则表达式。<br>正则表达式就是用事先定义好的一些特定字符（组合），组成一个“规则字符串”，这个“规则字符串”用来描述一种字符串的匹配模式（pattern）；</p>
+<p><strong>正则的作用</strong></p>
+<p>可以用来检查一个字串是否包含某种子串、将匹配的子串替换或者取出</p>
+<p><strong>正则的特点</strong></p>
+<p>灵活性、逻辑性和功能性非常强大</p>
+        
+          <a class="article-more-a" href="/2018/01/12/4.python爬虫/爬虫基础/正则表达式/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">正则表达式</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/python爬虫//" class="article-tag-list-link color4">python爬虫</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/python爬虫/爬虫基础//" class="article-tag-list-link color5">爬虫基础</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/01/12/4.python爬虫/爬虫基础/正则表达式/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+    <article id="post-4.python爬虫/爬虫基础/爬虫基础相关-介绍" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/12/4.python爬虫/爬虫基础/爬虫基础相关-介绍/">爬虫基础相关--介绍</a>
+    </h1>
+  
+
+        
+        <a href="/2017/01/12/4.python爬虫/爬虫基础/爬虫基础相关-介绍/" class="archive-article-date">
+  	<time datetime="2017-01-11T16:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-01-12</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        
+<a id="more"></a>
+<html>
+<head>
+  <title>Evernote Export</title>
+  <basefont face="微软雅黑" size="2">
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+  <meta name="exporter-version" content="Evernote Windows/307934 (zh-CN, DDL); Windows/10.0.0 (Win64);">
+  <style>
+    body, td {
+      font-family: 微软雅黑;
+      font-size: 10pt;
+    }
+  </style>
+</head>
+<body>
+<a name="558">
+
+<div>
+<span><div><font style="font-size: 14pt; background-color: rgb(255, 250, 165);-evernote-highlight:true;"><span style="background-color: rgb(255, 250, 165); font-size: 14pt; color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">爬虫的介绍</span></font></div><div><ul><li><span style="font-size: 10pt; font-weight: bold; line-height: 13.600000381469727px;">爬虫的定义</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">  模拟浏览器其发送请求，获取到和浏览器一模一样的数据</span></li><li><font style="font-size: 9pt;"><span style="font-size: 9pt; line-height: 1.45;">  浏览器能够看到的，我们爬虫才能够获取到，否则是没有办法获取到的，</span><span style="font-size: 9pt; line-height: 13.600000381469727px;">所以，只要浏览器能做的事情，原则上，爬虫都能做</span></font></li></ul><li><span style="font-size: 10pt; font-weight: bold; line-height: 1.45;">爬虫获取的数据的用途</span></li></ul></div><div><ul><ul><li><span style="font-size: 9pt; line-height: 1.45;">呈现数据，呈现在app或者在网站上</span></li><li><span style="font-size: 9pt; line-height: 13.600000381469727px;">伪造网站请求，进行自动的访问网站</span></li><li><span style="font-size: 9pt; line-height: 1.45;">进行数据分析，获得结论</span></li></ul><li><span style="font-size: 10pt; font-weight: bold; line-height: 1.45;">爬虫的分类</span></li></ul></div><div><ul><ul><li><span style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold; line-height: 1.45;">通用爬虫：</span></span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">搜索引擎的爬虫，通常指搜索引擎的爬虫</span><span style="font-size: 9pt; line-height: 1.45;">，<span style="font-size: 9pt; line-height: 1.45;">通用网络爬虫利用<span style="font-size: 9pt; line-height: 1.45; font-weight: bold;">种子url</span></span><span style="font-size: 9pt; line-height: 1.45;">从互联网中搜集网页，采集信息，这些网页信息用于为搜索引擎建立索引从而提供支持，它决定着整个引擎系统的内容是否丰富，信息是否即时，因此其性能的优劣直接影响着搜索引擎的效果。</span></span></li></ul><li><span style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold; line-height: 1.45;">聚焦爬虫：</span></span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">针对特定网站的爬虫，指定url进行爬取，有明确的爬取目标</span></li></ul></ul><li><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold; line-height: 13.600000381469727px;">通用爬虫工作原理</span></font></li><ul><li><font style="font-size: 12px;"><span style="font-size: 12px; line-height: 13.600000381469727px;">第一步：数据抓取</span></font></li><ul><li><span style="font-size: 9pt;">首先选取一部分的种子URL，将这些URL放入待抓取URL队列；</span></li><li><span style="font-size: 9pt;">取出待抓取URL，解析DNS得到主机的IP，并将URL对应的网页下载下来，存储进已下载网页库中，并且将这些URL放进已抓取URL队列。</span></li><li><span style="font-size: 9pt;">分析已抓取URL队列中的URL，分析其中的其他URL，并且将URL放入待抓取URL队列，从而进入下一个循环....</span></li></ul><li><span style="font-size: 9pt; line-height: 1.45;">第二步：数据存储</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">搜索引擎通过爬虫爬取到的网页，将数据存入原始页面数据库。其中的页面数据与用户浏览器得到的HTML是完全一样的。</span></li><li><span style="font-size: 9pt; line-height: 1.45;">搜索引擎蜘蛛在抓取页面时，也做一定的重复内容检测，一旦遇到访问权重很低的网站上有大量抄袭、采集或者复制的内容，很可能就不再爬行。</span></li></ul><li><span style="font-size: 9pt;">第三步：预处理</span></li><ul><li><span style="font-size: 9pt;">搜索引擎将爬虫抓取回来的页面，进行各种步骤的预处理。</span></li><li><span style="font-size: 9pt;">提取文字</span></li><li><span style="font-size: 9pt;">中文分词</span></li><li><span style="font-size: 9pt;">消除噪音（比如版权声明文字、导航条、广告等……）</span></li><li><span style="font-size: 9pt;">索引处理</span></li><li><span style="font-size: 9pt;">链接关系计算</span></li><li><span style="font-size: 9pt;">特殊文件处理</span></li></ul><li><span style="font-size: 9pt;">第四步：提供检索服务，网站排名</span></li><ul><li><span style="font-size: 9pt;">搜索引擎在对信息进行组织和处理后，为用户提供关键字检索服务，将用户检索相关的信息展示给用户。</span></li><li><span style="font-size: 9pt;">同时会根据页面的PageRank值（链接的访问量排名）来进行网站排名，这样Rank值高的网站在搜索结果中会排名较前，当然也可以直接使用 Money 购买搜索引擎网站排名，简单粗暴。</span></li></ul></ul><li><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold; line-height: 13.600000381469727px;">通用爬虫的局限性</span></font></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">通用搜索引擎所返回的网页里90%的内容无用。</span></li><li><span style="font-size: 9pt; line-height: 1.45;">图片、音频、视频多媒体的内容通用搜索引擎无能为力</span></li><li><span style="font-size: 9pt; line-height: 1.45;">不同用户搜索的目的不全相同，但是返回内容相同</span></li></ul><li><span style="font-weight: bold; line-height: 1.45; font-size: 10pt;">聚焦爬虫的工作流程</span></li></ul></div><div><ul><ul><li><span style="font-size: 9pt;"><img src="/E_img/爬虫基础相关-介绍_files/Image.png" type="image/png" data-filename="Image.png" width="223"></span></li></ul><li><span style="font-size: 10pt; font-weight: bold;">爬虫爬取哪些数据</span></li><ul><li><span style="font-size: 9pt;">教育机构：其他教育机构的开班，招生，就业，口碑</span></li><li><span style="font-size: 9pt;">资讯公司：特定领域的新闻数据的爬虫</span></li><li><span style="font-size: 9pt;">金融公司：关于各个公司的动态的信息，</span></li><li><span style="font-size: 9pt;">酒店/旅游：携程，去哪儿的酒店价格信息/机票，景点价格，其他旅游公司价格信息</span></li><li><span style="font-size: 9pt;">房地产、高铁：10大房地产楼盘门户网站，政府动态等</span></li><li><span style="font-size: 9pt;">强生保健医药：医疗数据，价格，目前的市场的行情</span></li></ul></ul></div><div><ul><li><span style="font-size: 10pt; font-weight: bold; line-height: 1.45;">Robots协议：</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">网站通过Robots协议告诉搜索引擎哪些页面可以抓取，哪些页面不能抓取。</span></li><li><span style="font-size: 9pt; line-height: 13.600000381469727px;">这个协议之是道德层面的协议，这个协议并不能从技术上阻止去对其网站进行爬取。</span></li><li><span style="font-size: 9pt;">例如：</span><a href="https://www.taobao.com/robots.txt" style="font-size: 9pt;" target="_blank" rel="noopener">https://www.taobao.com/robots.txt</a></li></ul></ul><div><span style="background-color: rgb(255, 250, 165); font-size: 14pt; color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">HTTP/HTTPS协议</span></div></div><div><ul><li><span style="font-size: 10pt; font-weight: bold; line-height: 13.600000381469727px;">url的形式</span></li><ul><li><span style="font-size: 9pt;">url表现形式：scheme://host[:port#]/path/…/[?query-string][#anchor]</span></li><ul><li><span style="font-size: 9pt;">scheme：协议(例如：http, https, ftp)</span></li><li><span style="font-size: 9pt;">host：服务器的IP地址或者域名</span></li><li><span style="font-size: 9pt;">port：服务器的端口（如果是走协议默认端口，80  or    443）\
+</span></li><li><span style="font-size: 9pt;">path：访问资源的路径</span></li><li><span style="font-size: 9pt;">query-string：参数，发送给http服务器的数据</span></li><li><span style="font-size: 9pt;">anchor：锚（跳转到网页的指定锚点位置）</span></li><li><span style="font-size: 9pt;">示例：</span><a href="http://localhost:4000/file/part01/1.2.htmlhttp://item.jd.com/11936238.html#product-detail" style="font-size: 9pt;" target="_blank" rel="noopener">http://localhost:4000/file/part01/1.2.htmlhttp://item.jd.com/11936238.html#product-detail</a></li></ul></ul><li><span style="font-size: 10pt; font-weight: bold;">HTTP/HTTPS的区别</span></li><ul><li><span style="font-size: 9pt;">HTTP</span></li><ul><li><span style="font-size: 9pt;">超文本传输协议 </span></li><li><span style="font-size: 9pt;">默认端口号:80</span></li></ul><li><span style="font-size: 9pt; line-height: 1.45;">HTTPS</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">HTTP + SSL(安全套接字层)</span></li><li><span style="font-size: 9pt; line-height: 1.45;">默认端口号：443</span></li></ul><li><span style="font-size: 9pt;">HTTP和HTTPS区别</span></li><ul><li><span style="font-size: 9pt;">浏览器默认请求服务器是以HTTP协议进行请求，如果服务器支持HTTPS协议，会返回给浏览器端一个协议相关的响应，浏览器会重新发起HTTPS协议的请求；</span></li><li><font size="2"><span style="line-height: 13.600000381469727px;"> </span></font></li></ul></ul><li><span style="font-size: 10pt; font-weight: bold; line-height: 13.600000381469727px;">HTTP请求报文的形式</span></li><ul><li><span style="font-size: 9pt;"><img src="/E_img/爬虫基础相关-介绍_files/Image [1].png" type="image/png" data-filename="Image.png" width="357"></span></li></ul><li><span style="font-size: 10pt; font-weight: bold;">http的请求过程</span></li><ul><li><font style="font-size: 9pt;">域名---&gt;dns（拿ip）---&gt;浏览器请求ip---&gt;服务器---&gt;返回资源</font></li></ul><li><span style="font-size: 10pt; font-weight: bold;">HTTP常见的请求头</span></li><ul><li><span style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">1. Host (主机和端口号)</span></span></li><ul><li><span style="font-size: 9pt;">对应网址URL中的Web名称和端口号，用于指定被请求资源的Internet主机和端口号，通常属于URL的Host部分</span></li></ul><li><span style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">2. Connection (链接类型)</span></span></li><ul><li><span style="font-size: 9pt;">keep-alive  客户端携带表示支持长连接</span></li><li><font style="font-size: 9pt;"><span style="font-size: 9pt; line-height: 13.600000381469727px;">keep-alive  服务器端如果回复<span style="font-size: 9pt; line-height: 13.600000381469727px;">keep-alive， 代表允许双方建立长连接</span></span></font></li><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">close： 服务器端回复close，代表不允许建立长连接，浏览器接收到响应后会主动断开连接</span></li></ul><li><span style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">3. Upgrade-Insecure-Requests (浏览器支持升级为HTTPS请求)</span></span></li><ul><li><span style="font-size: 9pt;">升级不安全的请求，意思是会在加载 http 资源时自动替换成 https 请求，让浏览器不再显示https页面中的http请求警报。</span></li></ul><li><span style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">4. User-Agent (浏览器名称)</span></span></li><ul><li><span style="font-size: 9pt;">对方的服务器通过User-Agent判断出来我们是一个手机版的浏览器还是电脑版的，同时能够判断出来浏览器的平台，型号，版本，内核版本</span></li></ul><li><span style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">5. Accept (传输文件类型)</span></span></li><ul><li><span style="font-size: 9pt;">Accept: */*</span><span style="font-size: 9pt;">：表示什么都可以接收。</span></li><li><span style="font-size: 9pt;">Accept：image/gif</span><span style="font-size: 9pt;">：表明客户端希望接受GIF图像格式的资源；</span></li><li><span style="font-size: 9pt;">Accept：text/html</span><span style="font-size: 9pt;">：表明客户端希望接受html文本。</span></li><li><span style="font-size: 9pt;">Accept: text/html, application/xhtml+xml;q=0.9, image/*;q=0.8</span><span style="font-size: 9pt;">：表示浏览器支持的 MIME 类型分别是 html文本、xhtml和xml文档、所有的图像格式资源。</span></li><ul><li><span style="font-size: 9pt;">q是权重系数，范围 0 =&lt; q &lt;= 1，q 值越大，请求越倾向于获得其“;”之前的类型表示的内容。若没有指定q值，则默认为1，按从左到右排序顺序；若被赋值为0，则用于表示浏览器不接受此内容类型。</span></li><li><span style="font-size: 9pt;">text：用于标准化地表示的文本信息，文本消息可以是多种字符集和或者多种格式的；</span></li><li><span style="font-size: 9pt;">application用于传输应用程序数据或者二进制数据。</span></li></ul></ul><li><span style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">6. Referer (页面跳转处)</span></span></li><ul><li><span style="font-size: 9pt;">表明产生请求的网页来自于哪个URL，用户是从该 Referer页面访问到当前请求的页面。这个属性可以用来跟踪Web请求来自哪个页面，是从什么网站来的等。</span></li><li><span style="font-size: 9pt; line-height: 1.45;">防盗链：有时候遇到下载某网站图片，需要对应的referer，否则无法下载图片，那是因为人家做了防盗链，原理就是根据referer去判断是否是本网站的地址，如果不是，则拒绝，如果是，就可以下载。</span></li></ul><li><span style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">7. Accept-Encoding（文件编解码格式）</span></span></li><ul><li><span style="font-size: 9pt;">指出浏览器可以接受的编码方式。编码方式不同于文件格式，它是为了压缩文件并加速文件传递速度。浏览器在接收到Web响应之后先解码，然后再检查文件格式，许多情形下这可以减少大量的下载时间。</span></li><li><span style="font-size: 9pt;">举例：Accept-Encoding:gzip;q=1.0, identity; q=0.5, *;q=0</span></li></ul><li><span style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">8. Cookie （Cookie）</span></span></li><ul><li><span style="font-size: 9pt;">cookies 能够记录用户信息，会在请求的时候一起传递给对方的服务器，对方的服务器能够根据cookie判断出来是否登陆过（用户的状态）</span></li></ul><li><span style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">9. x-requested-with :XMLHttpRequest  (是Ajax 异步请求)</span></span></li><li><span style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">10.</span><span style="font-size: 9pt; font-weight: bold;">Accept-Language   (接受语言)</span></span></li><ul><li><span style="font-size: 9pt;">指出浏览器可以接受的语言种类，如en或en-us指英语，zh或者zh-cn指中文，当服务器能够提供一种以上的语言版本时要用到。</span></li></ul><li><font style="font-size: 12px;"><span style="font-size: 12px; font-weight: bold; line-height: 13.600000381469727px;">11.</span><span style="font-size: 9pt; font-weight: bold; line-height: 13.600000381469727px;">Accept-Charset（字符编码）</span></font></li><ul><li><span style="font-size: 9pt;">指出浏览器可以接受的字符编码。</span></li><li><span style="font-size: 9pt;">举例：Accept-Charset:iso-8859-1,gb2312,utf-8</span></li></ul><li><font style="font-size: 12px;"><span style="font-size: 12px; font-weight: bold; line-height: 13.600000381469727px;">12.</span><span style="font-size: 9pt; font-weight: bold; line-height: 13.600000381469727px;">Content-Type (POST数据类型)</span></font></li><ul><li><span style="font-size: 9pt;">Content-Type：POST请求里用来表示的内容类型。</span></li><li><span style="font-size: 9pt;">举例：Content-Type = Text/XML; charset=gb2312：</span></li></ul><li><span style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">0.请求体</span></span></li></ul><li><span style="font-size: 10pt; font-weight: bold; line-height: 13.600000381469727px;">常见的请求方法</span></li><ul><li><span style="font-size: 9pt;">GET</span></li><ul><li><font style="font-size: 9pt;"><span style="line-height: 13.600000381469727px;">特点：请求所带参数包含在url中，显示在地址栏，请求数据可以被缓存，请求参数有长度限制，请求速度快</span></font></li></ul><li><span style="font-size: 9pt;">P</span><span style="font-size: 9pt; line-height: 1.45;">OST</span></li><ul><li><span style="font-size: 9pt;">特点：请求所带参数在请求体中，请求数据不可以被缓存，请求数据没有长度限制，请求速度慢</span></li></ul></ul><li><span style="font-size: 10pt; font-weight: bold;">常用的响应报头</span></li><ul><li><span style="font-size: 9pt;">1. Cache-Control：must-revalidate, no-cache, private。</span></li><ul><li><span style="font-size: 9pt;">告诉客户端，对资源的缓存建议；</span></li></ul><li><span style="font-size: 9pt;">2. Connection：keep-alive</span></li><ul><li><span style="font-size: 9pt;">作为回应客户端的Connection：keep-alive，告诉客户端是否同意建立长连接；</span></li></ul><li><span style="font-size: 9pt;">3. Content-Encoding:gzip</span></li><ul><li><span style="font-size: 9pt;">告诉客户端，服务端发送的资源是采用gzip编码的；</span></li></ul><li><span style="font-size: 9pt;">4. Content-Type：text/html;charset=UTF-8</span></li><ul><li><span style="font-size: 9pt;">告诉客户端，资源文件的类型，还有字符编码；</span></li></ul><li><span style="font-size: 9pt;">5. Date：Sun, 21 Sep 2016 06:18:21 GMT</span></li><ul><li><span style="font-size: 9pt;">这个是服务端发送资源时的服务器时间，GMT是格林尼治所在地的标准时间。</span></li></ul><li><span style="font-size: 9pt;">6. Expires:Sun, 1 Jan 2000 01:00:00 GMT</span></li><ul><li><span style="font-size: 9pt;">告诉客户端在这个时间前，缓存的到期时间</span></li></ul><li><span style="font-size: 9pt;">7. Pragma:no-cache</span></li><ul><li><span style="font-size: 9pt;">这个含义与Cache-Control等同。</span></li></ul><li><span style="font-size: 9pt;">8.Server：Tengine/1.4.6</span></li><ul><li><span style="font-size: 9pt;">这个是服务器和相对应的版本，只是告诉客户端服务器的信息。</span></li></ul><li><span style="font-size: 9pt;">9. Transfer-Encoding：chunked</span></li><ul><li><span style="font-size: 9pt;">这个响应头告诉客户端，服务器发送的资源的方式是分块发送的</span><span style="font-size: 9pt; line-height: 1.45;">。</span></li></ul></ul><li><span style="font-size: 10pt; font-weight: bold;">HTTP常见响应状态码</span></li><ul><li><span style="font-size: 9pt;">100~199：表示服务器成功接收部分请求，要求客户端继续提交其余请求才能完成整个处理过程</span><span style="font-weight: bold;">。</span></li><li><span style="font-size: 9pt;">200：<span style="font-size: 9pt;">表示服务器成功接收请求并已完成整个处理过程</span></span></li><ul><li><span style="font-size: 9pt;">200~299：表示服务器成功接收请求并已完成整个处理过程。常用200（OK 请求成功）。</span></li></ul><li><span style="font-size: 9pt;">302：临时转移至新的url</span></li><ul><li><span style="font-size: 9pt;">300~399表示请求转</span></li></ul><li><span style="font-size: 9pt;">307：临时转移至新的url</span></li><li><span style="font-size: 9pt;">404：not found</span></li><ul><li><span style="font-size: 9pt;">400~499：客户端的请求有错误，常用404（服务器无法找到被请求的页面）、403（服务器拒绝访问，权限不够）。</span></li></ul><li><span style="font-size: 9pt;">500：服务器内部错误</span></li></ul><li><span style="font-weight: bold;">为什么浏览器渲染出来的页面和爬虫请求的页面不一样</span></li><ul><li><span style="font-size: 9pt; line-height: 13.600000381469727px;">爬虫请求结果</span></li><ul><li><span style="font-size: 9pt;">爬虫只会请求当前url地址，不会主动请求js，所以往往当前URL对应的响应和element的内容不一样</span></li></ul><li><span style="font-size: 9pt; line-height: 13.600000381469727px;">浏览器</span></li><ul><li><span style="font-size: 9pt; line-height: 13.600000381469727px;">浏览器请求服务器渲染出来的界面，以及最终的在终端element显示的内容，和爬虫爬取到的不一样，因为浏览器会对页面中的静态文件的url进行请求，将请求结果渲染到浏览器中，导致最终的网页代码和显示的结果，已经是被js文件进行修改过；</span></li></ul></ul><li><span style="font-size: 10pt; font-weight: bold;">在哪里查看当前url地址对应的响应（不包括对静态文件请求的响应）：</span></li><ul><li><span style="font-size: 9pt;">抓包（network），network下的第一个url地址，当前url地址的response</span></li><li><span style="font-size: 9pt;">右键显示网页源码</span></li></ul></ul><div><br></div><div><span style="background-color: rgb(255, 250, 165);-evernote-highlight:true;"><span style="background-color: rgb(255, 250, 165); font-size: 14pt; color: rgb(50, 135, 18); font-weight: bold; line-height: 13.600000381469727px;-evernote-highlight:true;">字符串和字节（str/ bytes）</span></span></div></div><div><ul><li><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold; line-height: 13.600000381469727px;">python3 字符串应用的字符集</span></font></li><ul><li><span style="font-size: 9pt;">str ：unicode的呈现形式（python3应用的unicode的子集utf-8的形式对字符串进行呈现）</span></li><li><span style="font-size: 9pt;">bytes：二进制互联网上数据的都是以二进制的方式传输的，bytes是二进制格式的字符串</span></li><ul><li><span style="font-size: 9pt; line-height: 13.600000381469727px;">对服务器的请求，要将请求数据先转化为bytes格式；</span></li><li><span style="font-size: 9pt; line-height: 13.600000381469727px;">获取到服务器的响应要将获取到的bytes类型的数据，进行字符串的转化</span></li></ul></ul><li><span style="font-size: 10pt; font-weight: bold;">Unicode/UTF8/ASCII字符集的介绍</span></li><ul><li><span style="font-size: 9pt;">字符(Character)</span></li><ul><li><span style="font-size: 9pt;">各种文字和符号的总称，包括各国家文字、标点符号、图形符号、数字等</span></li></ul><li><span style="font-size: 9pt;">字符集(Character set)</span></li><ul><li><span style="font-size: 9pt;">多个字符的集合字符集包括：</span></li><ul><li><span style="font-size: 9pt;">ASCII字符集、GB2312字符集、GB18030字符集、Unicode字符集</span></li><li><span style="font-size: 9pt;">ASCII编码是1个字节，而Unicode编码通常是2个字节，UTF-8是Unicode的实现方式之一，它是一种变长的编码方式，可以是1，2，3个字节（一句字符的内容而定）</span></li></ul></ul></ul><li><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold; line-height: 13.600000381469727px;">str到bytes之间的转化（</span><span style="font-size: 10pt; font-weight: bold; line-height: 13.600000381469727px;">str、bytes</span><span style="font-size: 10pt; font-weight: bold; line-height: 13.600000381469727px;">）</span></font></li><ul><li><span style="font-size: 9pt; line-height: 13.600000381469727px;">python3中字节和字符之间转化的方法</span></li><ul><li><span style="font-size: 9pt;">从str---&gt; bytes：str使用encode方法转化为 bytes</span></li><li><span style="font-size: 9pt;">从bytes---&gt; str：bytes通过decode转化为str</span></li><li><span style="font-size: 9pt; line-height: 13.600000381469727px;">注意：</span></li><ul><li><span style="font-size: 9pt;">编码方式解码方式必须一样，否则就会出现乱码</span></li></ul></ul></ul></ul></div><div><br></div></span>
+</div></a></body></html> 
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">python爬虫</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/python爬虫//" class="article-tag-list-link color4">python爬虫</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/python爬虫/爬虫基础//" class="article-tag-list-link color5">爬虫基础</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2017/01/12/4.python爬虫/爬虫基础/爬虫基础相关-介绍/">展开全文 >></a>
         </p>
       
 
@@ -711,7 +859,7 @@ if __name__ == &apos;__main__&apos;:
   
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/4/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span>
     </nav>
   
 

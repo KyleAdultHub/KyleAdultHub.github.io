@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="爬虫与诡异的字体-反爬与反反爬的奇技淫巧从今天这篇文章开始，主要给大家过一些小众的反爬策略以及其中的利弊，所以一般来说都会有一个特定的示例，比如今天的反爬策略就来自反爬界大神之一的去哪儿（当然也是爬虫界的）手机版。我们先来用chrome的手机模式开一下去哪儿的机票:看着叫一个干净整洁，完全没毛病。但是！当我们掀开被子看源码的时候 震惊了：不知道大家能不能看清图，我码字注解一下，显示的价格是">
+<meta name="keywords" content="爬虫,反反爬">
+<meta property="og:type" content="article">
+<meta property="og:title" content="破解诡异字体">
+<meta property="og:url" content="http://blog.kyleliu.cn/2017/05/22/4.python爬虫/爬虫特殊反反爬/破解诡异字体/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="爬虫与诡异的字体-反爬与反反爬的奇技淫巧从今天这篇文章开始，主要给大家过一些小众的反爬策略以及其中的利弊，所以一般来说都会有一个特定的示例，比如今天的反爬策略就来自反爬界大神之一的去哪儿（当然也是爬虫界的）手机版。我们先来用chrome的手机模式开一下去哪儿的机票:看着叫一个干净整洁，完全没毛病。但是！当我们掀开被子看源码的时候 震惊了：不知道大家能不能看清图，我码字注解一下，显示的价格是">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/破解诡异字体_files/20170826150342_21359.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/破解诡异字体_files/20170826151158_22856.png">
+<meta property="og:updated_time" content="2018-12-05T08:02:02.087Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="破解诡异字体">
+<meta name="twitter:description" content="爬虫与诡异的字体-反爬与反反爬的奇技淫巧从今天这篇文章开始，主要给大家过一些小众的反爬策略以及其中的利弊，所以一般来说都会有一个特定的示例，比如今天的反爬策略就来自反爬界大神之一的去哪儿（当然也是爬虫界的）手机版。我们先来用chrome的手机模式开一下去哪儿的机票:看着叫一个干净整洁，完全没毛病。但是！当我们掀开被子看源码的时候 震惊了：不知道大家能不能看清图，我码字注解一下，显示的价格是">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/e_img/破解诡异字体_files/20170826150342_21359.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2017/05/22/4.python爬虫/爬虫特殊反反爬/破解诡异字体/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>破解诡异字体 | 刘小恺(Kyle) 的个人博客</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s、 crawler</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2017/05/22/4.python爬虫/爬虫特殊反反爬/破解诡异字体/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s、 crawler">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">破解诡异字体
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2017-05-22 23:00:00" itemprop="dateCreated datePublished" datetime="2017-05-22T23:00:00+08:00">2017-05-22</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/python爬虫/" itemprop="url" rel="index"><span itemprop="name">python爬虫</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/python爬虫/爬虫特殊反反爬/" itemprop="url" rel="index"><span itemprop="name">爬虫特殊反反爬</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/05/22/4.python爬虫/爬虫特殊反反爬/破解诡异字体/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2017/05/22/4.python爬虫/爬虫特殊反反爬/破解诡异字体/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/05/22/4.python爬虫/爬虫特殊反反爬/破解诡异字体/" class="leancloud_visitors" data-flag-title="破解诡异字体">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+<html>
+<body>
+<div>
+<span><div><br></div><div style="box-sizing: border-box; font-size: 10px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"><div style="box-sizing: inherit; background-color: rgb(255, 255, 255); font-size: 16px;"><div style="box-sizing: inherit; background-color: rgb(255, 255, 255);"><div style="box-sizing: inherit;"><div style="box-sizing: inherit; word-wrap: break-word;"><div style="box-sizing: inherit;"><div style="box-sizing: inherit;"><div style="box-sizing: inherit; margin-right: 7.6923%; margin-left: 7.6923%; width: 100%;"><h1 style="box-sizing: inherit; clear: both; margin: 0px 0px 0.2em; text-rendering: optimizelegibility; font-size: 1.75rem;"><span style="font-size: 16px;"><span style="box-sizing: inherit;"><span style="font-size: 1.75rem; background-color: rgb(255, 255, 255); color: rgb(26, 26, 26); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Montserrat, &quot;Helvetica Neue&quot;, sans-serif; font-weight: 700; line-height: 1.25;">爬虫与诡异的字体-反爬与反反爬的奇技淫巧</span></span></span></h1></div><div><div style="box-sizing: inherit; margin: 0px 0px 1.75em;"><span style="box-sizing: inherit; margin-right: 7.6923%; margin-left: 7.6923%; border-color: rgb(209, 209, 209); width: 100%;"><span style="font-size: 16px; color: rgb(26, 26, 26); font-family: -apple-system, &quot;font-size:medium;color:#333333;background-color:#FFFFFF;} &quot;; line-height: 1.75; background-color: rgb(255, 250, 165);-evernote-highlight:true;">从今天这篇文章开始，主要给大家过一些小众的反爬策略以及其中的利弊，所以一般来说都会有一个特定的示例，比如今天的反爬策略就来自反爬界大神之一的去哪儿（当然也是爬虫界的）手机版。</span></span></div><div style="box-sizing: inherit; margin: 0px 0px 1.75em;"><span style="font-size: 16px; background-color: rgb(255, 255, 255); color: rgb(26, 26, 26); font-family: -apple-system, &quot;font-size:medium;color:#333333;background-color:#FFFFFF;} &quot;; line-height: 1.75;">我们先来用chrome的手机模式开一下去哪儿的机票:</span></div><div style="box-sizing: inherit; margin: 0px 0px 1.75em;"><span style="font-size: 16px; background-color: rgb(255, 255, 255); color: rgb(26, 26, 26); font-family: -apple-system, &quot;font-size:medium;color:#333333;background-color:#FFFFFF;} &quot;; line-height: 1.75;"><img height="25" style="box-sizing:inherit;border:0px;height:auto;max-width:100%;vertical-align:middle;display:block;" width="840"><img src="/e_img/破解诡异字体_files/20170826150342_21359.png" type="image/png" data-filename="20170826150342_21359.png" height="528" style="box-sizing:inherit;border:0px;height:auto;max-width:100%;vertical-align:middle;display:block;" width="300"></span></div><div style="box-sizing: inherit; margin: 0px 0px 1.75em;"><span style="font-size: 16px; background-color: rgb(255, 255, 255); color: rgb(26, 26, 26); font-family: -apple-system, &quot;font-size:medium;color:#333333;background-color:#FFFFFF;} &quot;; line-height: 1.75;">看着叫一个干净整洁，完全没毛病。但是！当我们掀开被子看源码的时候 震惊了：</span></div><div style="box-sizing: inherit; margin: 0px 0px 1.75em;"><span style="font-size: 16px; background-color: rgb(255, 255, 255); color: rgb(26, 26, 26); font-family: -apple-system, &quot;font-size:medium;color:#333333;background-color:#FFFFFF;} &quot;; line-height: 1.75;"><img src="/e_img/破解诡异字体_files/20170826151158_22856.png" type="image/png" data-filename="20170826151158_22856.png" height="300" style="box-sizing:inherit;border:0px;height:auto;max-width:100%;vertical-align:middle;display:block;" width="600"></span></div><div style="box-sizing: inherit; margin: 0px 0px 1.75em;"><span style="box-sizing: inherit; font-size: 16px; background-color: rgb(255, 255, 255); color: rgb(26, 26, 26); font-family: -apple-system, &quot;font-size:medium;color:#333333;background-color:#FFFFFF;} &quot;; line-height: 1.75;">不知道大家能不能看清图，我码字注解一下，显示的价格是560，而源码中的价格则是540！</span></div><div style="box-sizing: inherit; margin: 0px 0px 1.75em;"><span style="font-size: 16px; background-color: rgb(255, 255, 255); color: rgb(26, 26, 26); font-family: -apple-system, &quot;font-size:medium;color:#333333;background-color:#FFFFFF;} &quot;; line-height: 1.75;">我们这篇文章就来看看去哪儿手机版是怎么做到的（当然偷偷剧透下，下篇文章咱们主角还是去哪儿）</span></div><div style="box-sizing: inherit; margin: 0px 0px 1.75em;"><span style="font-size: 16px; background-color: rgb(255, 255, 255); color: rgb(26, 26, 26); font-family: -apple-system, &quot;font-size:medium;color:#333333;background-color:#FFFFFF;} &quot;; line-height: 1.75;">其实同学们只要智商在线，看到标题就知道，这是用字体实现，我们看右侧的css面板也可以看到，这个dom元素的字体是单独设置的。也就是去哪儿通过修改字体，让4显示成了6。</span></div><h2><span style="font-size: 24px; background-color: rgb(255, 255, 255); color: rgb(26, 26, 26); font-family: -apple-system, &quot;color:#333333;color:inherit;margin-bottom:1.21739em;margin-top:2.43478em;font-weight:900;background-color:#FFFFFF;} &quot;; line-height: 1.21739;">1.为什么字体可以反爬</span></h2><div style="box-sizing: inherit; margin: 0px 0px 1.75em;"><span style="font-size: 16px; background-color: rgb(255, 255, 255); color: rgb(26, 26, 26); font-family: -apple-system, &quot;font-size:medium;color:#333333;background-color:#FFFFFF;} &quot;; line-height: 1.75;">感觉从这篇文章开始这个套路快进行不下去了。为什么字体可以反爬？ 首先这个迷惑性太大，很多马虎的工程师以为可以了，直接就爬下来，当然就是被老板骂的体无完肤了，对反反爬工程师的精神可以造成1万点伤害。同时呢，去哪儿这个字体是动态生成的字体，也就是说你也不知道下一次刷出来的4到底是几显示出来的。这个道行就比较高了。</span></div><h2><span style="font-size: 24px; background-color: rgb(255, 255, 255); color: rgb(26, 26, 26); font-family: -apple-system, &quot;color:#333333;color:inherit;margin-bottom:1.21739em;margin-top:2.43478em;font-weight:900;background-color:#FFFFFF;} &quot;; line-height: 1.21739;">2.怎么做好字体反爬？</span></h2><div style="box-sizing: inherit; margin: 0px 0px 1.75em;"><span style="font-size: 16px; background-color: rgb(255, 255, 255); color: rgb(26, 26, 26); font-family: -apple-system, &quot;font-size:medium;color:#333333;background-color:#FFFFFF;} &quot;; line-height: 1.75;">这种反爬策略用在数字上确实天衣无缝，非常优雅。唯一值得提的就是一点，如何动态生成字体和页面来做好对应关系。其实这是一个工程性的问题，大部分编程语言都含有生成字体的库，如果对网站整体性能比较自信的话，完全可以每次请求都动态生成，当然这样确实会比较慢，比较推荐是通过定时任务，去更新一个字体池。每次有请求过来，从字体池中随机拿一个字体，换一个随机的名字（可以通过url rewrite来实现），并和现在的数字做一次映射，调整页面显示后整体输出，就可以在尽量不影响性能的情况下搞死反反爬。</span></div><div style="box-sizing: inherit; margin: 0px 0px 1.75em;"><span style="font-size: 16px; background-color: rgb(255, 255, 255); color: rgb(26, 26, 26); font-family: -apple-system, &quot;font-size:medium;color:#333333;background-color:#FFFFFF;} &quot;; line-height: 1.75;">当然使用字体也是有局限的，其中最大的问题莫过于@font-face的兼容性问题，所以去哪儿只在移动端采用这个反爬策略，可能也有兼容性的考虑吧，相比之下，去哪儿的pc端的反爬写法则丑陋很多。</span></div><h2><span style="font-size: 24px; background-color: rgb(255, 255, 255); color: rgb(26, 26, 26); font-family: -apple-system, &quot;color:#333333;color:inherit;margin-bottom:1.21739em;margin-top:2.43478em;font-weight:900;background-color:#FFFFFF;} &quot;; line-height: 1.21739;">3.遇到字体反爬怎么办？</span></h2><div style="box-sizing: inherit; margin: 0px 0px 1.75em;"><span style="font-size: 16px; background-color: rgb(255, 255, 255); color: rgb(26, 26, 26); font-family: -apple-system, &quot;font-size:medium;color:#333333;background-color:#FFFFFF;} &quot;; line-height: 1.75;">好了，万一我就是要爬去哪儿机票了怎么办呢？其实字体反爬处理也并不复杂，就像前面说到的，大部分语言都有字体处理类库，而这种情况大概率来讲只有10个数字的字体，我们将字体解析后只要能找到对应关系，就简单了。这里如果是Java工程师的话，推荐用Apache.Fontbox，贴一段解析的代码，注意这段代码不保证现在可用，仅做参考：</span></div><div style="box-sizing: inherit;"><div style="white-space: pre-wrap; font-size: 1rem; border: 1px solid rgb(209, 209, 209); margin: 0px 0px 1.75em; max-width: 100%; overflow: auto; padding: 1.75em; word-wrap: break-word; box-sizing: inherit; border-radius: 4px; word-break: break-all; background-color: rgb(245, 245, 245);"><div><span style="font-size: 1rem; background-color: rgb(245, 245, 245); color: rgb(51, 51, 51); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Inconsolata, monospace; line-height: 1.3125;">int[] digits = null;</span></div><div><span style="font-size: 1rem; background-color: rgb(245, 245, 245); color: rgb(51, 51, 51); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Inconsolata, monospace; line-height: 1.3125;">BASE64Decoder decoder = new BASE64Decoder();</span></div><div><span style="font-size: 1rem; background-color: rgb(245, 245, 245); color: rgb(51, 51, 51); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Inconsolata, monospace; line-height: 1.3125;">TTFParser parser = new TTFParser();</span></div><div><span style="font-size: 1rem; background-color: rgb(245, 245, 245); color: rgb(51, 51, 51); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Inconsolata, monospace; line-height: 1.3125;">try {</span></div><div><span style="font-size: 1rem; background-color: rgb(245, 245, 245); color: rgb(51, 51, 51); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Inconsolata, monospace; line-height: 1.3125;">byte[] bytes = decoder.decodeBuffer(fontBase64);</span></div><div><span style="font-size: 1rem; background-color: rgb(245, 245, 245); color: rgb(51, 51, 51); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Inconsolata, monospace; line-height: 1.3125;">InputStream inputStream = new ByteArrayInputStream(bytes);</span></div><div><span style="font-size: 1rem; background-color: rgb(245, 245, 245); color: rgb(51, 51, 51); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Inconsolata, monospace; line-height: 1.3125;">TrueTypeFont ttf = parser.parse(inputStream);</span></div><div><span style="font-size: 1rem; background-color: rgb(245, 245, 245); color: rgb(51, 51, 51); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Inconsolata, monospace; line-height: 1.3125;">if(ttf != null &amp;&amp; ttf.getCmap() != null &amp;&amp;</span></div><div><span style="font-size: 1rem; background-color: rgb(245, 245, 245); color: rgb(51, 51, 51); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Inconsolata, monospace; line-height: 1.3125;">ttf.getCmap().getCmaps() != null &amp;&amp;</span></div><div><span style="font-size: 1rem; background-color: rgb(245, 245, 245); color: rgb(51, 51, 51); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Inconsolata, monospace; line-height: 1.3125;">ttf.getCmap().getCmaps().length &gt; 0){</span></div><div><span style="font-size: 1rem; background-color: rgb(245, 245, 245); color: rgb(51, 51, 51); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Inconsolata, monospace; line-height: 1.3125;">digits = new int[10];</span></div><div><span style="font-size: 1rem; background-color: rgb(245, 245, 245); color: rgb(51, 51, 51); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Inconsolata, monospace; line-height: 1.3125;">CmapSubtable[] tables = ttf.getCmap().getCmaps();</span></div><div><span style="font-size: 1rem; background-color: rgb(245, 245, 245); color: rgb(51, 51, 51); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Inconsolata, monospace; line-height: 1.3125;">CmapSubtable table = tables[0];// No matter what</span></div><div><span style="font-size: 1rem; background-color: rgb(245, 245, 245); color: rgb(51, 51, 51); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Inconsolata, monospace; line-height: 1.3125;">for(int i =0;i&lt;10;i++){</span></div><div><span style="font-size: 1rem; background-color: rgb(245, 245, 245); color: rgb(51, 51, 51); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Inconsolata, monospace; line-height: 1.3125;">digits[i] = table.getGlyphId(i+48)-1;</span></div><div><span style="font-size: 1rem; background-color: rgb(245, 245, 245); color: rgb(51, 51, 51); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Inconsolata, monospace; line-height: 1.3125;">}</span></div><div><span style="font-size: 1rem; background-color: rgb(245, 245, 245); color: rgb(51, 51, 51); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Inconsolata, monospace; line-height: 1.3125;">}</span></div><div><span style="font-size: 1rem; background-color: rgb(245, 245, 245); color: rgb(51, 51, 51); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Inconsolata, monospace; line-height: 1.3125;">} catch (IOException e) {</span></div><div><span style="font-size: 1rem; background-color: rgb(245, 245, 245); color: rgb(51, 51, 51); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Inconsolata, monospace; line-height: 1.3125;">digits = null;</span></div><div><span style="font-size: 1rem; background-color: rgb(245, 245, 245); color: rgb(51, 51, 51); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Inconsolata, monospace; line-height: 1.3125;">}</span></div><div><span style="font-size: 1rem; background-color: rgb(245, 245, 245); color: rgb(51, 51, 51); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;, Inconsolata, monospace; line-height: 1.3125;">return digits;</span></div></div></div><div style="box-sizing: inherit; margin: 0px 0px 1.75em;"><br></div><div style="box-sizing: inherit;"><span style="font-size: 16px; background-color: rgb(255, 255, 255); color: rgb(26, 26, 26); font-family: 微软雅黑, &quot;Microsoft YaHei&quot;; line-height: 1.75;"><img height="25" style="box-sizing:inherit;border:0px;height:auto;max-width:100%;vertical-align:middle;display:block;" width="840"><img height="25" style="box-sizing:inherit;border:0px;height:auto;max-width:100%;vertical-align:middle;display:block;" width="840"></span></div></div></div></div></div></div></div></div></div><div><br></div></span>
+</div></body></html>
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/爬虫/" rel="tag"><i class="fa fa-tag"></i> 爬虫</a>
+          
+            <a href="/tags/反反爬/" rel="tag"><i class="fa fa-tag"></i> 反反爬</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/10/4.python爬虫/爬虫常见反反爬/ADSL代理服务器搭建&代理池/" rel="next" title="ADSL代理服务器搭建&代理池">
+                <i class="fa fa-chevron-left"></i> ADSL代理服务器搭建&代理池
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/05/23/4.python爬虫/爬虫特殊反反爬/参数伪造/" rel="prev" title="参数伪造">
+                参数伪造 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s、 crawler</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">53</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">21</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#undefined"><span class="nav-text">爬虫与诡异的字体-反爬与反反爬的奇技淫巧</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-text">1.为什么字体可以反爬</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-text">2.怎么做好字体反爬？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#undefined"><span class="nav-text">3.遇到字体反爬怎么办？</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

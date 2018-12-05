@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Docker镜像Docker镜像介绍Docker镜像时一个只读的Docker容器模板，含有启动Docker容器所需的文件系统结构及其内容，因此是启动一个Docker容器的基础。Docker镜像的文件内容以及一些运行Docker容器的配置文件组成了Docker容器的静态文件系统运行环境-rootfs。可以理解为Docker容器的静态视角，Docker容器是Docker镜像的运行状态rootf">
+<meta name="keywords" content="Docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker镜像管理&amp;Dockerfile">
+<meta property="og:url" content="http://blog.kyleliu.cn/2018/06/20/11.Docker容器技术/Docker/Docker镜像管理&Dockerfile/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="Docker镜像Docker镜像介绍Docker镜像时一个只读的Docker容器模板，含有启动Docker容器所需的文件系统结构及其内容，因此是启动一个Docker容器的基础。Docker镜像的文件内容以及一些运行Docker容器的配置文件组成了Docker容器的静态文件系统运行环境-rootfs。可以理解为Docker容器的静态视角，Docker容器是Docker镜像的运行状态rootf">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Docker镜像管理、Dockerfile_files/Image.png">
+<meta property="og:updated_time" content="2018-12-05T09:03:32.742Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Docker镜像管理&amp;Dockerfile">
+<meta name="twitter:description" content="Docker镜像Docker镜像介绍Docker镜像时一个只读的Docker容器模板，含有启动Docker容器所需的文件系统结构及其内容，因此是启动一个Docker容器的基础。Docker镜像的文件内容以及一些运行Docker容器的配置文件组成了Docker容器的静态文件系统运行环境-rootfs。可以理解为Docker容器的静态视角，Docker容器是Docker镜像的运行状态rootf">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/e_img/Docker镜像管理、Dockerfile_files/Image.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2018/06/20/11.Docker容器技术/Docker/Docker镜像管理&Dockerfile/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Docker镜像管理&Dockerfile | 刘小恺(Kyle) 的个人博客</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s、 crawler</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2018/06/20/11.Docker容器技术/Docker/Docker镜像管理&Dockerfile/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s、 crawler">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Docker镜像管理&Dockerfile
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-06-20 22:00:00" itemprop="dateCreated datePublished" datetime="2018-06-20T22:00:00+08:00">2018-06-20</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Docker容器技术/" itemprop="url" rel="index"><span itemprop="name">Docker容器技术</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Docker容器技术/Docker/" itemprop="url" rel="index"><span itemprop="name">Docker</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/20/11.Docker容器技术/Docker/Docker镜像管理&Dockerfile/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2018/06/20/11.Docker容器技术/Docker/Docker镜像管理&Dockerfile/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/06/20/11.Docker容器技术/Docker/Docker镜像管理&Dockerfile/" class="leancloud_visitors" data-flag-title="Docker镜像管理&Dockerfile">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+<html>
+<body>
+<div>
+<span><div><div><span style="font-size: 18.6667px;background-color: rgb(255, 250, 165);-evernote-highlight:true;"><span style="background-color: rgb(255, 250, 165); font-size: 18.6667px; color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">Docker镜像</span></span></div><ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">Docker镜像介绍</span></font></div></li><ul><li><div><span style="font-size: 9pt;">Docker镜像时一个只读的Docker容器模板，含有启动Docker容器所需的文件系统结构及其内容，因此是启动一个Docker容器的基础。</span></div></li><li><div><span style="font-size: 9pt;">Docker镜像的文件内容以及一些运行Docker容器的配置文件组成了Docker容器的静态文件系统运行环境-rootfs。</span></div></li><li><div><span style="font-size: 9pt;">可以理解为Docker容器的静态视角，Docker容器是Docker镜像的运行状态</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">rootfs介绍</span></font></div></li><ul><li><div><span style="font-size: 9pt;">rootfs是Docker容器在启动时内部进程可见的文件系统，即Docker容器的根目录。</span></div></li><li><div><span style="font-size: 9pt;">rootfs通常包含一个操作系统运行所需的文件系统，例如可能包含典型的类Unix操作系统中的目录系统，/dev 、/proc 等,以及运行Docker容器所需的配置文件、工具等</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">rootfs原理</span></font></div></li><ul><li><div><span style="font-size: 9pt;">在传统的Linux操作系统内核启动时，首先挂在一个只读的rootfs，当系统检测其完整性之后，再将其切换为读写模式</span></div></li><li><div><span style="font-size: 9pt;">在Docker架构中，当Docker daemon 为容器挂在rootfs时，沿用了Linux内核启动时的方法，将rootfs设计为只读模式。在挂在完毕之后，再利用连个挂在技术在只读rootfs上再挂在一个读写层。</span></div></li><li><div><span style="font-size: 9pt;">这样可读写层处于Docker容器文件系统的最顶层，其下可能联合挂在多个只读层，只有在Docker容器运行过程中文件系统发生变化时，才会吧变化的文件内容写到可读写层，并隐藏只读层中的老版本文件</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">Docker镜像的特点</span></font></div></li><ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">分层</span></font></div></li><ul><li><div><span style="font-size: 9pt;">每个镜像都是由一系列的镜像层组成</span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">写时复制</span></font></div></li><ul><li><div><span style="font-size: 9pt;">在多个容器之间共享镜像，每个容器在启动的时候并不需要单独复制一份镜像文件</span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">内容寻址</span></font></div></li><ul><li><div><span style="font-size: 9pt;">根据文件内容来索引镜像和镜像层</span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">联合挂载</span></font></div></li><ul><li><div><span style="font-size: 9pt;">可以在一个挂载点同时挂在多个文件系统，将挂载点的原目录与被挂在内容进行整合，使得最终课件的文件系统将会包含整合之后的各层的文件和目录</span></div></li></ul></ul></ul><div><font style="background-color: rgb(255, 250, 165);font-size: 14pt;-evernote-highlight:true;"><span style="background-color: rgb(255, 250, 165); font-size: 14pt; color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">Docker镜像的构建</span></font></div><ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">使用commit创建镜像</span></font></div></li><ul><li><div><span style="font-size: 9pt;">docker commit命令只是提交容器镜像发生变更了的部分，即修改后的容器镜像与当前仓库中对应镜像之间的差异部分，这使得该操作实际需要提交的文件往往并不多</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">使用commit实现步骤</span></font></div></li><ul><li><div><span style="font-size: 9pt;">1.根据输入的pause参数的设置确定是否暂停该Docker容器的运行</span></div></li><li><div><span style="font-size: 9pt;">2.将容器的可读写层导出打包，该读写层代表了当前运行容器的文件系统与当初启动该容器镜像之间的差异</span></div></li><li><div><span style="font-size: 9pt;">3.在层存储中逐层可读写层差异包</span></div></li><li><div><span style="font-size: 9pt;">4.更新镜像历史信息rootfs，并据此在镜像存储中创建一个新的镜像，记录其原数据</span></div></li><li><div><span style="font-size: 9pt;">5.如果指定了repository信息，则给上述镜像添加tag信息</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">使用build构建镜像--client端</span></font></div></li><ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">命令格式</span></font></div></li><ul><li><div><span style="font-size: 9pt;">docker build [OPTIONS]  PATH | URL |  -</span></div></li><ul><li><div><span style="font-size: 9pt;">path | URL : 其所指向的文件称为上下文context，context包含build Docker镜像过程中所需要的Dockerfile以及其他的资源文件。</span></div></li><li><div><span style="font-size: 9pt;">-t: 指定镜像的名字</span></div></li><li><div><span style="font-size: 9pt;">-f: 指定Dockerfile完整路径  和context的完整路径(可以是相对路径也可以是绝对路径) </span></div></li></ul></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">不同参数，Docker client处理的方法</span></font></div></li><ul><li><div><span style="font-size: 9pt;">1. 第一个参数为 &quot;-&quot;</span></div></li><ul><li><div><span style="font-size: 9pt;">sudo docker build -  Dockerfile</span></div></li><li><div><span style="font-size: 9pt;">sudo docker build -  context.tar.gz</span></div></li><li><div><span style="font-size: 9pt;">该情况，根据命令行输入参数对Dockerfile和context进行设置</span></div></li></ul><li><div><span style="font-size: 9pt;">2.第一个参数为URL，且是git repository URL</span></div></li><ul><li><div><span style="font-size: 9pt;">sudo docker build</span> <a href="http://github.com/creack/docker-firefox" style="font-size: 9pt;" target="_blank" rel="noopener">github.com/creack/docker-firefox</a></div></li><li><div><span style="font-size: 9pt;">该情况，则调用git clone --depth 1 --recursive 命令克隆该Github repository，该操作会在本地的一个临时目录中进行</span></div></li><li><div><span style="font-size: 9pt;">命令你成功之后该目录会作为context传给Docker daemon，该目录中的Dockerfile会被用来进行后续构建Docker镜像</span></div></li></ul><li><div><span style="font-size: 9pt;">3.第一个参数为URL，不是git repository URL</span></div></li><ul><li><div><span style="font-size: 9pt;">该情况，会从该URL下载context，将其封装为一个io流，后面的处理与情况1相同</span></div></li></ul><li><div><span style="font-size: 9pt;">4.context为本地文件或者目录</span></div></li><ul><li><div><span style="font-size: 9pt;">sudo docker build -t vieux/apache:2.0     使用当前文件夹作为context</span></div></li><li><div><span style="font-size: 9pt;">cd /home/myapp/some/dir/really/deep &amp;&amp;</span></div></li><li><div><span style="font-size: 9pt;">sudo docker build -f /home/memyapp/dockerfiles/debug /home/me/myapp  使用指定的两目录分别作为Dockerfile  和context</span></div></li></ul><li><div><span style="font-size: 9pt;">备注：</span></div></li><ul><li><div><span style="font-size: 9pt;">如果目录中有.dockerignore文件，则将context中文件名满足其定义的规则的文件都从上传到列表中排出，不打包给Docker daemon。但唯一的例外是.dockerignore文件中若误写入了.dockerignore本身或者Dockerfile，将不产生作用。如果用户定义了tag，则对其指定的repository和tag进行验证</span></div></li><li><div><span style="font-size: 9pt;">完成了想关信息的设置之后，Docker client想Docker server发送buildHTTP请求，包含了所需的context信息</span></div></li></ul></ul></ul><li><div><font style="font-size: 12pt;"><span style="font-weight: bold;">使用build构建镜像--Docker server端</span></font></div></li><ul><li><div><span style="font-size: 9pt;">Docker server接受到HTTP请求后，其工作内容</span></div></li><ul><li><div><span style="font-size: 9pt;">1.创建临时目录，将context指定的文件系统解压到该目录下</span></div></li><li><div><span style="font-size: 9pt;">2.读取并解析Dockerfile</span></div></li><li><div><span style="font-size: 9pt;">3.根据解析出的Dockerfile遍历其中的所有指令，并分发到不同的模块去执行。Dockerfile特定的关键词都会映射到不同parser进行处理</span></div></li><li><div><span style="font-size: 9pt;">4.parser为上述每一个指令创建 一个对应的临时容器，在临时容器中执行当前指令，然后通过commit使用此容器生成一个镜像层</span></div></li><li><div><span style="font-size: 9pt;">5.Dockerfile中所有的指令对应的层的集合，就是此次build后的结果</span></div></li></ul></ul></ul><div><font style="background-color: rgb(255, 250, 165);font-size: 14pt;-evernote-highlight:true;"><span style="background-color: rgb(255, 250, 165); font-size: 14pt; color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">Dockerfile</span></font></div><ul><li><div><span style="font-size: 12pt; font-weight: bold;">Dockerfile介绍</span></div></li><ul><li><div><span style="font-size: 9pt;">Dockerfile是在通过docker build命令构建自己的Docker镜像时需要使用到的定义文件。</span></div></li><li><div><span style="font-size: 9pt;">它允许用户使用基本的DSL语法来定义Docker镜像，每一条指令描述了构建镜像的步骤。</span></div></li><li><div><span style="font-size: 9pt;">用户可以使用这些统一的语法命令来根据需求进行配置，通过这份统一的配置文件，在不同的平台上进行分发，需要使用时就可以根据配置文件自动化构建，解决了开发人员构建镜像的复杂过程</span></div></li><li><div><span style="font-size: 9pt;">Dockerfile与镜像配合使用，使Docker在构建时可以充分利用镜像功能进行缓存，大大提升了Docker的使用效率</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">Dockerfile生成镜像的过程</span></font></div></li><ul><li><div><span style="font-size: 9pt;">本地主机的一个包含Dockerfile的目录中的所有内容作为上下文</span></div></li><li><div><span style="font-size: 9pt;">上下文通过docker build命令传入到Docker daemon后，便开始按照Dockerfile中的内容构造镜像</span></div></li><li><div><span style="font-size: 9pt;">按照Dockerfile中的指令进行读条指令的构建镜像，除了from指令，其他每一条指令都会在上一条指令所生成的镜像的基础上执行，执行完成后生辰一个新的镜像层</span></div></li><li><div><span style="font-size: 9pt;">镜像层不断的覆盖原来的镜像形成新的镜像。Dockerfile所生成的最终镜像就是在基础镜像上叠加一层层的镜像层组建的</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">Docker指令</span></font></div></li><ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">介绍</span></font></div></li><ul><li><div><span style="font-size: 9pt;">基本格式 </span></div></li><ul><li><div><span style="font-size: 9pt;">INSTRUCTION arguments</span></div></li></ul><li><div><span style="font-size: 9pt;">命令格式</span></div></li><ul><li><div><span style="font-size: 9pt;">在Dockerfile中，指令INSTRUCTION不区分大小写，但是为了参数区分，推荐大写。</span></div></li><li><div><span style="font-size: 9pt;">Docker会顺序执行Dockerfile中的指令，第一条指令必须为FROM指令，它用于指定构建镜像的基础镜像</span></div></li></ul></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">ENV 指令</span></font></div></li><ul><li><div><span style="font-size: 9pt;">格式</span></div></li><ul><li><div><span style="font-size: 9pt;">ENV &lt;KEY&gt; =&lt;value&gt;   </span></div></li></ul><li><div><span style="font-size: 9pt;">说明</span></div></li><ul><li><div><span style="font-size: 9pt;">ENV指令可以为镜像创建出来的容器生命环境变量</span></div></li></ul></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">FROM指令</span></font></div></li><ul><li><div><span style="font-size: 9pt;">格式：</span></div></li><ul><li><div><span style="font-size: 9pt;">FROM &lt;iamge&gt;[:&lt;tag&gt;]</span></div></li></ul><li><div><span style="font-size: 9pt;">说明</span></div></li><ul><li><div><span style="font-size: 9pt;">FROM指令的功能是为后面的指令提供基础镜像，因为一个有效的Dockerfile必须以FROM指令你做为第一条非注释指令</span></div></li><li><div><span style="font-size: 9pt;">在Dockerfile中，FROM指令可以出现多次，这样会构建多个镜像。</span></div></li><li><div><span style="font-size: 9pt;">在每个镜像创建完成后，Docker命令行界面会输入该镜像的ID。若FROM指令中的参数tag为空，默认tag是latest</span></div></li></ul></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">COPY指令</span></font></div></li><ul><li><div><span style="font-size: 9pt;">格式</span></div></li><ul><li><div><span style="font-size: 9pt;">COPY &lt;src&gt; &lt;dest&gt;</span></div></li></ul><li><div><span style="font-size: 9pt;">说明</span></div></li><ul><li><div><span style="font-size: 9pt;">COPY指令复制&lt;src&gt;所指向的文件或者目录，将它添加到新场景中，复制的文件或目录在镜像中的路径是&lt;dest&gt;</span></div></li><li><div><span style="font-size: 9pt;">&lt;src&gt;所指定的源可以有多个，但必须在上下文中，即必须是上下文根目录的相对路径</span></div></li><li><div><span style="font-size: 9pt;">若结尾符为/则表示为目录，否则为文件</span></div></li></ul></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">ADD指令</span></font></div></li><ul><li><div><span style="font-size: 9pt;">格式</span></div></li><ul><li><div><span style="font-size: 9pt;">ADD &lt;src&gt;  &lt;dest&gt;</span></div></li></ul><li><div><span style="font-size: 9pt;">说明</span></div></li><ul><li><div><span style="font-size: 9pt;">ADD与COPY指令在功能上很相似，都支持复制本地文件到镜像的功能，但ADD指令还支持其他的功能</span></div></li><li><div><span style="font-size: 9pt;">&lt;src&gt;可以是一个指向一个网络文件的URL ，若&lt;dest&gt;为目录，则URL必须是完全路径，这样可以获得该网路文件的文件名filename，该文件会被复制添加到&lt;dest&gt;/&lt;file_name&gt;，若URL中的文件为压缩文件，默认不会被解压提取</span></div></li><li><div><span style="font-size: 9pt;">&lt;src&gt;还可以指向一个本地压缩归档文件，该文件再复制到容器中时会被解压提取</span></div></li></ul></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">RUN指令</span></font></div></li><ul><li><div><span style="font-size: 9pt;">格式 </span></div></li><ul><li><div><span style="font-size: 9pt;">RUN &lt;command&gt;  (shell 格式)</span></div></li><li><div><span style="font-size: 9pt;">RUN [&quot;executable&quot;, &quot;param1&quot;, &quot;param2&quot;]  (exec格式，推荐使用)</span></div></li></ul><li><div><span style="font-size: 9pt;">说明</span></div></li><ul><li><div><span style="font-size: 9pt;">RUN指令会在前一条命令创建出镜像的基础上创建一个容器，并在容器中运行命令，</span></div></li><li><div><span style="font-size: 9pt;">在命令运行后提交容器为新的镜像，新镜像被Dockerfile中的下一条指令使用</span></div></li><li><div><span style="font-size: 9pt;">通常在需要创建镜像后安装依赖的情况下使用</span></div></li></ul></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">CMD指令</span></font></div></li><ul><li><div><span style="font-size: 9pt;">格式</span></div></li><ul><li><div><span style="font-size: 9pt;">CMD &lt;command&gt;  (shell格式)</span></div></li><li><div><span style="font-size: 9pt;">CMD  [&quot;executable&quot;, &quot;param1&quot;, &quot;param2&quot;]  (exec格式，推荐格式)</span></div></li><li><div><span style="font-size: 9pt;">CMD [&quot;param1&quot;, &quot;param2&quot;]  (为ENTRUPOINT指令提供参数)</span></div></li></ul><li><div><span style="font-size: 9pt;">说明</span></div></li><ul><li><div><span style="font-size: 9pt;">CMD命令提供容器运行时的默认值，这些默认值可以是一条指令，也可以是一些参数。</span></div></li><li><div><span style="font-size: 9pt;">一个Dockerfile中可以有多条CMD指令，但是只有最后一条CMD指令有效。</span></div></li><li><div><span style="font-size: 9pt;">CMD [&quot;param1&quot;, &quot;param2&quot;] 格式只有在CMD指令和ENTRYPOINT指令配合使用，CMD指令中的参数会添加到ENTRYPOINT指令中</span></div></li><li><div><span style="font-size: 9pt;">使用shell和exec格式时，命令在容器中运行的方式和RUN指令相同，不同在于，RUN指令在构建镜像时执行命令，并生成新的镜像，CMD指令在构建镜像的时候不执行任何命令，而是在容器启动的时候默认将CMD指令作为第一条执行命令。</span></div></li><li><div><span style="font-size: 9pt;">如果用户在命令行界面运行docker run命令时指定了命令参数，则会覆盖CMD指令中的命令</span></div></li></ul></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">ENTRYPOINT指令</span></font></div></li><ul><li><div><span style="font-size: 9pt;">格式</span></div></li><ul><li><div><span style="font-size: 9pt;">ENTRYPOINT  &lt;command&gt;  (shell格式)</span></div></li><li><div><span style="font-size: 9pt;">ENTRYPOINT [&quot;executable&quot;, &quot;param1&quot;, &quot;param2&quot;]  (exec格式，推荐格式)</span></div></li></ul><li><div><span style="font-size: 9pt;">说明</span></div></li><ul><li><div><span style="font-size: 9pt;">ENTRYPOINT指令和CMD指令类似，都可以让容器每次启动时候执行相同的命令</span></div></li><li><div><span style="font-size: 9pt;">一个Dockerfile中可以有多条ENTRYPOINT指令，但只有最后一条ENTRYPOINT指令有效</span></div></li><li><div><span style="font-size: 9pt;">当使用shell格式时，ENTRYPOINT指令会忽略任何CMD指令和docker run命令参数，并运行在/bin/sh -c 中。</span></div></li><li><div><span style="font-size: 9pt;">当使用 exec格式，docker run传入的命令参数会覆盖CMD指令的内容并附加到ENTRYPOINT指令参数中</span></div></li><li><div><span style="font-size: 9pt;">CMD可以是参数，也可以是指令，ENTRYPOINT只能是命令，灵台docker run命令你提供的运行命令参数可以覆盖CMD，但是不能覆盖ENTRYPOINT</span></div></li></ul></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">ONBUILD</span></font></div></li><ul><li><div><span style="font-size: 9pt;">格式</span></div></li><ul><li><div><span style="font-size: 9pt;">ONBUILD  [INSTRUCTION]</span></div></li></ul><li><div><span style="font-size: 9pt;">说明</span></div></li><ul><li><div><span style="font-size: 9pt;">添加一个将来执行的触发器指令到镜像中。当该镜像作为FROM指令的参数时，这些触发器指令就会在FROM指令执行的时候加入到构建的过程中</span></div></li><li><div><span style="font-size: 9pt;">尽管任何一个指令都可以被注册成一个触发器钟灵，但是ONBUILD指令中不能包含ONBUILD指令，并且不会触发FROM和MAINTAINER指令</span></div></li><li><div><span style="font-size: 9pt;">ONBUILD经常用于需要在创建镜像的时候，需要对导入的镜像做一些文件的导入，一些批处理的时候</span></div></li></ul></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">LABLE</span></font></div></li><ul><li><div><span style="font-size: 9pt;">格式</span></div></li><ul><li><div><span style="font-size: 9pt;">LABEL multi.label1=&quot;value1&quot; \</span></div></li><ul><li><div><span style="font-size: 9pt;">multi.label2=&quot;value2&quot; \</span></div></li><li><div><span style="font-size: 9pt;">other=&quot;value3&quot;</span></div></li></ul></ul><li><div><span style="font-size: 9pt;">说明</span></div></li><ul><li><div><span style="font-size: 9pt;">label是累积的，包括FROM镜像的lable。</span></div></li><li><div><span style="font-size: 9pt;">如果Docker遇到一个label/key已经存在，那么新的值将覆盖这个label/key。</span></div></li><li><div><span style="font-size: 9pt;">要查看一个镜像的label，使用docker inspect命令。</span></div></li></ul></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">EXPOSE</span></font></div></li><ul><li><div><span style="font-size: 9pt;">格式</span></div></li><ul><li><div><span style="font-size: 9pt;">EXPOSE &lt;port1&gt; &lt;port2&gt;</span></div></li></ul><li><div><span style="font-size: 9pt;">说明</span></div></li><ul><li><div><span style="font-size: 9pt;">EXPOSE宿主机需要暴露哪些端口</span></div></li><li><div><span style="font-size: 9pt;">在启动容器时需要通过-P（注意是大写），Docker主机会自动分配一个端口转发到指定的端口；使用-p，则可以具体指定哪个本地端口映射过来。</span></div></li></ul></ul><li><div><span style="font-size: 12px;"><span style="font-size: 12px; font-weight: bold;">WORKDIR</span></span></div></li><ul><li><div><span style="font-size: 12px;">格式</span></div></li><ul><li><div><span style="font-size: 9pt;"><span style="font-size: 9pt;">WORKDIR &lt;path&gt;</span></span></div></li></ul><li><div><span style="font-size: 12px;">说明</span></div></li><ul><li><div>指定了RUN CMD  ENTRYPOINT等命令运行的目录</div></li></ul></ul></ul><li><div><span style="font-size: 12pt; font-weight: bold;">Dockerfile示例</span></div></li><ul><li><div><img src="/e_img/Docker镜像管理、Dockerfile_files/Image.png" type="image/png" data-filename="Image.png" width="443"></div></li></ul></ul><div><font style="font-size: 14pt;"><span style="font-size: 14pt; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">使用Dockerfile注意</span></font></div><ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">标签易读</span></font></div></li><ul><li><div><span style="font-size: 9pt;">例如：docker  build  -t  =&quot;ruby:2,0-onbuild&quot;</span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">谨慎选择基础镜像</span></font></div></li><ul><li><div><span style="font-size: 9pt;">尽量选择当前官方镜像库中的镜像</span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">充分利用缓存</span></font></div></li><ul><li><div><span style="font-size: 9pt;">尽量让相同的指令放在前面，充分使用缓存的结果</span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">正确使用ADD和COPY命令</span></font></div></li><ul><li><div><span style="font-size: 9pt;">尽量使用COPY命令</span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">CMD和ENTRPOINT合用</span></font></div></li><ul><li><div><span style="font-size: 9pt;">尽量使用CMD和ENTRYPOINT指令配合，可以使用exec格式的ENNTRYPOINT指令设置固定的默认命令参数，然后使用CMD指令设置可变的参数</span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">不要在Dockerfile中做端口映射</span></font></div></li><ul><li><div><span style="font-size: 9pt;">如果在Dockerfile中做端口映射，导致只能在主机上启动一个容器</span></div></li><li><div><span style="font-size: 9pt;">应该使用EXPOSE 80    只暴露端口，另做映射</span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">使用Dockerfile共享Docker镜像</span></font></div></li></ul><div><br></div><div><br></div></div><div><br></div></span>
+</div></body></html>
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Docker/" rel="tag"><i class="fa fa-tag"></i> Docker</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/19/11.Docker容器技术/Docker/Docker集群&应用栈/" rel="next" title="Docker镜像管理&Dockerfile">
+                <i class="fa fa-chevron-left"></i> Docker镜像管理&Dockerfile
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/22/11.Docker容器技术/Docker/Docker编排与集群部署/" rel="prev" title="Docker编排与集群部署">
+                Docker编排与集群部署 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s、 crawler</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">64</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

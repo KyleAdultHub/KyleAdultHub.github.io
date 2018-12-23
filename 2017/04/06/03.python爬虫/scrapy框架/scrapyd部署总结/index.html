@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="二、环境安装安装scprayd，网址：https://github.com/scrapy/scrapyd安装scrapyd-client，网址：https://github.com/scrapy/scrapyd-client建议从github上下载最新源码，然后用python setup.py install安装，因为pip安装源有可能不是最新版的。三、验证安装成功在命令框中输入scrap">
+<meta name="keywords" content="爬虫,scrapy">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Scrapyd部署总结">
+<meta property="og:url" content="http://blog.kyleliu.cn/2017/04/06/03.python爬虫/scrapy框架/scrapyd部署总结/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="二、环境安装安装scprayd，网址：https://github.com/scrapy/scrapyd安装scrapyd-client，网址：https://github.com/scrapy/scrapyd-client建议从github上下载最新源码，然后用python setup.py install安装，因为pip安装源有可能不是最新版的。三、验证安装成功在命令框中输入scrap">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/scrapyd部署总结_files/20161114205256046.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/scrapyd部署总结_files/20161114205800994.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/scrapyd部署总结_files/20161114205913543.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/scrapyd部署总结_files/20161115115154867.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/scrapyd部署总结_files/20161115115441699.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/scrapyd部署总结_files/20161115115521424.png">
+<meta property="og:updated_time" content="2018-12-05T07:23:08.454Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Scrapyd部署总结">
+<meta name="twitter:description" content="二、环境安装安装scprayd，网址：https://github.com/scrapy/scrapyd安装scrapyd-client，网址：https://github.com/scrapy/scrapyd-client建议从github上下载最新源码，然后用python setup.py install安装，因为pip安装源有可能不是最新版的。三、验证安装成功在命令框中输入scrap">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/e_img/scrapyd部署总结_files/20161114205256046.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2017/04/06/03.python爬虫/scrapy框架/scrapyd部署总结/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Scrapyd部署总结 | 刘小恺(Kyle) 的个人博客</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s、 crawler</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2017/04/06/03.python爬虫/scrapy框架/scrapyd部署总结/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s、 crawler">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Scrapyd部署总结
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2017-04-06 22:00:00" itemprop="dateCreated datePublished" datetime="2017-04-06T22:00:00+08:00">2017-04-06</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/python爬虫/" itemprop="url" rel="index"><span itemprop="name">python爬虫</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/python爬虫/scrapy框架/" itemprop="url" rel="index"><span itemprop="name">scrapy框架</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/04/06/03.python爬虫/scrapy框架/scrapyd部署总结/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2017/04/06/03.python爬虫/scrapy框架/scrapyd部署总结/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/04/06/03.python爬虫/scrapy框架/scrapyd部署总结/" class="leancloud_visitors" data-flag-title="Scrapyd部署总结">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+<html>
+<body>
+<div>
+<span><div><span style="font-size: 18px; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; font-weight: bold;">二、环境安装</span></div><div style="vertical-align: baseline; background-color: transparent;"><div style="vertical-align: baseline; background-image: url(&quot;http://static.blog.csdn.net/skin/skin-yellow/images/bg-yellow.png&quot;); background-repeat: repeat;"><div style="vertical-align: baseline;"><div style="vertical-align: baseline; text-align: left; min-width: 980px;"><div style="vertical-align: baseline; box-sizing: border-box;"><div style="vertical-align: baseline; overflow: hidden; background-color: rgb(255, 255, 255);"><div style="vertical-align: baseline; background-color: rgb(255, 255, 255);"><div style="margin: 35px 0px; border: 0px; padding: 0px; vertical-align: baseline;"><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">安装scprayd，网址：</span><a href="https://github.com/scrapy/scrapyd" style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(12, 137, 207); font-family: &quot;PT Serif&quot;; line-height: 35px; text-decoration: none;" target="_blank">https://github.com/scrapy/scrapyd</a></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">安装scrapyd-client，网址：</span><a href="https://github.com/scrapy/scrapyd-client" style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(12, 137, 207); font-family: &quot;PT Serif&quot;; line-height: 35px; text-decoration: none;" target="_blank">https://github.com/scrapy/scrapyd-client</a></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">建议从github上下载最新源码，然后用python setup.py install安装，因为pip安装源有可能不是最新版的。</span></span></div><div style="font-size: inherit; margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><div><br></div></div><div style="font-size: inherit; margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; font-size: 18px; vertical-align: baseline;"><span style="font-size: 18px; border: 0px; margin: 0px; padding: 0px; vertical-align: baseline; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; font-weight: bold; line-height: 35px;">三、验证安装成功</span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">在命令框中输入scrapyd，输出如下说明安装成功</span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><div><span style="background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;"><img src="/e_img/scrapyd部署总结_files/20161114205256046.png" type="image/png" data-filename="20161114205256046.png" height="229" style="margin: 0px; border: none; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; padding: 0px; line-height: inherit; font-family: inherit; vertical-align: baseline; max-height: 100%; max-width: 602px; height: auto;" width="602"></span></span></div></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><div><br></div></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">打开http://localhost:6800/ 可以看到</span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><div><br></div></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><div><span style="background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;"><img src="/e_img/scrapyd部署总结_files/20161114205800994.png" type="image/png" data-filename="20161114205800994.png" height="353" style="margin: 0px; border: none; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; padding: 0px; line-height: inherit; font-family: inherit; vertical-align: baseline; max-height: 100%; max-width: 602px; height: auto;" width="602"></span></span></div></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><div><br></div></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">点击jobs可以查看爬虫运行情况。</span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><div><br></div></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><div><span style="background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;"><img src="/e_img/scrapyd部署总结_files/20161114205913543.png" type="image/png" data-filename="20161114205913543.png" height="220" style="margin: 0px; border: none; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; padding: 0px; line-height: inherit; font-family: inherit; vertical-align: baseline; max-height: 100%; max-width: 602px; height: auto;" width="324"></span></span></div></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">接下来就是让人很头疼的scrapyd-deploy问题了，查看官方文档上说用</span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">scrapyd-deploy -l</span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">可以看到当前部署的爬虫项目，但是当我输入这段命令的时候显示这个命令不存在或者有错误、不合法之类的。</span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="background-color: rgb(255, 255, 255); border: 0px; margin: 0px; padding: 0px; vertical-align: baseline;"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; font-weight: bold; line-height: 35px;">解决方案：</span></span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">在你的python目录下的Scripts文件夹中，我的路径是“D:\program files\python2.7.0\Scripts”，增加一个scrapyd-deploy.bat文件。</span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">内容为：</span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><div><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">@echo off</span></span></div><div><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">&quot;D:\program files\python2.7.0\python.exe&quot; &quot;D:\program files\python2.7.0\Scripts\scrapyd-deploy&quot; %*</span></span></div></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">然后重新打开命令框，再运行scrapyd-deploy -l 就可以了。</span></span></div><div style="font-size: inherit; margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><br></div><div style="font-size: inherit; margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; font-size: 18px; vertical-align: baseline;"><span style="font-size: 18px; background-color: rgb(255, 255, 255); border: 0px; margin: 0px; padding: 0px; vertical-align: baseline; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; font-weight: bold; line-height: 35px;">四、发布工程到scrapyd</span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">scrapyd-deploy &lt;target&gt; -p &lt;project&gt;</span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">target为你的服务器命令，project是你的工程名字。</span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">首先对你要发布的爬虫工程的scrapy.cfg 文件进行修改，我这个文件的内容如下：</span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><div><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">[deploy:scrapyd1]</span></span></div><div><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="font-size: 12pt; background-color: rgb(255, 255, 255); color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">url = http://localhost:6800/</span></span></div><div><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">project = baidu</span></span></div></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><div><br></div></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="font-size: 12pt; background-color: rgb(255, 255, 255); color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">因此我输入的命令是：</span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">scrapyd-deploy scrapyd1 -p baidu</span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><div><br></div></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">输出如下</span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><div><span style="background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;"><img src="/e_img/scrapyd部署总结_files/20161115115154867.png" type="image/png" data-filename="20161115115154867.png" height="116" style="margin: 0px; border: none; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; padding: 0px; line-height: inherit; font-family: inherit; vertical-align: baseline; max-height: 100%; max-width: 602px; height: auto;" width="602"></span></span></div></div><div style="font-size: inherit; margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><br></div><div style="font-size: inherit; margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; font-size: 18px; vertical-align: baseline;"><span style="font-size: 18px; background-color: rgb(255, 255, 255); border: 0px; margin: 0px; padding: 0px; vertical-align: baseline; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; font-weight: bold; line-height: 35px;">五、启动爬虫</span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">使用如下命令启动一个爬虫</span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">curl http://localhost:6800/schedule.json -d project=PROJECT_NAME -d spider=SPIDER_NAME</span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">PROJECT_NAME填入你爬虫工程的名字，SPIDER_NAME填入你爬虫的名字</span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">我输入的代码如下：</span></span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><div><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">curl http://localhost:6800/schedule.json -d project=baidu -d spider=baidu</span></span></div></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><div><span style="background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;"><img src="/e_img/scrapyd部署总结_files/20161115115441699.png" type="image/png" data-filename="20161115115441699.png" height="77" style="margin: 0px; border: none; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; padding: 0px; line-height: inherit; font-family: inherit; vertical-align: baseline; max-height: 100%; max-width: 602px; height: auto;" width="602"></span></span></div></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><div><br></div></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; background-color: rgb(255, 255, 255);"><span style="background-color: rgb(255, 255, 255); font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">因为这个测试爬虫写的非常简单，一下子就运行完了。查看网站的jobs可以看到有一个爬虫已经运行完，处于Finished一列中</span></span></div><div style="font-size: inherit; margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><div><span style="font-size: 15px; background-color: rgb(255, 255, 255); color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;"><img src="/e_img/scrapyd部署总结_files/20161115115521424.png" type="image/png" data-filename="20161115115521424.png" height="271" style="font-size:inherit;margin:0px;border:none;font-style:inherit;font-variant:inherit;font-weight:inherit;font-stretch:inherit;padding:0px;line-height:inherit;font-family:inherit;vertical-align:baseline;max-height:100%;max-width:602px;height:auto;" width="602"></span></div></div><div style="font-size: inherit; margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; font-size: 18px; vertical-align: baseline;"><span style="font-size: 18px; background-color: rgb(255, 255, 255); border: 0px; margin: 0px; padding: 0px; vertical-align: baseline; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; font-weight: bold; line-height: 35px;">六、停止一个爬虫</span></span></div><div style="font-size: 13px; vertical-align: baseline; margin: 0px 0px 20px; border: 0px; padding: 9.5px; word-break: break-all; background-color: rgb(253, 246, 227); white-space: pre-wrap; word-wrap: normal; overflow: auto;"><span style="font-size: 12px; background-color: transparent; border: none; margin: 0px; padding: 0px; vertical-align: baseline; color: rgb(101, 123, 131); font-family: Menlo, Monaco, Consolas, &quot;Courier New&quot;, monospace; line-height: 20px;">curl http://localhost:</span><span style="margin: 0px; border: 0px; padding: 0px; font-size: inherit; vertical-align: baseline; background-color: transparent; color: rgb(42, 161, 152); font-family: Menlo, Monaco, Consolas, &quot;Courier New&quot;, monospace; line-height: 20px;">6800</span><span style="font-size: 12px; background-color: transparent; border: none; margin: 0px; padding: 0px; vertical-align: baseline; color: rgb(101, 123, 131); font-family: Menlo, Monaco, Consolas, &quot;Courier New&quot;, monospace; line-height: 20px;">/cancel.json</span> <span style="margin: 0px; border: 0px; padding: 0px; font-size: inherit; vertical-align: baseline; background-color: transparent; color: rgb(101, 123, 131); font-family: Menlo, Monaco, Consolas, &quot;Courier New&quot;, monospace; line-height: 20px;">-d</span> <span style="font-size: 12px; background-color: transparent; border: none; margin: 0px; padding: 0px; vertical-align: baseline; color: rgb(101, 123, 131); font-family: Menlo, Monaco, Consolas, &quot;Courier New&quot;, monospace; line-height: 20px;">project=PROJECT_NAME</span> <span style="margin: 0px; border: 0px; padding: 0px; font-size: inherit; vertical-align: baseline; background-color: transparent; color: rgb(101, 123, 131); font-family: Menlo, Monaco, Consolas, &quot;Courier New&quot;, monospace; line-height: 20px;">-d</span> <span style="font-size: 12px; background-color: transparent; border: none; margin: 0px; padding: 0px; vertical-align: baseline; color: rgb(101, 123, 131); font-family: Menlo, Monaco, Consolas, &quot;Courier New&quot;, monospace; line-height: 20px;">job=JOB_ID</span></div><div style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="font-size: 12pt; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; line-height: 35px;">更多API可以查看官网：</span><a href="http://scrapyd.readthedocs.io/en/latest/api.html" style="margin: 0px; border: 0px; padding: 0px; vertical-align: baseline; font-size: 12pt; color: rgb(12, 137, 207); font-family: &quot;PT Serif&quot;; line-height: 35px; text-decoration: none;" target="_blank">http://scrapyd.readthedocs.io/en/latest/api.html</a></span></div><div style="font-size: inherit; margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><br></div><div style="font-size: inherit; margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;"><span style="margin: 0px; border: 0px; padding: 0px; font-size: 18px; vertical-align: baseline;"><span style="font-size: 18px; border: 0px; margin: 0px; padding: 0px; vertical-align: baseline; color: rgb(85, 85, 85); font-family: &quot;PT Serif&quot;; font-weight: bold; line-height: 35px;">七、根据文档编写的调度脚本</span></span></div><div style="font-size: inherit; margin: 0px; border: 0px; padding: 0px; vertical-align: baseline;">前提: 已安装scrapyd-client</div><div style="font-size: 15px;"><br></div><div style="box-sizing: border-box; padding: 8px; font-family: Monaco, Menlo, Consolas, &quot;Courier New&quot;, monospace; font-size: 12px; color: rgb(51, 51, 51); border-radius: 4px; background-color: rgb(251, 250, 248); border: 1px solid rgba(0, 0, 0, 0.15);-en-codeblock:true;"><div># coding=utf-8</div><div>import requests</div><div>import time</div><div>import json</div><div>import os</div><div>import sys</div><div>reload(sys)</div><div>sys.setdefaultencoding('utf-8')</div><div>BASE_DIR = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))</div><div>sys.path.insert(0, os.path.join(BASE_DIR, 'conf'))</div><div><br></div><div># 需要配置</div><div>SCRAPYD_NODE = &quot;&quot;</div><div>PROJECT_NAME = &quot;&quot;</div><div><br></div><div><br></div><div>class SpiderSwitch(object):</div><div><br></div><div>    def __init__(self, project_name=&quot;&quot;, node=&quot;&quot;):</div><div>        self.project_name = project_name</div><div>        self.ip_port = node</div><div><br></div><div>    def delete_project(self):</div><div>        &quot;&quot;&quot;</div><div>        删除项目</div><div>        &quot;&quot;&quot;</div><div>        delete_data = {&quot;project&quot;: self.project_name}</div><div>        delete_url = &quot;http://{}/delproject.json&quot;.format(self.ip_port)</div><div>        response = requests.post(delete_url, data=delete_data)</div><div>        print &quot;delete_project: [{}]&quot;.format(response.content.decode())</div><div><br></div><div>    def start_spider(self, spider_name):</div><div>        &quot;&quot;&quot;</div><div>        启动爬虫的方法</div><div>        :return: 返回启动的状态</div><div>        &quot;&quot;&quot;</div><div>        start_data = {'project': self.project_name, 'spider': spider_name}</div><div>        start_url = &quot;http://{}/schedule.json&quot;.format(self.ip_port)</div><div>        response = requests.post(url=start_url, data=start_data)</div><div>        print &quot;start_spider: [{}]&quot;.format(response.content.decode())</div><div><br></div><div>    def stop_spider(self, job_id):</div><div>        &quot;&quot;&quot;</div><div>        关闭爬虫的方法</div><div>        :return:返回关闭结果</div><div>        &quot;&quot;&quot;</div><div>        stop_data = {'project': self.project_name, 'job': job_id}</div><div>        stop_url = &quot;http://{}/cancel.json&quot;.format(self.ip_port)</div><div>        response = requests.post(stop_url, data=stop_data)</div><div>        print &quot;stop_spider: [{}]&quot;.format(response.content.decode())</div><div><br></div><div>    def show_spiders(self):</div><div>        &quot;&quot;&quot;</div><div>        获取scrapyd服务器上名为myproject的工程下的爬虫清单</div><div>        :return: 返回查询到的状态</div><div>        &quot;&quot;&quot;</div><div>        show_url = 'http://{}/listspiders.json?project={}'.format(self.ip_port, self.project_name)</div><div>        response = requests.get(show_url)</div><div>        print &quot;show_spiders : [{}]&quot;.format(json.loads(response.content.decode()))</div><div><br></div><div>    def show_project(self):</div><div>        &quot;&quot;&quot;</div><div>        查看所有项目</div><div>        :return:返回查询结果</div><div>        &quot;&quot;&quot;</div><div>        show_url = &quot;http://{}/listprojects.json&quot;.format(self.ip_port)</div><div>        response = requests.get(show_url)</div><div>        print &quot;show_projects: [{}]&quot;.format(response.content.decode())</div><div><br></div><div>    def show_jobs(self):</div><div>        &quot;&quot;&quot;</div><div>        查看正在运行的job</div><div>        :return: 返回查看结果</div><div>        &quot;&quot;&quot;</div><div>        job_url = &quot;http://{}/listjobs.json?project={}&quot;.format(self.ip_port, self.project_name)</div><div>        response = requests.get(job_url)</div><div>        print &quot;jobs: [{}]&quot;.format(response.content.decode())</div><div>        return response.content.decode()</div><div><br></div><div>    def start_some(self, name, n):</div><div>        &quot;&quot;&quot;</div><div>        一次启动多个任务</div><div>        :param:n: 启动的任务数量</div><div>        &quot;&quot;&quot;</div><div>        for i in xrange(n):</div><div>            time.sleep(0.2)</div><div>            self.start_spider(name)</div><div><br></div><div>    def stop_project(self):</div><div>        &quot;&quot;&quot;</div><div>        停止改项目下的所有爬虫</div><div>        &quot;&quot;&quot;</div><div>        job_list = json.loads(self.show_jobs()).get(u&quot;running&quot;)</div><div>        if job_list:</div><div>            for job in job_list:</div><div>                spider_job_id = job.get(u&quot;id&quot;)</div><div>                self.stop_spider(spider_job_id)</div><div>                time.sleep(0.2)</div><div>        print u&quot;the jobs for the project are all closed&quot;</div><div><br></div><div><br></div><div>if __name__ == '__main__':</div><div>    scrpayd_node = SCRAPYD_NODE</div><div>    spider_switch = SpiderSwitch(project_name=PROJECT_NAME, node=scrpayd_node)</div><div>    task = sys.argv[1]</div><div><br></div><div>    if task == &quot;start&quot;:</div><div>        spider_name = sys.argv[2]</div><div>        spider_switch.start_spider(spider_name)</div><div><br></div><div>    if task == &quot;stop&quot;:</div><div>        job_id = sys.argv[2]</div><div>        spider_switch.stop_spider(job_id)</div><div><br></div><div>    if task == &quot;show_jobs&quot;:</div><div>        spider_switch.show_jobs()</div><div><br></div><div>    if task == &quot;show_spiders&quot;:</div><div>        spider_switch.show_spiders()</div><div><br></div><div>    if task == &quot;delete_project&quot;:</div><div>        spider_switch.delete_project()</div><div><br></div><div>    if task == &quot;show_projects&quot;:</div><div>        spider_switch.show_project()</div><div><br></div><div>    if task == &quot;start_some&quot;:</div><div>        spider_name = sys.argv[2]</div><div>        job_num = int(sys.argv[3])</div><div>        spider_switch.start_some(spider_name, job_num)</div><div><br></div><div>    if task == &quot;stop_project&quot;:</div><div>        spider_switch.stop_project()</div></div><div style="font-size: 15px;"><br></div></div></div></div></div></div></div></div></div><div><br></div></span>
+</div></body></html>
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/爬虫/" rel="tag"><i class="fa fa-tag"></i> 爬虫</a>
+          
+            <a href="/tags/scrapy/" rel="tag"><i class="fa fa-tag"></i> scrapy</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/03/26/03.python爬虫/scrapy框架/数据格式化输出/" rel="next" title="数据格式化输出">
+                <i class="fa fa-chevron-left"></i> 数据格式化输出
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/04/12/03.python爬虫/scrapy框架/Gerapy的介绍/" rel="prev" title="Gearapy的介绍和使用">
+                Gearapy的介绍和使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s、 crawler</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">82</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">20</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">35</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

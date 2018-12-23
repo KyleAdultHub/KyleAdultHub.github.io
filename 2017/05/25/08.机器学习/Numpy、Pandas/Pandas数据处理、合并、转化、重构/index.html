@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Pandas数据清洗数据清洗的介绍数据清洗是数据分析关键的一步，直接影响之后的处理工作数据清洗是一个迭代的过程，实际项目中可能需要不止一次地执行这些清洗操作数据的缺失数据处理pd.fillna()    补充缺失数据pd.dropna()    删除缺失数据数据的联接数据联接的介绍根据单个或多个键将不同DataFrame的行连接起来类似数据库的连接操作0.先定义两个表1.通过merge将两">
+<meta name="keywords" content="数据处理,pandas">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pandas数据处理、合并、转化、重构">
+<meta property="og:url" content="http://blog.kyleliu.cn/2017/05/25/08.机器学习/Numpy、Pandas/Pandas数据处理、合并、转化、重构/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="Pandas数据清洗数据清洗的介绍数据清洗是数据分析关键的一步，直接影响之后的处理工作数据清洗是一个迭代的过程，实际项目中可能需要不止一次地执行这些清洗操作数据的缺失数据处理pd.fillna()    补充缺失数据pd.dropna()    删除缺失数据数据的联接数据联接的介绍根据单个或多个键将不同DataFrame的行连接起来类似数据库的连接操作0.先定义两个表1.通过merge将两">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Pandas数据处理、合并、转化、重构_files/Image.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Pandas数据处理、合并、转化、重构_files/Image%20[1].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Pandas数据处理、合并、转化、重构_files/Image%20[2].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Pandas数据处理、合并、转化、重构_files/Image%20[3].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Pandas数据处理、合并、转化、重构_files/Image%20[4].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Pandas数据处理、合并、转化、重构_files/Image%20[5].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Pandas数据处理、合并、转化、重构_files/Image%20[6].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Pandas数据处理、合并、转化、重构_files/Image%20[7].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Pandas数据处理、合并、转化、重构_files/Image%20[8].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Pandas数据处理、合并、转化、重构_files/Image%20[9].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Pandas数据处理、合并、转化、重构_files/Image%20[10].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Pandas数据处理、合并、转化、重构_files/Image%20[11].png">
+<meta property="og:updated_time" content="2018-12-23T09:48:29.464Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Pandas数据处理、合并、转化、重构">
+<meta name="twitter:description" content="Pandas数据清洗数据清洗的介绍数据清洗是数据分析关键的一步，直接影响之后的处理工作数据清洗是一个迭代的过程，实际项目中可能需要不止一次地执行这些清洗操作数据的缺失数据处理pd.fillna()    补充缺失数据pd.dropna()    删除缺失数据数据的联接数据联接的介绍根据单个或多个键将不同DataFrame的行连接起来类似数据库的连接操作0.先定义两个表1.通过merge将两">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/e_img/Pandas数据处理、合并、转化、重构_files/Image.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2017/05/25/08.机器学习/Numpy、Pandas/Pandas数据处理、合并、转化、重构/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Pandas数据处理、合并、转化、重构 | 刘小恺(Kyle) 的个人博客</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s、 crawler</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2017/05/25/08.机器学习/Numpy、Pandas/Pandas数据处理、合并、转化、重构/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s、 crawler">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Pandas数据处理、合并、转化、重构
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2017-05-25 22:00:00" itemprop="dateCreated datePublished" datetime="2017-05-25T22:00:00+08:00">2017-05-25</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/机器学习/" itemprop="url" rel="index"><span itemprop="name">机器学习</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/机器学习/Numpy、Pandas/" itemprop="url" rel="index"><span itemprop="name">Numpy、Pandas</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/05/25/08.机器学习/Numpy、Pandas/Pandas数据处理、合并、转化、重构/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2017/05/25/08.机器学习/Numpy、Pandas/Pandas数据处理、合并、转化、重构/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/05/25/08.机器学习/Numpy、Pandas/Pandas数据处理、合并、转化、重构/" class="leancloud_visitors" data-flag-title="Pandas数据处理、合并、转化、重构">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+<html>
+<body>
+<div>
+<span><div><font style="font-size: 14pt;"><span style="color: rgb(50, 135, 18); font-size: 14pt; font-weight: bold; background-color: rgb(255, 250, 165); background-position: initial initial; background-repeat: initial initial;-evernote-highlight:true;">Pandas数据清洗</span></font></div><div><ul><li><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">数据清洗的介绍</span></font></li><ul><li><span style="font-size: 9pt;">数据清洗是数据分析关键的一步，直接影响之后的处理工作</span></li><li><span style="line-height: 1.45; font-size: 9pt;">数据清洗是一个迭代的过程，实际项目中可能需要不止一次地执行这些清洗操作</span></li></ul></ul><div><font size="2"><span style="line-height: 13.600000381469727px;"><br></span></font></div><div><span style="font-weight: bold; line-height: 13.600000381469727px; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-size: 14pt; background-position: initial initial; background-repeat: initial initial;-evernote-highlight:true;">数据的缺失数据处理</span></div><ul><li><span style="font-size: 9pt; line-height: 13.600000381469727px;">pd.fillna()    补充缺失数据</span></li><li><span style="font-size: 9pt; line-height: 13.600000381469727px;">pd.dropna()    删除缺失数据</span></li></ul><div><span style="font-weight: bold; line-height: 1.45; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-size: 14pt; background-position: initial initial; background-repeat: initial initial;-evernote-highlight:true;">数据的联接</span></div><ul><li><span style="font-weight: bold; font-size: 9pt; line-height: 13.600000381469727px;">数据联接的介绍</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">根据单个或多个键将不同DataFrame的行连接起来</span></li><li><span style="font-size: 9pt; line-height: 1.45;">类似数据库的连接操作</span></li></ul><li><span style="font-weight: bold; font-size: 9pt; line-height: 13.600000381469727px;">0.先定义两个表</span></li><ul><li><img src="/e_img/Pandas数据处理、合并、转化、重构_files/Image.png" type="image/png" data-filename="Image.png" style="font-size: 9pt; line-height: 1.45;" width="313"></li></ul><li><span style="font-weight: bold; font-size: 9pt; line-height: 13.600000381469727px;">1.通过merge将两个表通过外键关联到一起</span> <span style="font-size: 9pt; line-height: 13.600000381469727px;"> (默认使用相同且唯一的列作为外键，合并成内联接的结果)</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">使用方法   ()</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">pd.merge(df_obj1, df_obj_2)</span></li></ul><li><span style="font-size: 9pt; line-height: 1.45;">示例代码</span></li><ul><li><img src="/e_img/Pandas数据处理、合并、转化、重构_files/Image [1].png" type="image/png" data-filename="Image.png" style="font-size: 9pt; line-height: 1.45;" width="375"></li></ul></ul><li><span style="font-weight: bold; font-size: 9pt; line-height: 1.45;">2.on指定列作为&quot;外键&quot;</span><span style="font-size: 9pt; line-height: 1.45;">（如果多个相同列名的情况下，通过on来指定）</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">使用方法</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">pd.merge(df_obj1, df_obj_2， on='key')</span></li></ul><li><span style="font-size: 9pt; line-height: 1.45;">示例代码</span></li><ul><li><img src="/e_img/Pandas数据处理、合并、转化、重构_files/Image [2].png" type="image/png" data-filename="Image.png" style="font-size: 9pt; line-height: 1.45;" width="208"></li></ul></ul><li><span style="font-weight: bold; font-size: 9pt; line-height: 1.45;">3.left_on, right_on,分别指定两张表的外键</span><span style="font-size: 9pt; line-height: 1.45;">（如果两张表不存在相关联同名列的时候）</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">使用方法</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">pd.merge(df_obj1, df_obj_2， left_on='key1', right_on='key2')</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">left_on/right</span><span style="font-size: 9pt; line-height: 1.45;">_on:  表示指定两张表的哪个列作为外键进行关联</span></li></ul></ul><li><span style="font-size: 9pt; line-height: 1.45;">示例代码</span></li><ul><li><img src="/e_img/Pandas数据处理、合并、转化、重构_files/Image [3].png" type="image/png" data-filename="Image.png" style="font-size: 9pt; line-height: 1.45;" width="290"></li></ul></ul><li><span style="font-weight: bold; font-size: 9pt; line-height: 1.45;">4.通过how指定连接方式，默认是内联接(inner)</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">使用方法</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">pd.merge(df_obj1, df_obj2, left_on='key1', right_on='key2', how=&quot;outer&quot;)</span></li><ul><li><span style="font-size: 9pt; line-height: 13.600000381469727px;">how：表示指定的联接方式，默认为inner内联接。outer：外联接；left：左联接；right：右联接</span></li></ul></ul><li><span style="font-size: 9pt; line-height: 1.45;">示例代码</span></li><ul><li><img src="/e_img/Pandas数据处理、合并、转化、重构_files/Image [4].png" type="image/png" data-filename="Image.png" style="font-size: 9pt; line-height: 1.45;" width="326"></li></ul></ul><li><span style="font-size: 9pt;"><span style="font-size: 9pt; line-height: 13.600000381469727px; font-weight: bold;">5.按索引连接</span></span></li><ul><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">使用场景（当一个表的索引是另一张表的列数据的时候）</span></li><ul><li><span style="font-size: 9pt;"><img src="/e_img/Pandas数据处理、合并、转化、重构_files/Image [5].png" type="image/png" data-filename="Image.png" style="line-height: 1.45;" width="191"></span></li></ul><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">使用方法</span></li><ul><li><span style="line-height: 1.45; font-size: 9pt;">pd.merge(df_obj3, df_obj4, left_on=&quot;key&quot;, right_index=True, suffixes=[&quot;_left&quot;, &quot;_right&quot;])</span></li><ul><li><span style="line-height: 1.45; font-size: 9pt;">left_index/right_index: True 表示使用对应左/右表的索引作为外键，与另一张表的列进行关联</span></li></ul></ul><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">示例代码</span></li><ul><li><img src="/e_img/Pandas数据处理、合并、转化、重构_files/Image [6].png" type="image/png" data-filename="Image.png" style="font-size: 9pt; line-height: 1.45;" width="452"></li></ul></ul></ul><div><span style="font-weight: bold; font-size: 10pt; line-height: 13.600000381469727px;">处理合并后的同名数据列</span></div><ul><li><span style="font-weight: bold; font-size: 9pt; line-height: 13.600000381469727px;">使用方法</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">pd.merge(df_obj1, df_obj2, left_on='key1', right_on='key2', suffixes=[&quot;_left&quot;, &quot;_right&quot;])</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">suffixes：指定同名数据列后缀，可接收一个列表，分别表示左/右表同名列后缀默认为_x, _y；</span></li></ul></ul><li><span style="font-weight: bold; font-size: 9pt; line-height: 13.600000381469727px;">示例代码</span></li><ul><li><img src="/e_img/Pandas数据处理、合并、转化、重构_files/Image [7].png" type="image/png" data-filename="Image.png" style="font-size: 9pt; line-height: 1.45;" width="393"></li></ul></ul><div><span style="background-color: rgb(255, 250, 165);-evernote-highlight:true;"><font style="font-size: 14pt;"><span style="background-color: rgb(255, 250, 165); line-height: 13.600000381469727px; color: rgb(50, 135, 18); font-size: 14pt; font-weight: bold;-evernote-highlight:true;">Pandas数据合并</span></font></span></div></div><div><ul><li><span style="line-height: 1.45; font-weight: bold; font-size: 10pt;">数据合并的介绍</span></li><ul><li><span style="font-size: 9pt;">将两个pandas的对象的数据进行合并</span></li><li><span style="font-size: 9pt;">与表的联接不同，合并数据只会将两个表存在的数据进行合并，不会生成额外关联的数据</span></li></ul><li><font style="font-size: 10pt;"><span style="font-size: 10pt; line-height: 13.600000381469727px; font-weight: bold;">Series对象的数据合并</span></font></li><ul><li><font style="font-size: 9pt;"><span style="line-height: 13.600000381469727px; font-size: 9pt; font-weight: bold;">1.当索引有重复的情况</span></font></li><ul><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">使用方法</span></li><ul><li><font style="font-size: 9pt;"><span style="font-size: 9pt; line-height: 13.600000381469727px;">pd.concat([ser_obj1, ser_obj_2, ser_obj3], [</span><span style="font-size: 9pt; line-height: 13.600000381469727px;">axis=1</span><span style="font-size: 9pt; line-height: 13.600000381469727px;">, join='inner'])</span></font></li><ul><li><font style="font-size: 9pt;"><span style="font-size: 9pt; line-height: 13.600000381469727px;">axis: 1表示将Series转化为DataFrame对象数据按列追加，0表示直接在行下面对数据进行追加</span></font></li><li><font style="font-size: 9pt;"><span style="font-size: 9pt; line-height: 13.600000381469727px;">join: 数据的连接方式，默认为outer，还支持inner，表示内连接，默认为outer；</span></font></li></ul></ul><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">代码示例</span></li><ul><li><span style="font-size: 9pt;"><img src="/e_img/Pandas数据处理、合并、转化、重构_files/Image [8].png" type="image/png" data-filename="Image.png" width="309"></span></li></ul></ul><li><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">2.索引不重复的情况</span></font></li><ul><li><span style="font-size: 9pt;">使用方法</span></li><ul><li><font style="font-size: 9pt;"><span style="font-size: 9pt; line-height: 13.600000381469727px;">pd.concat([ser_obj1, ser_obj_2, ser_obj3], [</span><span style="font-size: 9pt; line-height: 13.600000381469727px;">axis=1</span><span style="font-size: 9pt; line-height: 13.600000381469727px;">])</span></font></li><ul><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">axis: 1表示将Series转化为DataFrame对象数据按列追加，0表示直接在行下面对数据进行追加</span></li></ul></ul><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">代码示例</span></li><ul><li><span style="font-size: 9pt;"><img src="/e_img/Pandas数据处理、合并、转化、重构_files/Image [9].png" type="image/png" data-filename="Image.png" width="279"></span></li></ul></ul></ul><li><font style="font-size: 10pt;"><span style="line-height: 13.600000381469727px; font-size: 10pt; font-weight: bold;">DataFrame对象的数据合并</span></font></li><ul><li><font style="font-size: 9pt;"><span style="font-size: 9pt; line-height: 13.600000381469727px; font-weight: bold;">0.创建两组数据</span></font></li><ul><li><span style="font-size: 9pt;"><img src="/e_img/Pandas数据处理、合并、转化、重构_files/Image [10].png" type="image/png" data-filename="Image.png" width="434"></span></li></ul><li><span style="font-size: 9pt; font-weight: bold;">1.将两组数据进行合并</span> <span style="font-size: 9pt;">（默认列索引共享，行索引不共享，默认在行的尾部添加数据）</span></li><ul><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">使用方法</span></li><ul><li><span style="font-size: 9pt;">pd.concat([df_obj1, df_obj2], axis = 1, join='inner')</span></li><ul><li><font style="font-size: 9pt;"><span style="font-size: 9pt; line-height: 13.600000381469727px;">axis：1 按照行方向进行追加，共享行索引；0<span style="font-size: 9pt; line-height: 13.600000381469727px;"> 按照列方向进行追加，共享列索引；</span></span></font></li><li><span style="font-size: 9pt;">join：inner(当axis=1时，包含nan的行不显示，当axis=0时，包含nan的列不显示)，还支持outer，默认为outer</span></li></ul></ul><li><span style="font-size: 9pt;">代码示例</span></li><ul><li><span style="font-size: 9pt;"><img src="/e_img/Pandas数据处理、合并、转化、重构_files/Image [11].png" type="image/png" data-filename="Image.png" width="272"></span></li></ul></ul></ul><li><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">pd.concat与pd.merge的区别</span></font></li><ul><li><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">pd.concat() </span></font></li><ul><li><span style="font-size: 9pt;">表示多个数据结构按行/按列合并，并返回一个完整的数据结构，concat合并不会制造新的数据（尽量保证结构的索引个数匹配）</span></li><li><span style="font-size: 9pt;">数据合并到一起</span></li></ul><li><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">pd.merge()</span></font></li><ul><li><span style="font-size: 9pt;">表示多个数据结构按指定的列进行关联，并返回一个完整的数据结构，merge关联需要保证数据结构的形状完整，会填充新的数据（关联不依赖索引个数—）</span></li><li><span style="line-height: 1.45; font-size: 9pt;">类似于数据库的表关联</span></li></ul></ul></ul></div><div><font style="font-size: 14pt;"><span style="color: rgb(50, 135, 18); font-size: 14pt; font-weight: bold; background-color: rgb(255, 250, 165); background-position: initial initial; background-repeat: initial initial;-evernote-highlight:true;">Pandas的数据转化</span></font></div><div><ul><li><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">duplicated处理重复数据</span></font></li><ul><li><span style="font-size: 9pt;">使用方法   (依次判断指定列数据，如果判断当前数据之前有重复，则设为True，否则为False)</span></li><ul><li><span style="font-size: 9pt;">df_obj.duplicated('col_name')     返回布尔类型的Series对象</span></li><ul><li><span style="font-size: 9pt;">col_name:  表示指定那一列来判断重复</span></li></ul></ul></ul><li><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">drop_duplicates 过滤重复的行</span></font></li><ul><li><span style="font-size: 9pt;">使用方法 (依次判断指定数据列的重复情况，并将重复的行删除（注意，根据行索引删除，会影响其他列数据))</span></li><ul><li><span style="font-size: 9pt;">df_obj.drop_duplicates('col_name')</span></li><ul><li><span style="font-size: 9pt;">col_name:  表示指定那一列来判断重复</span></li></ul></ul></ul><li><font style="font-size: 10pt;"><span style="line-height: 13.600000381469727px; font-size: 10pt; font-weight: bold;"> map 将每列数据进行转换</span></font></li><ul><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">使用方法（将数据对象传递给函数，对所有的数据进行处理）</span></li><ul><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">DataFrame.map(lambda x : x ** 2))</span></li><ul><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">函数的参数为DataFrame数据对象，或者Series数据对象</span></li></ul></ul></ul><li><font style="font-size: 10pt;"><span style="line-height: 13.600000381469727px; font-size: 10pt; font-weight: bold;">replace 数据替换</span></font></li><ul><li><font style="font-size: 9pt;"><span style="font-size: 9pt; line-height: 13.600000381469727px; font-weight: bold;">将所有不想要的数据进行替换</span></font></li><ul><li><span style="font-size: 9pt;">df_obj.replace(old_data, new_data)</span></li><ul><li><span style="font-size: 9pt;">old_data: 为将要被替换的数据</span></li><li><font style="font-size: 9pt;"><span style="font-size: 9pt; line-height: 13.600000381469727px;">new_data: 为替换的目标数据</span></font></li></ul></ul><li><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">替换固定个数数据</span></font></li><ul><li><span style="font-size: 9pt;">df_obj.replace([old_data, new_data], num)</span></li><ul><li><span style="font-size: 9pt;">old_data: 为将要被替换的数据</span></li><li><span style="font-size: 9pt;">new_data: 为替换的目标数据</span></li><li><span style="font-size: 9pt;">num：替换的最大数量</span></li></ul></ul><li><font style="font-size: 9pt;"><span style="font-size: 9pt; line-height: 1.45; font-weight: bold;">同时替换多个数据</span></font></li><ul><li><span style="font-size: 9pt;">df_obj.replace([old_data1, old_data2], [new_data1, old_data2])</span></li><ul><li><span style="font-size: 9pt;">old_data: 为将要被替换的数据</span></li><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">new_data: 为替换的目标数据</span></li></ul></ul></ul><li><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">rename 修改数据结构属性</span></font></li><ul><li><span style="font-size: 9pt;">df_obj.rename(columns={&quot;old_col1&quot; : &quot;new_col1&quot;, &quot;old_col2&quot;: &quot;new_col2&quot;}, inplace=True)</span></li><ul><li><span style="font-size: 9pt;">old_data: 为将要被替换的列名</span></li><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">new_data: 为替换的目标列名</span></li><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">inplace：True在源文件上进行修改，False会返回修改后的数据，默认为False</span></li></ul></ul></ul></div><div><br></div></span>
+</div></body></html>
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/数据处理/" rel="tag"><i class="fa fa-tag"></i> 数据处理</a>
+          
+            <a href="/tags/pandas/" rel="tag"><i class="fa fa-tag"></i> pandas</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/24/08.机器学习/Numpy、Pandas/Pandas统计计算和描述分组与聚合/" rel="next" title="Pandas统计计算和描述分组与聚合">
+                <i class="fa fa-chevron-left"></i> Pandas统计计算和描述分组与聚合
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/05/26/08.机器学习/Numpy、Pandas/Matplotlib绘图工具/" rel="prev" title="Matplotlib绘图工具">
+                Matplotlib绘图工具 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s、 crawler</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">101</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">22</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">41</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

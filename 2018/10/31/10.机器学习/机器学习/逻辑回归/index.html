@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="1. 分类问题在分类问题中，如果想要预测的变量y是离散的值，那么可以只用一种叫做逻辑回归(logistic regression)的算法,这是在目前最流行的一种学习算法之一。 在分类问题中，我们尝试预测的是结果是否属于某一个类（例如正确或错误）。分类问题的例子有：判断一封电子邮件是否是垃圾邮件；判断一次金融交易是否是欺诈；之前我们也谈到了肿瘤分类问题的例子，区别一个肿瘤是恶性的还是良性的。">
+<meta name="keywords" content="机器学习,逻辑回归,分类问题">
+<meta property="og:type" content="article">
+<meta property="og:title" content="逻辑回归 &amp; 分类问题">
+<meta property="og:url" content="http://blog.kyleliu.cn/2018/10/31/10.机器学习/机器学习/逻辑回归/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="1. 分类问题在分类问题中，如果想要预测的变量y是离散的值，那么可以只用一种叫做逻辑回归(logistic regression)的算法,这是在目前最流行的一种学习算法之一。 在分类问题中，我们尝试预测的是结果是否属于某一个类（例如正确或错误）。分类问题的例子有：判断一封电子邮件是否是垃圾邮件；判断一次金融交易是否是欺诈；之前我们也谈到了肿瘤分类问题的例子，区别一个肿瘤是恶性的还是良性的。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1540997286168.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1540997531192.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1541078937881.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1541079100064.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1541080097808.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1541080767309.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1541081223807.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1541081375902.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1541081567959.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1541082558471.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1541083131135.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1541084166476.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1541166796206.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1541168153304.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1541168782303.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1541168809943.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1541169223823.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1541169503523.png">
+<meta property="og:updated_time" content="2018-12-23T08:36:09.823Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="逻辑回归 &amp; 分类问题">
+<meta name="twitter:description" content="1. 分类问题在分类问题中，如果想要预测的变量y是离散的值，那么可以只用一种叫做逻辑回归(logistic regression)的算法,这是在目前最流行的一种学习算法之一。 在分类问题中，我们尝试预测的是结果是否属于某一个类（例如正确或错误）。分类问题的例子有：判断一封电子邮件是否是垃圾邮件；判断一次金融交易是否是欺诈；之前我们也谈到了肿瘤分类问题的例子，区别一个肿瘤是恶性的还是良性的。">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/img/1540997286168.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2018/10/31/10.机器学习/机器学习/逻辑回归/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>逻辑回归 & 分类问题 | 刘小恺(Kyle) 的个人博客</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s、 crawler</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2018/10/31/10.机器学习/机器学习/逻辑回归/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s、 crawler">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">逻辑回归 & 分类问题
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-10-31 22:16:00" itemprop="dateCreated datePublished" datetime="2018-10-31T22:16:00+08:00">2018-10-31</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/机器学习/" itemprop="url" rel="index"><span itemprop="name">机器学习</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/机器学习/机器学习/" itemprop="url" rel="index"><span itemprop="name">机器学习</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/10/31/10.机器学习/机器学习/逻辑回归/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2018/10/31/10.机器学习/机器学习/逻辑回归/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/10/31/10.机器学习/机器学习/逻辑回归/" class="leancloud_visitors" data-flag-title="逻辑回归 & 分类问题">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="1-分类问题"><a href="#1-分类问题" class="headerlink" title="1. 分类问题"></a>1. 分类问题</h3><p>在分类问题中，如果想要预测的变量y是离散的值，那么可以只用一种叫做逻辑回归(logistic regression)的算法,这是在目前最流行的一种学习算法之一。</p>
+<p>在分类问题中，我们尝试预测的是结果是否属于某一个类（例如正确或错误）。分类问题的例子有：判断一封电子邮件是否是垃圾邮件；判断一次金融交易是否是欺诈；之前我们也谈到了肿瘤分类问题的例子，区别一个肿瘤是恶性的还是良性的。  </p>
+<a id="more"></a>
+<p><img src="/img/1540997286168.png" alt="1540997286168"></p>
+<p>我们将因变量(dependent variable)可能属于的两个类分别称为负向类（negative class）和正向类（positive class），则因变量y∈0,1 ，其中 0 表示负向类，1 表示正向类。</p>
+<p><img src="/img/1540997531192.png" alt="1540997531192"></p>
+<h4 id="线型回归不适合分类问题"><a href="#线型回归不适合分类问题" class="headerlink" title="线型回归不适合分类问题"></a>线型回归不适合分类问题</h4><p>如果我们要用线性回归算法来解决一个分类问题，对于分类， y 取值为 0 或者1，但如果你使用的是线性回归，那么假设函数的输出值可能远大于 1，或者远小于0，即使所有训练样本的标签 y 都等于 0 或 1。尽管我们知道标签应该取值0 或者1，但是如果算法得到的值远大于1或者远小于0的话，就会感觉很奇怪。所以我们在接下来的要研究的算法就叫做逻辑回归算法，这个算法的性质是：它的输出值永远在0到 1 之间。</p>
+<h4 id="逻辑回归算法"><a href="#逻辑回归算法" class="headerlink" title="逻辑回归算法"></a>逻辑回归算法</h4><p>逻辑回归算法是分类算法，我们将它作为分类算法使用。有时候可能因为这个算法的名字中出现了“回归”使你感到困惑，但逻辑回归算法实际上是一种分类算法，它适用于标签 y 取值离散的情况，如：1 0 0 1。</p>
+<h3 id="2-逻辑回归表达式"><a href="#2-逻辑回归表达式" class="headerlink" title="2. 逻辑回归表达式"></a>2. 逻辑回归表达式</h3><p>在分类问题中，要用什么样的函数来表示我们的假设。在解决分类问题的时候，我们希望分类器的输出值在0和1之间，因此，我们希望想出一个满足某个性质的假设函数，这个性质是它的预测值要在0和1之间。</p>
+<h4 id="为什么线型回归不适合分类问题"><a href="#为什么线型回归不适合分类问题" class="headerlink" title="为什么线型回归不适合分类问题?"></a>为什么线型回归不适合分类问题?</h4><p>回顾在一开始提到的乳腺癌分类问题，我们可以用线性回归的方法求出适合数据的一条直线：</p>
+<p><img src="/img/1541078937881.png" alt="1541078937881"></p>
+<p>根据线性回归模型我们只能预测连续的值，然而对于分类问题，我们需要输出0或1，我们可以预测：</p>
+<p>当 $h_θ(x) &gt;= 0.5$ 时, 预测y= 1;   当$h_θ(x) &lt; 0.5$ 时，预测y = 0</p>
+<p>对于上图所示的数据，这样的一个线性模型似乎能很好地完成分类任务。但是， 假使我们又观测到一个非常大尺寸的恶性肿瘤，将其作为实例加入到我们的训练集中来，这将使得我们获得一条新的直线。</p>
+<p><img src="/img/1541079100064.png" alt="1541079100064"></p>
+<p>这时，再使用0.5作为阀值来预测肿瘤是良性还是恶性便不合适了， 所以使用线型回归模型，很难确定断定一个问题分类的边界。可以看出，线性回归模型，因为其预测的值可以超越[0,1]的范围，并不适合解决分类这样的问题。</p>
+<h4 id="逻辑回归模型"><a href="#逻辑回归模型" class="headerlink" title="逻辑回归模型"></a>逻辑回归模型</h4><p>我们引入一个新的模型，逻辑回归，该模型的输出变量范围始终在0和1之间。 逻辑回归模型的假设是：</p>
+<p>$h_θ(x) = g(θ^TX)$      函数g的表达式为:  $g(z) = {1\over1+e^{-z}}$</p>
+<blockquote>
+<p> 其中: X 代表特征向量, g代表逻辑函数（logistic function)是一个常用的逻辑函数为S形函数（Sigmoid function）</p>
+</blockquote>
+<p>g(z) 的函数图像为:</p>
+<p><img src="/img/1541080097808.png" alt="1541080097808"></p>
+<blockquote>
+<p>对逻辑回归模型理解</p>
+<p>$h_θ(x)$ 的作用是，对于给定的输入变量，根据选择的参数计算出输出的变量=1 的可能性, 即$h_θ(x) =P(y=1|x; θ)$ </p>
+<p>例如, 如果对于给定的x， 通过已经确定的参数计算出$h_θ(x) = 0.7$ ， 则表示有70%的几率y为正向类，响应地y为负向类的几率为1-0.7=0.3</p>
+<p>g(z) （Sigmoid function）函数的作用就是将$θ^TX$的结果映射到0-1之间，</p>
+</blockquote>
+<h3 id="3-决策边界"><a href="#3-决策边界" class="headerlink" title="3. 决策边界"></a>3. 决策边界</h3><h4 id="对决策边界的理解"><a href="#对决策边界的理解" class="headerlink" title="对决策边界的理解"></a>对决策边界的理解</h4><blockquote>
+<p>决策边界(decision boundary)，能够更好地帮助我们理解逻辑回归的假设函数中计算什么</p>
+</blockquote>
+<p><img src="/img/1541080767309.png" alt="1541080767309"></p>
+<p>在逻辑回归中， 我们预测到: </p>
+<p>当$h_θ(x) &gt;= 0.5$ 时， 预测 y= 1;     当 $h_θ(x) &gt;= 0.5$ 时，预测 y  = 0；</p>
+<p>根据上面绘制的S形函数图像，我们知道当</p>
+<p>z = 0 时, g(z) = 0.5</p>
+<p>z &gt; 时, g(z) &gt; 0.5</p>
+<p>z &lt; 0 时, g(z) &lt; 0.5</p>
+<p>又 $z = θ^Tx$, 即: $θ^TX &gt;= 0$ 时, 预测 y = 1 , $θ^TX &lt; 0$ 时， 预测 y = 0</p>
+<p>现在假设我们有一个模型: </p>
+<p><img src="/img/1541081223807.png" alt="1541081223807"></p>
+<p>并且参数θ是向量[-3 1 1]. 则当 -3 + x1 + x2 &gt;= 0, 即x1 + x2 &gt;= 3时， 模型将预测 y = 1. 我们可以绘制直线x1 + x2 = 3, 这条线便是我们模型的分界线，将预测为1的区域和预测为 0的区域分隔开。</p>
+<p><img src="/img/1541081375902.png" alt="1541081375902"></p>
+<h4 id="复杂形状的决策边界"><a href="#复杂形状的决策边界" class="headerlink" title="复杂形状的决策边界"></a>复杂形状的决策边界</h4><p>假使我们的数据呈现这样的分布情况，怎样的模型才能适合呢？</p>
+<p><img src="/img/1541081567959.png" alt="1541081567959"></p>
+<p>因为需要用曲线才能分隔 y = 0 的区域和 y = 1 的区域，我们需要二次方特征：</p>
+<p>所以按照假设函数应该趋近， $h_θ(x) = g(θ_0 + θ_1x_1 + θ_2x_2 + θ_1x_1^2 + θ_2x_2^2 )$  θ最终结果趋近 [-1 0 0 1 1], 我们最终得到的判定边界恰好是圆点在原点且半径为1的圆形 , 综上我们可以用复杂的模型来适应飞象复杂形状的判定边界</p>
+<h3 id="4-逻辑回归代价函数和梯度下降"><a href="#4-逻辑回归代价函数和梯度下降" class="headerlink" title="4. 逻辑回归代价函数和梯度下降"></a>4. 逻辑回归代价函数和梯度下降</h3><h4 id="逻辑回归代价函数及简化"><a href="#逻辑回归代价函数及简化" class="headerlink" title="逻辑回归代价函数及简化"></a>逻辑回归代价函数及简化</h4><p>对于线性回归模型，我们定义的代价函数是所有模型误差的平方和和。理论上来说，我们也可以对逻辑回归模型沿用这个定义，但是问题在于，当我们将 $h_θ(x) = g(θ^TX)$  带入到这样定义了的代价函数中时，我们得到的代价函数将是一个非凸函数（non-convexfunction）如下图，这意味着我们的代价函数有许多局部最小值，这将影响梯度下降算法寻找全局最小值。</p>
+<p><img src="/img/1541082558471.png" alt="1541082558471"></p>
+<p>线型回归代价函数为: $J_{(θ)} = {1\over m} \sum_{i=1}^m{1\over2}(h_θ(x^{(i)})-y^{(i)})^2​$</p>
+<p>重新定义逻辑回归代价函数，使代价函数在逻辑回归算法中为凸函数, 过程如下: </p>
+<p><img src="/img/1541083131135.png" alt="1541083131135"></p>
+<blockquote>
+<p>根据推倒可以证明, 我们推倒的的代价值函数会给我们一个凸优化问题。代价函数 J(θ) 会是一个凸函数，并且没有局部最优值。</p>
+</blockquote>
+<p><strong>python代码实现</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">cost</span><span class="params">(theta, X, y)</span>:</span></span><br><span class="line">   theta = np.matrix(theta)</span><br><span class="line">   X = np.matrix(X)</span><br><span class="line">   y = np.matrix(y)</span><br><span class="line">   first = np.multiply(‐y, np.log(sigmoid(X* theta.T)))</span><br><span class="line">   second = np.multiply((<span class="number">1</span> ‐ y), np.log(<span class="number">1</span> ‐ sigmoid(X* theta.T)))</span><br><span class="line">   <span class="keyword">return</span> np.sum(first ‐ second) / (len(X))</span><br></pre></td></tr></table></figure>
+<h4 id="梯度下降算法推倒及简化"><a href="#梯度下降算法推倒及简化" class="headerlink" title="梯度下降算法推倒及简化"></a>梯度下降算法推倒及简化</h4><p>在得到这样一个代价函数以后，我们便可以用梯度下降算法来求得能使代价函数最小的参数了。算法为：</p>
+<p>Repeat {  $θ_j : =θ_j  −  α{∂\over∂θ_j }J(θ)$         (simultaneously update all ) }</p>
+<p>求导后得到: </p>
+<p>Repeat { $θ_j : =θ<em>j  −  α{1\over m}\sum</em>{i=1}^m(h_θ(x^{(i)}) - y^{(i)})x_j^{(i)}$    (simultaneously update all ) }</p>
+<p><img src="/img/1541084166476.png" alt="1541084166476"></p>
+<blockquote>
+<p>注：虽然得到的梯度下降算法表面上看上去与线性回归的梯度下降算法一样，但是这里的 $h_θ(x) = g(θ^TX)$ 与线性回归中不同，所以实际上是不一样的。另外，在运行梯度下降算法之前，进行特征缩放依旧是非常必要的。</p>
+</blockquote>
+<h3 id="5-高级优化算法"><a href="#5-高级优化算法" class="headerlink" title="5. 高级优化算法"></a>5. 高级优化算法</h3><h4 id="一些高级算法的介绍"><a href="#一些高级算法的介绍" class="headerlink" title="一些高级算法的介绍"></a>一些高级算法的介绍</h4><p>现在我们换个角度来看，什么是梯度下降，我们有个代价函数 J(θ)，而我们想要使其最小化，那么我们需要做的是编写代码，当输入参数θ时，它们会计算出两样东西：J(θ) 以及 J 等于 0、1直到 n 时的偏导数项。</p>
+<p><img src="/img/1541166796206.png" alt="1541166796206"></p>
+<p>假设我们已经完成了可以实现这两件事的代码，那么梯度下降所做的就是反复执行这些更新。 另一种考虑梯度下降的思路是：我们需要写出代码来计算 J(θ) 和这些偏导数，然后把这些插入到梯度下降中，然后它就可以为我们最小化这个函数。 对于梯度下降来说，我认为从技术上讲，你实际并不需要编写代码来计算代价函数J(θ)。你只需要编写代码来计算导数项，但是，如果你希望代码还要能够监控这些 J(θ)的收敛性，那么我们就需要自己编写代码来计算代价函数J(θ)和偏导数项$α{∂\over∂θ_j }J(θ)$。所以，在写完能够计算这两者的代码之后，我们就可以使用梯度下降。 </p>
+<p>然而梯度下降并不是我们可以使用的唯一算法，还有其他一些算法，更高级、更复杂。如果我们能用这些方法来计算代价函数J(θ)和偏导数项$α{∂\over∂θ_j }J(θ)$两个项的话，那么这些算法就是为我们优化代价函数的不同方法，<strong>共轭梯度法、 BFGS (变尺度法)、 L-BFGS (限制变尺度法)</strong> 就是其中一些更高级的优化算法，它们需要有一种方法来计算 J(θ)，以及需要一种方法计算导数项，然后使用比梯度下降更复杂的算法来最小化代价函数。</p>
+<blockquote>
+<p><strong>这三种算法的优点：</strong></p>
+<p>一个是使用这其中任何一个算法，你通常不需要手动选择学习率 α ，所以对于这些算法的一种思路是，给出计算导数项和代价函数的方法，你可以认为算法有一个智能的内部循环，而且，事实上，他们确实有一个智能的内部循环，称为线性搜索(line search)算法，它可以自动尝试不同的学习速率 α ，并自动选择一个好的学习速率 α，因此它甚至可以为每次迭代选择不同的学习速率，那么你就不需要自己选择。</p>
+</blockquote>
+<p>Octave 有一个非常理想的库用于实现这些先进的优化算法，所以，如果你直接调用它自带的库，你就能得到不错的结果。我必须指出这些算法实现得好或不好是有区别的，因此，如果你正在你的机器学习程序中使用一种不同的语言，比如如果你正在使用C、C++、Java等等，你可能会想尝试一些不同的库，以确保你找到一个能很好实现这些算法的库。</p>
+<h4 id="如何使用这些算法"><a href="#如何使用这些算法" class="headerlink" title="如何使用这些算法"></a>如何使用这些算法</h4><p>比方说，你有一个含两个参数的问题，这两个参数是θ1和θ2，因此，通过这个代价函数，你可以得到 θ1 和 θ2 的值，如果你将 J(θ) 最小化的话，那么它的最小值将是 θ1 = 5 ，θ2 = 5 。代价函数 J(θ) 的导数推出来就是这两个表达式：</p>
+<p>$α{∂\over∂θ_1}J(θ) = 2(θ_1 - 5)$</p>
+<p>$α{∂\over∂θ_2}J(θ) = 2(θ_2 - 5)$</p>
+<p>如果我们不知道最小值，但你想要代价函数找到这个最小值，是用比如梯度下降这些算法，但最好是用比它更高级的算法，你要做的就是运行一个像这样的Octave 函数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">function [jVal, gradient]=costFunction(theta)</span><br><span class="line">	jVal=(theta(1)‐5)^2+(theta(2)‐5)^2;</span><br><span class="line">	gradient=zeros(2,1);</span><br><span class="line">	gradient(1)=2*(theta(1)‐5);</span><br><span class="line">	gradient(2)=2*(theta(2)‐5);</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+<p>这样就计算出这个代价函数，函数返回的第二个值是梯度值，梯度值应该是一个2×1的向量，梯度向量的两个元素对应这里的两个偏导数项，运行这个costFunction 函数后，你就可以调用高级的优化函数，这个函数叫fminunc，它表示Octave 里无约束最小化函数。调用它的方式如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">options=optimset(<span class="string">'GradObj'</span>,<span class="string">'on'</span>,<span class="string">'MaxIter'</span>,<span class="number">100</span>);</span><br><span class="line">initialTheta=zeros(<span class="number">2</span>,<span class="number">1</span>);</span><br><span class="line">[optTheta, functionVal, exitFlag]=fminunc(@costFunction, initialTheta, options);</span><br></pre></td></tr></table></figure>
+<p>你要设置几个options，这个 options 变量作为一个数据结构可以存储你想要的options，所以 GradObj 和On，这里设置梯度目标参数为打开(on)，这意味着你现在确实要给这个算法提供一个梯度，然后设置最大迭代次数，比方说100，我们给出一个 的猜测初始值，它是一个2×1的向量，那么这个命令就调用fminunc，这个@符号表示指向我们刚刚定义的costFunction 函数的指针。如果你调用它，它就会使用众多高级优化算法中的一个，当然你也可以把它当成梯度下降，只不过它能自动选择学习速率，你不需要自己来做。然后它会尝试使用这些高级的优化算法，就像加强版的梯度下降法，为你找到最佳的值。</p>
+<p><strong>实际运行过程示例</strong></p>
+<p><img src="/img/1541168153304.png" alt="1541168153304"></p>
+<h3 id="6-多分类问题"><a href="#6-多分类问题" class="headerlink" title="6. 多分类问题"></a>6. 多分类问题</h3><h4 id="多分类的介绍"><a href="#多分类的介绍" class="headerlink" title="多分类的介绍"></a>多分类的介绍</h4><p><strong>一些多分类的例子:</strong></p>
+<p>例一: 假如说你现在需要一个学习算法能自动地将邮件归类到不同的文件夹里，或者说可以自动地加上标签，那么，你也许需要一些不同的文件夹，或者不同的标签来完成这件事，来区分开来自工作的邮件、来自朋友的邮件、来自家人的邮件或者是有关兴趣爱好的邮件，那么，我们就有了这样一个分类问题：其类别有四个，分别用 y=1, y=2, y=3, y=4 来表示</p>
+<p>例二: 如果一个病人因为鼻塞来到你的诊所，他可能并没有生病，用 y=1 这个类别来代表；或者患了感冒，用 y=2 来代表；或者得了流感用 y=3 来代表.</p>
+<p>然而对于之前的一个，二元分类问题，我们的数据看起来可能是像这样：</p>
+<p><img src="/img/1541168782303.png" alt="1541168782303"></p>
+<p>对于一个多类分类问题，我们的数据集或许看起来像这样：</p>
+<p><img src="/img/1541168809943.png" alt="1541168809943"></p>
+<h4 id="一对于多分类思路"><a href="#一对于多分类思路" class="headerlink" title="一对于多分类思路"></a>一对于多分类思路</h4><p>我用3种不同的符号来代表3个类别，问题就是给出3个类型的数据集，我们如何得到一个学习算法来进行分类呢？我们现在已经知道如何进行二元分类，可以使用逻辑回归，对于直线或许你也知道，可以将数据集一分为二为正类和负类。用一对多的分类思想，我们可以将其用在多类分类问题上。下面将介绍如何进行一对多的分类工作，有时这个方法也被称为<strong>“一对余”</strong>方法。</p>
+<p><img src="/img/1541169223823.png" alt="1541169223823"></p>
+<p>现在我们有一个训练集，好比上图表示的有3个类别，我们用三角形表示 y = 1 ，方框表示 y = 2，叉叉表示 y = 3。下面要做的就是使用一个训练集，将其分成3个二元分类问题。我们先从用三角形代表的类别1开始，实际上我们可以创建一个，新的”伪”训练集，类型2和类型3定为负类，类型1设定为正类，我们创建一个新的训练集，如下图所示的那样，我们要拟合出一个合适的分类器。</p>
+<p>这里的三角形是正样本，而圆形代表负样本。可以这样想，设置三角形的值为1，圆形的值为0，下面我们来训练一个标准的逻辑回归分类器，这样我们就得到一个正边界。</p>
+<p><img src="/img/1541169503523.png" alt="1541169503523"></p>
+<p>为了能实现这样的转变，我们将多个类中的一个类标记为正向类（y=1），然后将其他所有类都标记为负向类，这个模型记作$h_θ^{(1)}(x)$。接着，类似地第我们选择另一个类标记为正向类（y=2），再将其它类都标记为负向类，将这个模型记作$h_θ^{(2)}(x)$ ,依此类推。 最后我们得到一系列的模型简记为：$h_θ^{(i)}(x) = P(y=i|x; θ)$ 其中：i = (1, 2, 3, 4, 5, …, k) k为总分类数量<br>最后，在我们需要做预测时，我们将所有的分类机都运行一遍，然后对每一个输入变量，都选择最高可能性的输出变量。<br>总之，我们已经把要做的做完了，现在要做的就是训练这个逻辑回归分类器：$h_θ^{(i)}(x)$ ， 其中 i 对应每一个可能的y=i，最后，为了做出预测，我们给出输入一个新的 x 值，用这个做预测。我们要做的就是在我们三个分类器里面输入 x ，然后我们选择一个让 $h_θ^{(i)}(x)$ 最大的 i 作为最终的分类结果。<br>现在知道了基本的挑选分类器的方法，选择出哪一个分类器是可信度最高效果最好的，那么就可认为得到一个正确的分类，无论值是多少，我们都有最高的概率值，我们预测就是那个值。这就是多类别分类问题，以及一对多的方法，通过这个小方法，你现在也可以将逻辑回归分类器用在多类分类的问题上。</p>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/机器学习/" rel="tag"><i class="fa fa-tag"></i> 机器学习</a>
+          
+            <a href="/tags/逻辑回归/" rel="tag"><i class="fa fa-tag"></i> 逻辑回归</a>
+          
+            <a href="/tags/分类问题/" rel="tag"><i class="fa fa-tag"></i> 分类问题</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/10/26/10.机器学习/机器学习/octave 基础操作/" rel="next" title="Octave基础操作">
+                <i class="fa fa-chevron-left"></i> Octave基础操作
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/10/31/10.机器学习/机器学习/sklearn 线性回归/" rel="prev" title="sklearn 线型回归">
+                sklearn 线型回归 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s、 crawler</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">82</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">20</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">35</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-分类问题"><span class="nav-text">1. 分类问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#线型回归不适合分类问题"><span class="nav-text">线型回归不适合分类问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#逻辑回归算法"><span class="nav-text">逻辑回归算法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-逻辑回归表达式"><span class="nav-text">2. 逻辑回归表达式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#为什么线型回归不适合分类问题"><span class="nav-text">为什么线型回归不适合分类问题?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#逻辑回归模型"><span class="nav-text">逻辑回归模型</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-决策边界"><span class="nav-text">3. 决策边界</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#对决策边界的理解"><span class="nav-text">对决策边界的理解</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#复杂形状的决策边界"><span class="nav-text">复杂形状的决策边界</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-逻辑回归代价函数和梯度下降"><span class="nav-text">4. 逻辑回归代价函数和梯度下降</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#逻辑回归代价函数及简化"><span class="nav-text">逻辑回归代价函数及简化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#梯度下降算法推倒及简化"><span class="nav-text">梯度下降算法推倒及简化</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-高级优化算法"><span class="nav-text">5. 高级优化算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#一些高级算法的介绍"><span class="nav-text">一些高级算法的介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#如何使用这些算法"><span class="nav-text">如何使用这些算法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-多分类问题"><span class="nav-text">6. 多分类问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#多分类的介绍"><span class="nav-text">多分类的介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#一对于多分类思路"><span class="nav-text">一对于多分类思路</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

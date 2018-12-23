@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Fig/Compose编排工具Fig/Compose的介绍在生产环境中，整个团队需要发布的容器数量很可能极其庞大，而容器之间的联系和拓扑结构也可能非常复杂，往往太难升就是集群化的，并且具备高可用设计。如果依赖人工记录和配置这样的复杂容器关系，并保障集群正常运行、监控、迁移、高可用等常规运维需求，难免力不从心因此Fig/Compose就是解决这一问题的。Dockerfile可以重现一个容器，">
+<meta name="keywords" content="Docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker编排与集群部署">
+<meta property="og:url" content="http://blog.kyleliu.cn/2018/06/22/10.Docker容器技术/Docker/Docker编排与集群部署/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="Fig/Compose编排工具Fig/Compose的介绍在生产环境中，整个团队需要发布的容器数量很可能极其庞大，而容器之间的联系和拓扑结构也可能非常复杂，往往太难升就是集群化的，并且具备高可用设计。如果依赖人工记录和配置这样的复杂容器关系，并保障集群正常运行、监控、迁移、高可用等常规运维需求，难免力不从心因此Fig/Compose就是解决这一问题的。Dockerfile可以重现一个容器，">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Docker编排与集群部署_files/Image.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Docker编排与集群部署_files/Image%20[1].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Docker编排与集群部署_files/Image%20[2].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Docker编排与集群部署_files/Image%20[3].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Docker编排与集群部署_files/Image%20[4].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Docker编排与集群部署_files/Image%20[5].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Docker编排与集群部署_files/Image%20[6].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Docker编排与集群部署_files/Image%20[7].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Docker编排与集群部署_files/Image%20[8].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Docker编排与集群部署_files/Image%20[9].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Docker编排与集群部署_files/Image%20[10].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Docker编排与集群部署_files/Image%20[11].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Docker编排与集群部署_files/Image%20[12].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Docker编排与集群部署_files/Image%20[13].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/Docker编排与集群部署_files/Image%20[14].png">
+<meta property="og:updated_time" content="2018-12-05T09:03:04.152Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Docker编排与集群部署">
+<meta name="twitter:description" content="Fig/Compose编排工具Fig/Compose的介绍在生产环境中，整个团队需要发布的容器数量很可能极其庞大，而容器之间的联系和拓扑结构也可能非常复杂，往往太难升就是集群化的，并且具备高可用设计。如果依赖人工记录和配置这样的复杂容器关系，并保障集群正常运行、监控、迁移、高可用等常规运维需求，难免力不从心因此Fig/Compose就是解决这一问题的。Dockerfile可以重现一个容器，">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/e_img/Docker编排与集群部署_files/Image.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2018/06/22/10.Docker容器技术/Docker/Docker编排与集群部署/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Docker编排与集群部署 | 刘小恺(Kyle) 的个人博客</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s、 crawler</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2018/06/22/10.Docker容器技术/Docker/Docker编排与集群部署/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s、 crawler">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Docker编排与集群部署
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-06-22 22:00:00" itemprop="dateCreated datePublished" datetime="2018-06-22T22:00:00+08:00">2018-06-22</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Docker容器技术/" itemprop="url" rel="index"><span itemprop="name">Docker容器技术</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Docker容器技术/Docker/" itemprop="url" rel="index"><span itemprop="name">Docker</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/22/10.Docker容器技术/Docker/Docker编排与集群部署/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2018/06/22/10.Docker容器技术/Docker/Docker编排与集群部署/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/06/22/10.Docker容器技术/Docker/Docker编排与集群部署/" class="leancloud_visitors" data-flag-title="Docker编排与集群部署">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+<html>
+<body>
+<div>
+<span><div><div><span style="background-color: rgb(255, 250, 165);-evernote-highlight:true;"><span style="background-color: rgb(255, 250, 165); font-size: 14pt; color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">Fig/Compose编排工具</span></span></div><ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">Fig/Compose的介绍</span></font></div></li><ul><li><div><span style="font-size: 9pt;">在生产环境中，整个团队需要发布的容器数量很可能极其庞大，而容器之间的联系和拓扑结构也可能非常复杂，往往太难升就是集群化的，并且具备高可用设计。</span></div></li><li><div><span style="font-size: 9pt;">如果依赖人工记录和配置这样的复杂容器关系，并保障集群正常运行、监控、迁移、高可用等常规运维需求，难免力不从心</span></div></li><li><div><span style="font-size: 9pt;">因此Fig/Compose就是解决这一问题的。Dockerfile可以重现一个容器，Compose可以重现容器的配置和集群</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">编排和部署</span></font></div></li><ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">编排</span></font></div></li><ul><li><div><span style="font-size: 9pt;">它根据被部署的对象之间的耦合关系，以及被部署对象对环境的依赖，制定部署流程中各个动作的执行顺序，部署过程所需要的依赖文件和被部署的文件的存储位置和获取方式，以及如何验证部署成功。</span></div></li><li><div><span style="font-size: 9pt;">这些信息都会在编排工具中以制定的格式来要求运维人员定义并保存起来，从而保证这个流程能够随时在全新的环境中可靠有序的重现出来</span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">部署</span></font></div></li><ul><li><div><span style="font-size: 9pt;">是指按照编排制定的内容和流程，在目标机器上执行编排制定的环境初始化，存放制定的依赖和文件，运行制定的部署动作，最终按照编排中的规则来确认部署成功</span></div></li><li><div><span style="font-size: 9pt;">在Compse的世界里，编排和部署的组合结果，就是一朵&quot;容器云&quot;</span></div></li></ul></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">编排工具-Compose的使用</span></font></div></li><ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">Compose安装</span></font></div></li><ul><li><div><span style="font-size: 9pt;">yum -y install epel-release</span> &amp;&amp; yum -y install python-pip <span style="font-size: 9pt;">&amp;&amp; pip install docker-compose</span></div></li></ul></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">Compose的使用</span></font></div></li><ul><li><div><span style="font-size: 9pt; font-weight: bold;">Compose常用命令</span></div></li><ul><li><div><span style="font-size: 9pt;">docker-compose up   启动服务(当前目录下需要有.yml文件)</span></div></li><ul><li><div><span style="font-size: 9pt;">-d:   后台启动，默认是前台启动</span></div></li><li><div><span style="font-size: 9pt;">-f:    指定详细的docker-compose.yml文件, 默认为当前目录下的<span style="font-size: 9pt;">docker-compose.yml</span></span></div></li><li><div><span style="font-size: 9pt;">-p:   指定项目名称启动</span></div></li><li><div><span style="font-size: 9pt;">-H:  指定链接到哪一个Hoser daemon</span></div></li><li><div><span style="font-size: 9pt;">--no-recreate，不会新创建容器，如果有已经存在的容器，那么会直接启动</span></div></li></ul><li><div><span style="font-size: 12px;">docker-compose start  </span><span style="font-size: 9pt;">启动已经存在的容器作为一个服务</span></div></li><li><div><span style="font-size: 9pt;">docker-compose stop  <span style="font-size: 9pt;">停止运行的容器而不删除它们</span></span></div></li><li><div><span style="font-size: 9pt;">docker-compose restart  重启已经停止的容器</span></div></li></ul><li><div><span style="font-size: 9pt; font-weight: bold;">.yml文件的配置选项</span></div></li><ul><li><div><font style="font-size: 9pt;">build</font></div></li><ul><li><div><font style="font-size: 9pt;">指定Dockerfile路径和上下文路径，Compose 将会利用它自动构建这个镜像，然后使用这个镜像启动服务容器</font></div></li><li><div><font style="font-size: 9pt;">args为构建(build)过程中的环境变量，用于替换Dockerfile里定义的ARG参数，容器中不可用。</font></div></li><li><div><font style="font-size: 9pt;"><img src="/e_img/Docker编排与集群部署_files/Image.png" type="image/png" data-filename="Image.png" width="262"></font></div></li></ul><li><div><font style="font-size: 9pt;">image</font></div></li><ul><li><div><font style="font-size: 9pt;">指定使用的镜像，本地不存在会从HUB拉取，当和build同时使用，会把生成的镜像标记为image定义的镜像名称</font></div></li><li><div><font style="font-size: 9pt;"><img src="/e_img/Docker编排与集群部署_files/Image [1].png" type="image/png" data-filename="Image.png" width="169"></font></div></li></ul><li><div><font style="font-size: 9pt;">command</font></div></li><ul><li><div><font style="font-size: 9pt;">容器启动后执行的命令，会覆盖默认的启动命令</font></div></li><li><div><font style="font-size: 9pt;"><img src="/e_img/Docker编排与集群部署_files/Image [2].png" type="image/png" data-filename="Image.png" width="303"></font></div></li></ul><li><div><font style="font-size: 9pt;">ports</font></div></li><ul><li><div><font style="font-size: 9pt;">用于暴露端口给主机, 当不指定主机映射端口时，不能供外部访问(host_ip:container_ip)</font></div></li><li><div><font style="font-size: 9pt;"><img src="/e_img/Docker编排与集群部署_files/Image [3].png" type="image/png" data-filename="Image.png" width="210"></font></div></li></ul><li><div><font style="font-size: 9pt;">expose</font></div></li><ul><li><div><font style="font-size: 9pt;">提供container之间端口访问, 不会暴露给主机使用.同docker run --expose</font></div></li><li><div><font style="font-size: 9pt;"><img src="/e_img/Docker编排与集群部署_files/Image [4].png" type="image/png" data-filename="Image.png" width="116"></font></div></li></ul><li><div><font style="font-size: 9pt;">volumes</font></div></li><ul><li><div><font style="font-size: 9pt;">挂在目录</font></div></li><li><div><font style="font-size: 9pt;"><img src="/e_img/Docker编排与集群部署_files/Image [5].png" type="image/png" data-filename="Image.png" width="235"></font></div></li></ul><li><div><font style="font-size: 9pt;">environment</font></div></li><ul><li><div><font style="font-size: 9pt;">添加环境变量，同docker run -e </font></div></li><li><div><font style="font-size: 9pt;"><img src="/e_img/Docker编排与集群部署_files/Image [6].png" type="image/png" data-filename="Image.png" width="224"></font></div></li></ul><li><div><font style="font-size: 9pt;">depends_on</font></div></li><ul><li><div><font style="font-size: 9pt;">指定依赖，将会优先于该服务创建并启动依赖</font></div></li></ul><li><div><font style="font-size: 9pt;">extra_hosts</font></div></li><ul><li><div><font style="font-size: 9pt;">添加主机名映射</font></div></li><li><div><font style="font-size: 9pt;"><img src="/e_img/Docker编排与集群部署_files/Image [7].png" type="image/png" data-filename="Image.png" width="261"></font></div></li></ul><li><div><font style="font-size: 9pt;">network_mode</font></div></li><ul><li><div><font style="font-size: 9pt;">定义网络模式  同docker --net参数</font></div></li><li><div><font style="font-size: 9pt;"><img src="/e_img/Docker编排与集群部署_files/Image [8].png" type="image/png" data-filename="Image.png" width="290"></font></div></li></ul><li><div><font style="font-size: 9pt;">privileged</font></div></li><ul><li><div><font style="font-size: 9pt;">是否使用privileged模式</font></div></li><li><div><font style="font-size: 9pt;"><img src="/e_img/Docker编排与集群部署_files/Image [9].png" type="image/png" data-filename="Image.png" width="275"></font></div></li></ul><li><div><font style="font-size: 9pt;">env_file</font></div></li><ul><li><div><font style="font-size: 9pt;">指定变量的文件，默认为docker-compose文件夹下的 .env 文件.</font></div></li><li><div><font style="font-size: 9pt;">同一个变量，通过export设置，会覆盖env_file中的变量.</font></div></li><li><div><font style="font-size: 9pt;">env_file: .env</font></div></li></ul></ul></ul></ul><ul><li><div><font style="font-size: 9pt;">env_file:</font></div></li><li><div><font style="font-size: 9pt;">  - ./common.env</font></div></li><li><div><font style="font-size: 9pt;">  - ./apps/web.env</font></div></li><li><div><font style="font-size: 9pt;">  - /opt/secrets.env</font></div></li></ul><div><font style="font-size: 9pt;"><br></font></div><ul><ul><ul><li><div><font style="font-size: 9pt;">cat .env</font></div></li><li><div><font style="font-size: 9pt;"> MYSQL_DATA_DIR=/my/sql/data-dir</font></div></li></ul><li><div><font style="font-size: 9pt;">tty</font></div></li><ul><li><div><font style="font-size: 9pt;">是否给容器分配终端</font></div></li><li><div><font style="font-size: 9pt;">当想要让容器后台运行的时候，必须带该配置，不然不会分配终端，容器执完命令会自动退出</font></div></li></ul></ul><li><div><span style="font-size: 12pt; font-weight: bold;">编排.yml文件使用示例</span></div></li><ul><li><div><img src="/e_img/Docker编排与集群部署_files/Image [10].png" type="image/png" data-filename="Image.png" width="326"></div></li><li><div><span style="font-weight: bold;">networks关键字:</span></div></li><ul><li><div><span style="font-size: 9pt;">compose file中顶级networks关键字，可以用来创建更加复杂的网络拓扑，指定自定义网络驱动和选项，也可以用它来连接外部创建（非Compose创建）的网络。</span></div></li><li><div><span style="font-size: 9pt;">每个Service可通过service内部的networks关键字来指定它要使用的顶级网络。给Service指定networks的好处是，实现网络隔离或连接</span></div></li><li><div><span style="font-size: 9pt;">每个网络中的启动的容器，可以实现相互的网络通信，容器直接可以使用容器名进行通信</span></div></li></ul></ul><li><div><span style="font-size: 12pt; font-weight: bold;">使用Docker-compose进行网络通信</span></div></li><ul><li><div><span style="font-size: 10pt; font-weight: bold;">第一种方法：</span></div></li><ul><li><div>将service部署到同一个网络环境中，即可实现容器的互相通信，使用container_name即可</div></li><li><div>示例：</div></li><ul><li><div><img src="/e_img/Docker编排与集群部署_files/Image [11].png" type="image/png" data-filename="Image.png" width="408"></div></li></ul></ul><li><div><span style="font-weight: bold;">第二种方法:</span></div></li><ul><li><div>使用自定义局域网络，容器之间使用静态ip进行通信</div></li><li><div>示例：</div></li><ul><li><div><img src="/e_img/Docker编排与集群部署_files/Image [12].png" type="image/png" data-filename="Image.png" width="269"></div></li></ul></ul><li><div><span style="font-weight: bold;">第三种方法</span>：</div></li><ul><li><div><span style="font-size: 9pt;">先给每个服务指定容器的名称</span></div></li><li><div><span style="font-size: 9pt;">再在每个服务中给容器添加extra_host对应容器的映射关系</span></div></li></ul></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">Compose的缺点</span></font></div></li><ul><li><div><span style="font-size: 9pt;">docker-compose是面向单宿主机部署的，这是一种部署能力的欠缺，管理员需要借助成熟的自动化运维工具来管理多个目标机，将docker-compose所需要的所有资源包括配置文、用户代码交给所有的目标机，再在目标机上运行docker-compose指令</span></div></li><li><div><span style="font-size: 9pt;">docker-compose还不能提供跨宿主机的网络和存储。这意味着管理员必须部署一套类似于Open vSwich的堵路网络工具，而且管理员还需要完成继承工作。</span></div></li><li><div><span style="font-size: 9pt;">Docker官方给出了一套用Compse、Machine、Swarm联动的解决方案</span></div></li></ul></ul><div><font style="background-color: rgb(255, 250, 165);font-size: 14pt;-evernote-highlight:true;"><span style="background-color: rgb(255, 250, 165); font-size: 14pt; color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">集群抽象工具Swarm</span></font></div><ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">Swarm的介绍</span></font></div></li><ul><li><div><span style="font-size: 9pt;">Swarm的目的是将多个宿主机抽象为&quot;一台&quot;宿主机来对待</span></div></li><li><div><span style="font-size: 9pt;">Swarm在多台Docker宿主机(Docker服务端)上建立了一层抽象，可以通过操作Swarm服务端实现对宿主机的资源分配和管理</span></div></li><li><div><span style="font-size: 9pt;">Swarm通过在Docker宿主机上添加标签信息来讲宿主机资源进行细粒度分区，通过分区来帮助用户将容器部署到目标宿主机上</span></div></li><li><div><span style="font-size: 9pt;">利用Swarm可以实现控制一台Swarm Manager来控制整个Docker集群。</span></div></li><li><div><span style="font-size: 9pt;"><img src="/e_img/Docker编排与集群部署_files/Image [13].png" type="image/png" data-filename="Image.png" width="370"></span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">Swarm集群的Agent\Manager</span></font></div></li><ul><li><div><span style="font-size: 9pt;">Agent: Agent节点运行Docker服务端，Docker Release的版本需要保证一怔，且为1.4.0或更新的版本。</span></div></li><li><div><span style="font-size: 9pt;">Manager：Manager节点负责与所有的Agent上的Docker宿主机通信以及对外提供Docker远程API服务，因此Manager负责能获取到所有的Agent地址。当通过Docker客户端与Manager通信，执行docker run命令时，Manager会选择一个Agent来执行该命令，并执行结果返回给Docker客户端</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">创建一个Swarm集群</span></font></div></li><ul><li><div><span style="font-size: 10pt; font-weight: bold;">搭建Swarm集群</span></div></li><ul><li><div><span style="font-size: 9pt;">1.拉取swarm镜像</span></div></li><ul><li><div><span style="font-size: 9pt;">docker pull swarm</span></div></li></ul><li><div><span style="font-size: 9pt;">2.把准备加入集群的所有的节点的docker deamon的监听端口修改为0.0.0.0:2375</span></div></li><ul><li><div><span style="font-size: 9pt;">vi /etc/default/docker</span></div></li><li><div><span style="font-size: 9pt;">DOCKER_OPTS=&quot;-H 0.0.0.0:2375 -H unix:///var/run/docker.sock&quot;  在文件结尾添加</span></div></li><li><div><span style="font-size: 9pt;">service docker restart   重启docker服务</span></div></li></ul><li><div><span style="font-size: 9pt;">3.在manage节点新建一个文件,把要加入到集群的机器的IP地址都写进去</span></div></li><ul><li><div><span style="font-size: 9pt;"><img src="/e_img/Docker编排与集群部署_files/Image [14].png" type="image/png" data-filename="Image.png" width="317"></span></div></li></ul><li><div><span style="font-size: 9pt;">4.执行swarm manage命令(在manage节点上)</span></div></li><ul><li><div><span style="font-size: 9pt;">docker run –d –p 2376:2375 –v $(pwd)/cluster:/tmp/cluster swarm manage file:///tmp/cluster</span></div></li><ul><li><div><span style="font-size: 9pt;">这里一定要使用-v命令，因为cluster文件是在本机上面，启动的容器默认是访问不到的，所以要通过-v命令共享</span></div></li></ul></ul><li><div><span style="font-size: 9pt;">5.让集群运行某些命令</span></div></li><ul><li><div><span style="font-size: 9pt;">随机指定节点来运行</span></div></li><ul><li><div><span style="font-size: 9pt;">docker -H &lt;manage_host:manage_port&gt; info</span></div></li><li><div><span style="font-size: 9pt;">docker -H &lt;manage_host:manage_port&gt; run -it ubuntu /bin/bash</span></div></li></ul><li><div><span style="font-size: 9pt;">通过lable来指定某个节点来运行命令</span></div></li><ul><li><div><span style="font-size: 9pt;">docker -d --lable  storage  给节点加上storage标签</span></div></li><li><div><span style="font-size: 9pt;">sudo docker run –H 10.13.181.83:2376 run –name redis_083 –d –e constraint:storage redis    通过指定标签来选择节点启动</span></div></li></ul></ul><li><div><span style="font-size: 9pt;">6.Docker客户端与Manager通信</span></div></li><ul><li><div><span style="font-size: 9pt;">docker -H &lt;manage_host:manage_port&gt; run -it ubuntu /bin/bash </span></div></li></ul><li><div><span style="font-size: 9pt;">7.删除一个节点</span></div></li><ul><li><div><span style="font-size: 9pt;">docker node rm --force node1  </span></div></li></ul></ul></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">Swarm的调度测略（可以通过strategy来选出最终运行容器的宿主机）</span></font></div></li><ul><li><div><span style="font-size: 9pt;">Random :顾名思义，就是随机选择一个Node来运行容器，一般用作调试用，spread和binpack策略会根据各个节点的可用的CPU,RAM以及正在运行的容器的数量来计算应该运行容器的节点。</span></div></li><li><div><span style="font-size: 9pt;">Spread :会选择运行容器最少的那台节点来运行新的容器,使用Spread策略会使得容器会均衡的分布在集群中的各个节点上运行，一旦一个节点挂掉了只会损失少部分的容器。</span></div></li><li><div><span style="font-size: 9pt;">binpack: 会选择运行容器最集中的那台机器来运行新的节点,binpack策略最大化的避免容器碎片化，就是说binpack策略尽可能的把还未使用的节点留给需要更大空间的容器运行，尽可能的把容器运行在一个节点上面。</span></div></li></ul></ul><div><font style="font-size: 14pt;"><span style="font-size: 14pt; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">跨平台宿主环境管理工具-Machine</span></font></div><ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;"> Machine的介绍</span></font></div></li><ul><li><div><span style="font-size: 9pt;">搭建环境想来是一个重复造轮子的过程，Machine这一工具把用户搭建Docker环境的跟中方案汇集在一起，即一目了然的简化了Docker环境的创建过程，让用户继续讲时间投入到应用开发商，而不是无谓的花费在环境的搭建上</span></div></li><li><div><span style="font-size: 9pt;">Machine的主要功能就是帮助用户在不同的云主机提供商上创建和管理虚拟机，并在虚拟机中安装Docker</span></div></li><li><div><span style="font-size: 9pt;">用户只需要提供几项登录凭证即可等待环境安装完成。Machine能便捷地管理所有通过它创建的Docker宿主机，进行宿主机的启动、关闭、重启、删除等操作</span></div></li><li><div><span style="font-size: 9pt;">使用Machine可以在最开始快速创建多台主机系统，并搭建Docker部署环境，接下俩就可以使用swarm创建集群等操作</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">Machine与虚拟机软件</span></font></div></li><ul><li><div><span style="font-size: 9pt;">Machine包含的虚拟机驱动有VirtualBox、VMware FUsion、Hyper-V</span></div></li><li><div><span style="font-size: 9pt;">使用Machine前，机器上需要有上述的三种软件之一，需要在命令中指定使用哪一种</span></div></li><li><div><span style="font-size: 9pt;">当不需要创建虚拟镜像充当主机的时候，我们也可以直接指定主机的ip方式来通过Docker Machine来控制多个真正的主机</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">Docker Machine的使用</span></font></div></li><ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">安装Docker Machine</span></font></div></li><ul><li><div><span style="font-size: 9pt;">curl -L https://github.com/docker/machine/releases/download/v0.12.0/docker-machine-`uname -s`-`uname -m` &gt; /tmp/docker-machine</span></div></li><li><div><span style="font-size: 9pt;">chmod +x /tmp/docker-machine</span></div></li><li><div><span style="font-size: 9pt;">sudo mv /tmp/docker-machine /usr/local/bin/docker-machine</span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">使用Docker Machine的前提条件</span></font></div></li><ul><li><div><span style="font-size: 9pt;">sudo adduser nick </span></div></li><li><div><span style="font-size: 9pt;">sudo usermod -a -G sudo nick    在目标主机上创建一个用户并加入sudo 组</span></div></li><li><div><span style="font-size: 9pt;">sudo vi  sudoer    </span></div></li><li><div><span style="font-size: 9pt;">nick   ALL=(ALL:ALL) NOPASSWD: ALL    为该用户设置 sudo 操作不需要输入密码</span></div></li><li><div><span style="font-size: 9pt;">ssh-copy-id -i ~/.ssh/id_rsa.pub</span> <a href="mailto:nick@xxx.xxx.xxx.xxx" style="font-size: 9pt;" target="_blank" rel="noopener">nick@xxx.xxx.xxx.xxx</a><span style="font-size: 9pt;">     把本地用户的 ssh public key 添加到目标主机上</span></div></li></ul></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">第一种安装Docker方法：在目标主机上安装Docker</span></font></div></li><ul><li><div><span style="font-size: 9pt;">命令</span></div></li></ul></ul><div style="box-sizing: border-box; padding: 8px; font-family: Monaco, Menlo, Consolas, &quot;Courier New&quot;, monospace; font-size: 12px; color: rgb(51, 51, 51); border-radius: 4px; background-color: rgb(251, 250, 248); border: 1px solid rgba(0, 0, 0, 0.15);-en-codeblock:true;"><div><span style="font-size: 9pt;">            docker-machine create -d generic \</span></div><div>                --generic-ip-address=xxx.xxx.xxx.xxx \</div><div>                --generic-ssh-user=nick \</div><div>                --generic-ssh-key ~/.ssh/id_rsa \</div><div>                krdevdb</div></div><ul><ul><li><div><span style="font-size: 9pt;">备注：</span></div></li><ul><li><div><span style="font-size: 9pt;">create 命令本是要创建虚拟主机并安装 Docker，因为本例中的目标主机已经存在，所以仅安装 Docker。</span></div></li></ul><li><div><span style="font-size: 9pt;">解释</span></div></li><ul><li><div><span style="font-size: 9pt;">-d 是 --driver 的简写形式，主要用来指定使用什么驱动程序来创建目标主机。Docker Machine 支持在云服务器上创建主机，就是靠使用不同的驱动来实现了。本例中使用 generic 就可以了</span></div></li><li><div><span style="font-size: 9pt;">--generic 开头的三个参数主要是指定操作的目标主机和使用的账户。最后一个参数 krdevdb 是虚拟机的名称</span></div></li></ul></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">第二种安装Docker方法：在本地主机上安装Docker虚拟机</span></font></div></li><ul><li><div><span style="font-size: 9pt;">命令</span></div></li></ul></ul><div style="box-sizing: border-box; padding: 8px; font-family: Monaco, Menlo, Consolas, &quot;Courier New&quot;, monospace; font-size: 12px; color: rgb(51, 51, 51); border-radius: 4px; background-color: rgb(251, 250, 248); border: 1px solid rgba(0, 0, 0, 0.15);-en-codeblock:true;"><div><span style="font-size: 9pt;">            docker-machine create \</span></div><div>                --driver vmwarevsphere \</div><div>                --vmwarevsphere-vcenter=xxx.xxx.xxx.xxx \</div><div>                --vmwarevsphere-username=root \</div><div>                --vmwarevsphere-password=12345678 \</div><div>                --vmwarevsphere-cpu-count=1 \</div><div>                --vmwarevsphere-memory-size=512 \</div><div>                --vmwarevsphere-disk-size=10240 \</div><div>                testvm</div></div><ul><li><div><span style="font-size: 9pt;">备注：</span></div></li><ul><li><div><span style="font-size: 9pt;">在实际使用中我们一般会在物理机上安装 vSphere 等虚拟机管理软件，并称之为虚拟机 host。然后通过 vSphere 工具安装虚拟机进行使用。接下来我们将介绍如何在本地的一台安装了 vSphere 的虚拟机 host 上安装带有 Docker 的虚拟机</span></div></li></ul><li><div><span style="font-size: 9pt;">参数解释：</span></div></li></ul><div style="box-sizing: border-box; padding: 8px; font-family: Monaco, Menlo, Consolas, &quot;Courier New&quot;, monospace; font-size: 12px; color: rgb(51, 51, 51); border-radius: 4px; background-color: rgb(251, 250, 248); border: 1px solid rgba(0, 0, 0, 0.15);-en-codeblock:true;"><div><span style="font-size: 9pt;">            --driver vmwarevsphere   需要给 Docker Machine 提供对应的驱动，这样才能够在上面安装新的虚拟机。</span></div><div>            --vmwarevsphere-vcenter=xxx.xxx.xxx.xxx \</div><div>            --vmwarevsphere-username=root \</div><div>            --vmwarevsphere-password=12345678 \    上面三行分别指定了虚拟机 host 的 IP 地址、用户名和密码。</div><div>            --vmwarevsphere-cpu-count=1 \</div><div>            --vmwarevsphere-memory-size=512 \</div><div>            --vmwarevsphere-disk-size=10240 \    上面三行则分别指定了新创建的虚拟机占用的 cpu、内存和磁盘资源。</div><div>            testvm      最后一个参数则是新建虚拟机的名称。</div></div><ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">查看docker machine 管理的主机列表</span></font></div></li><ul><li><div><span style="font-size: 9pt;">docker-machine ls </span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">获取构造docker主机时使用的命令</span></font></div></li><ul><li><div><span style="font-size: 9pt;">docker-machine config  dev</span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">获取连接到某个主机需要的环境变量</span></font></div></li><ul><li><div><span style="font-size: 9pt;">docker-machine env dev   </span></div></li><li><div><span style="font-size: 9pt;">eval &quot;$(docker-machine env dev)&quot;   会指定接下来和哪台主机的docker daemon进行通信</span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">启动\停止\重启虚拟机</span></font></div></li><ul><li><div><span style="font-size: 9pt;">docker-machine start/stop/restart  dev   </span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">SSH到宿主机上执行命令</span></font></div></li><ul><li><div><span style="font-size: 9pt;">docker-machine ssh dev /start.sh   </span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">获取主机的url</span></font></div></li><ul><li><div><span style="font-size: 9pt;">docker-machine url   </span></div></li></ul><li><div><span style="font-size: 10pt; font-weight: bold;">主机之间传递文件</span></div></li><ul><li><div><span style="font-size: 9pt;">docker-machine scp  </span></div></li></ul></ul><div><br></div><div><br></div><div><br></div></div><div><br></div></span>
+</div></body></html>
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Docker/" rel="tag"><i class="fa fa-tag"></i> Docker</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/20/10.Docker容器技术/Docker/Docker镜像管理&Dockerfile/" rel="next" title="Docker镜像管理&Dockerfile">
+                <i class="fa fa-chevron-left"></i> Docker镜像管理&Dockerfile
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/17/12.数据存储/Kafka/Kafka的介绍/" rel="prev" title="Kafka的介绍">
+                Kafka的介绍 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s、 crawler</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">82</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">20</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">35</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

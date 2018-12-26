@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="线程简介线程：线程是操作系统进行资源调度的基本单位线程与进程的区别 线程 ：线程间共享进程资源；  （当多个任务需要同时执行且需要实时的共享数据的时候优先选用多线程）操作系统进行资源调度的基本单位，所有线程占用同一块内存空间单个线程拥有的资源更小，线程切换代码更小。线程的独立性并不是很好，主线程会等待子线程都结束才会结束，一个子线程崩溃所有线程都可能会崩溃进程： 进程之间的数据是不共享的，">
+<meta name="keywords" content="python">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多任务-线程">
+<meta property="og:url" content="http://blog.kyleliu.cn/2016/11/06/01.python/python特性/多任务-线程/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="线程简介线程：线程是操作系统进行资源调度的基本单位线程与进程的区别 线程 ：线程间共享进程资源；  （当多个任务需要同时执行且需要实时的共享数据的时候优先选用多线程）操作系统进行资源调度的基本单位，所有线程占用同一块内存空间单个线程拥有的资源更小，线程切换代码更小。线程的独立性并不是很好，主线程会等待子线程都结束才会结束，一个子线程崩溃所有线程都可能会崩溃进程： 进程之间的数据是不共享的，">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/多任务-线程_files/Image.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/多任务-线程_files/Image%20[1].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/多任务-线程_files/Image%20[2].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/多任务-线程_files/Image%20[3].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/多任务-线程_files/Image%20[4].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/多任务-线程_files/Image%20[5].png">
+<meta property="og:updated_time" content="2018-12-26T01:48:02.936Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="多任务-线程">
+<meta name="twitter:description" content="线程简介线程：线程是操作系统进行资源调度的基本单位线程与进程的区别 线程 ：线程间共享进程资源；  （当多个任务需要同时执行且需要实时的共享数据的时候优先选用多线程）操作系统进行资源调度的基本单位，所有线程占用同一块内存空间单个线程拥有的资源更小，线程切换代码更小。线程的独立性并不是很好，主线程会等待子线程都结束才会结束，一个子线程崩溃所有线程都可能会崩溃进程： 进程之间的数据是不共享的，">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/e_img/多任务-线程_files/Image.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2016/11/06/01.python/python特性/多任务-线程/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>多任务-线程 | 刘小恺(Kyle) 的个人博客</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s、 crawler</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2016/11/06/01.python/python特性/多任务-线程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s、 crawler">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">多任务-线程
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2016-11-06 22:00:00" itemprop="dateCreated datePublished" datetime="2016-11-06T22:00:00+08:00">2016-11-06</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/python/" itemprop="url" rel="index"><span itemprop="name">python</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/python/python特性/" itemprop="url" rel="index"><span itemprop="name">python特性</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/11/06/01.python/python特性/多任务-线程/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2016/11/06/01.python/python特性/多任务-线程/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2016/11/06/01.python/python特性/多任务-线程/" class="leancloud_visitors" data-flag-title="多任务-线程">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+<html>
+<body>
+<div>
+<span><div><div><font style="font-size: 14pt;"><span style="font-size: 14pt; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">线程简介</span></font></div><div><ul><li><span style="font-size: 10pt; font-weight: bold;">线程</span><span style="font-size: 10pt;">：</span></li><ul><li><span style="font-size: 9pt;">线程是操作系统进行资源调度的基本单位</span></li></ul><li><span style="font-size: 10pt; font-weight: bold;">线程与进程的区别</span><span style="font-size: 10pt;"> </span></li><ul><li><span style="font-size: 9pt;">线程 ：</span></li><ul><li><span style="font-size: 9pt;">线程间共享进程资源；  （当多个任务需要同时执行且需要实时的共享数据的时候优先选用多线程）</span></li><li><span style="font-size: 9pt;">操作系统进行资源调度的基本单位，所有线程占用同一块内存空间</span></li><li><span style="font-size: 9pt;">单个线程拥有的资源更小，线程切换代码更小。</span></li><li><span style="font-size: 9pt;">线程的独立性并不是很好，主线程会等待子线程都结束才会结束，一个子线程崩溃所有线程都可能会崩溃</span></li></ul><li><span style="font-size: 9pt;">进程： </span></li><ul><li><span style="font-size: 9pt;">进程之间的数据是不共享的，需要使用列队进行数据的传递</span></li><li><span style="font-size: 9pt;">是操作系统进程资源分配的基本单位， 占用不同的内存空间，</span></li><li><span style="font-size: 9pt;">独立性比较好，单个进程崩溃不影响其他进程的运行</span><span style="font-size: 9pt;">；</span></li></ul></ul></ul></div><div><font style="font-size: 14pt;"><span style="font-size: 14pt; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">创建子线程--threading.Tread类</span></font></div><div><ul><li><span style="font-weight: bold; font-size: 10pt;">创建子线程的方法（第一种）</span></li><ul><li><span style="font-size: 9pt;">thd = threading.Thread(target=None, args=())</span></li></ul><li><span style="font-weight: bold; font-size: 10pt;">Tread类__init__方法常用的参数</span></li><ul><li><span style="font-size: 9pt;">target 表示线程执行的入口函数代码</span></li><li><span style="font-size: 9pt;">args 表示给入口函数传递的函数参数</span></li></ul><li><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">Thread类常用的实例方法</span></font></li><ul><li><span style="font-size: 9pt;">is_alive()    判断线程是否处于运行状态</span></li><li><span style="font-size: 9pt;">start()   判断子线程的创建和执行      “start()方法有两个主要步骤1.启动子进程 2.执行run方法（run（）方法会去默认调用target参数传入的函数）”</span></li><li><span style="font-size: 9pt;">run()    子线程默认执行的线程入口代码</span></li><li><span style="font-size: 9pt;">join()    阻塞等待线程结束  “在主线程中默认会等待所有的子线程结束后再结束程序，所以一般情况下不需要使用join()”</span></li></ul><li><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">创建子线程的方法（第二种）</span></font></li><ul><li><span style="font-size: 9pt;">1.import threading 模块</span></li><li><span style="font-size: 9pt;">2.继承threading.Thread类</span></li><li><span style="font-size: 9pt;">3.重写子类中的run方法</span></li><li><span style="font-size: 9pt;">4.创建子线程实例（通过该方法创建的实例不需要传入target，默认会调用重写的父类方法，重写的run方法需要的参数而已通过实例属性获取。）</span></li><li><span style="font-size: 9pt;">例子：</span></li><ul><li><img src="/e_img/多任务-线程_files/Image.png" type="image/png" data-filename="Image.png" style="font-size: 9pt;" width="251"></li></ul></ul><li><span style="font-weight: bold; font-size: 10pt;">线程间的数据竞争与同步的概念*</span></li><ul><li><span style="font-size: 9pt;">数据竞争描述：</span></li><ul><li><span style="font-size: 9pt;">当多个线程对一个全局变量进行操作的时候，会产生资源竞争的情况，从而导致操作的结果不正确</span></li></ul><li><span style="font-size: 9pt;">多线程同步的描述：</span></li><ul><li><span style="font-size: 9pt;">在多线程的工作模式下，使各个线程有序的协作，有序的处理数据，避免数据竞争等异常现象的发生</span></li></ul><li><span style="font-size: 9pt;">线程安全：</span></li><ul><li><span style="font-size: 9pt;">由于线程之间的数据操作经常是不安全的，所以通常需要对数据加上保护措施，保证数据操作的逻辑正确性</span></li></ul><li><span style="font-size: 9pt;">注意： </span></li><ul><li><span style="font-size: 9pt;">Queue 是线程安全的，线程间的操作不会产生数据竞争的情况</span></li></ul></ul><li><span style="font-weight: bold; font-size: 10pt;">实现多线程同步的方法---队列（Queue）</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">介绍Queue</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">Queue是python中的标准库，可以直接import Queue引用，队列是线程间最常用的交换数据的形式。</span></li></ul><li><span style="font-size: 9pt; line-height: 1.45;">Queue的作用</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">python下多线程对于资源的处理，加锁是个重要的环节，因为python原生的list,dict等，都是not thread safe的，所以使用Queue，可以不用手动添加资源锁就能解决资源竞争的问题。</span></li><li><span style="font-size: 9pt; line-height: 1.45;">在使用Queue进行参数传递的时候，只有Queue列队中有数据，线程就可以获得并执行任务，不需要等待其他线程对数据的处理并传递，更方便数据的传递和处理；</span></li></ul><li><span style="font-size: 9pt; line-height: 1.45;">使用方法</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">创建队列对象</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">from queue import Queue</span></li><li><span style="font-size: 9pt; line-height: 1.45;">queue = Queue(maxsize = n)        创建一个最大容量为n的queue列队</span></li></ul><li><span style="font-size: 9pt; line-height: 1.45;">将一个数值放在队列中</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">queue.put( )      向列队中添加任务，列队满后会阻塞等待</span></li><li><span style="font-size: 9pt; line-height: 1.45;">myqueue.put_nowait( )    向列队中添加任务，列队满后会报错</span></li></ul><li><span style="font-size: 9pt; line-height: 1.45;">将一个数值从队列中取出</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">queue.get( )     从列队中取出任务</span></li><li><span style="font-size: 9pt; line-height: 1.45;">queue.get([block[, timeout]])        从列队中取出任务，超时后会报错</span></li><li><span style="font-size: 9pt; line-height: 1.45;">备注：从列队取出任务后，列队计数并不会减一，需要标记任务task_done</span></li></ul><li><span style="font-size: 9pt; line-height: 1.45;">任务完成，列队计数减一</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">queue.task_done( )      列队计数减一</span></li></ul><li><span style="font-size: 9pt; line-height: 1.45;">列队任务计数不为0时，阻塞进程</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">Queue.join( )                 列队如果不为空，阻塞主线程</span></li></ul><li><span style="font-size: 9pt; line-height: 1.45;">其他查询列队状态的方法</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">Queue.qsize()              返回队列当前计数大小</span></li><li><span style="font-size: 9pt; line-height: 1.45;">Queue.empty()           如果队列为空，返回True,反之False</span></li><li><span style="font-size: 9pt; line-height: 1.45;">Queue.full()                  如果队列满了，返回True,反之False</span></li><li><span style="font-size: 9pt; line-height: 1.45;">Queue.full                    与 maxsize 大小对应</span></li></ul></ul></ul><li><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">实现多线程同步的方法---互斥锁（threading.Lock类）</span></font></li><ul><li><span style="font-size: 9pt; font-weight: bold;">互斥锁的概念</span><span style="font-size: 9pt;">：</span></li><ul><li><span style="font-size: 9pt;">有我不能有你，有你一定不能有我；即多个线程里面如果一个线程上了锁，其他使用该锁的线程则会发生阻塞，直到该线程解锁</span></li></ul><li><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">使用方法</span></font></li><ul><li><span style="font-size: 9pt;">安装锁</span></li><ul><li><span style="font-size: 9pt;">import threading </span></li><li><span style="font-size: 9pt;">mutex_lock = threading.Lock()</span></li></ul><li><span style="font-size: 9pt;">上锁</span></li><ul><li><span style="font-size: 9pt;">mutex_lock.acquire(True， timeout)      其中的参数默认为True，表示如果没有获取到锁会一直阻塞等待，直到获取到互斥锁的资源，并且返回True ； False 表示如果没有获取到锁的资源不会阻塞，会返回False  ；  timeout为阻塞时间， 默认为无穷大，只能在锁为阻塞状态下使用</span></li></ul><li><span style="font-size: 9pt;">解锁</span></li><ul><li><span style="font-size: 9pt;">mutex_lock.release()</span></li></ul></ul><li><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">互斥锁两种状态的图示</span></font></li><ul><li><span style="font-size: 9pt;"><img src="/e_img/多任务-线程_files/Image [1].png" type="image/png" data-filename="Image.png" width="241"></span></li></ul><li><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">互斥锁的优点与缺点</span></font></li><ul><li><span style="font-size: 9pt;">优点：能够使多线程同步运行保证结果正确</span></li><li><span style="font-size: 9pt;">缺点：丧失了并发优势可能会造成</span><span style="font-size: 9pt; font-weight: bold;">deadlock 死锁</span></li></ul><li><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">死锁</span></font></li><ul><li><span style="font-size: 9pt;">（场景一）某个任务对锁不正常的请求/释放导致的多任务相互阻塞等待的情况</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">例子：（一个线程中没有对锁的资源进行释放）</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">   </span><img src="/e_img/多任务-线程_files/Image [2].png" type="image/png" data-filename="Image.png" style="font-size: 9pt; line-height: 1.45;" width="231"></li></ul></ul><li><span style="font-size: 9pt; line-height: 1.45;">（场景二）在线程共享资源的时候，如果连个线程分别占有一部分资源的时候，两个线程分别占有一部分资源并且同时等待对方的资源导致死锁    </span><span style="font-size: 9pt; font-weight: bold; line-height: 1.45;">“临界资源”</span><span style="font-size: 9pt; line-height: 1.45;">：</span><span style="font-size: 9pt; line-height: 1.45;">同一时间点只允许一个任务访问的资源</span></li><ul><li><span style="font-size: 9pt; orphans: 3; widows: 3; line-height: 1.45;">例子：（双方都等待对方的资源释放）</span></li><ul><li><span style="font-size: 9pt; line-height: 1.45;">  </span><img src="/e_img/多任务-线程_files/Image [3].png" type="image/png" data-filename="Image.png" style="font-size: 9pt; line-height: 1.45; orphans: 3; widows: 3;" width="352"></li></ul></ul></ul><li><span style="font-size: 9pt; font-weight: bold; line-height: 1.45;">避免死锁的方法</span></li><ul><li><span style="line-height: 1.45; font-size: 9pt;">正确的请求锁，释放锁</span></li><li><span style="font-size: 9pt; line-height: 1.45;">为锁设置非阻塞/超时时间等</span></li><li><span style="font-size: 9pt; line-height: 1.45;">合理的临界资源  管理策略预防  --银行家算法</span></li><li><img src="/e_img/多任务-线程_files/Image [4].png" type="image/png" data-filename="Image.png" style="font-size: 9pt; line-height: 1.45;" width="319"></li></ul></ul></ul></div><div><br></div><div><span style="background-color: rgb(255, 250, 165); font-size: 14pt; color: rgb(50, 135, 18); font-weight: bold; line-height: 1.45;-evernote-highlight:true;">Cpython的GIL （global interpreter lock）</span></div><div><ul><li><span style="font-size: 9pt; font-weight: bold;">GIL定义</span><span style="font-size: 9pt;">：</span></li><ul><li><span style="font-size: 9pt;">在CPython中，有一个全局的解释器锁，它可以防止多个本机线程同时执行Python的编译器。这个锁是必需的，主要是因为</span><span style="font-size: 9pt; font-weight: bold;">Cpython的内存管理不是线程安全的</span><span style="font-size: 9pt;">。(然而，由于吉尔存在，其他的特性已经发展到依赖于它的保证。)   因此，才cpython中多线程不存在利用多核的情况，只能轮流等待cpu执行每一个线程，因此一个进程中的所有线程都不是并行执行的</span></li></ul><li><span style="font-weight: bold; font-size: 9pt;">cpython的GIL问题</span></li><ul><li><span style="font-size: 9pt;">多个线程间需要操作共享的系统资源， </span><span style="font-size: 9pt; line-height: 1.45;">由于cpython的内存管理不是线程安全的， 所以所有的”线程”在执行时都需要先获取GIL</span></li><li><span style="font-size: 9pt;">GIL类似于 Lock，所以cpython原理上不存在多线程的，多线程并不存在并行执行的情况</span></li><li><span style="font-size: 9pt;">越过GIL限制的方法</span></li><ul><li><span style="font-size: 9pt;">用C/C++编写线程代码</span></li><ul><li><span style="font-size: 9pt;">void DeadLoop()</span></li><li><span style="font-size: 9pt;">{    </span></li><ul><li><span style="font-size: 9pt;">while(1) ;</span></li></ul><li><span style="font-size: 9pt;">}</span></li></ul><li><span style="font-size: 9pt;">编译为动态库让python调用gcc loop.c -shared -o libgil.so</span></li><li><span style="font-size: 9pt;">Python程序中调用</span></li><ul><li><span style="font-size: 9pt;">from ctypes import * ; </span></li><li><span style="font-size: 9pt;">import threading</span></li><li><span style="font-size: 9pt;">lib = cdll.LoadLibrary(&quot;./libgil.so&quot;)</span></li><li><span style="font-size: 9pt;">t= threading.Thread(target=lib.Deadloop)</span></li><li><span style="font-size: 9pt;">t.start()</span></li><li><span style="font-size: 9pt;">lib.Deadloop()</span></li></ul></ul></ul></ul></div><div><font style="font-size: 14pt;"><span style="font-size: 14pt; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">Daemon线程（守护线程）</span></font></div><ul><li><span style="font-weight: bold; font-size: 10pt;">线程退出步骤：</span></li><ul><li><span style="font-size: 9pt;">主线程运行结束时，会判断子线程的daemon值，主线程会等待所有daemon为False的线程结束后才退出，如果剩下的线程daemon值都为True，那么会强制退出所有子线程，并结束进程。</span></li></ul><li><span style="font-weight: bold; font-size: 10pt;">Deamon线程：</span></li><ul><li><span style="font-size: 9pt;">默认线程是普通类型的，当设置线程为守护线程时，当程序的最后一个普通线程退出时，整个进程都将会退处出</span></li></ul><li><span style="font-weight: bold; font-size: 10pt;">将线程设置为Daemon的方法</span></li><ul><li><span style="font-size: 9pt;">第一种写法：线程名.Daemon = True</span></li><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">第二种写法：线程名.setDaemon(True)</span></li></ul></ul><div><font style="font-size: 14pt;"><span style="background-color: rgb(255, 250, 165);-evernote-highlight:true;"><span style="font-size: 14pt; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">在子进程中创建子线程应该注意的点</span></span></font></div><div><ul><li><span style="font-size: 9pt;">需要注意：与主进程会默认等待子线程不同，子进程中不管创不创建子线程，如果子进程运行结束，那么子进程包括所有的子线程都会一起结束，并释放资源</span></li><li><span style="font-size: 9pt;">例如下面的代码，子进程如果不加入子线程的join（）阻塞等待，主进程如果先运行完将会直接释放资源。</span></li></ul></div><div>        </div><div>                    <img src="/e_img/多任务-线程_files/Image [5].png" type="image/png" data-filename="Image.png" width="402"></div><div><span style="background-color: rgb(255, 250, 165); font-size: 14pt; color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">线程池的使用方法</span></div><ul><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">使用步骤</span></li><ul><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">导入线程池模块</span></li><ul><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">from multiprocessing.dummy import Pool as ThreadPool     ---- </span></li></ul><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">创建参数列表</span></li><ul><li><span style="letter-spacing: normal; orphans: 2; text-indent: 0px; text-transform: none; white-space: pre-wrap; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px;"><span style="color: rgb(17, 17, 17); font-size: 9pt;">url_list = ［'url1', 'url2', 'url3', ... ］</span></span></li></ul><li style="orphans: 2; widows: 2;"><span style="white-space: pre-wrap;"><span style="color: rgb(17, 17, 17); line-height: 13.600000381469727px; font-size: 9pt;">创建一个线程池，20个线程数</span></span></li><ul><li><span style="font-size: 9pt;">pool = ThreadPool(20)  </span></li></ul><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">第一种向线程池中添加任务的方法（轮流执行情况）</span></li><ul><li><span style="font-size: 9pt;">pool.map(</span><span style="font-size: 9pt;">func, args_list</span><span style="font-size: 9pt;">)</span></li><li><font size="2"><span style="line-height: 13.600000381469727px;">pool.apply(func, args=( ))</span></font></li></ul><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">第二种向线程池中添加任务的方法（异步执行的情况）</span></li><ul><li><span style="font-size: 9pt;">pool.apply_async(func, args=( )) </span></li><li><span style="font-size: 9pt;">pool.map_async(func, args_list( ))</span></li></ul><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">关闭线程池，不能再添加任务</span></li><ul><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">pool.close()</span></li></ul><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">阻塞线程池</span></li><ul><li><span style="line-height: 13.600000381469727px; font-size: 9pt;">pool.join()</span></li></ul></ul></ul><div><span style="font-size: 14pt; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">拓展-threading的几个函数、/线程间的通信/线程池</span></div><ul><li><span style="font-size: 9pt;">返回当前线程所在的主线程的Thread的实例对象</span></li><ul><li><span style="font-size: 9pt;">threading.main_thread()</span></li></ul><li><span style="font-size: 9pt;">返回当前所在线程实例对象</span></li><ul><li><span style="font-size: 9pt;">threading.current_thread()</span></li></ul><li><span style="line-height: 1.45; font-size: 9pt;">返回存活线程的数量</span></li><ul><li><span style="font-size: 9pt;">threading.active_count()</span></li></ul></ul><div><br></div><div><br></div><div><br></div></div><div><br></div><div><br></div><div><br></div><div><br></div><div><br></div></span>
+</div></body></html>
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/python/" rel="tag"><i class="fa fa-tag"></i> python</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/11/05/01.python/python特性/多任务-进程/" rel="next" title="多任务-进程">
+                <i class="fa fa-chevron-left"></i> 多任务-进程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/11/09/01.python/网络协议与python/网络通信-UDP/" rel="prev" title="网络通信-UDP">
+                网络通信-UDP <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s、 crawler</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">116</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">43</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

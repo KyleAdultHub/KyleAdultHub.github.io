@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="自定义命令行参数定义命令行参数的方法tf.app.flags 支持应从命令行接收参数, 可以用来指定集群的配置等, 有下面的参数类型DEFINE_string(flag_name, default_value, docstring)DEFINE_integer(flag_name, default_value, docstring)DEFINE_boolean(flag_name, def">
+<meta name="keywords" content="神经网络,深度学习,tensorflow">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TensowFlow分布式">
+<meta property="og:url" content="http://blog.kyleliu.cn/2018/06/05/07.机器学习/深度学习/TensowFlow分布式/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="自定义命令行参数定义命令行参数的方法tf.app.flags 支持应从命令行接收参数, 可以用来指定集群的配置等, 有下面的参数类型DEFINE_string(flag_name, default_value, docstring)DEFINE_integer(flag_name, default_value, docstring)DEFINE_boolean(flag_name, def">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/TensowFlow分布式_files/Image.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/TensowFlow分布式_files/Image%20[1].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/TensowFlow分布式_files/Image%20[2].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/TensowFlow分布式_files/Image%20[3].png">
+<meta property="og:updated_time" content="2018-12-26T01:48:03.052Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="TensowFlow分布式">
+<meta name="twitter:description" content="自定义命令行参数定义命令行参数的方法tf.app.flags 支持应从命令行接收参数, 可以用来指定集群的配置等, 有下面的参数类型DEFINE_string(flag_name, default_value, docstring)DEFINE_integer(flag_name, default_value, docstring)DEFINE_boolean(flag_name, def">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/e_img/TensowFlow分布式_files/Image.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2018/06/05/07.机器学习/深度学习/TensowFlow分布式/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>TensowFlow分布式 | 刘小恺(Kyle) 的个人博客</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s、 crawler</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2018/06/05/07.机器学习/深度学习/TensowFlow分布式/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s、 crawler">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">TensowFlow分布式
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-06-05 21:00:00" itemprop="dateCreated datePublished" datetime="2018-06-05T21:00:00+08:00">2018-06-05</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/机器学习/" itemprop="url" rel="index"><span itemprop="name">机器学习</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/机器学习/深度学习/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/05/07.机器学习/深度学习/TensowFlow分布式/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2018/06/05/07.机器学习/深度学习/TensowFlow分布式/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/06/05/07.机器学习/深度学习/TensowFlow分布式/" class="leancloud_visitors" data-flag-title="TensowFlow分布式">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+<html>
+<body>
+<div>
+<span><div><div><font style="font-size: 14pt;"><span style="font-size: 14pt; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">自定义命令行参数</span></font></div><ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">定义命令行参数的方法</span></font></div></li><ul><li><div><span style="font-size: 9pt;">tf.app.flags 支持应从命令行接收参数, 可以用来指定集群的配置等, 有下面的参数类型</span></div></li><li><div><span style="font-size: 9pt;">DEFINE_string(flag_name, default_value, docstring)</span></div></li><li><div><span style="font-size: 9pt;">DEFINE_integer(flag_name, default_value, docstring)</span></div></li><li><div><span style="font-size: 9pt;">DEFINE_boolean(flag_name, default_value, docstring)</span></div></li><li><div><span style="font-size: 9pt;">DEFINE_float(flag_name, default_value, docstring)</span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">调用命令行参数的方法</span></font></div></li><ul><li><div><span style="font-size: 9pt;">tf.app.flags.FlAGS.xxx</span></div></li><ul><li><div><span style="font-size: 9pt;">xxx 为上面定义的flag_name</span></div></li></ul></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">通过命令行启动的方法</span></font></div></li><ul><li><div><span style="font-size: 9pt;">tf.app.run() 可以截止启动main(argv) 函数</span></div></li><li><div><span style="font-size: 9pt;">可以在命令行中启动并传入参数, 程序可以直接帮我们运行main()函数 </span></div></li></ul></ul><div><font style="background-color: rgb(255, 250, 165);font-size: 14pt;-evernote-highlight:true;"><span style="background-color: rgb(255, 250, 165); font-size: 14pt; color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">分布式TensorFlow</span></font></div><ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">分布式TensowFlow介绍</span></font></div></li><ul><li><div><span style="font-size: 9pt;">Tensorflow的一个特色就是分布式计算。分布式Tensorflow是由高性能的gRPC框架作为底层技术来支持的。这是一个通信框架gRPC(google remote procedure call)，是一个高性能、跨平台的RPC框架。RPC协议，即远程过程调用协议，是指通过网络从远程计算机程序上请求服务。</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">分布式原理</span></font></div></li><ul><li><div><span style="font-size: 9pt;">Tensorflow分布式是由多个服务器进程和客户端进程组成。有几种部署方式，列如单机多卡和多机多卡（分布式）。</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">单机多卡(单台服务器有多块GPU设备)</span></font></div></li><ul><li><div><span style="font-size: 9pt;">在单机单GPU的训练中，数据是一个batch一个batch的训练。 在单机多GPU中，数据一次处理4个batch(假设是4个GPU训练）， 每个GPU处理一个batch的数据计算。</span></div></li><li><div><span style="font-size: 9pt;">变量，或者说参数，保存在CPU上。数据由CPU分发给4个GPU，在GPU上完成计算，得到每个批次要更新的梯度</span></div></li><li><div><span style="font-size: 9pt;">在CPU上收集完4个GPU上要更新的梯度，计算一下平均梯度，然后更新。</span></div></li><li><div><span style="font-size: 9pt;">循环进行上面步骤</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">多机多卡</span></font></div></li><ul><li><div><span style="font-size: 9pt;">而分布式是指有多台计算机，充分使用多台计算机的性能，处理数据的能力。可以根据不同计算机划分不同的工作节点。当数据量或者计算量达到超过一台计算机处理能力的上上限的话，必须使用分布式</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">分布式架构</span></font></div></li><ul><li><div><span style="font-size: 9pt;">当我们知道的基本的分布式原理之后，我们来看看分布式的架构的组成。分布式架构的组成可以说是一个集群的组成方式。那么一般我们在进行Tensorflow分布式时，需要建立一个集群。通常是我们分布式的作业集合。一个作业中又包含了很多的任务（工作结点），每个任务由一个工作进程来执行。</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">分布式节点之间的关系</span></font></div></li><ul><li><div><span style="font-size: 9pt;">一般来说，在分布式机器学习框架中，我们会把作业分成参数作业（parameter job）和工作结点作业（worker job）。</span></div></li><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">参数服务器:</span></font></div></li><ul><li><div><span style="font-size: 9pt;">运行参数作业的服务器我们称之为参数服务器（parameter server,PS），负责管理参数的存储和更新</span></div></li><li><div><span style="font-size: 9pt;">参数服务器，当模型越来越大时，模型的参数越来越多，多到一台机器的性能不够完成对模型参数的更新的时候，就需要把参数分开放到不同的机器去存储和更新。参数服务器可以是由多台机器组成的集群。</span></div></li></ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">worker服务器:</span></font></div></li><ul><li><div><span style="font-size: 9pt;">工作结点作业负责主要从事计算的任务，如运行操作。</span></div></li><li><div><span style="font-size: 9pt;">Tensorflow的分布式实现了作业间的数据传输，也就是参数作业到工作结点作业的前向传播，以及工作节点到参数作业的反向传播。</span></div></li><li><div><span style="font-size: 9pt;">所有的Worker服务器会有一个主worker服务器, 会话的创建, 文件的读取和存储只会在主worker上进行</span></div></li></ul></ul></ul><div><font style="font-size: 14pt;"><span style="font-size: 14pt; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">分布式的模式</span></font></div><ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">数据并行</span></font></div></li><ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">原理</span></font></div></li><ul><li><div><span style="font-size: 9pt;">数据并总的原理很简单。其中CPU主要负责梯度平均和参数更新，而GPU主要负责训练模型副本。</span></div></li></ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">实现</span></font></div></li><ul><li><div><span style="font-size: 9pt;">模型副本定义在GPU上</span></div></li><li><div><span style="font-size: 9pt;">对于每一个GPU，都是从CPU获得数据，前向传播进行计算，得到损失，并计算出梯度</span></div></li><li><div><span style="font-size: 9pt;">CPU接到GPU的梯度，取平均值，然后进行梯度更新</span></div></li></ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">存在的问题</span></font></div></li><ul><li><div><span style="font-size: 9pt;">每一个设备的计算速度不一样，有的快有的慢，那么CPU在更新变量的时候，就应该等待每一个设备的一个batch进行完成，这样相当于降低了分布式的效率,解决办法请参考下面的异步更新</span></div></li></ul></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">同步更新&amp;异步更新</span></font></div></li><ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">同步更新(随机梯度下降法（Sync-SGD))</span></font></div></li><ul><li><div><span style="font-size: 9pt;">同步随即梯度下降法的含义是在进行训练时，每个节点的工作任务需要读入共享参数，执行并行的梯度计算，同步需要等待所有工作节点把局部的梯度算好，然后将所有共享参数进行合并、累加，再一次性更新到模型的参数；下一个批次中，所有工作节点拿到模型更新后的参数再进行训练。这种方案的优势是，每个训练批次都考虑了所有工作节点的训练情况，损失下降比较稳定；劣势是，性能瓶颈在于最慢的工作结点上。</span></div></li><li><div><img src="/e_img/TensowFlow分布式_files/Image.png" type="image/png" data-filename="Image.png" width="508"></div></li></ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">异步更新(异步随机梯度下降法（Async-SGD))</span></font></div></li><ul><li><div><span style="font-size: 9pt;">异步随机梯度下降法的含义是每个工作结点上的任务独立计算局部梯度，并异步更新到模型的参数中，不需要执行协调和等待操作。这种方案的优势是，性能不存在瓶颈；劣势是，每个工作节点计算的梯度值发送回参数服务器会有参数更新的冲突，一定程度上会影响算法的收敛速度，在损失下降的过程中抖动较大。</span></div></li><li><div><img src="/e_img/TensowFlow分布式_files/Image [1].png" type="image/png" data-filename="Image.png" width="520"></div></li></ul></ul></ul><div><font style="font-size: 14pt;"><span style="font-size: 14pt; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">分布式接口</span></font></div><ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">创建分布式集群的方法</span></font></div></li><ul><li><div><span style="font-size: 9pt;">创建集群的方法是为每一个任务启动一个服务，这些任务可以分布在不同的机器上，也可以同一台机器上启动多个任务，使用不同的GPU等来运行。</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">创建分布式集群的步骤</span></font></div></li><ul><li><div><span style="font-size: 9pt;">1、创建一个tf.train.ClusterSpec，用于对集群中的所有任务进行描述，该描述内容对所有任务应该是相同的</span></div></li><li><div><span style="font-size: 9pt;">2、创建tf.train.Server，用于创建一个任务</span></div></li><li><div><span style="font-size: 9pt;">3、启动</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">TensorFlow分布式API接口使用</span></font></div></li><ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">1. tf.train.ClusterSpec( )         创建ClusterSpec,表示参与分布式TensorFlow计算的一组进程</span></font></div></li><ul><li><div><span style="font-size: 9pt;"><img src="/e_img/TensowFlow分布式_files/Image [2].png" type="image/png" data-filename="Image.png" width="596"></span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">2. tf.train.Server( )       创建Tensorflow的集群描述信息，其中ps和worker为作业名称，通过指定ip地址加端口创建，</span></font></div></li><ul><li><div><span style="font-size: 9pt;">创建server</span></div></li><ul><li><div><span style="font-size: 9pt;">server = tf.train.Server(server_or_cluster_def, job_name=None, task_index=None, protocol=None, config=None, start=True)</span></div></li><ul><li><div><span style="font-size: 9pt;">server_or_cluster_def: 集群描述</span></div></li><li><div><span style="font-size: 9pt;">job_name: 任务类型名称 </span></div></li><li><div><span style="font-size: 9pt;">task_index: 任务数</span></div></li></ul></ul><li><div><span style="font-size: 9pt;">使用server</span></div></li><ul><li><div><span style="font-size: 9pt;">server.target</span></div></li><ul><li><div><span style="-webkit-font-smoothing: antialiased; box-sizing: border-box; -webkit-tap-highlight-color: transparent; text-size-adjust: none;"><span style="font-size: 9pt;">返回tf.Session连接到此服务器的目标</span></span></div></li></ul><li><div><span style="font-size: 9pt;">server.join()</span></div></li><ul><li><div><span style="-webkit-font-smoothing: antialiased; box-sizing: border-box; -webkit-tap-highlight-color: transparent; text-size-adjust: none;"><span style="font-size: 9pt;">参数服务器端等待接受参数任务，直到服务器关闭</span></span></div></li></ul></ul></ul></ul><li><div><font style="font-size: 11pt;"><span style="font-size: 11pt; font-weight: bold;">3. tf.device( )    指定worker运行设备</span></font></div></li><ul><li><div><span style="font-size: 9pt;">tf.device(device_name_or_function)    指定代码运行在CPU或者GPU上   </span></div></li><ul><li><div><span style="font-size: 9pt;">device_name:</span></div></li><ul><li><div><span style="font-size: 9pt;">例: /job:worker/task:0/cpu:0</span></div></li></ul><li><div><span style="font-size: 9pt;">function:</span></div></li><ul><li><div><span style="font-size: 9pt;">tf.train.reploca_device_setter(worker_device=worker_device, cluster=cluster)</span></div></li><li><div><span style="font-size: 9pt;">worker_device: 例： /job:worker/task:0/cpu:0</span></div></li><li><div><span style="font-size: 9pt;">cluster: 集群描述对象</span></div></li></ul></ul><li><div><span style="font-size: 9pt;">示例：</span></div></li><ul><li><div><span style="font-size: 9pt;"><img src="/e_img/TensowFlow分布式_files/Image [3].png" type="image/png" data-filename="Image.png" width="593"></span></div></li></ul></ul><li><div><span style="font-size: 10pt; font-weight: bold;">4. sess = tf.train.MonitoredTrainingSession( )    创建分布式会话</span></div></li><ul><li><div style="-webkit-font-smoothing: antialiased; box-sizing: border-box; -webkit-tap-highlight-color: transparent; text-size-adjust: none;"><span style="font-size: 9pt;">创建会话方法</span></div></li><ul><li><div style="-webkit-font-smoothing: antialiased; box-sizing: border-box; -webkit-tap-highlight-color: transparent; text-size-adjust: none;"><span style="font-size: 9pt;">tf.train.MonitoredTrainingSession(master, is_chief=True, checkpoint_dir=None, hooks=None, save_checkpoint_secs=600, save_summaries_steps=USE_DEFAULT, save_summaries_secs=USE_DEFAULT, config-None)</span></div></li><ul><li><div style="-webkit-font-smoothing: antialiased; box-sizing: border-box; -webkit-tap-highlight-color: transparent; text-size-adjust: none;"><span style="font-size: 9pt;">master: 指定运行会话协议IP和端口(用于分布式)</span></div></li><ul><li><div style="-webkit-font-smoothing: antialiased; box-sizing: border-box; -webkit-tap-highlight-color: transparent; text-size-adjust: none;"><span style="font-size: 9pt;">例: grpc://192.168.0.1:2000</span></div></li></ul><li><div style="-webkit-font-smoothing: antialiased; box-sizing: border-box; -webkit-tap-highlight-color: transparent; text-size-adjust: none;"><span style="font-size: 9pt;">is_chief:  是否为主worker  主worker负责初始化和恢复基础的TensorFlow会话</span></div></li><li><div style="-webkit-font-smoothing: antialiased; box-sizing: border-box; -webkit-tap-highlight-color: transparent; text-size-adjust: none;"><span style="font-size: 9pt;">checkpoint_dir: 检查点文件记录, 同时也是events目录</span></div></li><li><div style="-webkit-font-smoothing: antialiased; box-sizing: border-box; -webkit-tap-highlight-color: transparent; text-size-adjust: none;"><span style="font-size: 9pt;">config:  会话运行的配置项, tf.ConfigProto(log_device_placement=True)</span></div></li><li><div style="-webkit-font-smoothing: antialiased; box-sizing: border-box; -webkit-tap-highlight-color: transparent; text-size-adjust: none;"><span style="font-size: 9pt;">hooks:  可选SessionRunHook 对象列表</span></div></li></ul></ul><li><div><span style="font-size: 9pt;">会话的方法</span></div></li><ul><li><div><span style="font-size: 9pt;">sess.should_stop( ) :  当程序发生异常的时候should_stop 返回True </span></div></li><li><div><span style="font-size: 9pt;">sess.run()  跟session一样可以运行op</span></div></li></ul></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">分布式会话-钩子对象</span></font></div></li><ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">钩子对象作用</span></font></div></li><ul><li><div><span style="font-size: 9pt;">当在开启分布式会话的时候, 钩子对象方法被调用</span></div></li><li><div><span style="font-size: 9pt;">指定了钩子对象(包含了begin，before_run,  after_run方法), 可以实现分别在初始化会话, 调用run方法之前, 调用run方法之后, 分别运行钩子对象对应的方法</span></div></li><li><div><span style="font-size: 9pt;">该功能相当于django的中间件功能</span></div></li><li><div><span style="font-size: 9pt;">可以用来实现计步, 打印中间输出等功能</span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">创建钩子对象的方法</span></font></div></li><ul><li><div><span style="font-size: 9pt;">1. 创建类并继承tf.train.SessionRunHook  </span></div></li><li><div><span style="font-size: 9pt;">2. 实现方法 begin  会话之前调用, 只会调用一次</span></div></li><li><div><span style="font-size: 9pt;">3. 实现方法  before_run(run_context)  接收run_context 参数</span></div></li><ul><li><div><span style="font-size: 9pt;">run_context:  一个SessionRunContenxt对象, 包含会话的运行信息</span></div></li><li><div><span style="font-size: 9pt;">return: 一个SessionRunArgs对象, 例如: tf.train.SessionRunArgs(Tensow),接收的参数必须为Tensow类型</span></div></li></ul><li><div><span style="font-size: 9pt;">4. 实现方法 after_run(run_context, run_value)</span></div></li><ul><li><div><span style="font-size: 9pt;">run_context: 一个SessionRunContext 对象</span></div></li><li><div><span style="font-size: 9pt;">run_values: 一个SessionRunValues对象, run_values.results 为before_run返回的Tensow对象的eval属性, 即tensow的值</span></div></li></ul></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">常用的钩子对象</span></font></div></li><ul><li><div><span style="font-size: 9pt;">tf.train.StopAtStepHook(last_stop)   计步钩子对象</span></div></li><ul><li><div><span style="font-size: 9pt;">last_stop: 指定训练步数, 当达到的时候抛出异常</span></div></li><li><div><span style="font-size: 9pt;">注意: 在使用计步钩子的时候需要定义全局步数：global_step = tf.contrib.framework.get_or_create_global_step()</span></div></li></ul></ul></ul></ul><div><br></div></div><div><br></div></span>
+</div></body></html>
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/神经网络/" rel="tag"><i class="fa fa-tag"></i> 神经网络</a>
+          
+            <a href="/tags/深度学习/" rel="tag"><i class="fa fa-tag"></i> 深度学习</a>
+          
+            <a href="/tags/tensorflow/" rel="tag"><i class="fa fa-tag"></i> tensorflow</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/04/07.机器学习/深度学习/TensowFlow神经网络/" rel="next" title="TensowFlow神经网络">
+                <i class="fa fa-chevron-left"></i> TensowFlow神经网络
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/06/07.机器学习/深度学习/Tensowflw-dropout(防止过拟合)/" rel="prev" title="Tensowflw-dropout(防止过拟合)">
+                Tensowflw-dropout(防止过拟合) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s、 crawler</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">116</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">43</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

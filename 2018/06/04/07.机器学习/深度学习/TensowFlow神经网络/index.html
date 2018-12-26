@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="神经网络介绍神经网络在机器学习和认知科学领域，人工神经网络（artificial neural network，缩写ANN），简称神经网络（neural network，缩写NN）或类神经网络，是一种模仿生物神经网络的结构和功能的计算模型，用于对函数进行估计或近似。神经网络的分类(人工神经网络)神经网络前身:   单层感知机基础神经网络：线性神经网络，BP神经网络，Hopfield神经网">
+<meta name="keywords" content="神经网络,深度学习,tensorflow">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TensowFlow神经网络">
+<meta property="og:url" content="http://blog.kyleliu.cn/2018/06/04/07.机器学习/深度学习/TensowFlow神经网络/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="神经网络介绍神经网络在机器学习和认知科学领域，人工神经网络（artificial neural network，缩写ANN），简称神经网络（neural network，缩写NN）或类神经网络，是一种模仿生物神经网络的结构和功能的计算模型，用于对函数进行估计或近似。神经网络的分类(人工神经网络)神经网络前身:   单层感知机基础神经网络：线性神经网络，BP神经网络，Hopfield神经网">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/TensowFlow神经网络_files/Image.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/TensowFlow神经网络_files/Image%20[1].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/TensowFlow神经网络_files/Image%20[2].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/TensowFlow神经网络_files/Image%20[3].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/TensowFlow神经网络_files/Image%20[4].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/TensowFlow神经网络_files/Image%20[5].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/TensowFlow神经网络_files/Image%20[6].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/TensowFlow神经网络_files/Image%20[7].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/TensowFlow神经网络_files/Image%20[8].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/TensowFlow神经网络_files/Image%20[9].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/TensowFlow神经网络_files/Image%20[10].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/TensowFlow神经网络_files/Image%20[11].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/TensowFlow神经网络_files/Image%20[12].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/TensowFlow神经网络_files/Image%20[13].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/TensowFlow神经网络_files/Image%20[14].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/TensowFlow神经网络_files/Image%20[15].png">
+<meta property="og:updated_time" content="2018-12-26T01:48:03.053Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="TensowFlow神经网络">
+<meta name="twitter:description" content="神经网络介绍神经网络在机器学习和认知科学领域，人工神经网络（artificial neural network，缩写ANN），简称神经网络（neural network，缩写NN）或类神经网络，是一种模仿生物神经网络的结构和功能的计算模型，用于对函数进行估计或近似。神经网络的分类(人工神经网络)神经网络前身:   单层感知机基础神经网络：线性神经网络，BP神经网络，Hopfield神经网">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/e_img/TensowFlow神经网络_files/Image.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2018/06/04/07.机器学习/深度学习/TensowFlow神经网络/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>TensowFlow神经网络 | 刘小恺(Kyle) 的个人博客</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s、 crawler</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2018/06/04/07.机器学习/深度学习/TensowFlow神经网络/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s、 crawler">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">TensowFlow神经网络
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-06-04 21:00:00" itemprop="dateCreated datePublished" datetime="2018-06-04T21:00:00+08:00">2018-06-04</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/机器学习/" itemprop="url" rel="index"><span itemprop="name">机器学习</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/机器学习/深度学习/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/04/07.机器学习/深度学习/TensowFlow神经网络/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2018/06/04/07.机器学习/深度学习/TensowFlow神经网络/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/06/04/07.机器学习/深度学习/TensowFlow神经网络/" class="leancloud_visitors" data-flag-title="TensowFlow神经网络">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+
+<html>
+<body>
+<div>
+<span><div><div><font style="font-size: 14pt;"><span style="font-size: 14pt; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">神经网络介绍</span></font></div><ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">神经网络</span></font></div></li><ul><li><div><span style="font-size: 9pt;">在机器学习和认知科学领域，人工神经网络（artificial neural network，缩写ANN），简称神经网络（neural network，缩写NN）或类神经网络，是一种模仿生物神经网络的结构和功能的计算模型，用于对函数进行估计或近似。</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">神经网络的分类(人工神经网络)</span></font></div></li><ul><li><div><span style="font-size: 9pt; font-weight: bold;">神经网络前身</span><span style="font-size: 9pt;">:   单层感知机</span></div></li><li><div><span style="font-size: 9pt; font-weight: bold;">基础神经网络</span><span style="font-size: 9pt;">：线性神经网络，BP神经网络，Hopfield神经网络等﻿</span></div></li><li><div><span style="font-size: 9pt; font-weight: bold;">进阶神经网络</span><span style="font-size: 9pt;">：玻尔兹曼机，受限玻尔兹曼机，递归神经网络等﻿</span></div></li><li><div><span style="font-size: 9pt; font-weight: bold;">深度神经网络</span><span style="font-size: 9pt;">：深度置信网络，卷积神经网络(CNN)，循环神经网络，LSTM网络等</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">神经网络的特点</span></font></div></li><ul><li><div><span style="font-size: 9pt;">输入向量的特征数量和输入神经元的个数相同</span></div></li><li><div><span style="font-size: 9pt;">输出层的神经元数量和种类数量相同</span></div></li><li><div><span style="font-size: 9pt;">每个连接都有个权重值</span></div></li><li><div><span style="font-size: 9pt;">同一层神经元之间没有连接</span></div></li><li><div><span style="font-size: 9pt;"> 由输入层，隐层，输出层组成</span></div></li><li><div><span style="font-size: 9pt;">第N层与第N-1层的所有神经元连接，也叫全连接</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">简单的神经网络模型</span></font></div></li><ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">神经网络模型示例</span></font></div></li><ul><li><div><span style="font-size: 9pt;">输入层、隐层、输出层  （隐层和输出层统称为全连接层）</span></div></li></ul><li><div><span style="font-size: 9pt;"><img src="/e_img/TensowFlow神经网络_files/Image.png" type="image/png" data-filename="Image.png" width="199"><img src="/e_img/TensowFlow神经网络_files/Image [1].png" type="image/png" data-filename="Image.png" width="370"></span></div></li><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">神经元模型示例</span></font></div></li><ul><li><div><span style="font-size: 9pt;">输入向量的特征数量和输入神经元的个数相同</span></div></li></ul><li><div><span style="font-size: 9pt;"><img src="/e_img/TensowFlow神经网络_files/Image [2].png" type="image/png" data-filename="Image.png" width="243">中间层三个神经元的示例</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">神经网络的组成</span></font></div></li><ul><li><div><span style="font-size: 9pt;">结构： 组成神经网络的神经元</span></div></li><li><div><span style="font-size: 9pt;">激励函数：隐层和输出层节点的输入和输出之间具有函数关系，这个函数称为激励函数</span></div></li><li><div><span style="font-size: 9pt;">学习规则：学习规则制定了网络中的权重如何随着时间的推进而调整(反向传播算法)</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">TensowFlow提供神经网络功能的主要模块</span></font></div></li><ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">tf.nn：</span></font></div></li><ul><li><div><span style="font-size: 9pt;">神经网络相关操作的支持，包括卷积操作（conv）、池化操作（pooling）、归一化、loss、分类操作、embedding、RNN、Evaluation</span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">tf.layers:</span></font></div></li><ul><li><div><span style="font-size: 9pt;">主要提供的高层的神经网络，主要和卷积相关的，对tf.nn的进一步封装</span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">tf.contrib:</span></font></div></li><ul><li><div><span style="font-size: 9pt;">tf.contrib.layers提供够将计算图中的  网络层、正则化、摘要操作、是构建计算图的高级操作</span></div></li></ul></ul></ul><div><font color="#328712" style="font-size: 14pt;"><span style="font-size: 14pt; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">神经网络前身--感知机</span></font></div><ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">什么是感知机</span></font></div></li><ul><li><div><span style="font-size: 9pt;">有n个输入数据，通过权重与各数据之间进行加权求和，求和后的结果经过激活函数结果(0/1)，得出输出</span></div></li><li><div><span style="font-size: 9pt;">很容易解决与、或问题</span></div></li><li><div><span style="font-size: 9pt;">通过多个感知机，可以将结果分类的区域划分的越来越准确</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">用模型表示</span></font></div></li><ul><li><div><span style="font-size: 9pt;"><img src="/e_img/TensowFlow神经网络_files/Image [3].png" type="image/png" data-filename="Image.png" width="342"></span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">感知机与逻辑回归的联系和区别</span></font></div></li><ul><li><div><span style="font-size: 9pt;">联系: 都可以用来做分类的学习</span></div></li><li><div><span style="font-size: 9pt;">区别：激活函数不一样，感知机使用的额是sign函数,输出值是0/1，只能判断简单的分类问题, 逻辑回归使用的是sigmid函数, 结果为0-1, 可以预测为某一个分类的准确概率, 更为广泛使用</span></div></li></ul></ul><div><font style="font-size: 14pt;"><span style="font-size: 14pt; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">浅层(单一隐层)神经网络</span></font></div><ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">概念</span></font></div></li><ul><li><div><span style="font-size: 9pt;">只有一层隐藏层的神经网络</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">目标值处理</span></font></div></li><ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">one-hot编码</span></font></div></li><ul><li><div><span style="font-size: 9pt;"><img src="/e_img/TensowFlow神经网络_files/Image [4].png" type="image/png" data-filename="Image.png" width="331"></span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">one-hot api介绍</span></font></div></li><ul><li><div><span style="font-size: 9pt;">作用:  将一组目标集转化为one-hot编码</span></div></li><li><div><span style="font-size: 9pt;">tf.one_hot(indices, depth, on_value=None, off_value=None, axis=None, dtype=None, name=None)</span></div></li><ul><li><div><span style="font-size: 9pt;">indices: 数据集标签, 目标值集合</span></div></li><li><div><span style="font-size: 9pt;">depth: 张量的深度,  即类别数</span></div></li></ul></ul></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">SoftMax回归函数</span></font></div></li><ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">作用: </span></font></div></li><ul><li><div><span style="font-size: 9pt;">将一组结果数据转化为[0, 1] 两个之间的数, 为1的数代表预测结果为该分类</span></div></li></ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">公式</span></font></div></li><ul><li><div><span style="font-size: 9pt;"> <img src="/e_img/TensowFlow神经网络_files/Image [5].png" type="image/png" data-filename="Image.png" width="98"></span></div></li></ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">使用位置</span></font></div></li><ul><li><div><span style="font-size: 9pt;">在特征值经过加权和偏置计算后，经过softmax函数, 得到最终预测的概率结果</span></div></li></ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">图示</span></font></div></li><ul><li><div><span style="font-size: 9pt;"><img src="/e_img/TensowFlow神经网络_files/Image [6].png" type="image/png" data-filename="Image.png" width="376"></span></div></li><li><div><span style="font-size: 9pt;"><img src="/e_img/TensowFlow神经网络_files/Image [7].png" type="image/png" data-filename="Image.png" width="395"></span></div></li></ul></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">特征的加权计算</span></font></div></li><ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">tensorflow加权计算api</span></font></div></li><ul><li><div><span style="font-size: 9pt;">tf.matmul(a, b,name=None)</span></div></li><ul><li><div><span style="font-size: 9pt;">a: 特征值矩阵</span></div></li><li><div><span style="font-size: 9pt;">b: 加权矩阵</span></div></li></ul></ul></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">损失计算</span></font></div></li><ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;"> 损失计算-交叉熵损失公式</span></font></div></li><ul><li><div><span style="font-size: 9pt;"><img src="/e_img/TensowFlow神经网络_files/Image [8].png" type="image/png" data-filename="Image.png" width="202"></span></div></li><li><div><span style="font-size: 9pt;"><img src="/e_img/TensowFlow神经网络_files/Image [9].png" type="image/png" data-filename="Image.png" width="224"></span></div></li></ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">损失计算api</span></font></div></li><ul><li><div><span style="font-size: 9pt;">s = tf.nn.softmax_cross_entropy_with_logits(labels=None, logits=None,name=None)     计算交叉熵损失</span></div></li><ul><li><div><span style="font-size: 9pt;">labels:标签值（真实值）</span></div></li><li><div><span style="font-size: 9pt;">logits：样本加权之后的值</span></div></li><li><div><span style="font-size: 9pt;">return:返回损失值列表</span></div></li></ul></ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">损失均值计算api</span></font></div></li><ul><li><div><span style="font-size: 9pt;">tf.reduce_mean(s)   获取损失的平均值</span></div></li></ul></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">损失的优化--梯度下降</span></font></div></li><ul><li><div><span style="font-size: 9pt;"> tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)</span></div></li><ul><li><div><span style="font-size: 9pt;">learning_rate:  学习率，一般为</span></div></li><li><div><span style="font-size: 9pt;">minimize(loss):  最小化损失</span></div></li><li><div><span style="font-size: 9pt;">return:  梯度下降op</span></div></li></ul></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">模型准确性计算</span></font></div></li><ul><li><div><span style="font-size: 9pt;">equal_list = tf.equal(tf.argmax(y, 1), tf.argmax(y_label, 1))   <span style="font-size: 9pt;">返回每一行的最大值的索引</span></span></div></li><li><div><span style="font-size: 9pt;"><span style="font-size: 9pt;">equal_list = tf.equal(tf.argmax(y, 0), tf.argmax(y_label, 0))   </span><span style="font-size: 9pt;">返回每一列的最大值的索引</span></span></div></li><li><div><span style="font-size: 9pt;"><span style="font-size: 9pt;">equal_list = tf.equal(tf.argmax(y, 2), tf.argmax(y_label, 2))   </span><span style="font-size: 9pt;">返回每行每列的最大值</span></span></div></li><li><div><span style="font-size: 9pt;">accuracy = tf.reduce_mean(tf.cast(equal_list, tf.float32))</span></div></li><ul><li><div><span style="font-size: 9pt;">y: 预测结果的集合</span></div></li><li><div><span style="font-size: 9pt;">x: 目标集合</span></div></li></ul></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">神经网络实现流程</span></font></div></li><ul><li><div><span style="font-size: 9pt;">1、准备数据</span></div></li><li><div><span style="font-size: 9pt;">2、全连接结果计算</span></div></li><li><div><span style="font-size: 9pt;">3、损失优化</span></div></li><li><div><span style="font-size: 9pt;">4、模型评估（计算准确性）</span></div></li></ul></ul><div><font style="font-size: 14pt;"><span style="font-size: 14pt; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">深层神经网络(卷积神经网络介绍)</span></font></div><ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">概念</span></font></div></li><ul><li><div><span style="font-size: 9pt;">深度学习网络与更常见的单一隐藏层神经网络的区别在于深度，深度学习网络中，每一个节点层在前一层输出的基础上学习识别一组特定的特征。随着神经网络深度增加，节点所能识别的特征也就越来越复杂</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">为什么引入深层神经网络</span></font></div></li><ul><li><div><span style="font-size: 9pt;">全连接神经网络具有一定的局限性</span></div></li><li><div><span style="font-size: 9pt;">当数据的特征特别多的时候, 每一个特征值都会有一个权重, 这时每一个神经元都需要很多个权重值</span></div></li><li><div><span style="font-size: 9pt;">这样就会很影响资源， 造成资源的浪费， 影响训练</span></div></li><li><div><span style="font-size: 9pt;">增加隐藏层数, 可以每层逐渐的减少所需权重的数量</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">什么是卷积神经网络</span></font></div></li><ul><li><div><span style="font-size: 9pt;">卷积神经网络，是一种前馈神经网络，人工神经元可以响应周围单元，可以进行大型图像处理。卷积神经网络包括卷积层和池化层。</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">卷积神经网络的发展历史</span></font></div></li><ul><li><div><span style="font-size: 9pt;"><img src="/e_img/TensowFlow神经网络_files/Image [10].png" type="image/png" data-filename="Image.png" width="543"></span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">卷积神经网络的特点</span></font></div></li><ul><li><div><span style="font-size: 9pt;">神经网络(neural networks)的基本组成包括输入层、隐藏层、输出层。</span></div></li><li><div><span style="font-size: 9pt;">而卷积神经网络的特点在于隐藏层分为卷积层和池化层(pooling layer，又叫下采样层)</span></div></li></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">卷积神经网络的结构分析</span></font></div></li><ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">训练结构图</span></font></div></li><ul><li><div><span style="font-size: 9pt;"><img src="/e_img/TensowFlow神经网络_files/Image [11].png" type="image/png" data-filename="Image.png" width="568"></span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">卷积层(CONV): </span></font></div></li><ul><li><div><span style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">卷积层介绍</span></span></div></li><ul><li><div><span style="font-size: 9pt;">通过Filter(过滤器)在原始图像上平移来提取并转化特征, 使转化后的特征可以提供给池化层进行数据的池化</span></div></li></ul><li><div><span style="font-size: 12px;"><span style="font-size: 12px; font-weight: bold;">卷积层过滤器参数介绍</span></span></div></li><ul><li><div><span style="font-size: 9pt;">个数</span></div></li><li><div><span style="font-size: 9pt;">大小(1*1,3*3,5*5)</span></div></li><li><div><span style="font-size: 9pt;">步长</span></div></li><li><div><span style="font-size: 9pt;">零填充</span></div></li></ul><li><div><span style="font-size: 12px;"><span style="font-size: 12px; font-weight: bold;">卷积层输出的参数介绍</span></span></div></li><ul><li><div><span style="font-size: 9pt;">深度由过滤器个数决定</span></div></li><li><div><span style="font-size: 9pt;">输出长度和宽度：由filter尺寸和步长决定</span></div></li></ul></ul><li><div><span style="font-size: 10pt; font-weight: bold;">RELU激活函数</span></div></li><ul><li><div><span style="font-size: 9pt; font-weight: bold;">使用Relu函数的优点</span></div></li><ul><li><div><span style="font-size: 9pt;">第一，采用sigmoid等函数，反向传播求误差梯度时，计算量相对大，而采用Relu激活函数，整个过程的计算量节省很多</span></div></li><li><div><span style="font-size: 9pt;">第二，对于深层网络，sigmoid函数反向传播时，很容易就会出现梯度消失的情况（求不出权重和偏置）</span></div></li></ul><li><div><span style="font-size: 9pt; font-weight: bold;">函数图形</span></div></li><li><div><img src="/e_img/TensowFlow神经网络_files/Image [12].png" type="image/png" data-filename="Image.png" style="font-weight: bold;" width="346"></div></li></ul></ul></ul><div><br></div><ul><ul><li><div><span style="font-size: 9pt; font-weight: bold;">激活函数使用api</span></div></li><ul><li><div><span style="font-size: 9pt;">tf.nn.relu(features, name=None)</span></div></li><ul><li><div><span style="font-size: 9pt;">features:卷积后加上偏置的结果</span></div></li><li><div><span style="font-size: 9pt;">return:结果</span></div></li></ul></ul></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold;">池化层(POOL):</span></font></div></li><ul><li><div><span style="font-size: 9pt; font-weight: bold;">池化层介绍</span></div></li><ul><li><div><span style="font-size: 9pt;">通过特征后稀疏参数来减少学习的参数，降低网络的复杂度，（最大池化和平均池化）</span></div></li><li><div><span style="font-size: 9pt;">Pooling层主要的作用是特征提取，通过去掉Feature Map中不重要的样本，进一步减少参数数量。</span></div></li><li><div><span style="font-size: 9pt;">Pooling的方法很多，最常用的是Max Pooling。2*2  2步长</span></div></li></ul><li><div><span style="font-size: 9pt; font-weight: bold;">数据的池化过程图例</span></div></li><ul><li><div><img src="/e_img/TensowFlow神经网络_files/Image [13].png" type="image/png" data-filename="Image.png" width="473"></div></li></ul><li><div><span style="font-size: 9pt; font-weight: bold;">池化使用api</span></div></li><ul><li><div><span style="font-size: 9pt;">tf.nn.max_pool(value, ksize=, strides=, padding=,name=None)   输入上执行最大池数</span></div></li><ul><li><div><span style="font-size: 9pt;">value:4-D Tensor形状[batch, height, width, channels]</span></div></li><li><div><span style="font-size: 9pt;">ksize:池化窗口大小，[1, ksize, ksize, 1]</span></div></li><li><div><span style="font-size: 9pt;">strides:步长大小，[1,strides,strides,1]</span></div></li><li><div><span style="font-size: 9pt;">padding:“SAME”, “VALID”，使用的填充算法的类型，使用“SAME”</span></div></li></ul></ul></ul><li><div><span style="font-size: 10pt; font-weight: bold;">全连接层(FC):</span></div></li><ul><li><div><span style="font-size: 12px;"><span style="font-size: 12px; font-weight: bold;">全连接层在卷积神经网络中介绍</span></span></div></li><ul><li><div><span style="font-size: 9pt;">前面的卷积和池化相当于做特征工程，后面的全连接相当于做特征加权。最后的全连接层在整个卷积神经网络中起到“分类器”的作用。</span></div></li></ul></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">卷积神经网络相关参数计算</span></font></div></li><ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">输入值的体积</span></font></div></li><ul><li><div><span style="font-size: 9pt;">H1 * W1 * D1</span></div></li></ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">卷积层过滤器四个超参数</span></font></div></li><ul><li><div><span style="font-size: 9pt;">Filter数量K</span></div></li><li><div><span style="font-size: 9pt;">Filter大小K</span></div></li><li><div><span style="font-size: 9pt;">步长S</span></div></li><li><div><span style="font-size: 9pt;">零填充大小P</span></div></li></ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">卷积层过滤器输出体积大小</span></font></div></li><ul><li><div><span style="font-size: 9pt;">H2 = (H1-F+2P)/S + 1</span></div></li><li><div><span style="font-size: 9pt;">W2 = (W1-F+2P)/S +1</span></div></li><li><div><span style="font-size: 9pt;">D2 = K</span></div></li></ul></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">数据特征的变化过程</span></font></div></li><ul><li><div><span style="font-size: 9pt; font-weight: bold;">数据在经过多个卷积层后的变化</span></div></li><ul><li><div><span style="font-size: 9pt;">宽度和高度在缩小, 深度不断的增加(深度和卷积层的过滤器数量相关)</span></div></li><li><div><span style="font-size: 9pt;"><img src="/e_img/TensowFlow神经网络_files/Image [14].png" type="image/png" data-filename="Image.png" width="365"></span></div></li></ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">单个卷积层(2个Filter)的过程示例</span></font></div></li><ul><li><div><span style="font-size: 9pt;"><img src="/e_img/TensowFlow神经网络_files/Image [15].png" type="image/png" data-filename="Image.png" width="500"></span></div></li></ul></ul><li><div><font style="font-size: 12pt;"><span style="font-size: 12pt; font-weight: bold;">卷积层的零填充</span></font></div></li><ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">定义</span></font></div></li><ul><li><div><span style="font-size: 9pt;">卷积核在提取特征映射时的动作称之为padding（零填充)</span></div></li><li><div><span style="font-size: 9pt;">由于移动步长不一定能整出整张图的像素宽度。其中有两种方式，SAME和VALID</span></div></li></ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">两种零填充的方式</span></font></div></li><ul><li><div><span style="font-size: 9pt;">1. SAME：越过边缘取样，取样的面积和输入图像的像素宽度一致。</span></div></li><li><div><span style="font-size: 9pt;">2. VALID：不越过边缘取样，取样的面积小于输入人的图像的像素宽度</span></div></li></ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold;">卷积网络卷积操作零填充api介绍</span></font></div></li><ul><li><div><span style="font-size: 9pt;">tf.nn.conv2d(input, filter, strides=, padding=, name=None)    卷计划操作</span></div></li><ul><li><div><span style="font-size: 9pt;">input：给定的输入张量，具有[batch,heigth,width, channel]，类型为float32,64</span></div></li><li><div><span style="font-size: 9pt;">filter：指定过滤器的大小，[filter_height, filter_width,in_channels, out_channels]</span></div></li><li><div><span style="font-size: 9pt;">strides：strides = [1, stride, stride, 1],步长</span></div></li><li><div><span style="font-size: 9pt;">padding：“SAME”, “VALID”，使用的填充算法的类型，使用“SAME”。其中”VALID”表示滑动超出部分舍弃，SAME”表示填充，使得变化后height,width一样大</span></div></li></ul></ul></ul></ul><div><span style="background-color: rgb(255, 250, 165); font-size: 12pt; color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">神经网络总结</span></div><ul><li><div><span style="font-size: 9pt;">输入层的矩阵的特征数量和特征的数量(样本的列数)相等</span></div></li><li><div><span style="font-size: 9pt;">输出层的矩阵的列数与分类数量相等</span></div></li><li><div><span style="font-size: 9pt;">经过矩阵变换的矩阵: 行数=左矩阵的行， 列数= 右矩阵的列</span></div></li><li><div><span style="font-size: 9pt;">每个矩阵代表全连接层的一层隐层</span></div></li><li><div><span style="font-size: 9pt;">矩阵中的每一列代表一个神经元</span></div></li><li><div><span style="font-size: 9pt;">一个全连接层和一有多个隐层，即多个矩阵</span></div></li><li><div><span style="font-size: 9pt;">偏置的列数应该等于矩阵的行数</span></div></li></ul></div><div><br></div></span>
+</div></body></html>
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/神经网络/" rel="tag"><i class="fa fa-tag"></i> 神经网络</a>
+          
+            <a href="/tags/深度学习/" rel="tag"><i class="fa fa-tag"></i> 深度学习</a>
+          
+            <a href="/tags/tensorflow/" rel="tag"><i class="fa fa-tag"></i> tensorflow</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/03/07.机器学习/深度学习/TensorFlow线程对列&IO操作/" rel="next" title="TensorFlow线程对列&IO操作">
+                <i class="fa fa-chevron-left"></i> TensorFlow线程对列&IO操作
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/05/07.机器学习/深度学习/TensowFlow分布式/" rel="prev" title="TensowFlow分布式">
+                TensowFlow分布式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s、 crawler</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">116</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">43</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

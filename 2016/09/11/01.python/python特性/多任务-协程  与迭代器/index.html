@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="编程语言中的——迭代迭代的概念：是一种数据的访问方式，例如当用for循环访问数据时，我们会从中依次拿到其中的数据迭代会记住你当前访问的位置在下一次访问的时候能够基于当前的位置继续进行在python中迭代只能从前往后直到访问结束常见的可迭代类型list、tuple、dict、set、str、等容器类型都是可迭代类型实例可迭代对象与迭代器可迭代对象可迭代对象概念实现了__iter__方法的对">
+<meta name="keywords" content="python">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多任务-携程与迭代器">
+<meta property="og:url" content="http://blog.kyleliu.cn/2016/09/11/01.python/python特性/多任务-协程  与迭代器/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="编程语言中的——迭代迭代的概念：是一种数据的访问方式，例如当用for循环访问数据时，我们会从中依次拿到其中的数据迭代会记住你当前访问的位置在下一次访问的时候能够基于当前的位置继续进行在python中迭代只能从前往后直到访问结束常见的可迭代类型list、tuple、dict、set、str、等容器类型都是可迭代类型实例可迭代对象与迭代器可迭代对象可迭代对象概念实现了__iter__方法的对">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/多任务-协程%20%20与迭代器_files/Image.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/多任务-协程%20%20与迭代器_files/Image%20[1].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/多任务-协程%20%20与迭代器_files/Image%20[2].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/多任务-协程%20%20与迭代器_files/Image%20[3].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/多任务-协程%20%20与迭代器_files/Image%20[4].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/多任务-协程%20%20与迭代器_files/Image%20[5].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/多任务-协程%20%20与迭代器_files/Image%20[6].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/多任务-协程%20%20与迭代器_files/Image%20[7].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/多任务-协程%20%20与迭代器_files/Image%20[8].png">
+<meta property="og:image" content="http://blog.kyleliu.cn/e_img/多任务-协程%20%20与迭代器_files/Image%20[9].png">
+<meta property="og:updated_time" content="2018-12-29T15:56:41.530Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="多任务-携程与迭代器">
+<meta name="twitter:description" content="编程语言中的——迭代迭代的概念：是一种数据的访问方式，例如当用for循环访问数据时，我们会从中依次拿到其中的数据迭代会记住你当前访问的位置在下一次访问的时候能够基于当前的位置继续进行在python中迭代只能从前往后直到访问结束常见的可迭代类型list、tuple、dict、set、str、等容器类型都是可迭代类型实例可迭代对象与迭代器可迭代对象可迭代对象概念实现了__iter__方法的对">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/e_img/多任务-协程%20%20与迭代器_files/Image.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2016/09/11/01.python/python特性/多任务-协程  与迭代器/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>多任务-携程与迭代器 | 刘小恺(Kyle) 的个人博客</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s、 crawler</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2016/09/11/01.python/python特性/多任务-协程  与迭代器/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s、 crawler">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">多任务-携程与迭代器
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2016-09-11 21:00:00" itemprop="dateCreated datePublished" datetime="2016-09-11T21:00:00+08:00">2016-09-11</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/python/" itemprop="url" rel="index"><span itemprop="name">python</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/python/python特性/" itemprop="url" rel="index"><span itemprop="name">python特性</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/09/11/01.python/python特性/多任务-协程  与迭代器/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2016/09/11/01.python/python特性/多任务-协程  与迭代器/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2016/09/11/01.python/python特性/多任务-协程  与迭代器/" class="leancloud_visitors" data-flag-title="多任务-携程与迭代器">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+
+<html>
+<body>
+<div>
+<span><div><div><font style="font-size: 14pt;"><span style="font-size: 14pt; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">编程语言中的——迭代</span></font></div><div><ul><li><div><span style="font-size: 10pt; font-weight: bold;">迭代的概念</span><span style="font-size: 10pt;">：</span></div></li><ul><li><div><span style="font-size: 9pt;">是一种数据的访问方式，例如当用for循环访问数据时，我们会从中依次拿到其中的数据</span></div></li><li><div><span style="font-size: 9pt;">迭代会记住你当前访问的位置</span></div></li><li><div><span style="font-size: 9pt;">在下一次访问的时候能够基于当前的位置继续进行</span></div></li><li><div><span style="font-size: 9pt;">在python中迭代只能从前往后</span></div></li><li><div><span style="font-size: 9pt;">直到访问结束</span></div></li></ul><li><div><span style="font-size: 10pt; font-weight: bold;">常见的可迭代类型</span></div></li><ul><li><div><span style="font-size: 9pt;">list、tuple、dict、set、str、等容器类型都是可迭代类型实例</span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold; line-height: 13.6px;">可迭代对象与迭代器</span></font></div></li><ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold; line-height: 13.6px;">可迭代对象</span></font></div></li><ul><li><div><font style="font-size: 12px;"><span style="font-size: 12px; line-height: 13.6px;">可迭代对象概念</span></font></div></li><ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; line-height: 13.6px;">实现了__iter__方法的对象就是符合了可迭代对象的表象特征，此时可用isinstance判断类型是可迭代类型</span></font></div></li><li><div><span style="font-size: 9pt; line-height: 13.6px;">可迭代对象实质需要通过调用__iter__方法返回了一个迭代器对象，这才完成了可迭代对象的本质；实际上是通过迭代器对象来完成迭代</span></div></li></ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; line-height: 13.6px;">综合来说</span></font></div></li><ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; line-height: 13.6px;">可迭代对象就是实现了__iter__方法，并且返回了一个迭代器的实例的实例对象</span></font></div></li></ul></ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; font-weight: bold; line-height: 13.6px;">迭代器</span></font></div></li><ul><li><div><span style="font-size: 9pt; line-height: 13.6px;">迭代器概念</span></div></li><ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; line-height: 13.6px;">实现了__next__方法，在__next__方法中，提供迭代数据并记录位置信息的对象称为</span><span style="font-size: 9pt; line-height: 13.6px;">迭代器</span></font></div></li><li><div><span style="font-size: 9pt; line-height: 13.6px;">__next__方法每次返回一个元素，并且会自动指向下一个元素，当元素都已经取完的时候会抛出Stoplteration异常，底层会根据异常来结束for循环的遍历</span></div></li><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; line-height: 13.6px;">另外在python中一般要求迭代器也要同时是可迭代对象，所以一个迭代器也会有__iter__方法，并且会返回自己的实例</span></font></div></li></ul><li><div><span style="font-size: 9pt; line-height: 13.6px;">综合来说</span></div></li><ul><li><div><span style="font-size: 9pt; line-height: 13.6px;">一个迭代器就是实现了：</span></div></li><ul><li><div><span style="font-size: 9pt; line-height: 13.6px;">1.__next__方法用来提供数据和记录数据位置，当数据取完的时候抛出</span><span style="font-size: 9pt; line-height: 13.6px;">Stoplteration异常</span><span style="font-size: 9pt; line-height: 13.6px;">；</span></div></li><li><div><span style="font-size: 9pt; line-height: 13.6px;">2.迭代器也有__iter__方法</span><span style="font-size: 9pt; line-height: 13.6px;">，返回时实例是自己本身；  所以迭代器本身即是迭代器也是可迭代对象</span></div></li></ul></ul><li><div><span style="font-size: 9pt; line-height: 13.6px;">迭代器的两种使用场景</span></div></li><ul><li><div><span style="font-size: 9pt;">迭代访问已经存在的数据&lt;容器&gt;</span></div></li><li><div><span style="font-size: 9pt;">延迟计算还未存在的数据在迭代访问的时候计算出来     例如：遍历斐波那契数列，提前定义要访问的数据数量</span></div></li></ul></ul></ul></ul></div><ul><li><div><span style="font-size: 10pt; font-weight: bold;">如何判断对象obj是否可迭代</span></div></li><ul><li><div><span style="font-size: 9pt; font-weight: bold; line-height: 15.2px;">使用方法</span></div></li><ul><li><div><span style="font-size: 9pt;">isinstance(obj, classinfo)  -&gt; bool 判断obj是否是classinfo类型的实例 是则返回真 ； 否则返回假</span></div></li></ul><li><div><font style="font-size: 12px;"><span style="font-size: 12px; font-weight: bold; line-height: 13.6px;">判断是不是可迭代对象</span></font></div></li><ul><li><div><span style="font-size: 9pt;">from collections import Iterable</span></div></li><li><div><span style="font-size: 9pt;">is_iterable = isinstance(obj, Iterable) </span></div></li><ul><li><div><span style="font-size: 9pt;">判断是不是可迭代对象如过obj实例包含__iter__ 方法，就会认为是iterable创建或者其子类创建出来的实例</span></div></li></ul></ul></ul><li><div><span style="font-size: 10pt; font-weight: bold; line-height: 13.6px;">判断对象是不是迭代器（后面有介绍迭代器）：</span></div></li><ul><li><div><span style="font-size: 9pt;">from collections import Iterator</span></div></li><li><div><span style="font-size: 9pt;">isinstance(iter(obj), Iterator)   obj为可迭代对象，  判断列表的迭代器是不是迭代器类型</span></div></li></ul><li><div><span style="font-size: 10pt; font-weight: bold;">理解 for 循环遍历的过程实质</span></div></li><ul><li><div><span style="font-size: 9pt;">1.for item in Iterable 循环的本质就是先通过iter()函数获取可迭代对象Iterable的迭代器，实际上是对迭代器的操作</span></div></li><li><div><span style="font-size: 9pt;">2.然后对获取到的迭代器不断调用next()方法来获取下一个值并将其赋值给item，</span></div></li><li><div><span style="font-size: 9pt;">3.当遇到StopIteration的异常后循环结束。</span></div></li><li><div><span style="font-size: 9pt;"><img src="/e_img/多任务-协程  与迭代器_files/Image.png" type="image/png" data-filename="Image.png" width="188"></span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold; line-height: 13.6px;">对list、set、dict、等集合的迭代的理解</span></font></div></li><ul><li><div><img src="/e_img/多任务-协程  与迭代器_files/Image [1].png" type="image/png" data-filename="Image.png" style="font-size: 9pt;" width="300"></div></li></ul><li><div><span style="font-weight: bold;">对可迭代对象和迭代器的举例</span></div></li><ul><li><div><img src="/e_img/多任务-协程  与迭代器_files/Image [2].png" type="image/png" data-filename="Image.png" width="286"></div></li></ul></ul><div><font style="font-size: 14pt;"><span style="background-color: rgb(255, 250, 165);-evernote-highlight:true;"><span style="font-size: 14pt; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-weight: bold; line-height: 13.6px;-evernote-highlight:true;">生成器 -- 特殊的迭代器</span></span></font></div><div><ul><li><div><span style="font-size: 10pt; font-weight: bold; line-height: 13.6px;">概念：</span></div></li><ul><li><div><span style="font-size: 9pt; line-height: 13.6px;">生成器generato</span><span style="font-size: 9pt; font-weight: bold; line-height: 13.6px;">r是一种特殊的优雅的迭代器</span><span style="font-size: 9pt; line-height: 13.6px;">，使用方式和迭代器一致，实现方式和迭代器不同</span></div></li><li><div><span style="font-size: 9pt;">一个函数或者子程序都只能 return 一次，但是一个生成器能暂停执行并返回一个中间的结果-这就是 yield 语句的功能 : 返回一个中间值给调用者并暂停执行。使用next（）会再次激活生成器执行程序；</span></div></li></ul></ul></div><div><ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold; line-height: 13.6px;">第一种生成器</span></font></div></li><ul><li><div><span style="font-size: 9pt; line-height: 13.6px;">概念：</span></div></li><ul><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; line-height: 13.6px;">使用yield关键字实现的迭代器功能   含有yield关键字的函数不再是函数，而是生成器</span></font></div></li><li><div><span style="font-size: 9pt;">例：<img src="/e_img/多任务-协程  与迭代器_files/Image [3].png" type="image/png" data-filename="Image.png" width="144"></span></div></li></ul><li><div><span style="font-size: 9pt;">yield 语句的功能 </span></div></li><ul><li><div><span style="font-size: 9pt;">返回一个中间值给调用者并暂停执行，返回yield后面的表达式，待下次激活重新活重新恢复执行状态。</span></div></li></ul><li><div><span style="font-size: 9pt; line-height: 1.45;"> 用生成器遍历斐波那契数列</span></div></li><li><div><span style="font-size: 9pt;"><img src="/e_img/多任务-协程  与迭代器_files/Image [4].png" type="image/png" data-filename="Image.png" width="271"></span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold; line-height: 13.6px;">第二种生成器</span></font></div></li><ul><li><div><span style="font-size: 9pt; line-height: 13.6px;">格式：</span></div></li><ul><li><div><span style="font-size: 9pt; line-height: 13.6px;">lst 也是也个生成器</span></div></li><li><div><span style="font-size: 9pt;"><img src="/e_img/多任务-协程  与迭代器_files/Image [5].png" type="image/png" data-filename="Image.png" width="211"></span></div></li></ul></ul><li><div><span style="font-size: 10pt; font-weight: bold;">生成器的方法</span></div></li><ul><li><div><span style="font-size: 9pt;">next（生成器）/ 生成器.next（）  “激活生成器”第一次激活，生成器第一次执行代码要用next（）激活，或者send(None)</span></div></li><li><div><span style="font-size: 9pt;">send(data)；  生成器.send(None)  == next（生成器）  “激活生成器并给生成器发送数据，用yield接收；</span></div></li><ul><li><div><span style="font-size: 9pt;">注意：</span><span style="font-size: 9pt; line-height: 1.45;">第一次激活生成器你能使用send发送内容，因为没有在yield位置，没有接收，会报错”</span></div></li></ul><li><div><span style="font-size: 9pt;">close()  关闭生成器</span></div></li></ul><li><div><span style="font-size: 10pt; font-weight: bold;">备注：</span></div></li><ul><li><div><span style="font-size: 9pt;">生成器对象 一旦调用close() 在下一次恢复调用的时候将raise StopIteration</span></div></li><li><div><span style="font-size: 9pt; line-height: 13.6px;">生成器的任务执行完后，底层会自动raise一个</span><span style="font-size: 9pt; line-height: 13.6px;">StopIteration</span></div></li><li><div><span style="font-size: 9pt;">return可以终止生成器，Python3中的生成器可以使用</span><span style="font-size: 9pt; font-weight: bold;">return</span><span style="font-size: 9pt;">返回最终运行的返回值，返回值是依靠StopInteration异常来传出，可用一次拦截来获取return的内容；   而Python2中的生成器不允许使用return返回一个返回值（即可以使用return从生成器中退出，但return后不能有任何表达式）</span></div></li></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; line-height: 13.6px;"><span style="font-size: 10pt; line-height: 13.6px; font-weight: bold;">案例</span>：</span></font></div></li><ul><li><div><img src="/e_img/多任务-协程  与迭代器_files/Image [6].png" type="image/png" data-filename="Image.png" style="font-size: 9pt;" width="343"></div></li></ul></ul></div><div><br></div><div><font style="font-size: 14pt;"><span style="font-size: 14pt; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-weight: bold;-evernote-highlight:true;">多任务——携程</span></font></div><div><ul><li><div><span style="font-size: 10pt; font-weight: bold;">协程概念</span></div></li><ul><li><div><span style="font-size: 9pt;">协程Coroutine是一种多任务的实现方式.</span></div></li><li><div><span style="font-size: 9pt;">协程在执行遇阻塞时会根据(底层实现yield或其他)挂起当前函数, 转而执行其他函数代码在合适的时候能够切换到另一个函数中执行</span></div></li><li><div><span style="font-size: 9pt; line-height: 13.6px;">协程的多任务：</span><span style="font-size: 9pt; line-height: 13.6px;">进程和线程是操作系统提供的多任务方式，协程则是从用户层面解决任务的执行-恢复-执行-完成的过程从而实现多任务。</span></div></li><li><div><span style="font-size: 9pt;">生成器就是一个简单的协程.</span></div></li><ul><li><div><font style="font-size: 12px;"><span style="font-size: 12px; line-height: 13.6px;">例：<img src="/e_img/多任务-协程  与迭代器_files/Image [7].png" type="image/png" data-filename="Image.png" style="font-size: 9pt;" width="214"></span></font></div></li></ul></ul><li><div><font style="font-size: 10pt;"><span style="font-size: 10pt; font-weight: bold; line-height: 13.6px;">携程相比线程的优点缺点</span></font></div></li><ul><li><div><span style="font-size: 9pt; line-height: 13.6px;">优点</span></div></li><ul><li><div><span style="font-size: 9pt;">在实现多任务时, 线程切换从系统层面远不止保存和恢复 CPU上下文这么简单。 操作系统为了程序运行的高效性每个线程都有自己缓存Cache等等数据，操作系统还会帮你做这些数据的恢复操作。 所以线程的切换非常耗性能。但是协程的切换只是单纯的操作CPU的上下文，所以一秒钟切换个上百万次系统都抗的住。</span></div></li><li><div><span style="font-size: 9pt; line-height: 13.6px;">并发性高，占用资源小</span></div></li></ul><li><div><span style="font-size: 9pt; line-height: 13.6px;">缺点</span></div></li><ul><li><div><span style="font-size: 9pt; line-height: 13.6px;">由于协程是基于同一个线程，故不存在并行的情况，不能有效的利用多核</span></div></li></ul></ul><li><div><span style="font-size: 10pt; font-weight: bold;">python中协程实现-greenlet</span></div></li><ul><li><div><span style="font-size: 9pt; line-height: 13.6px;">实现原理</span></div></li><ul><li><div><span style="font-size: 9pt;">greenlet封装yield关键字的作用</span></div></li></ul><li><div><span style="font-size: 9pt; line-height: 13.6px;">使用方法</span></div></li><ul><li><div><span style="font-size: 9pt;">g = greenlet(func)   创建一个协程 g   ； func为协程程序</span></div></li><li><div><span style="font-size: 9pt;">g.switch( *args, **args)   启动协程g/ 切换执行其他的协程g； args为函数接收的参数</span></div></li></ul><li><div><span style="font-size: 9pt; line-height: 13.6px;">特点：</span><span style="font-size: 9pt; line-height: 13.6px;">易用性不高，还是太底层，需要手动切换</span></div></li><li><div><span style="font-size: 9pt; line-height: 13.6px;">例子：</span></div></li><ul><li><div><img src="/e_img/多任务-协程  与迭代器_files/Image [8].png" type="image/png" data-filename="Image.png" style="font-size: 9pt;" width="205"></div></li></ul></ul><li><div><span style="font-size: 10pt; font-weight: bold;">python中协程实现-gevent</span></div></li><ul><li><div><span style="font-size: 9pt; line-height: 1.45;">实现原理</span></div></li><ul><li><div><span style="font-size: 9pt; line-height: 1.45;">gevent 底层实现封装了greenlet的代码，不需要人工切换协程；</span></div></li><li><div><span style="font-size: 9pt;">其原理是当一个greenlet遇到IO(指的是input output 输入输出，比如网络、文件操作等)操作时，比如访问网络，就自动切换到其他的greenlet，等到IO操作完成，再在适当的时候切换回来继续执行。由于IO操作非常耗时，经常使程序处于等待状态，有了gevent为我们自动切换协程，就保证总有greenlet在运行，而不是等待IO</span></div></li></ul><li><div><span style="font-size: 9pt;">使用方法</span></div></li><ul><li><div><span style="font-size: 9pt;">from gevent import monkey    导入 monkey模块</span></div></li><li><div><span style="font-size: 9pt;">monkey.patch_all(socket=True, dns=True, time=True, select=True, thread=True)    给在程序中导入的各python模块打上补丁（除input所在模块），即替换成gevent可切换的模块，默认都为True既表示可以协程化，可手动修改程False     **注：这句话尽可能放到import其他模块的最前面，放到后面可能出错</span></div></li><li><div><span style="font-size: 9pt;"> g = gevnet.spawn(fuc, *args, **args</span><span style="font-size: 9pt; line-height: 1.45;">)     </span><span style="font-size: 9pt; line-height: 1.45;">创建协程，</span><span style="font-size: 9pt; line-height: 1.45;">func 为函数，  其他为函数需要传入的参数</span></div></li><li><div><span style="font-size: 9pt; line-height: 1.45;">g.join() 和 gevent.joinall([g])      阻塞等待协程结束， 一定要等待协程结束，不然线程会默认结束整个线程</span></div></li><li><div><font style="font-size: 9pt;"><span style="font-size: 9pt; line-height: 1.45;">**注意：在协程中遇到阻塞等待会切换协程，排除（</span><span style="font-size: 9pt; font-weight: bold; line-height: 1.45;">input（）</span><span style="font-size: 9pt; line-height: 1.45;">）</span></font></div></li></ul><li><div><span style="font-size: 9pt; line-height: 13.6px;">协程应用场景</span></div></li><ul><li><div><span style="line-height: 13.6px; font-size: 9pt;">应用:爬虫/并发服务器</span></div></li></ul><li><div><span style="font-size: 9pt; line-height: 13.6px;">案例：</span></div></li><ul><li><div><img src="/e_img/多任务-协程  与迭代器_files/Image [9].png" type="image/png" data-filename="Image.png" style="font-size: 9pt;" width="316"></div></li></ul></ul></ul><div><font style="font-size: 14pt;"><span style="font-size: 14pt; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-weight: bold; line-height: 13.6px;-evernote-highlight:true;">如何选择使用什么来实现</span><span style="background-color: rgb(255, 250, 165);-evernote-highlight:true;"><span style="font-size: 14pt; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-weight: bold; line-height: 13.6px;-evernote-highlight:true;">多任</span><span style="font-size: 14pt; background-color: rgb(255, 250, 165); color: rgb(50, 135, 18); font-weight: bold; line-height: 13.6px;-evernote-highlight:true;">务</span></span></font></div><ul><li><div><span style="font-size: 9pt; line-height: 13.6px;">多进程：当逻辑功能复杂，选择多进程来独立执行</span></div></li><li><div><span style="font-size: 9pt; line-height: 13.6px;">多线程：当有多个重复性的操作，逻辑性不复杂的较轻量级操作，选择用多线程来执行</span></div></li><li><div><span style="font-size: 9pt; line-height: 13.6px;">协程：当涉及到网络等，这种需要高并发和有阻塞等待的场景选择协程类执行；</span></div></li></ul></div><div><br></div></div><div><br></div><div><br></div><div><br></div><div><br></div><div><br></div></span>
+</div></body></html>
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/python/" rel="tag"><i class="fa fa-tag"></i> python</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/09/09/01.python/网络协议与python/网络通信-TCP/" rel="next" title="网络通信-TCP">
+                <i class="fa fa-chevron-left"></i> 网络通信-TCP
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/09/11/01.python/python特性/Python AsyncAwait 异步编程_1/" rel="prev" title="Python Async 异步编程_1">
+                Python Async 异步编程_1 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s、 crawler</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">178</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">47</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">54</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: true
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

@@ -127,15 +127,15 @@
 <meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
 <meta property="og:description" content="一、goroutine作用goroutine的本质是协程，是实现并行计算的核心，和python的async编程类似，但是又不需要我们手动的去创建携程并通过实践循环来启动。goroutine异步执行函数，只需使用go关键字+函数名即可启动一个协程，函数则直接处于异步执行的状态。 1go func()//通过go关键字启动一个协程来运行函数 二、goroutine的原理携程概念介绍协程拥有自己的寄存器">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://images2018.cnblogs.com/blog/1075473/201807/1075473-20180704144900055-654632620.jpg">
-<meta property="og:image" content="https://images2018.cnblogs.com/blog/1075473/201807/1075473-20180704160300058-287296807.jpg">
-<meta property="og:image" content="https://images2018.cnblogs.com/blog/1075473/201807/1075473-20180704162532330-809705926.jpg">
-<meta property="og:image" content="https://images2018.cnblogs.com/blog/1075473/201807/1075473-20180704164251684-1689850867.jpg">
-<meta property="og:updated_time" content="2019-01-05T04:10:54.183Z">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1546663603111.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1546663612721.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1546663635363.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1546663659450.png">
+<meta property="og:updated_time" content="2019-01-05T04:47:42.252Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="goroutine原理以及channel使用">
 <meta name="twitter:description" content="一、goroutine作用goroutine的本质是协程，是实现并行计算的核心，和python的async编程类似，但是又不需要我们手动的去创建携程并通过实践循环来启动。goroutine异步执行函数，只需使用go关键字+函数名即可启动一个协程，函数则直接处于异步执行的状态。 1go func()//通过go关键字启动一个协程来运行函数 二、goroutine的原理携程概念介绍协程拥有自己的寄存器">
-<meta name="twitter:image" content="https://images2018.cnblogs.com/blog/1075473/201807/1075473-20180704144900055-654632620.jpg">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/img/1546663603111.png">
 
 
 
@@ -475,15 +475,15 @@
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span>//通过<span class="title">go</span>关键字启动一个协程来运行函数</span></span><br></pre></td></tr></table></figure>
 <h3 id="二、goroutine的原理"><a href="#二、goroutine的原理" class="headerlink" title="二、goroutine的原理"></a>二、goroutine的原理</h3><h4 id="携程概念介绍"><a href="#携程概念介绍" class="headerlink" title="携程概念介绍"></a>携程概念介绍</h4><p>协程拥有自己的寄存器上下文和栈。协程调度切换时，将寄存器上下文和栈保存到其他地方，在切回来的时候，恢复先前保存的寄存器上下文和栈。因此，协程能保留上一次调用时的状态（即所有局部状态的一个特定组合），每次过程重入时，就相当于进入上一次调用的状态，换种说法：进入上一次离开时所处逻辑流的位置。线程和进程的操作是由程序触发系统接口，最后的执行者是系统；协程的操作执行者则是用户自身程序，goroutine也是协程。</p>
 <h4 id="调度模型简介"><a href="#调度模型简介" class="headerlink" title="调度模型简介"></a>调度模型简介</h4><p>groutine是通过GPM调度模型实现，下面就来解释下goroutine的调度模型。</p>
-<p><img src="https://images2018.cnblogs.com/blog/1075473/201807/1075473-20180704144900055-654632620.jpg" alt="img"></p>
+<p><img src="/img/1546663603111.png" alt="1546663603111"></p>
 <p>Go的调度器内部有四个重要的结构：M，P，S，Sched，如上图所示（Sched未给出）<br>M:M代表内核级线程，一个M就是一个线程，goroutine就是跑在M之上的；M是一个很大的结构，里面维护小对象内存cache（mcache）、当前执行的goroutine、随机数发生器等等非常多的信息<br>G:代表一个goroutine，它有自己的栈，instruction pointer和其他信息（正在等待的channel等等），用于调度。<br>P:P全称是Processor，处理器，它的主要用途就是用来执行goroutine的，所以它也维护了一个goroutine队列，里面存储了所有需要它来执行的goroutine<br>Sched：代表调度器，它维护有存储M和G的队列以及调度器的一些状态信息等。</p>
-<h4 id="调度实现"><a href="#调度实现" class="headerlink" title="调度实现"></a>调度实现</h4><p><img src="https://images2018.cnblogs.com/blog/1075473/201807/1075473-20180704160300058-287296807.jpg" alt="img"></p>
+<h4 id="调度实现"><a href="#调度实现" class="headerlink" title="调度实现"></a>调度实现</h4><p><img src="/img/1546663612721.png" alt="1546663612721"></p>
 <p>从上图中看，有2个物理线程M，每一个M都拥有一个处理器P，每一个也都有一个正在运行的goroutine。<br>P的数量可以通过GOMAXPROCS()来设置，它其实也就代表了真正的并发度，即有多少个goroutine可以同时运行。<br>图中灰色的那些goroutine并没有运行，而是出于ready的就绪态，正在等待被调度。P维护着这个队列（称之为runqueue），<br>Go语言里，启动一个goroutine很容易：go function 就行，所以每有一个go语句被执行，runqueue队列就在其末尾加入一个goroutine，在下一个调度点，就从runqueue中取出</p>
 <p>当一个OS线程M0陷入阻塞时(例如爬虫或者其他的io操作， 这里就和python的多线程类似)（如下图)，P转而在运行M1，图中的M1可能是正被创建，或者从线程缓存中取出。</p>
-<p><img src="https://images2018.cnblogs.com/blog/1075473/201807/1075473-20180704162532330-809705926.jpg" alt="img"></p>
+<p><img src="/img/1546663635363.png" alt="1546663635363"></p>
 <p>当MO返回时，它必须尝试取得一个P来运行goroutine，一般情况下，它会从其他的OS线程那里拿一个P过来，<br>如果没有拿到的话，它就把goroutine放在一个global runqueue里，然后自己睡眠（放入线程缓存里）。所有的P也会周期性的检查global runqueue并运行其中的goroutine，否则global runqueue上的goroutine永远无法执行。</p>
 <p>另一种情况是P所分配的任务G很快就执行完了（分配不均），这就导致了这个处理器P很忙，但是其他的P还有任务，此时如果global runqueue没有任务G了，那么P不得不从其他的P里拿一些G来执行。一般来说，如果P从其他的P那里要拿任务的话，一般就拿runqueue的一半，这就确保了每个OS线程都能充分的使用，如下图：</p>
-<p><img src="https://images2018.cnblogs.com/blog/1075473/201807/1075473-20180704164251684-1689850867.jpg" alt="img"></p>
+<p><img src="/img/1546663659450.png" alt="1546663659450"></p>
 <h3 id="三、goroutine使用"><a href="#三、goroutine使用" class="headerlink" title="三、goroutine使用"></a>三、goroutine使用</h3><h4 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h4><p>设置goroutine运行的CPU数量，最新版本的go已经默认已经设置了。</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">num := runtime.NumCPU()    <span class="comment">//获取主机的逻辑CPU个数</span></span><br><span class="line">runtime.GOMAXPROCS(num)    <span class="comment">//设置可同时执行的最大CPU数，即设置多少个P</span></span><br></pre></td></tr></table></figure>
 <p>使用示例</p>

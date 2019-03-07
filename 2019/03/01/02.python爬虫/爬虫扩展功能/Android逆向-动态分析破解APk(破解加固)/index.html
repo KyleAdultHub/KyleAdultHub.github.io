@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="转载: http://www.520monkey.com/ 一、前言介绍一下如何应对现在市场中一些加固的apk的破解之道，现在市场中加固apk的方式一般就是两种：一种是对源apk整体做一个加固，放到指定位置，运行的时候在解密动态加载，还有一种是对so进行加固，在so加载内存的时候进行解密释放。我们今天主要看第一种加固方式，就是对apk整体进行加固。 二、案例分析按照国际惯例，咋们还是得用一个案例来">
+<meta name="keywords" content="爬虫,Android逆向">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android逆向-动态分析破解Apk(破解加固)">
+<meta property="og:url" content="http://blog.kyleliu.cn/2019/03/01/02.python爬虫/爬虫扩展功能/Android逆向-动态分析破解APk(破解加固)/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="转载: http://www.520monkey.com/ 一、前言介绍一下如何应对现在市场中一些加固的apk的破解之道，现在市场中加固apk的方式一般就是两种：一种是对源apk整体做一个加固，放到指定位置，运行的时候在解密动态加载，还有一种是对so进行加固，在so加载内存的时候进行解密释放。我们今天主要看第一种加固方式，就是对apk整体进行加固。 二、案例分析按照国际惯例，咋们还是得用一个案例来">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551411964089.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551411972337.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551411980295.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551411990583.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551411997754.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412011735.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412020437.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412032149.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412042421.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412051232.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412058854.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412066303.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412075783.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412082688.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412091795.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412100337.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412107970.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412119327.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412126706.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412134873.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412141684.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412152284.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412160530.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412168174.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412175294.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412182305.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412188951.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412199808.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412207234.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412215225.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412224196.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412231725.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412242134.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412252134.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412261132.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412270357.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412279648.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412287311.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412295016.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412304306.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412314129.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412323606.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412332017.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412341893.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412350326.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412360214.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412369218.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412377849.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412386861.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412394814.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412404048.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412413355.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412424135.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412433726.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412441417.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412449805.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412458167.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412466571.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1551412480302.png">
+<meta property="og:updated_time" content="2019-03-07T14:14:28.057Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android逆向-动态分析破解Apk(破解加固)">
+<meta name="twitter:description" content="转载: http://www.520monkey.com/ 一、前言介绍一下如何应对现在市场中一些加固的apk的破解之道，现在市场中加固apk的方式一般就是两种：一种是对源apk整体做一个加固，放到指定位置，运行的时候在解密动态加载，还有一种是对so进行加固，在so加载内存的时候进行解密释放。我们今天主要看第一种加固方式，就是对apk整体进行加固。 二、案例分析按照国际惯例，咋们还是得用一个案例来">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/img/1551411964089.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2019/03/01/02.python爬虫/爬虫扩展功能/Android逆向-动态分析破解APk(破解加固)/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Android逆向-动态分析破解Apk(破解加固) | 刘小恺(Kyle) 的个人博客</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/03/01/02.python爬虫/爬虫扩展功能/Android逆向-动态分析破解APk(破解加固)/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Android逆向-动态分析破解Apk(破解加固)
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-03-01 00:01:00" itemprop="dateCreated datePublished" datetime="2019-03-01T00:01:00+08:00">2019-03-01</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/python爬虫/" itemprop="url" rel="index"><span itemprop="name">python爬虫</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/python爬虫/爬虫拓展功能/" itemprop="url" rel="index"><span itemprop="name">爬虫拓展功能</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/03/01/02.python爬虫/爬虫扩展功能/Android逆向-动态分析破解APk(破解加固)/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/03/01/02.python爬虫/爬虫扩展功能/Android逆向-动态分析破解APk(破解加固)/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>转载: <a href="http://www.520monkey.com/" target="_blank" rel="noopener">http://www.520monkey.com/</a></p>
+<h2 id="一、前言"><a href="#一、前言" class="headerlink" title="一、前言"></a><strong>一、前言</strong></h2><p>介绍一下如何应对现在市场中一些加固的apk的破解之道，现在市场中加固apk的方式一般就是两种：一种是对源apk整体做一个加固，放到指定位置，运行的时候在解密动态加载，还有一种是对so进行加固，在so加载内存的时候进行解密释放。我们今天主要看第一种加固方式，就是对apk整体进行加固。</p>
+<h2 id="二、案例分析"><a href="#二、案例分析" class="headerlink" title="二、案例分析"></a><strong>二、案例分析</strong></h2><p>按照国际惯例，咋们还是得用一个案例来分析讲解，这次依然采用的是阿里的CTF比赛的第三题：</p>
+<p><img src="/img/1551411964089.png" alt="1551411964089"></p>
+<p>题目是：<strong>要求输入一个网页的url，然后会跳转到这个页面，但是必须要求弹出指定内容的Toast提示，这个内容是：祥龙！</strong></p>
+<p>了解到题目，我们就来简单分析一下，这里大致的逻辑应该是，输入的url会传递给一个WebView控件，进行展示网页，如果按照题目的逻辑的话，应该是网页中的Js会调用本地的一个Java方法，然后弹出相应的提示，那么这里我们就来开始操作了。</p>
+<p>按照我们之前的破解步骤：</p>
+<p><strong>第一步：肯定是先用解压软件搞出来他的classes.dex文件，然后使用dex2jar+jd-gui进行查看java代码</strong></p>
+<p><img src="/img/1551411972337.png" alt="1551411972337"></p>
+<p>擦，这里我们看到这里只有一个Application类，从这里我们可以看到，这个apk可能被加固了，为什么这么说呢？因为我们知道一个apk加固，外面肯定得套一个壳，这个壳必须是自定义的Application类，因为他需要做一些初始化操作，那么一般现在加固的apk的壳的Application类都喜欢叫StubApplication。而且，这里我们可以看到，除了一个Application类，没有其他任何类了，包括我们的如可Activity类都没有了，那么这时候会发现，很蛋疼，无处下手了。</p>
+<p><strong>第二步：我们会使用apktool工具进行apk的反编译，得到apk的AndroidManifest.xml和资源内容</strong></p>
+<p><img src="/img/1551411980295.png" alt="1551411980295"></p>
+<p>反编译之后，看到程序会有一个入口的Activity就是MainActivity类，我们记住一点就是，不管最后的apk如何加固，即使我们看不到代码中的四大组件的定义，但是肯定会在AndroidManifest.xml中声明的，因为如果不声明的话，运行是会报错的。那么这里我们也分析完了该分析的内容，还是没发现我们的入口Activity类，而且我们知道他肯定是放在本地的一个地方，因为需要解密动态加载，所以不可能是放在网上的，肯定是本地，所以这里就有一些技巧了：</p>
+<p>当我们发现apk中主要的类都没有了，肯定是apk被加固了，加固的源程序肯定是在本地，一般会有这么几个地方需要注意的：</p>
+<p><strong>1、应用程序的asset目录，我们知道这个目录是不参与apk的资源编译过程的，所以很多加固的应用喜欢把加密之后的源apk放到这里</strong></p>
+<p><strong>2、把源apk加密放到壳的dex文件的尾部，这个肯定不是我们这里的案例，但是也有这样的加固方式，这种加固方式会发现使用dex2jar工具解析dex是失败的，我们这时候就知道了，肯定对dex做了手脚</strong></p>
+<p><strong>3、把源apk加密放到so文件中，这个就比较难了，一般都是把源apk进行拆分，存到so文件中，分析难度会加大的。</strong></p>
+<p>一般都是这三个地方，其实我们知道记住一点：就是不管源apk被拆分，被加密了，被放到哪了，只要是在本地，我们都有办法得到他的。</p>
+<p>好了，按照这上面的三个思路我们来分析一下，这个apk中加固的源apk放在哪了？通过刚刚的dex文件分析，发现第二种方式肯定不可能了，那么会放在asset目录中吗？我们查看asset目录：</p>
+<p><img src="/img/1551411990583.png" alt="1551411990583"></p>
+<p>看到asset目录中的确有两个jar文件，而且我们第一反应是使用jd-gui来查看jar，可惜的是打开失败，所以猜想这个jar是经过处理了，应该是加密，所以这里很有可能是存放源apk的地方。但是我们上面也说了还有第三种方式，我们去看看libs目录中的so文件：</p>
+<p><img src="/img/1551411997754.png" alt="1551411997754">**</p>
+<p>擦，这里有三个so文件，而我们上面的Application中加载的只有一个so文件：libmobisec.so，那么其他的两个so文件很有可能是拆分的apk文件的藏身之处。</p>
+<p>通过上面的分析之后，我们大致知道了两个地方很有可能是源apk的藏身地方，一个是asset目录，一个是libs目录，那么分析完了之后，我们发现现在面临两个问题：</p>
+<p><strong>第一个问题：asset目录中的jar文件被处理了，打不开，也不知道处理逻辑</strong></p>
+<p><strong>第二个问题：libs目录中的三个so文件，唯一加载了libmobisec.so文件了</strong></p>
+<p>那么这里现在的唯一入口就是这个libmobisec.so文件了，因为上层的代码没有，没法分析，下面来看一下so文件：</p>
+<p><img src="/img/1551412011735.png" alt="1551412011735"></p>
+<p>擦，发现蛋疼的是，这里没有特殊的方法，比如Java_开头的什么，所以猜测这里应该是自己注册了native方法，混淆了native方法名称，那么到这里，我们会发现我们遇到的问题用现阶段的技术是没法解决了。</p>
+<h2 id="三、获取正确的dex内容"><a href="#三、获取正确的dex内容" class="headerlink" title="三、获取正确的dex内容"></a><strong>三、获取正确的dex内容</strong></h2><p>分析完上面的破解流程之后，发现现在首要的任务是先得到源apk程序，通过分析知道，处理的源apk程序很难找到和分析，所以这里就要引出今天说的内容了，使用动态调试，给libdvm.so中的函数：dvmDexFileOpenPartial 下断点，然后得到dex文件在内存中的起始地址和大小，然后dump处dex数据即可。</p>
+<p>那么这里就有几个问题了：</p>
+<p><strong>第一个问题：为何要给dvmDexFileOpenPartial 这个函数下断点？</strong></p>
+<p>因为我们知道，不管之前的源程序如何加固，放到哪了，最终都是需要被加载到内存中，然后运行的，而且是没有加密的内容，那么我们只要找到这的dex的内存位置，把这部分数据搞出来就可以了，管他之前是如何加固的，我们并不关心。那么问题就变成了，如何获取加载到内存中的dex的地址和大小，这个就要用到这个函数了：dvmDexFileOpenPartial 因为这个函数是最终分析dex文件，加载到内存中的函数：</p>
+<p>int dvmDexFileOpenPartial(const void* addr, int len, DvmDex** ppDvmDex);</p>
+<p>第一个参数就是dex内存起始地址，第二个参数就是dex大小。</p>
+<p><strong>第二个问题：如何使用IDA给这个函数下断点</strong></p>
+<p>我们在之前的一篇文章中说到了，在动态调试so，下断点的时候，必须知道一个函数在内存中的绝对地址，而函数的绝对地址是：这个函数在so文件中的相对地址+so文件映射到内存中的基地址，这里我们知道这个函数肯定是存在libdvm.so文件中的，因为一般涉及到dvm有关的函数功能都是存在这个so文件中的，那么我们可以从这个so文件中找到这个函数的相对地址，运行程序之后，在找到libdvm.so的基地址，相加即可，那么我们如何获取到这个libdvm.so文件呢？这个文件是存放在设备的/system/lib目录下的：</p>
+<p><img src="/img/1551412020437.png" alt="1551412020437"></p>
+<p>那么我们只需要使用adb pull 把这个so文件搞出来就可以了。</p>
+<p>好了，解决了这两个问题，下面就开始操作了：</p>
+<p><strong>第一步：运行设备中的android_server命令，使用adb forward进行端口转发</strong></p>
+<p><img src="/img/1551412032149.png" alt="1551412032149"></p>
+<p>这里的android_server工具可以去ida安装目录中dbgsrv文件夹中找到</p>
+<p><img src="/img/1551412042421.png" alt="1551412042421"></p>
+<p><strong>第二步：使用命令以debug模式启动apk</strong></p>
+<p><strong>adb shell am start -D -n com.ali.tg.testapp/.MainActivity</strong></p>
+<p><img src="/img/1551412051232.png" alt="1551412051232"></p>
+<p>因为我们需要给libdvm.so下断点，这个库是系统库，所以加载时间很早，所以我们需要像之前给JNI_OnLoad函数下断点一样，采用debugger模式运行程序，这里我们通过上面的AndroidManifest.xml中，得到应用的包名和入口Activity：</p>
+<p><img src="/img/1551412058854.png" alt="1551412058854"></p>
+<p>而且这里的android:debuggable=true，可以进行debug调试的。</p>
+<p><strong>第三步：双开IDA，一个用于静态分析libdvm.so，一个用于动态调试libdvm.so</strong></p>
+<p><img src="/img/1551412066303.png" alt="1551412066303"></p>
+<p>通过IDA的Debugger菜单，进行进程附加操作：</p>
+<p><img src="/img/1551412075783.png" alt="1551412075783"></p>
+<p><strong>第四步：使用jdb命令启动连接attach调试器</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jdb -connect com.sun.jdi.SocketAttach:hostname=127.0.0.1,port=8700</span><br></pre></td></tr></table></figure>
+<p>但是这里可能会出现这样的错误：</p>
+<p><img src="/img/1551412082688.png" alt="1551412082688"></p>
+<p>这个是因为，我们的8700端口没有指定，这时候我们可以通过Eclipse的DDMS进行端口的查看：</p>
+<p><img src="/img/1551412091795.png" alt="1551412091795"></p>
+<p>看到了，这里是8600端口，但是基本端口8700不在，所以这里我们有两种处理方式，一种是把上面的命令的端口改成8600，还有一种是选中这个应用，使其具有8700端口：</p>
+<p><img src="/img/1551412100337.png" alt="1551412100337"></p>
+<p>点击这个条目即可，这时候我们在运行上面的jdb命令：</p>
+<p><img src="/img/1551412107970.png" alt="1551412107970"></p>
+<p>处于等待状态。</p>
+<p><strong>第四步：给dvmDexFileOpenPartial函数下断点</strong></p>
+<p>使用一个IDA静态分析得到这个函数的相对地址：43308</p>
+<p><img src="/img/1551412119327.png" alt="1551412119327"></p>
+<p>在动态调试的IDA解密，使用Ctrl+S键找到libdvm.so的在内存中的基地址：41579000</p>
+<p><img src="/img/1551412126706.png" alt="1551412126706"></p>
+<p>然后将两者相加得到绝对地址：43308+41579000=415BC308，使用G键，跳转：</p>
+<p><img src="/img/1551412134873.png" alt="1551412134873"></p>
+<p>跳转到dvmDexFileOpenPartial函数处，下断点：</p>
+<p><img src="/img/1551412141684.png" alt="1551412141684"></p>
+<p><strong>第五步：点击运行按钮或者F9运行程序</strong></p>
+<p>之前的jdb命令就连接上了：</p>
+<p><img src="/img/1551412152284.png" alt="1551412152284"></p>
+<p>IDA出现如下界面，不要理会，一路点击取消按钮即可</p>
+<p><img src="/img/1551412160530.png" alt="1551412160530"></p>
+<p>运行到了dvmDexFileOpenPartial函数处：</p>
+<p><img src="/img/1551412168174.png" alt="1551412168174"></p>
+<p>使用F8进行单步调试，但是这里需要注意的是，只要运行过了PUSH命令就可以了，记得不要越过下面的BL命令，因为我们没必要走到那里，当执行了PUSH命令之后，我们就是使用脚本来dump处内存中的dex数据了，这里有一个知识点，就是R0~R4寄存器一般是用来存放一个函数的参数值的，那么我们知道dvmDexFileOpenPartial函数的第一个参数就是dex内存起始地址，第二个参数就是dex大小：</p>
+<p><img src="/img/1551412175294.png" alt="1551412175294"></p>
+<p>那么这里就可以使用这样的脚本进行dump即可：</p>
+<p><strong>static main(void){    auto fp, dex_addr, end_addr;    fp = fopen(“F:\dump.dex”, “wb”);    end_addr = r0 + r1;    for ( dex_addr = r0; dex_addr &lt; end_addr; dex_addr ++ )        fputc(Byte(dex_addr), fp);}</strong></p>
+<p>脚本不解释了，非常简单，而且这个是固定的格式，以后dump内存中的dex都是这段代码，我们将dump出来的dex保存到F盘中。</p>
+<p>然后这时候，我们使用：Shirt+F2 调出IDA的脚本运行界面：</p>
+<p><img src="/img/1551412182305.png" alt="1551412182305"></p>
+<p>点击运行，这里可能需要等一会，运行成功之后，我们去F盘得到dump.dex文件，其实这里我们的IDA使命就完成了，因为我们得到了内存的dex文件了，下面开始就简单了，只要分析dex文件即可</p>
+<h2 id="四、分析正确的dex文件内容"><a href="#四、分析正确的dex文件内容" class="headerlink" title="四、分析正确的dex文件内容"></a><strong>四、分析正确的dex文件内容</strong></h2><p>我们拿到dump.dex之后，使用dex2jar工具进行反编译：</p>
+<p><img src="/img/1551412188951.png" alt="1551412188951"></p>
+<p>可惜的是，报错了，反编译失败，主要是有一个类导致的，开始我以为是dump出来的dex文件有问题，最后我用baksmali工具得到smali文件是可以的，所以不是dump出来的问题，我最后用baksmali工具将dex转化成smali源码：</p>
+<p>j</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ava -jar baksmali-2.0.3.jar -o C:\classout/ dump.dex</span><br></pre></td></tr></table></figure>
+<p><img src="/img/1551412199808.png" alt="1551412199808"></p>
+<p>得到的smali源码目录classout在C盘中：</p>
+<p><img src="/img/1551412207234.png" alt="1551412207234"></p>
+<p>我们得到了指定的smali源码了。</p>
+<p>那么下面我们就可以使用静态方式分析smali即可了：</p>
+<p>首先找到入口的MainActivity源码：</p>
+<p><img src="/img/1551412215225.png" alt="1551412215225"></p>
+<p>这里不解释了，肯定是找按钮的点击事件代码处，这里是一个btn_listener变量，看这个变量的定义：</p>
+<p><img src="/img/1551412224196.png" alt="1551412224196"></p>
+<p>是MainActivity$1内部类定义，查看这个类的smali源码，直接查看他的onClick方法：</p>
+<p><img src="/img/1551412231725.png" alt="1551412231725"></p>
+<p>这里可以看到，把EditText中的内容，用Intent传递给WebViewActivity中，但是这里的intent数据的key是加密的。</p>
+<p>下面继续看WebViewActivity这个类：</p>
+<p><img src="/img/1551412242134.png" alt="1551412242134"></p>
+<p>我们直接查找onCreate方法即可，看到这里是初始化WebView，然后进行一些设置，这里我们看到一个@JavascriptInterface</p>
+<p>这个注解，我们在使用WebView的时候都知道，他是用于Js中能够访问的设置了这个注解的方法，没有这个注解的方法Js是访问不了的</p>
+<p><strong>注意：</strong></p>
+<p>我们知道这个注解是在SDK17加上的，也就是Android4.2版本中，那么在之前的版本中没有这个注解，任何public的方法都可以在JS代码中访问，而Java对象继承关系会导致很多public的方法都可以在JS中访问，其中一个重要的方法就是  getClass()。然后JS可以通过反射来访问其他一些内容。那么这里就有这个问题了：比如下面的一段JS代码：</p>
+<script>
+    function findobj(){
+        for (var obj in window) { 
+            if ("getClass" in window[obj]) { 
+                return window[obj] 
+            } 
+        } 
+    }
+</script>
+
+<p>看到了，这段js代码很危险的，使用getClass方法，得到这个对象(java中的每个对象都有这个方法的)，用这个方法可以得到一个java对象，然后我们就可以调用这个对象中的方法了。这个也算是WebView的一个漏洞了。</p>
+<p>所以通过引入 @JavascriptInterface注解，则在JS中只能访问 @JavascriptInterface注解的函数。这样就可以增强安全性。</p>
+<p>回归到正题，我们上面分析了smali源码，看到了WebView的一些设置信息，我们可以继续往下面看：</p>
+<p><img src="/img/1551412252134.png" alt="1551412252134"></p>
+<p>这里的我们看到了一些重要的方法，一个是addJavascriptInterface，一个是loadUrl方法。</p>
+<p>我们知道addjavaascriptInterface方法一般的用法：</p>
+<p>mWebView.addJavascriptInterface(new JavaScriptObject(this), “jiangwei”);</p>
+<p>第一个参数是本地的Java对象，第二个参数是给Js中使用的对象的名称。然后js得到这个对象的名称就可以调用本地的Java对象中的方法了。</p>
+<p>看了这里的addjavaascriptInterface方法代码，可以看到，这里用</p>
+<p>ListViewAutoScrollHelpern;-&gt;decrypt_native(Ljava/lang/String;I)Ljava/lang/String;</p>
+<p>将js中的名称进行混淆加密了，这个也是为了防止恶意的网站来拦截url，然后调用我们本地的Java中的方法。</p>
+<p><strong>注意：</strong></p>
+<p>这里又存在一个关于WebView的安全问题，就是这里的js访问的对象的名称问题，比如现在我的程序中有一个Js交互的类，类中有一个获取设备重要信息的方法，比如这里获取设备的imei方法，如果我们的程序没有做这样名称的混淆的话，破解者得到这个js名称和方法名，然后就伪造一个恶意url，来调用我们程序中的这个方法，比如这样一个例子：</p>
+<p><img src="/img/1551412261132.png" alt="1551412261132"></p>
+<p>然后在设置js名称：</p>
+<p><img src="/img/1551412270357.png" alt="1551412270357"></p>
+<p>我们就可以伪造一个恶意的url页面来访问这个方法，比如这个恶意的页面代码如下：</p>
+<p><img src="/img/1551412279648.png" alt="1551412279648"></p>
+<p>运行程序：</p>
+<p><img src="/img/1551412287311.png" alt="1551412287311"></p>
+<p>看到了，这里恶意的页面就成功的调用了程序中的一个重要方法。</p>
+<p>所以，我们可以看到，对Js交互中的对象名称做混淆是必要的，特别是本地一些重要的方法。</p>
+<p>回归到正题，我们分析完了WebView的一些初始化和设置代码，而且我们知道如果要被Js访问的方法，那么必须要有@JavascriptInterface注解 因为在Java中注解也是一个类，所以我们去注解类的源码看看那个被Js调用的方法：</p>
+<p><img src="/img/1551412295016.png" alt="1551412295016"></p>
+<p>这里看到了有一个showToast方法，展示的内容：\u7965\u9f99\uff01 ，我们在线转化一下：</p>
+<p><img src="/img/1551412304306.png" alt="1551412304306"></p>
+<p>擦，这里就是题目要求展示的内容。</p>
+<p>好了，到这里我们就分析完了apk的逻辑了，下面我们来整理一下：</p>
+<p>1、在MainActivity中输入一个页面的url，跳转到WebViewActivity进行展示</p>
+<p>2、WebViewActivity有Js交互，需要调用本地Java对象中的showToast方法展示消息</p>
+<p>问题：</p>
+<p>因为这里的js对象名称进行了加密，所以这里我们自己编写一个网页，但是不知道这个js对象名称，无法完成showToast方法的调用</p>
+<h2 id="五、破解的方法"><a href="#五、破解的方法" class="headerlink" title="五、破解的方法"></a><strong>五、破解的方法</strong></h2><p>下面我们就来分析一下如何解决上面的问题，其实解决这个问题，我们现有的方法太多了</p>
+<p><strong>第一种方法：</strong>修改smali源码，把上面的那个js对象名称改成我们自己想要的，比如：jiangwei，然后在自己编写的页面中直接调用：jiangwei.showToast方法即可，不过这里需要修改smali源码，在使用smali工具回编译成dex文件，在弄到apk中，在运行。方法是可行的，但是感觉太复杂，这里不采用</p>
+<p><strong>第二种方法：</strong>利用Android4.2中的WebView的漏洞，直接使用如下Js代码即可</p>
+<p><img src="/img/1551412314129.png" alt="1551412314129"></p>
+<p>这里根本不需要任何js对象的名称，只需要方法名就可以完成调用，所以这里可以看到这个漏洞还是很危险的。</p>
+<p><strong>第三种方法：</strong>我们看到了那个加密方法，我们自己写一个程序，来调用这个方法，尽然得到正确的js对象名称，这里我们就采用这种方式，因为这个方式有一个新的技能，所以这里我就讲解一下了。</p>
+<p>那么如果用第三种方法的话，就需要再去分析那个加密方法逻辑了：</p>
+<p><img src="/img/1551412323606.png" alt="1551412323606"></p>
+<p>android.support.v4.widget.ListViewAutoScrollHelpern在这个类中，我们再去查找这个smali源码：</p>
+<p><img src="/img/1551412332017.png" alt="1551412332017"></p>
+<p>这个类加载了libtranslate.so库，而且加密方法是native层的，那么我们用IDA查看libtranslate.so库：</p>
+<p><img src="/img/1551412341893.png" alt="1551412341893"></p>
+<p>我们搜一下Java开头的函数，发现并没有和decrypt_native方法对应的native函数，说明这里做了native方法的注册混淆，我们直接看JNI_OnLoad函数：</p>
+<p><img src="/img/1551412350326.png" alt="1551412350326"></p>
+<p>这里果然是自己注册了native函数，但是分析到这里，我就不往下分析了，为什么呢？因为我们其实没必要搞清楚native层的函数功能，我们知道了Java层的native方法定义，那么我们可以自己定义一个这么个native方法来调用libtranslate.so中的加密函数功能：</p>
+<p><img src="/img/1551412360214.png" alt="1551412360214"></p>
+<p>我们新建一个Demo工程，仿造一个ListViewAutoScrollHelpern类，内部在定义一个native方法：</p>
+<p><img src="/img/1551412369218.png" alt="1551412369218"></p>
+<p>然后我们在MainActivity中加载libtranslate.so：</p>
+<p><img src="/img/1551412377849.png" alt="1551412377849"></p>
+<p>然后调用那个native方法，打印结果：</p>
+<p><img src="/img/1551412386861.png" alt="1551412386861"></p>
+<p>这里的方法的参数可以查看smali源码中的那个方法参数：</p>
+<p><img src="/img/1551412394814.png" alt="1551412394814"></p>
+<p>点击运行，发现有崩溃的，我们查看log信息：</p>
+<p><img src="/img/1551412404048.png" alt="1551412404048"></p>
+<p>是libtranslate.so中有一个PagerTitleStripIcsn类找不到，这个类应该也有一个native方法，我们在构造这个类：</p>
+<p><img src="/img/1551412413355.png" alt="1551412413355"></p>
+<p>再次运行，还是报错，原因差不多，还需要在构造一个类：TaskStackBuilderJellybeann</p>
+<p><img src="/img/1551412424135.png" alt="1551412424135"></p>
+<p>好了，再次点击运行：</p>
+<p><img src="/img/1551412433726.png" alt="1551412433726"></p>
+<p>OK了，成功了，从这个log信息可以看出来了，解密之后的js对象名称是：SmokeyBear，那么下面就简单了，我们在构造一个url页面，直接调用：SmokeyBear.showToast即可。</p>
+<p><strong>注意：</strong></p>
+<p>这里我们看到，如果知道了Java层的native方法的定义，那么我们就可以调用这个native方法来获取native层的函数功能了，这个还是很不安全的，但是我们如何防止自己的so被别人调用呢？可以在so中的native函数做一个应用的签名校验，只有属于自己的签名应用才能调用，否则直接退出。</p>
+<h2 id="六，开始测试"><a href="#六，开始测试" class="headerlink" title="六，开始测试"></a><strong>六，开始测试</strong></h2><p>上面已经知道了js的对象名称，下面我们就来构造这个页面了：</p>
+<p><img src="/img/1551412441417.png" alt="1551412441417"></p>
+<p>那么这里又有一个问题了，这个页面构造好了？放哪呢？有的同学说我有服务器，放到服务器上，然后输入url地址就可以了，的确这个方法是可以的，但是有的同学没有服务器怎么办呢？这个也是有方法的，我们知道WebView的loadUrl方法是可以加载本地的页面的，所以我们可以把这个页面保存到本地，但是需要注意的是，这里不能存到SD卡中，因为这个应用没有读取SD的权限，我们可以查看他的AndroidManifest.xml文件：</p>
+<p><img src="/img/1551412449805.png" alt="1551412449805"></p>
+<p>我们在不重新打包的情况下，是没办法做到的，那么放哪呢？其实很简单了，放在这个应用的/data/data/com.ali.tg.testapp/目录下即可，因为除了SD卡位置，这个位置是最好的了，那么我们知道WebView的loadUrl方法在加载本地的页面的格式是：</p>
+<p><strong>file:///data/data/com.ali.tg.testapp/crack.html</strong></p>
+<p>那么我们直接输入即可</p>
+<p><strong>注意：</strong></p>
+<p>这里在说一个小技巧：就是我们在一个文本框中输入这么多内容，是不是有点蛋疼，我们其实可以借助于命令来实现输入的，就是使用：adb shell input text ”我们需要输入的内容“。</p>
+<p>具体用法很简单，打开我们需要输入内容的EditText，点击调出系统的输入法界面，然后执行上面的命令即可：</p>
+<p><img src="/img/1551412458167.png" alt="1551412458167"></p>
+<p>不过这里有一个小问题，就是他不识别分号：</p>
+<p><img src="/img/1551412466571.png" alt="1551412466571"></p>
+<p>不过我们直接修改成分号点击进入：<img src="/img/1551412480302.png" alt="1551412480302"></p>
+<p>运行成功，看到了toast的展示。</p>
+<h2 id="七、内容整理"><a href="#七、内容整理" class="headerlink" title="七、内容整理"></a><strong>七、内容整理</strong></h2><p>到这里我们就破解成功了，下面来看看整理一下我们的破解步骤：</p>
+<p><strong>1、破解的常规套路</strong></p>
+<p>我们按照破解惯例，首先解压出classses.dex文件，使用dex2jar工具查看java代码，但是发现只有一个Application类，所以猜测apk被加壳了，然后用apktool来反编译apk，得到他的资源文件和AndroidManifest.xml内容，找到了包名和入口的Activity类。</p>
+<p><strong>2、加固apk的源程序一般存放的位置</strong></p>
+<p>知道是加固apk了，那么我们就分析，这个加固的apk肯定是存放在本地的一个地方，一般是三个地方：</p>
+<p>1》应用的asset目录中</p>
+<p>2》应用的libs中的so文件中</p>
+<p>3》应用的dex文件的末尾</p>
+<p>我们分析了一下之后，发现asset目录中的确有两个jar文件，但是打不开，猜测是被经过处理了，所以我们得分析处理逻辑，但是这时候我们也没有代码，怎么分析呢？所以这时候就需要借助于dump内存dex技术了：</p>
+<p>不管最后的源apk放在哪里，最后都是需要经历解密动态加载到内存中的，所以分析底层加载dex源码，知道有一个函数：dvmDexFileOpenPartial 这个函数有两个重要参数，一个是dex的其实地址，一个是dex的大小，而且知道这个函数是在libdvm.so中的。所以我们可以使用IDA进行动态调试获取信息</p>
+<p><strong>3、双开IDA开始获取内存中的dex内容</strong></p>
+<p>双开IDA，走之前的动态破解so方式来给dvmDexFileOpenPartial函数下断点，获取两个参数的值，然后使用一段脚本，将内存中的dex数据保存到本地磁盘中。</p>
+<p><strong>4、分析获取到的dex内容</strong></p>
+<p>得到了内存中的dex之后，我们在使用dex2jar工具去查看源码，但是发现保存，以为是dump出来的dex格式有问题，但是最后使用baksmali工具进行处理，得到smali源码是可以的，然后我们就开始分析smali源码。</p>
+<p><strong>5、分析源码了解破解思路</strong></p>
+<p>通过分析源码得知在WebViewActivity页面中会加载一个页面，然后那个页面中的js会调用本地的Java对象中的一个方法来展示toast信息，但是这里我们遇到了个问题：Js的Java对象名称被混淆加密了，所以这时候我们需要去分析那个加密函数，但是这个加密函数是native的，然后我们就是用IDA去静态分析了这个native函数，但是没有分析完成，因为我们不需要，其实很简单，我们只需要结果，不需要过程，现在解密的内容我们知道了，native方法的定义也知道了，那么我们就去写一个简单的demo去调用这个so的native方法即可，结果成功了，我们得到了正确的Js对象名称。</p>
+<p><strong>6、了解WebView的安全性</strong></p>
+<p>WebView的早期版本的一个漏洞信息，在Android4.2之前的版本WebView有一个漏洞，就是可以执行Java对象中所有的public方法，那么在js中就可以这么处理了，先获取geClass方法获取这个对象，然后在调用这个对象中的一些特定方法即可，因为Java中所有的对象都有一个getClass方法，而这个方法是public的，同时能够返回当前对象。所以在Android4.2之后有了一个注解：</p>
+<p>@JavascriptInterface ，只有这个注解标识的方法才能被Js中调用。</p>
+<p><strong>7、获取输入的新技能</strong></p>
+<p>验证结果的过程中我们发现了一个技巧，就是我们在输入很长的文本的时候，比较繁琐，可以借助adb shell input text命令来实现。</p>
+<h2 id="八、技术点概要"><a href="#八、技术点概要" class="headerlink" title="八、技术点概要"></a><strong>八、技术点概要</strong></h2><p>1、通过dump出内存中的dex数据，可以佛挡杀佛了，不管apk如何加固，最终都是需要加载到内存中的。</p>
+<p>2、了解到了WebView的安全性的相关知识，比如我们在WebView中js对象名称做一次混淆还是有必要的，防止被恶意网站调用我们的本地隐私方法。</p>
+<p>3、可以尝试调用so中的native方法，在知道了这个方法的定义之后</p>
+<p>4、adb shell input text 命令来辅助我们的输入</p>
+<h2 id="九、总结"><a href="#九、总结" class="headerlink" title="九、总结"></a><strong>九、总结</strong></h2><p>这里就介绍了Android中如何dump出那些加固的apk程序，其实核心就一个：不管上层怎么加固，最终加载到内存的dex肯定不是加固的，所以这个dex就是我们想要的，这里使用了IDA来动态调试libdvm.so中的dvmDexFileOpenPartial函数来获取内存中的dex内容，同时还可以使用gdb+gdbserver来获取，这个感兴趣的同学自行搜索吧。结合了之前的两篇文章，就算善始善终，介绍了Android中大体的破解方式，当然这三种方式不是万能的，因为加固和破解是相生相克的，没有哪个有绝对的优势，只是两者相互进步罢了，当然还有很多其他的破解方式，后面如果遇到的话，会在详细说明。</p>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/爬虫/" rel="tag"><i class="fa fa-tag"></i> 爬虫</a>
+          
+            <a href="/tags/Android逆向/" rel="tag"><i class="fa fa-tag"></i> Android逆向</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/02/27/02.python爬虫/爬虫扩展功能/App反编译爬虫/" rel="next" title="Android反编译尝试(裁判文书app示例)">
+                <i class="fa fa-chevron-left"></i> Android反编译尝试(裁判文书app示例)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/03/01/02.python爬虫/爬虫扩展功能/Android逆向-静态分析破解APk/" rel="prev" title="Android逆向-静态分析破解Apk">
+                Android逆向-静态分析破解Apk <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">187</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">50</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">57</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、前言"><span class="nav-text">一、前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、案例分析"><span class="nav-text">二、案例分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、获取正确的dex内容"><span class="nav-text">三、获取正确的dex内容</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、分析正确的dex文件内容"><span class="nav-text">四、分析正确的dex文件内容</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#五、破解的方法"><span class="nav-text">五、破解的方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#六，开始测试"><span class="nav-text">六，开始测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#七、内容整理"><span class="nav-text">七、内容整理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#八、技术点概要"><span class="nav-text">八、技术点概要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#九、总结"><span class="nav-text">九、总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

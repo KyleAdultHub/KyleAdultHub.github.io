@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="生成MSP身份文件配置crypto-config文件crypto-config.yaml文件： 1234567891011121314151617181920212223242526272829OrdererOrgs:  - Name: Orderer    Domain: example.com    Specs:      - Hostname: ordererPeerOrgs:  - Nam">
+<meta name="keywords" content="区块链,Fabric">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Fabric 示例应用搭建">
+<meta property="og:url" content="http://blog.kyleliu.cn/2019/04/12/12.区块链/Hyperledger fabric/3.Fabric 示例应用搭建/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="生成MSP身份文件配置crypto-config文件crypto-config.yaml文件： 1234567891011121314151617181920212223242526272829OrdererOrgs:  - Name: Orderer    Domain: example.com    Specs:      - Hostname: ordererPeerOrgs:  - Nam">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-04-19T08:04:18.933Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Fabric 示例应用搭建">
+<meta name="twitter:description" content="生成MSP身份文件配置crypto-config文件crypto-config.yaml文件： 1234567891011121314151617181920212223242526272829OrdererOrgs:  - Name: Orderer    Domain: example.com    Specs:      - Hostname: ordererPeerOrgs:  - Nam">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2019/04/12/12.区块链/Hyperledger fabric/3.Fabric 示例应用搭建/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Fabric 示例应用搭建 | 刘小恺(Kyle) 的个人博客</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/04/12/12.区块链/Hyperledger fabric/3.Fabric 示例应用搭建/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Fabric 示例应用搭建
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-04-12 15:40:00" itemprop="dateCreated datePublished" datetime="2019-04-12T15:40:00+08:00">2019-04-12</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/区块链/" itemprop="url" rel="index"><span itemprop="name">区块链</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/区块链/Hyperledger-fabric/" itemprop="url" rel="index"><span itemprop="name">Hyperledger fabric</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/04/12/12.区块链/Hyperledger fabric/3.Fabric 示例应用搭建/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/04/12/12.区块链/Hyperledger fabric/3.Fabric 示例应用搭建/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="生成MSP身份文件"><a href="#生成MSP身份文件" class="headerlink" title="生成MSP身份文件"></a>生成MSP身份文件</h3><h4 id="配置crypto-config文件"><a href="#配置crypto-config文件" class="headerlink" title="配置crypto-config文件"></a>配置crypto-config文件</h4><p>crypto-config.yaml文件：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">OrdererOrgs:</span></span><br><span class="line"><span class="attr">  - Name:</span> <span class="string">Orderer</span></span><br><span class="line"><span class="attr">    Domain:</span> <span class="string">example.com</span></span><br><span class="line"><span class="attr">    Specs:</span></span><br><span class="line"><span class="attr">      - Hostname:</span> <span class="string">orderer</span></span><br><span class="line"></span><br><span class="line"><span class="attr">PeerOrgs:</span></span><br><span class="line"><span class="attr">  - Name:</span> <span class="string">Org1</span></span><br><span class="line"><span class="attr">    Domain:</span> <span class="string">org1.example.com</span></span><br><span class="line"><span class="attr">    CA:</span></span><br><span class="line"><span class="attr">       Hostname:</span> <span class="string">ca</span> <span class="comment"># implicitly ca.org1.example.com</span></span><br><span class="line"><span class="attr">    Template:</span></span><br><span class="line"><span class="attr">      Count:</span> <span class="number">2</span></span><br><span class="line"><span class="attr">      SANS:</span></span><br><span class="line"><span class="bullet">        -</span> <span class="string">"localhost"</span></span><br><span class="line"><span class="attr">    Users:</span></span><br><span class="line"><span class="attr">      Count:</span> <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="attr">  - Name:</span> <span class="string">Org2</span></span><br><span class="line"><span class="attr">    Domain:</span> <span class="string">org2.example.com</span></span><br><span class="line"><span class="attr">    CA:</span></span><br><span class="line"><span class="attr">       Hostname:</span> <span class="string">ca</span></span><br><span class="line"></span><br><span class="line"><span class="attr">    Template:</span></span><br><span class="line"><span class="attr">      Count:</span> <span class="number">2</span></span><br><span class="line"><span class="attr">      SANS:</span></span><br><span class="line"><span class="bullet">        -</span> <span class="string">"localhost"</span></span><br><span class="line"><span class="attr">    Users:</span></span><br><span class="line"><span class="attr">      Count:</span> <span class="number">1</span></span><br></pre></td></tr></table></figure>
+<h4 id="生成MSP文件"><a href="#生成MSP文件" class="headerlink" title="生成MSP文件"></a>生成MSP文件</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cryptogen generate --config=./crypto-config.yaml   # 生成msp文件</span><br></pre></td></tr></table></figure>
+<h3 id="生成创世区块和channel事务"><a href="#生成创世区块和channel事务" class="headerlink" title="生成创世区块和channel事务"></a>生成创世区块和channel事务</h3><p>创世区块中，包含了组织和联盟的配置信息等</p>
+<h4 id="配置configtx-yaml文件"><a href="#配置configtx-yaml文件" class="headerlink" title="配置configtx.yaml文件"></a>配置configtx.yaml文件</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">Profiles:</span></span><br><span class="line"><span class="attr">    TwoOrgsOrdererGenesis:</span></span><br><span class="line"><span class="attr">        Orderer:</span></span><br><span class="line">            <span class="string">&lt;&lt;:</span> <span class="meta">*OrdererDefaults</span></span><br><span class="line"><span class="attr">            Organizations:</span></span><br><span class="line"><span class="bullet">                -</span> <span class="meta">*OrdererOrg</span></span><br><span class="line"><span class="attr">        Consortiums:</span></span><br><span class="line"><span class="attr">            SampleConsortium:</span></span><br><span class="line"><span class="attr">                Organizations:</span></span><br><span class="line"><span class="bullet">                    -</span> <span class="meta">*Org1</span></span><br><span class="line"><span class="bullet">                    -</span> <span class="meta">*Org2</span></span><br><span class="line"><span class="attr">    TwoOrgsChannel:</span></span><br><span class="line"><span class="attr">        Consortium:</span> <span class="string">SampleConsortium</span></span><br><span class="line"><span class="attr">        Application:</span></span><br><span class="line">            <span class="string">&lt;&lt;:</span> <span class="meta">*ApplicationDefaults</span></span><br><span class="line"><span class="attr">            Organizations:</span></span><br><span class="line"><span class="bullet">                -</span> <span class="meta">*Org1</span></span><br><span class="line"><span class="bullet">                -</span> <span class="meta">*Org2</span></span><br><span class="line"></span><br><span class="line"><span class="attr">Organizations:</span></span><br><span class="line"><span class="bullet">    -</span> <span class="meta">&amp;OrdererOrg</span></span><br><span class="line"><span class="attr">        Name:</span> <span class="string">OrdererMSP</span></span><br><span class="line"><span class="attr">        ID:</span> <span class="string">OrdererMSP</span></span><br><span class="line"><span class="attr">        MSPDir:</span> <span class="string">crypto-config/ordererOrganizations/example.com/msp</span></span><br><span class="line"></span><br><span class="line"><span class="bullet">    -</span> <span class="meta">&amp;Org1</span></span><br><span class="line"><span class="attr">        Name:</span> <span class="string">Org1MSP</span></span><br><span class="line"><span class="attr">        ID:</span> <span class="string">Org1MSP</span></span><br><span class="line"><span class="attr">        MSPDir:</span> <span class="string">crypto-config/peerOrganizations/org1.example.com/msp</span></span><br><span class="line"><span class="attr">        AnchorPeers:</span></span><br><span class="line"><span class="attr">            - Host:</span> <span class="string">peer0.org1.example.com</span></span><br><span class="line"><span class="attr">              Port:</span> <span class="number">7051</span></span><br><span class="line"><span class="bullet">    -</span> <span class="meta">&amp;Org2</span></span><br><span class="line"><span class="attr">        Name:</span> <span class="string">Org2MSP</span></span><br><span class="line"><span class="attr">        ID:</span> <span class="string">Org2MSP</span></span><br><span class="line"></span><br><span class="line"><span class="attr">        MSPDir:</span> <span class="string">crypto-config/peerOrganizations/org2.example.com/msp</span></span><br><span class="line"><span class="attr">        AnchorPeers:</span></span><br><span class="line"><span class="attr">            - Host:</span> <span class="string">peer0.org2.example.com</span></span><br><span class="line"><span class="attr">              Port:</span> <span class="number">7051</span></span><br><span class="line"></span><br><span class="line"><span class="attr">Orderer:</span> <span class="meta">&amp;OrdererDefaults</span></span><br><span class="line"><span class="attr">    OrdererType:</span> <span class="string">solo</span></span><br><span class="line"></span><br><span class="line"><span class="attr">    Addresses:</span></span><br><span class="line"><span class="bullet">        -</span> <span class="string">orderer.example.com:7050</span></span><br><span class="line"><span class="attr">    BatchTimeout:</span> <span class="number">2</span><span class="string">s</span></span><br><span class="line"><span class="attr">    BatchSize:</span></span><br><span class="line"><span class="attr">        MaxMessageCount:</span> <span class="number">10</span></span><br><span class="line"><span class="attr">        AbsoluteMaxBytes:</span> <span class="number">98</span> <span class="string">MB</span></span><br><span class="line"><span class="attr">        PreferredMaxBytes:</span> <span class="number">512</span> <span class="string">KB</span></span><br><span class="line"></span><br><span class="line"><span class="attr">    Kafka:</span></span><br><span class="line"><span class="attr">        Brokers:</span></span><br><span class="line"><span class="bullet">            -</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:9092</span></span><br><span class="line"><span class="attr">    Organizations:</span></span><br><span class="line"><span class="attr">Application:</span> <span class="meta">&amp;ApplicationDefaults</span></span><br><span class="line"><span class="attr">    Organizations:</span></span><br></pre></td></tr></table></figure>
+<h4 id="生成创世区块"><a href="#生成创世区块" class="headerlink" title="生成创世区块"></a>生成创世区块</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">configtxgen -profile TwoOrgsOrdererGenesis -channelID order-channel -outputBlock genesis.block</span><br></pre></td></tr></table></figure>
+<h4 id="生成channel配置事务"><a href="#生成channel配置事务" class="headerlink" title="生成channel配置事务"></a>生成channel配置事务</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export CHANNEL_NAME=mychannel &amp;&amp; configtxgen -profile TwoOrgsChannel -outputCreateChannelTx channel.tx -channelID $CHANNEL_NAME</span><br></pre></td></tr></table></figure>
+<h4 id="生成Anchor-peer-配置事务"><a href="#生成Anchor-peer-配置事务" class="headerlink" title="生成Anchor peer 配置事务"></a>生成Anchor peer 配置事务</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export CHANNEL_NAME=mychannel &amp;&amp; configtxgen -profile TwoOrgsChannel -outputAnchorPeersUpdate Org1MSPanchors.tx -channelID $CHANNEL_NAME -asOrg Org1MSP</span><br><span class="line">export CHANNEL_NAME=mychannel &amp;&amp; configtxgen -profile TwoOrgsChannel -outputAnchorPeersUpdate Org2MSPanchors.tx -channelID $CHANNEL_NAME -asOrg Org2MSP</span><br></pre></td></tr></table></figure>
+<h3 id="启动网络"><a href="#启动网络" class="headerlink" title="启动网络"></a>启动网络</h3><h4 id="配置docker-compose文件"><a href="#配置docker-compose文件" class="headerlink" title="配置docker-compose文件"></a>配置docker-compose文件</h4><p>完成两个ca， 两个组织(每个组织2个节点)，一个order节点和一个cli节点的配置</p>
+<p>cli节点可以帮助初始化channel和链码的安装和初始化等工作</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="string">'2'</span></span><br><span class="line"></span><br><span class="line"><span class="attr">services:</span></span><br><span class="line"></span><br><span class="line">  <span class="string">ca.org1.example.com:</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">hyperledger/fabric-ca</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">FABRIC_CA_SERVER_CA_NAME=ca.org1.example.com</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/0e729224e8b3f31784c8a93c5b8ef6f4c1c91d9e6e577c45c33163609fe40011_sk</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">FABRIC_CA_SERVER_TLS_ENABLED=true</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/0e729224e8b3f31784c8a93c5b8ef6f4c1c91d9e6e577c45c33163609fe40011_sk</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"7054:7054"</span></span><br><span class="line"><span class="attr">    command:</span> <span class="string">sh</span> <span class="bullet">-c</span> <span class="string">'fabric-ca-server start -b admin:adminpw -d'</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./channel/crypto-config/peerOrganizations/org1.example.com/ca/:/etc/hyperledger/fabric-ca-server-config</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">ca.org1.example.com</span></span><br><span class="line"></span><br><span class="line">  <span class="string">ca.org2.example.com:</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">hyperledger/fabric-ca</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">FABRIC_CA_SERVER_CA_NAME=ca.org2.example.com</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org2.example.com-cert.pem</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/a7d47efa46a6ba07730c850fed2c1375df27360d7227f48cdc2f80e505678005_sk</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">FABRIC_CA_SERVER_TLS_ENABLED=true</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org2.example.com-cert.pem</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/a7d47efa46a6ba07730c850fed2c1375df27360d7227f48cdc2f80e505678005_sk</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">"8054:7054"</span></span><br><span class="line"><span class="attr">    command:</span> <span class="string">sh</span> <span class="bullet">-c</span> <span class="string">'fabric-ca-server start -b admin:adminpw -d'</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./channel/crypto-config/peerOrganizations/org2.example.com/ca/:/etc/hyperledger/fabric-ca-server-config</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">ca.org2.example.com</span></span><br><span class="line"></span><br><span class="line">  <span class="string">orderer.example.com:</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">orderer.example.com</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">hyperledger/fabric-orderer</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">ORDERER_GENERAL_LOGLEVEL=debug</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">ORDERER_GENERAL_LISTENADDRESS=0.0.0.0</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">ORDERER_GENERAL_GENESISMETHOD=file</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/configtx/genesis.block</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">ORDERER_GENERAL_LOCALMSPID=OrdererMSP</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/crypto/orderer/msp</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">ORDERER_GENERAL_TLS_ENABLED=true</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">ORDERER_GENERAL_TLS_PRIVATEKEY=/etc/hyperledger/crypto/orderer/tls/server.key</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">ORDERER_GENERAL_TLS_CERTIFICATE=/etc/hyperledger/crypto/orderer/tls/server.crt</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/crypto/orderer/tls/ca.crt,</span> <span class="string">/etc/hyperledger/crypto/peerOrg1/tls/ca.crt,</span> <span class="string">/etc/hyperledger/crypto/peerOrg2/tls/ca.crt]</span></span><br><span class="line"><span class="attr">    working_dir:</span> <span class="string">/opt/gopath/src/github.com/hyperledger/fabric/orderers</span></span><br><span class="line"><span class="attr">    command:</span> <span class="string">orderer</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="number">7050</span><span class="string">:7050</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">        -</span> <span class="string">./channel:/etc/hyperledger/configtx</span></span><br><span class="line"><span class="bullet">        -</span> <span class="string">./channel/crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/:/etc/hyperledger/crypto/orderer</span></span><br><span class="line"><span class="bullet">        -</span> <span class="string">./channel/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/etc/hyperledger/crypto/peerOrg1</span></span><br><span class="line"><span class="bullet">        -</span> <span class="string">./channel/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/etc/hyperledger/crypto/peerOrg2</span></span><br><span class="line"></span><br><span class="line">  <span class="string">peer0.org1.example.com:</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">peer0.org1.example.com</span></span><br><span class="line"><span class="attr">    extends:</span></span><br><span class="line"><span class="attr">      file:</span>   <span class="string">base.yaml</span></span><br><span class="line"><span class="attr">      service:</span> <span class="string">peer-base</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">CORE_PEER_ID=peer0.org1.example.com</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">CORE_PEER_LOCALMSPID=Org1MSP</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">CORE_PEER_ADDRESS=peer0.org1.example.com:7051</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="number">7051</span><span class="string">:7051</span></span><br><span class="line"><span class="bullet">      -</span> <span class="number">7053</span><span class="string">:7053</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">        -</span> <span class="string">./channel/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/etc/hyperledger/crypto/peer</span></span><br><span class="line"><span class="attr">    depends_on:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">orderer.example.com</span></span><br><span class="line"></span><br><span class="line">  <span class="string">peer1.org1.example.com:</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">peer1.org1.example.com</span></span><br><span class="line"><span class="attr">    extends:</span></span><br><span class="line"><span class="attr">      file:</span>   <span class="string">base.yaml</span></span><br><span class="line"><span class="attr">      service:</span> <span class="string">peer-base</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">CORE_PEER_ID=peer1.org1.example.com</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">CORE_PEER_LOCALMSPID=Org1MSP</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">CORE_PEER_ADDRESS=peer1.org1.example.com:7051</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="number">8051</span><span class="string">:7051</span></span><br><span class="line"><span class="bullet">      -</span> <span class="number">8053</span><span class="string">:7053</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">        -</span> <span class="string">./channel/crypto-config/peerOrganizations/org1.example.com/peers/peer1.org1.example.com/:/etc/hyperledger/crypto/peer</span></span><br><span class="line"><span class="attr">    depends_on:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">orderer.example.com</span></span><br><span class="line"></span><br><span class="line">  <span class="string">peer0.org2.example.com:</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">peer0.org2.example.com</span></span><br><span class="line"><span class="attr">    extends:</span></span><br><span class="line"><span class="attr">      file:</span>   <span class="string">base.yaml</span></span><br><span class="line"><span class="attr">      service:</span> <span class="string">peer-base</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">CORE_PEER_ID=peer0.org2.example.com</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">CORE_PEER_LOCALMSPID=Org2MSP</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">CORE_PEER_ADDRESS=peer0.org2.example.com:7051</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="number">9051</span><span class="string">:7051</span></span><br><span class="line"><span class="bullet">      -</span> <span class="number">9053</span><span class="string">:7053</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">        -</span> <span class="string">./channel/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/:/etc/hyperledger/crypto/peer</span></span><br><span class="line"><span class="attr">    depends_on:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">orderer.example.com</span></span><br><span class="line"></span><br><span class="line">  <span class="string">peer1.org2.example.com:</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">peer1.org2.example.com</span></span><br><span class="line"><span class="attr">    extends:</span></span><br><span class="line"><span class="attr">      file:</span>   <span class="string">base.yaml</span></span><br><span class="line"><span class="attr">      service:</span> <span class="string">peer-base</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">CORE_PEER_ID=peer1.org2.example.com</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">CORE_PEER_LOCALMSPID=Org2MSP</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">CORE_PEER_ADDRESS=peer1.org2.example.com:7051</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="number">10051</span><span class="string">:7051</span></span><br><span class="line"><span class="bullet">      -</span> <span class="number">10053</span><span class="string">:7053</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">        -</span> <span class="string">./channel/crypto-config/peerOrganizations/org2.example.com/peers/peer1.org2.example.com/:/etc/hyperledger/crypto/peer</span></span><br><span class="line"><span class="attr">    depends_on:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">orderer.example.com</span></span><br><span class="line"></span><br><span class="line"><span class="attr">  cli:</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">cli</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">hyperledger/fabric-tools</span></span><br><span class="line"><span class="attr">    tty:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">    stdin_open:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">GOPATH=/opt/gopath</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock</span></span><br><span class="line">      <span class="comment">#- CORE_LOGGING_LEVEL=DEBUG</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">FABRIC_LOGGING_SPEC=INFO</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">CORE_PEER_ID=cli</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">CORE_PEER_ADDRESS=peer0.org1.example.com:7051</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">CORE_PEER_LOCALMSPID=Org1MSP</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">CORE_PEER_TLS_ENABLED=true</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/server.crt</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/server.key</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp</span></span><br><span class="line"><span class="attr">    working_dir:</span> <span class="string">/opt/gopath/src/github.com/hyperledger/fabric/peer</span></span><br><span class="line"><span class="attr">    command:</span> <span class="string">/bin/bash</span> <span class="bullet">-c</span> <span class="string">"./scripts/script.sh"</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">        -</span> <span class="string">/var/run/:/host/var/run/</span></span><br><span class="line"><span class="bullet">        -</span> <span class="string">./../chaincode/:/opt/gopath/src/github.com/chaincode</span></span><br><span class="line"><span class="bullet">        -</span> <span class="string">./channel/crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/</span></span><br><span class="line"><span class="bullet">        -</span> <span class="string">./scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/</span></span><br><span class="line"><span class="bullet">        -</span> <span class="string">./channel:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts</span></span><br><span class="line"><span class="attr">    depends_on:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">orderer.example.com</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">peer0.org1.example.com</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">peer1.org1.example.com</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">peer0.org2.example.com</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">peer1.org2.example.com</span></span><br></pre></td></tr></table></figure>
+<h4 id="运行docker-compose启动网络"><a href="#运行docker-compose启动网络" class="headerlink" title="运行docker-compose启动网络"></a>运行docker-compose启动网络</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker-compose -f ./docker-compose.yaml up -d</span><br></pre></td></tr></table></figure>
+<p>接下来一个安装并示例好链码的网络环境就已经搭建好了， 接下来查看cli容器中进行了哪些步骤实现了对channel的创建和chaincode的安装和实例化</p>
+<h3 id="cli-客户端中执行的内容"><a href="#cli-客户端中执行的内容" class="headerlink" title="cli 客户端中执行的内容"></a>cli 客户端中执行的内容</h3><p>cli 容器中启动程序代码为， 在脚本中会进行channel的创建，组织节点加入channel，链码的安装，实例化等</p>
+<p>启动执行脚本scripts.sh</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line">CHANNEL_NAME="$1"</span><br><span class="line">DELAY="$2"</span><br><span class="line">LANGUAGE="$3"</span><br><span class="line">TIMEOUT="$4"</span><br><span class="line">: $&#123;CHANNEL_NAME:="mychannel"&#125;</span><br><span class="line">: $&#123;DELAY:="3"&#125;</span><br><span class="line">: $&#123;LANGUAGE:="golang"&#125;</span><br><span class="line">: $&#123;TIMEOUT:="10"&#125;</span><br><span class="line">LANGUAGE=`echo "$LANGUAGE" | tr [:upper:] [:lower:]`</span><br><span class="line">COUNTER=1</span><br><span class="line">MAX_RETRY=5</span><br><span class="line">ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem</span><br><span class="line"></span><br><span class="line">CC_SRC_PATH="github.com/chaincode/chaincode_example02/go/"</span><br><span class="line">if [ "$LANGUAGE" = "node" ]; then</span><br><span class="line">	CC_SRC_PATH="/opt/gopath/src/github.com/chaincode/chaincode_example02/node/"</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">echo "Channel name : "$CHANNEL_NAME</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> import utils</span><br><span class="line">. scripts/utils.sh</span><br><span class="line"></span><br><span class="line">createChannel() &#123;</span><br><span class="line">	setGlobals 0 1</span><br><span class="line"></span><br><span class="line">	if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then</span><br><span class="line">                set -x</span><br><span class="line">		peer channel create -o orderer.example.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/channel.tx &gt;&amp;log.txt</span><br><span class="line">		res=$?</span><br><span class="line">                set +x</span><br><span class="line">	else</span><br><span class="line">				set -x</span><br><span class="line">		peer channel create -o orderer.example.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/channel.tx --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA &gt;&amp;log.txt</span><br><span class="line">		res=$?</span><br><span class="line">				set +x</span><br><span class="line">	fi</span><br><span class="line">	cat log.txt</span><br><span class="line">	verifyResult $res "Channel creation failed"</span><br><span class="line">	echo "===================== Channel \"$CHANNEL_NAME\" is created successfully ===================== "</span><br><span class="line">	echo</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">joinChannel () &#123;</span><br><span class="line">	for org in 1 2; do</span><br><span class="line">	    for peer in 0 1; do</span><br><span class="line">		joinChannelWithRetry $peer $org</span><br><span class="line">		echo "===================== peer$&#123;peer&#125;.org$&#123;org&#125; joined on the channel \"$CHANNEL_NAME\" ===================== "</span><br><span class="line">		sleep $DELAY</span><br><span class="line">		echo</span><br><span class="line">	    done</span><br><span class="line">	done</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span># Create channel</span><br><span class="line">echo "Creating channel..."</span><br><span class="line">createChannel</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span># Join all the peers to the channel</span><br><span class="line">echo "Having all peers join the channel..."</span><br><span class="line">joinChannel</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span># Set the anchor peers for each org in the channel</span><br><span class="line">echo "Updating anchor peers for org1..."</span><br><span class="line">updateAnchorPeers 0 1</span><br><span class="line">echo "Updating anchor peers for org2..."</span><br><span class="line">updateAnchorPeers 0 2</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span># Install chaincode on peer0.org1 and peer0.org2</span><br><span class="line">echo "Installing chaincode on peer0.org1..."</span><br><span class="line">installChaincode 0 1</span><br><span class="line">echo "Install chaincode on peer0.org2..."</span><br><span class="line">installChaincode 0 2</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span># Install chaincode on peer1.org2</span><br><span class="line">echo "Installing chaincode on peer1.org1..."</span><br><span class="line">installChaincode 1 1</span><br><span class="line">echo "Installing chaincode on peer1.org2..."</span><br><span class="line">installChaincode 1 2</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> Instantiate chaincode on peer0.org2</span><br><span class="line">echo "Instantiating chaincode on peer0.org2..."</span><br><span class="line">instantiateChaincode 0 2</span><br></pre></td></tr></table></figure>
+<p>依赖脚本utils.sh</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br></pre></td><td class="code"><pre><span class="line">verifyResult () &#123;</span><br><span class="line">	if [ $1 -ne 0 ] ; then</span><br><span class="line">		echo "!!!!!!!!!!!!!!! "$2" !!!!!!!!!!!!!!!!"</span><br><span class="line">    echo "========= ERROR !!! FAILED to execute End-2-End Scenario ==========="</span><br><span class="line">		echo</span><br><span class="line">   		exit 1</span><br><span class="line">	fi</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> Set OrdererOrg.Admin globals</span><br><span class="line">setOrdererGlobals() &#123;</span><br><span class="line">        CORE_PEER_LOCALMSPID="OrdererMSP"</span><br><span class="line">        CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem</span><br><span class="line">        CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/users/Admin@example.com/msp</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">setGlobals () &#123;</span><br><span class="line">	PEER=$1</span><br><span class="line">	ORG=$2</span><br><span class="line">	if [ $ORG -eq 1 ] ; then</span><br><span class="line">		CORE_PEER_LOCALMSPID="Org1MSP"</span><br><span class="line">		CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt</span><br><span class="line">		CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp</span><br><span class="line">		if [ $PEER -eq 0 ]; then</span><br><span class="line">			CORE_PEER_ADDRESS=peer0.org1.example.com:7051</span><br><span class="line">		else</span><br><span class="line">			CORE_PEER_ADDRESS=peer1.org1.example.com:7051</span><br><span class="line">		fi</span><br><span class="line">	elif [ $ORG -eq 2 ] ; then</span><br><span class="line">		CORE_PEER_LOCALMSPID="Org2MSP"</span><br><span class="line">		CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt</span><br><span class="line">		CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp</span><br><span class="line">		if [ $PEER -eq 0 ]; then</span><br><span class="line">			CORE_PEER_ADDRESS=peer0.org2.example.com:7051</span><br><span class="line">		else</span><br><span class="line">			CORE_PEER_ADDRESS=peer1.org2.example.com:7051</span><br><span class="line">		fi</span><br><span class="line"></span><br><span class="line">	elif [ $ORG -eq 3 ] ; then</span><br><span class="line">		CORE_PEER_LOCALMSPID="Org3MSP"</span><br><span class="line">		CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt</span><br><span class="line">		CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp</span><br><span class="line">		if [ $PEER -eq 0 ]; then</span><br><span class="line">			CORE_PEER_ADDRESS=peer0.org3.example.com:7051</span><br><span class="line">		else</span><br><span class="line">			CORE_PEER_ADDRESS=peer1.org3.example.com:7051</span><br><span class="line">		fi</span><br><span class="line">	else</span><br><span class="line">		echo "================== ERROR !!! ORG Unknown =================="</span><br><span class="line">	fi</span><br><span class="line"></span><br><span class="line">	env |grep CORE</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">updateAnchorPeers() &#123;</span><br><span class="line">  PEER=$1</span><br><span class="line">  ORG=$2</span><br><span class="line">  setGlobals $PEER $ORG</span><br><span class="line"></span><br><span class="line">  if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then</span><br><span class="line">                set -x</span><br><span class="line">		peer channel update -o orderer.example.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/$&#123;CORE_PEER_LOCALMSPID&#125;anchors.tx &gt;&amp;log.txt</span><br><span class="line">		res=$?</span><br><span class="line">                set +x</span><br><span class="line">  else</span><br><span class="line">                set -x</span><br><span class="line">		peer channel update -o orderer.example.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/$&#123;CORE_PEER_LOCALMSPID&#125;anchors.tx --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA &gt;&amp;log.txt</span><br><span class="line">		res=$?</span><br><span class="line">                set +x</span><br><span class="line">  fi</span><br><span class="line">	cat log.txt</span><br><span class="line">	verifyResult $res "Anchor peer update failed"</span><br><span class="line">	echo "===================== Anchor peers for org \"$CORE_PEER_LOCALMSPID\" on \"$CHANNEL_NAME\" is updated successfully ===================== "</span><br><span class="line">	sleep $DELAY</span><br><span class="line">	echo</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span># Sometimes Join takes time hence RETRY at least for 5 times</span><br><span class="line">joinChannelWithRetry () &#123;</span><br><span class="line">	PEER=$1</span><br><span class="line">	ORG=$2</span><br><span class="line">	setGlobals $PEER $ORG</span><br><span class="line"></span><br><span class="line">        set -x</span><br><span class="line">	peer channel join -b $CHANNEL_NAME.block  &gt;&amp;log.txt</span><br><span class="line">	res=$?</span><br><span class="line">        set +x</span><br><span class="line">	cat log.txt</span><br><span class="line">	if [ $res -ne 0 -a $COUNTER -lt $MAX_RETRY ]; then</span><br><span class="line">		COUNTER=` expr $COUNTER + 1`</span><br><span class="line">		echo "peer$&#123;PEER&#125;.org$&#123;ORG&#125; failed to join the channel, Retry after $DELAY seconds"</span><br><span class="line">		sleep $DELAY</span><br><span class="line">		joinChannelWithRetry $PEER $ORG</span><br><span class="line">	else</span><br><span class="line">		COUNTER=1</span><br><span class="line">	fi</span><br><span class="line">	verifyResult $res "After $MAX_RETRY attempts, peer$&#123;PEER&#125;.org$&#123;ORG&#125; has failed to Join the Channel"</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">installChaincode () &#123;</span><br><span class="line">	PEER=$1</span><br><span class="line">	ORG=$2</span><br><span class="line">	setGlobals $PEER $ORG</span><br><span class="line">	VERSION=$&#123;3:-1.0&#125;</span><br><span class="line">        set -x</span><br><span class="line">	peer chaincode install -n mycc -v $&#123;VERSION&#125; -l $&#123;LANGUAGE&#125; -p $&#123;CC_SRC_PATH&#125; &gt;&amp;log.txt</span><br><span class="line">	res=$?</span><br><span class="line">        set +x</span><br><span class="line">	cat log.txt</span><br><span class="line">	verifyResult $res "Chaincode installation on peer$&#123;PEER&#125;.org$&#123;ORG&#125; has Failed"</span><br><span class="line">	echo "===================== Chaincode is installed on peer$&#123;PEER&#125;.org$&#123;ORG&#125; ===================== "</span><br><span class="line">	echo</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">instantiateChaincode () &#123;</span><br><span class="line">	PEER=$1</span><br><span class="line">	ORG=$2</span><br><span class="line">	setGlobals $PEER $ORG</span><br><span class="line">	VERSION=$&#123;3:-1.0&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">	#</span> while 'peer chaincode' command can get the orderer endpoint from the peer (if join was successful),</span><br><span class="line"><span class="meta">	#</span> lets supply it directly as we know it using the "-o" option</span><br><span class="line">	if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then</span><br><span class="line">                set -x</span><br><span class="line">		peer chaincode instantiate -o orderer.example.com:7050 -C $CHANNEL_NAME -n mycc -l $&#123;LANGUAGE&#125; -v $&#123;VERSION&#125; -c '&#123;"Args":["init","a","100","b","200"]&#125;' -P "OR	('Org1MSP.member','Org2MSP.member')" &gt;&amp;log.txt</span><br><span class="line">		res=$?</span><br><span class="line">                set +x</span><br><span class="line">	else</span><br><span class="line">                set -x</span><br><span class="line">		peer chaincode instantiate -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -l $&#123;LANGUAGE&#125; -v 1.0 -c '&#123;"Args":["init","a","100","b","200"]&#125;' -P "OR	('Org1MSP.member','Org2MSP.member')" &gt;&amp;log.txt</span><br><span class="line">		res=$?</span><br><span class="line">                set +x</span><br><span class="line">	fi</span><br><span class="line">	cat log.txt</span><br><span class="line">	verifyResult $res "Chaincode instantiation on peer$&#123;PEER&#125;.org$&#123;ORG&#125; on channel '$CHANNEL_NAME' failed"</span><br><span class="line">	echo "===================== Chaincode Instantiation on peer$&#123;PEER&#125;.org$&#123;ORG&#125; on channel '$CHANNEL_NAME' is successful ===================== "</span><br><span class="line">	echo</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">upgradeChaincode () &#123;</span><br><span class="line">    PEER=$1</span><br><span class="line">    ORG=$2</span><br><span class="line">    setGlobals $PEER $ORG</span><br><span class="line"></span><br><span class="line">    set -x</span><br><span class="line">    peer chaincode upgrade -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -v 2.0 -c '&#123;"Args":["init","a","90","b","210"]&#125;' -P "OR ('Org1MSP.peer','Org2MSP.peer','Org3MSP.peer')"</span><br><span class="line">    res=$?</span><br><span class="line">	set +x</span><br><span class="line">    cat log.txt</span><br><span class="line">    verifyResult $res "Chaincode upgrade on org$&#123;ORG&#125; peer$&#123;PEER&#125; has Failed"</span><br><span class="line">    echo "===================== Chaincode is upgraded on org$&#123;ORG&#125; peer$&#123;PEER&#125; ===================== "</span><br><span class="line">    echo</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">chaincodeQuery () &#123;</span><br><span class="line">  PEER=$1</span><br><span class="line">  ORG=$2</span><br><span class="line">  setGlobals $PEER $ORG</span><br><span class="line">  EXPECTED_RESULT=$3</span><br><span class="line">  echo "===================== Querying on peer$&#123;PEER&#125;.org$&#123;ORG&#125; on channel '$CHANNEL_NAME'... ===================== "</span><br><span class="line">  local rc=1</span><br><span class="line">  local starttime=$(date +%s)</span><br><span class="line"></span><br><span class="line"><span class="meta">  #</span> continue to poll</span><br><span class="line"><span class="meta">  #</span> we either get a successful response, or reach TIMEOUT</span><br><span class="line">  while test "$(($(date +%s)-starttime))" -lt "$TIMEOUT" -a $rc -ne 0</span><br><span class="line">  do</span><br><span class="line">     sleep $DELAY</span><br><span class="line">     echo "Attempting to Query peer$&#123;PEER&#125;.org$&#123;ORG&#125; ...$(($(date +%s)-starttime)) secs"</span><br><span class="line">     set -x</span><br><span class="line">     peer chaincode query -C $CHANNEL_NAME -n mycc -c '&#123;"Args":["query","a"]&#125;' &gt;&amp;log.txt</span><br><span class="line">	 res=$?</span><br><span class="line">     set +x</span><br><span class="line">     test $res -eq 0 &amp;&amp; VALUE=$(cat log.txt | awk '/Query Result/ &#123;print $NF&#125;')</span><br><span class="line">     test "$VALUE" = "$EXPECTED_RESULT" &amp;&amp; let rc=0</span><br><span class="line">  done</span><br><span class="line">  echo</span><br><span class="line">  cat log.txt</span><br><span class="line">  if test $rc -eq 0 ; then</span><br><span class="line">	echo "===================== Query on peer$&#123;PEER&#125;.org$&#123;ORG&#125; on channel '$CHANNEL_NAME' is successful ===================== "</span><br><span class="line">  else</span><br><span class="line">	echo "!!!!!!!!!!!!!!! Query result on peer$&#123;PEER&#125;.org$&#123;ORG&#125; is INVALID !!!!!!!!!!!!!!!!"</span><br><span class="line">        echo "================== ERROR !!! FAILED to execute End-2-End Scenario =================="</span><br><span class="line">	echo</span><br><span class="line">	exit 1</span><br><span class="line">  fi</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> fetchChannelConfig &lt;channel_id&gt; &lt;output_json&gt;</span><br><span class="line"><span class="meta">#</span> Writes the current channel config for a given channel to a JSON file</span><br><span class="line">fetchChannelConfig() &#123;</span><br><span class="line">  CHANNEL=$1</span><br><span class="line">  OUTPUT=$2</span><br><span class="line"></span><br><span class="line">  setOrdererGlobals</span><br><span class="line"></span><br><span class="line">  echo "Fetching the most recent configuration block for the channel"</span><br><span class="line">  if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then</span><br><span class="line">    set -x</span><br><span class="line">    peer channel fetch config config_block.pb -o orderer.example.com:7050 -c $CHANNEL --cafile $ORDERER_CA</span><br><span class="line">    set +x</span><br><span class="line">  else</span><br><span class="line">    set -x</span><br><span class="line">    peer channel fetch config config_block.pb -o orderer.example.com:7050 -c $CHANNEL --tls --cafile $ORDERER_CA</span><br><span class="line">    set +x</span><br><span class="line">  fi</span><br><span class="line"></span><br><span class="line">  echo "Decoding config block to JSON and isolating config to $&#123;OUTPUT&#125;"</span><br><span class="line">  set -x</span><br><span class="line">  configtxlator proto_decode --input config_block.pb --type common.Block | jq .data.data[0].payload.data.config &gt; "$&#123;OUTPUT&#125;"</span><br><span class="line">  set +x</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> signConfigtxAsPeerOrg &lt;org&gt; &lt;configtx.pb&gt;</span><br><span class="line"><span class="meta">#</span> Set the peerOrg admin of an org and signing the config update</span><br><span class="line">signConfigtxAsPeerOrg() &#123;</span><br><span class="line">        PEERORG=$1</span><br><span class="line">        TX=$2</span><br><span class="line">        setGlobals 0 $PEERORG</span><br><span class="line">        set -x</span><br><span class="line">        peer channel signconfigtx -f "$&#123;TX&#125;"</span><br><span class="line">        set +x</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> createConfigUpdate &lt;channel_id&gt; &lt;original_config.json&gt; &lt;modified_config.json&gt; &lt;output.pb&gt;</span><br><span class="line"><span class="meta">#</span> Takes an original and modified config, and produces the config update tx which transitions between the two</span><br><span class="line">createConfigUpdate() &#123;</span><br><span class="line">  CHANNEL=$1</span><br><span class="line">  ORIGINAL=$2</span><br><span class="line">  MODIFIED=$3</span><br><span class="line">  OUTPUT=$4</span><br><span class="line"></span><br><span class="line">  set -x</span><br><span class="line">  configtxlator proto_encode --input "$&#123;ORIGINAL&#125;" --type common.Config &gt; original_config.pb</span><br><span class="line">  configtxlator proto_encode --input "$&#123;MODIFIED&#125;" --type common.Config &gt; modified_config.pb</span><br><span class="line">  configtxlator compute_update --channel_id "$&#123;CHANNEL&#125;" --original original_config.pb --updated modified_config.pb &gt; config_update.pb</span><br><span class="line">  configtxlator proto_decode --input config_update.pb  --type common.ConfigUpdate &gt; config_update.json</span><br><span class="line">  echo '&#123;"payload":&#123;"header":&#123;"channel_header":&#123;"channel_id":"'$CHANNEL'", "type":2&#125;&#125;,"data":&#123;"config_update":'$(cat config_update.json)'&#125;&#125;&#125;' | jq . &gt; config_update_in_envelope.json</span><br><span class="line">  configtxlator proto_encode --input config_update_in_envelope.json --type common.Envelope &gt; "$&#123;OUTPUT&#125;"</span><br><span class="line">  set +x</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">chaincodeInvoke () &#123;</span><br><span class="line">	PEER=$1</span><br><span class="line">	ORG=$2</span><br><span class="line">	setGlobals $PEER $ORG</span><br><span class="line"><span class="meta">	#</span> while 'peer chaincode' command can get the orderer endpoint from the peer (if join was successful),</span><br><span class="line"><span class="meta">	#</span> lets supply it directly as we know it using the "-o" option</span><br><span class="line">	if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then</span><br><span class="line">                set -x</span><br><span class="line">		peer chaincode invoke -o orderer.example.com:7050 -C $CHANNEL_NAME -n mycc -c '&#123;"Args":["invoke","a","b","10"]&#125;' &gt;&amp;log.txt</span><br><span class="line">		res=$?</span><br><span class="line">                set +x</span><br><span class="line">	else</span><br><span class="line">                set -x</span><br><span class="line">		peer chaincode invoke -o orderer.example.com:7050  --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -c '&#123;"Args":["invoke","a","b","10"]&#125;' &gt;&amp;log.txt</span><br><span class="line">		res=$?</span><br><span class="line">                set +x</span><br><span class="line">	fi</span><br><span class="line">	cat log.txt</span><br><span class="line">	verifyResult $res "Invoke execution on peer$&#123;PEER&#125;.org$&#123;ORG&#125; failed "</span><br><span class="line">	echo "===================== Invoke transaction on peer$&#123;PEER&#125;.org$&#123;ORG&#125; on channel '$CHANNEL_NAME' is successful ===================== "</span><br><span class="line">	echo</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="链代码内容"><a href="#链代码内容" class="headerlink" title="链代码内容"></a>链代码内容</h3><h4 id="链代码实现的主要方法"><a href="#链代码实现的主要方法" class="headerlink" title="链代码实现的主要方法"></a>链代码实现的主要方法</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"strconv"</span></span><br><span class="line"></span><br><span class="line">	<span class="string">"github.com/hyperledger/fabric/core/chaincode/shim"</span></span><br><span class="line">	pb <span class="string">"github.com/hyperledger/fabric/protos/peer"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// SimpleChaincode example simple Chaincode implementation</span></span><br><span class="line"><span class="keyword">type</span> SimpleChaincode <span class="keyword">struct</span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *SimpleChaincode)</span> <span class="title">Init</span><span class="params">(stub shim.ChaincodeStubInterface)</span> <span class="title">pb</span>.<span class="title">Response</span></span> &#123;</span><br><span class="line">	fmt.Println(<span class="string">"ex02 Init"</span>)</span><br><span class="line">	_, args := stub.GetFunctionAndParameters()</span><br><span class="line">	<span class="keyword">var</span> A, B <span class="keyword">string</span>    <span class="comment">// Entities</span></span><br><span class="line">	<span class="keyword">var</span> Aval, Bval <span class="keyword">int</span> <span class="comment">// Asset holdings</span></span><br><span class="line">	<span class="keyword">var</span> err error</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(args) != <span class="number">4</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> shim.Error(<span class="string">"Incorrect number of arguments. Expecting 4"</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Initialize the chaincode</span></span><br><span class="line">	A = args[<span class="number">0</span>]</span><br><span class="line">	Aval, err = strconv.Atoi(args[<span class="number">1</span>])</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> shim.Error(<span class="string">"Expecting integer value for asset holding"</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	B = args[<span class="number">2</span>]</span><br><span class="line">	Bval, err = strconv.Atoi(args[<span class="number">3</span>])</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> shim.Error(<span class="string">"Expecting integer value for asset holding"</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Printf(<span class="string">"Aval = %d, Bval = %d\n"</span>, Aval, Bval)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Write the state to the ledger</span></span><br><span class="line">	err = stub.PutState(A, []<span class="keyword">byte</span>(strconv.Itoa(Aval)))</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> shim.Error(err.Error())</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	err = stub.PutState(B, []<span class="keyword">byte</span>(strconv.Itoa(Bval)))</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> shim.Error(err.Error())</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> shim.Success(<span class="literal">nil</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *SimpleChaincode)</span> <span class="title">Invoke</span><span class="params">(stub shim.ChaincodeStubInterface)</span> <span class="title">pb</span>.<span class="title">Response</span></span> &#123;</span><br><span class="line">	fmt.Println(<span class="string">"ex02 Invoke"</span>)</span><br><span class="line">	function, args := stub.GetFunctionAndParameters()</span><br><span class="line">	<span class="keyword">if</span> function == <span class="string">"invoke"</span> &#123;</span><br><span class="line">		<span class="comment">// Make payment of X units from A to B</span></span><br><span class="line">		<span class="keyword">return</span> t.invoke(stub, args)</span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> function == <span class="string">"delete"</span> &#123;</span><br><span class="line">		<span class="comment">// Deletes an entity from its state</span></span><br><span class="line">		<span class="keyword">return</span> t.<span class="built_in">delete</span>(stub, args)</span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> function == <span class="string">"query"</span> &#123;</span><br><span class="line">		<span class="comment">// the old "Query" is now implemtned in invoke</span></span><br><span class="line">		<span class="keyword">return</span> t.query(stub, args)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> shim.Error(<span class="string">"Invalid invoke function name. Expecting \"invoke\" \"delete\" \"query\""</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Transaction makes payment of X units from A to B</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *SimpleChaincode)</span> <span class="title">invoke</span><span class="params">(stub shim.ChaincodeStubInterface, args []<span class="keyword">string</span>)</span> <span class="title">pb</span>.<span class="title">Response</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> A, B <span class="keyword">string</span>    <span class="comment">// Entities</span></span><br><span class="line">	<span class="keyword">var</span> Aval, Bval <span class="keyword">int</span> <span class="comment">// Asset holdings</span></span><br><span class="line">	<span class="keyword">var</span> X <span class="keyword">int</span>          <span class="comment">// Transaction value</span></span><br><span class="line">	<span class="keyword">var</span> err error</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(args) != <span class="number">3</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> shim.Error(<span class="string">"Incorrect number of arguments. Expecting 3"</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	A = args[<span class="number">0</span>]</span><br><span class="line">	B = args[<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Get the state from the ledger</span></span><br><span class="line">	<span class="comment">// <span class="doctag">TODO:</span> will be nice to have a GetAllState call to ledger</span></span><br><span class="line">	Avalbytes, err := stub.GetState(A)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> shim.Error(<span class="string">"Failed to get state"</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> Avalbytes == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> shim.Error(<span class="string">"Entity not found"</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	Aval, _ = strconv.Atoi(<span class="keyword">string</span>(Avalbytes))</span><br><span class="line"></span><br><span class="line">	Bvalbytes, err := stub.GetState(B)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> shim.Error(<span class="string">"Failed to get state"</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> Bvalbytes == <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> shim.Error(<span class="string">"Entity not found"</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	Bval, _ = strconv.Atoi(<span class="keyword">string</span>(Bvalbytes))</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Perform the execution</span></span><br><span class="line">	X, err = strconv.Atoi(args[<span class="number">2</span>])</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> shim.Error(<span class="string">"Invalid transaction amount, expecting a integer value"</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	Aval = Aval - X</span><br><span class="line">	Bval = Bval + X</span><br><span class="line">	fmt.Printf(<span class="string">"Aval = %d, Bval = %d\n"</span>, Aval, Bval)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Write the state back to the ledger</span></span><br><span class="line">	err = stub.PutState(A, []<span class="keyword">byte</span>(strconv.Itoa(Aval)))</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> shim.Error(err.Error())</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	err = stub.PutState(B, []<span class="keyword">byte</span>(strconv.Itoa(Bval)))</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> shim.Error(err.Error())</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> shim.Success(<span class="literal">nil</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Deletes an entity from state</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *SimpleChaincode)</span> <span class="title">delete</span><span class="params">(stub shim.ChaincodeStubInterface, args []<span class="keyword">string</span>)</span> <span class="title">pb</span>.<span class="title">Response</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(args) != <span class="number">1</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> shim.Error(<span class="string">"Incorrect number of arguments. Expecting 1"</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	A := args[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Delete the key from the state in ledger</span></span><br><span class="line">	err := stub.DelState(A)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> shim.Error(<span class="string">"Failed to delete state"</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> shim.Success(<span class="literal">nil</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// query callback representing the query of a chaincode</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *SimpleChaincode)</span> <span class="title">query</span><span class="params">(stub shim.ChaincodeStubInterface, args []<span class="keyword">string</span>)</span> <span class="title">pb</span>.<span class="title">Response</span></span> &#123;</span><br><span class="line">	<span class="keyword">var</span> A <span class="keyword">string</span> <span class="comment">// Entities</span></span><br><span class="line">	<span class="keyword">var</span> err error</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(args) != <span class="number">1</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> shim.Error(<span class="string">"Incorrect number of arguments. Expecting name of the person to query"</span>)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	A = args[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Get the state from the ledger</span></span><br><span class="line">	Avalbytes, err := stub.GetState(A)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		jsonResp := <span class="string">"&#123;\"Error\":\"Failed to get state for "</span> + A + <span class="string">"\"&#125;"</span></span><br><span class="line">		<span class="keyword">return</span> shim.Error(jsonResp)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> Avalbytes == <span class="literal">nil</span> &#123;</span><br><span class="line">		jsonResp := <span class="string">"&#123;\"Error\":\"Nil amount for "</span> + A + <span class="string">"\"&#125;"</span></span><br><span class="line">		<span class="keyword">return</span> shim.Error(jsonResp)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	jsonResp := <span class="string">"&#123;\"Name\":\""</span> + A + <span class="string">"\",\"Amount\":\""</span> + <span class="keyword">string</span>(Avalbytes) + <span class="string">"\"&#125;"</span></span><br><span class="line">	fmt.Printf(<span class="string">"Query Response:%s\n"</span>, jsonResp)</span><br><span class="line">	<span class="keyword">return</span> shim.Success(Avalbytes)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	err := shim.Start(<span class="built_in">new</span>(SimpleChaincode))</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Printf(<span class="string">"Error starting Simple chaincode: %s"</span>, err)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="SDK-实现链码调用"><a href="#SDK-实现链码调用" class="headerlink" title="SDK 实现链码调用"></a>SDK 实现链码调用</h3>
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/区块链/" rel="tag"><i class="fa fa-tag"></i> 区块链</a>
+          
+            <a href="/tags/Fabric/" rel="tag"><i class="fa fa-tag"></i> Fabric</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/02/12.区块链/Hyperledger fabric/2.Fabric SDK配置文件/" rel="next" title="Fabric SDK 配置文件">
+                <i class="fa fa-chevron-left"></i> Fabric SDK 配置文件
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">190</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">51</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">58</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#生成MSP身份文件"><span class="nav-text">生成MSP身份文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#配置crypto-config文件"><span class="nav-text">配置crypto-config文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#生成MSP文件"><span class="nav-text">生成MSP文件</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#生成创世区块和channel事务"><span class="nav-text">生成创世区块和channel事务</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#配置configtx-yaml文件"><span class="nav-text">配置configtx.yaml文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#生成创世区块"><span class="nav-text">生成创世区块</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#生成channel配置事务"><span class="nav-text">生成channel配置事务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#生成Anchor-peer-配置事务"><span class="nav-text">生成Anchor peer 配置事务</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动网络"><span class="nav-text">启动网络</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#配置docker-compose文件"><span class="nav-text">配置docker-compose文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#运行docker-compose启动网络"><span class="nav-text">运行docker-compose启动网络</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cli-客户端中执行的内容"><span class="nav-text">cli 客户端中执行的内容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#链代码内容"><span class="nav-text">链代码内容</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#链代码实现的主要方法"><span class="nav-text">链代码实现的主要方法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SDK-实现链码调用"><span class="nav-text">SDK 实现链码调用</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

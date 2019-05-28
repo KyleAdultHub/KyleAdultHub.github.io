@@ -1,0 +1,1770 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="OAuth2 的简单解释OAuth2 是目前比较流行的授权机制，用来授权第三方应用来使用用户的一些数据 通过OAuth2可以比较简单的实现跨平台的资源共享，下面简单介绍一下OAuth2具体解决了哪方面的问题； 一个关于小区送快递的场景在一个大型的居民小区，小区入口处的门有密码锁；  进出门的时候，需要业主输入密码下能进入；  但是小区经常会有外卖和快递员出入，快递员需要在有快件派送的时候有权限进入">
+<meta name="keywords" content="Golang,Orm">
+<meta property="og:type" content="article">
+<meta property="og:title" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:url" content="http://blog.kyleliu.cn/2019/05/27/11.Golang/Golang工具包/oauth2原理及应用/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="OAuth2 的简单解释OAuth2 是目前比较流行的授权机制，用来授权第三方应用来使用用户的一些数据 通过OAuth2可以比较简单的实现跨平台的资源共享，下面简单介绍一下OAuth2具体解决了哪方面的问题； 一个关于小区送快递的场景在一个大型的居民小区，小区入口处的门有密码锁；  进出门的时候，需要业主输入密码下能进入；  但是小区经常会有外卖和快递员出入，快递员需要在有快件派送的时候有权限进入">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1558925689197.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1558925719706.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1558925875324.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1558937107718.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1558937182421.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1558938880561.png">
+<meta property="og:image" content="https://images2018.cnblogs.com/blog/647983/201805/647983-20180504165552108-84866874.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1558940908929.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1558945515537.png">
+<meta property="og:updated_time" content="2019-05-27T08:51:51.542Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="刘小恺(Kyle) 的个人博客">
+<meta name="twitter:description" content="OAuth2 的简单解释OAuth2 是目前比较流行的授权机制，用来授权第三方应用来使用用户的一些数据 通过OAuth2可以比较简单的实现跨平台的资源共享，下面简单介绍一下OAuth2具体解决了哪方面的问题； 一个关于小区送快递的场景在一个大型的居民小区，小区入口处的门有密码锁；  进出门的时候，需要业主输入密码下能进入；  但是小区经常会有外卖和快递员出入，快递员需要在有快件派送的时候有权限进入">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/img/1558925689197.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2019/05/27/11.Golang/Golang工具包/oauth2原理及应用/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title> | 刘小恺(Kyle) 的个人博客</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/05/27/11.Golang/Golang工具包/oauth2原理及应用/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-05-27 10:42:00" itemprop="dateCreated datePublished" datetime="2019-05-27T10:42:00+08:00">2019-05-27</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Golang/" itemprop="url" rel="index"><span itemprop="name">Golang</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Golang/Golang工具包/" itemprop="url" rel="index"><span itemprop="name">Golang工具包</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/05/27/11.Golang/Golang工具包/oauth2原理及应用/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/05/27/11.Golang/Golang工具包/oauth2原理及应用/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="OAuth2-的简单解释"><a href="#OAuth2-的简单解释" class="headerlink" title="OAuth2 的简单解释"></a>OAuth2 的简单解释</h2><p>OAuth2 是目前比较流行的授权机制，用来授权第三方应用来使用用户的一些数据</p>
+<p>通过OAuth2可以比较简单的实现跨平台的资源共享，下面简单介绍一下OAuth2具体解决了哪方面的问题；</p>
+<h4 id="一个关于小区送快递的场景"><a href="#一个关于小区送快递的场景" class="headerlink" title="一个关于小区送快递的场景"></a>一个关于小区送快递的场景</h4><p>在一个大型的居民小区，小区入口处的门有密码锁；</p>
+<p><img src="/img/1558925689197.png" alt="1558925689197"></p>
+<p>进出门的时候，需要业主输入密码下能进入；</p>
+<p><img src="/img/1558925719706.png" alt="1558925719706"></p>
+<p>但是小区经常会有外卖和快递员出入，快递员需要在有快件派送的时候有权限进入小区，现在必须有一种办法可以让快递员在没有账号密码的情况下通过门禁系统，进入小区</p>
+<p><img src="/img/1558925875324.png" alt="1558925875324"></p>
+<p>如果业主将密码告诉了快递员， 那快递员就拥有了和业主一样的权限，快递员可以用密码反反复复出入小区, 好像并不能这样设计。</p>
+<h4 id="小区授权机制设计"><a href="#小区授权机制设计" class="headerlink" title="小区授权机制设计"></a>小区授权机制设计</h4><p>对于以上问题，可以设计一套如下的授权方案，授权的流程如下</p>
+<ol>
+<li>门禁系统的密码输入下方，提供一个获取授权的按钮。快递员需要首先按这个按钮，去申请授权。</li>
+<li>按下按钮以后， 业主的手机就会弹出对话框， 有人正在要求授权。系统还会显示出该快递员的姓名，工号和所属的快递公司，业主确认快递员的请求属实，就会点击按钮，告诉门禁系统，我同意给与他进入小区的权限；</li>
+<li>门禁系统得到业主的确认以后，向快递员显示一个进入小区的令牌(一个临时密码, 一般会有一个期限)。</li>
+<li>快递员输入临时密码后，便可以进入小区；</li>
+</ol>
+<h4 id="OAuth-的具体作用"><a href="#OAuth-的具体作用" class="headerlink" title="OAuth 的具体作用"></a>OAuth 的具体作用</h4><p>关于快递的例子，解决了一个不属于本小区用户，通过业主(资源所有者)的授权，有了临时进入小区，执行一些业主权限的问题；</p>
+<p>把该例子应用到互联网应用的场景，就是OAuth的作用了；</p>
+<p>一、居民小区就相当于拥有用户数据资源的资源服务器。比如，支付宝存储了我们的头像和信用分等信息，想要获取这些数据，用户一定要先成功登陆支付宝；</p>
+<p>二、快递员相当于第三方应用，想要穿过门禁系统，进入小区。比如，某贷款机构想要通过支付宝，获取用户的芝麻饮用分来判断贷款金额；</p>
+<p>三、就是业主本人相当于互联网应用的资源所有者，同意快递员第三方进入小区，执行业主本人的一些权限。</p>
+<blockquote>
+<p>总结: OAuth就是一种授权机制， 数据所有者告诉系统，同意并授权第三方进入系统，获取一些指定的数据的权限。系统从而会提供一个短期的令牌给第三方，在一定时间内，第三方都可以通过该令牌获取用户已经授权获取的数据；OAuth解决了第三方应用获取平台用户数据的问题；</p>
+</blockquote>
+<h2 id="OAuth2的一些基本概念"><a href="#OAuth2的一些基本概念" class="headerlink" title="OAuth2的一些基本概念"></a>OAuth2的一些基本概念</h2><h4 id="OAuth2-相关角色"><a href="#OAuth2-相关角色" class="headerlink" title="OAuth2 相关角色"></a>OAuth2 相关角色</h4><ol>
+<li>资源所有者</li>
+<li>用户认证中心(IDP)</li>
+<li>授权中心(oauth2 server)</li>
+<li>资源服务器(resource server)</li>
+<li>oauth2 client</li>
+<li>用户终端(浏览器…)</li>
+</ol>
+<p>2.1 资源所有者（Resource Owner）</p>
+<p>资源所有者是 OAuth 2 四大基本角色之一，在 OAuth 2 标准中，资源所有者即代表授权客户端访问本身资源信息的用户（User），也就是应用场景中的“开发者A”。客户端访问用户帐户的权限仅限于用户授权的“范围”（aka. scope，例如读取或写入权限）。</p>
+<blockquote>
+<p>如果没有特别说明，下文中出现的”用户”将统一代表资源所有者。</p>
+</blockquote>
+<p>2.2 资源/授权服务器（Resource/Authorization Server）</p>
+<p>资源服务器托管了受保护的用户账号信息，而授权服务器验证用户身份然后为客户端派发资源访问令牌。</p>
+<p>在上述应用场景中，Github 既是授权服务器也是资源服务器，个人信息和仓库信息即为资源（Resource）。而在实际工程中，不同的服务器应用往往独立部署，协同保护用户账户信息资源。</p>
+<p>2.3 客户端（Client）</p>
+<p>在 OAuth 2 中，客户端即代表意图访问受限资源的第三方应用。在访问实现之前，它必须先经过用户者授权，并且获得的授权凭证将进一步由授权服务器进行验证。</p>
+<blockquote>
+<p>如果没有特别说明，下文中将不对”应用”，“第三方应用”，“客户端”做出区分。</p>
+</blockquote>
+<h4 id="令牌与密码"><a href="#令牌与密码" class="headerlink" title="令牌与密码"></a>令牌与密码</h4><p>令牌（token）与密码（password）的作用是一样的，都可以进入系统，但是有三点差异。</p>
+<p>（1）令牌是短期的，到期会自动失效，用户自己无法修改。密码一般长期有效，用户不修改，就不会发生变化。</p>
+<p>（2）令牌可以被数据所有者撤销，会立即失效。以上例而言，屋主可以随时取消快递员的令牌。密码一般不允许被他人撤销。</p>
+<p>（3）令牌有权限范围（scope），比如只能进小区的二号门。对于网络服务来说，只读令牌就比读写令牌更安全。密码一般是完整权限。</p>
+<p>上面这些设计，保证了令牌既可以让第三方应用获得权限，同时又随时可控，不会危及系统安全。这就是 OAuth 2.0 的优点。</p>
+<p>注意，只要知道了令牌，就能进入系统。系统一般不会再次确认身份，所以<strong>令牌必须保密，泄漏令牌与泄漏密码的后果是一样的。</strong>这也是为什么令牌的有效期，一般都设置得很短的原因。</p>
+<h4 id="OpenID"><a href="#OpenID" class="headerlink" title="OpenID"></a>OpenID</h4><p>OpenID是一种<strong>认证</strong>标准，互联网上有很多账户都是支持OpenID比如谷歌、雅虎、PayPal等等。</p>
+<p>用户要使用OpenID就必须先在OpenID身份服务器（Identity Provider， IDP）获得OpenID 账号（比如Google账户）。用户可以使用OpenID账户来登录任何一个接受OpenID认证的服务应用（the relying party，RP，依赖方）。OpenID协议标准就是提供一个框架用来IDP和RP之间通信。</p>
+<h2 id="OAuth2-0-的授权模式与使用"><a href="#OAuth2-0-的授权模式与使用" class="headerlink" title="OAuth2.0 的授权模式与使用"></a>OAuth2.0 的授权模式与使用</h2><p>OAuth 2.0 规定了四种获得令牌的流程。你可以选择最适合自己的那一种，向第三方应用颁发令牌。下面就是这四种授权方式。</p>
+<h4 id="Auth2-0的四种授权模式"><a href="#Auth2-0的四种授权模式" class="headerlink" title="Auth2.0的四种授权模式"></a>Auth2.0的四种授权模式</h4><ul>
+<li>​    授权码模式（Authorization Code）(支持refresh token)</li>
+<li>​    隐藏模式（Implicit）(不支持refresh token)</li>
+<li>​    密码模式（Resource Owner Password Credentials） (支持refresh token)</li>
+<li>​    客户端模式（Client Credentials） (不支持refresh token)</li>
+</ul>
+<blockquote>
+<p>注意，不管哪一种授权方式，第三方应用申请令牌之前，都必须先到系统备案，说明自己的身份，然后会拿到两个身份识别码：客户端 ID（client ID）和客户端密钥（client secret）。这是为了防止令牌被滥用，没有备案过的第三方应用，是不会拿到令牌的。</p>
+</blockquote>
+<h4 id="授权码模式"><a href="#授权码模式" class="headerlink" title="授权码模式"></a>授权码模式</h4><p>授权码（authorization code）方式，指的是第三方应用先申请一个授权码，然后再用该码获取令牌。</p>
+<p>这种方式是最常用的流程，安全性也最高，它适用于那些有后端的 Web 应用。授权码通过前端传送，令牌则是储存在后端，而且所有与资源服务器的通信都在后端完成。这样的前后端分离，可以避免令牌泄漏。</p>
+<p>第一步，A 网站提供一个链接，用户点击后就会跳转到 B 网站，授权用户数据给 A 网站使用。</p>
+<p>第二步，用户跳转后，B 网站会要求用户登录，然后询问是否同意给予 A 网站授权。用户表示同意，这时 B 网站就会跳回<code>redirect_uri</code>参数指定的网址。跳转时，会传回一个授权码。</p>
+<p>第三步，A 网站拿到授权码以后，就可以在后端，向 B 网站请求令牌。</p>
+<p>第四步，B 网站收到请求以后，就会颁发令牌。具体做法是向<code>redirect_uri</code>指定的网址，发送一段 JSON 数据包含了令牌的详细内容。</p>
+<p><img src="/img/1558937107718.png" alt="1558937107718"></p>
+<h4 id="隐藏模式"><a href="#隐藏模式" class="headerlink" title="隐藏模式"></a>隐藏模式</h4><p>有些 Web 应用是纯前端应用，没有后端。这时就不能用上面的方式了，必须将令牌储存在前端。</p>
+<p>第一步，A 网站提供一个链接，要求用户跳转到 B 网站，授权用户数据给 A 网站使用。</p>
+<p>第二步，用户跳转到 B 网站，登录后同意给予 A 网站授权。这时，B 网站就会跳回<code>redirect_uri</code>参数指定的跳转网址，并且把令牌作为 URL 参数，传给 A 网站。</p>
+<p><img src="/img/1558937182421.png" alt="1558937182421"></p>
+<p>这种方式把令牌直接传给前端，是很不安全的。因此，只能用于一些安全要求不高的场景，并且令牌的有效期必须非常短，通常就是会话期间（session）有效，浏览器关掉，令牌就失效了。</p>
+<h4 id="密码模式"><a href="#密码模式" class="headerlink" title="密码模式"></a>密码模式</h4><p>如果你高度信任某个应用，也允许用户把用户名和密码，直接告诉该应用。该应用就使用你的密码，申请令牌，这种方式称为”密码式”（password）。</p>
+<p>第一步，A 网站要求用户提供 B 网站的用户名和密码。拿到以后，A 就直接向 B 请求令牌。</p>
+<p>第二步，B 网站验证身份通过后，直接给出令牌。注意，这时不需要跳转，而是把令牌放在 JSON 数据里面，作为 HTTP 回应，A 因此拿到令牌。</p>
+<p>这种方式需要用户给出自己的用户名/密码，显然风险很大，因此只适用于其他授权方式都无法采用的情况，而且必须是用户高度信任的应用。</p>
+<h4 id="客户端模式"><a href="#客户端模式" class="headerlink" title="客户端模式"></a>客户端模式</h4><p>最后一种方式是凭证式（client credentials），适用于没有前端的命令行应用，即在命令行下请求令牌。</p>
+<p>第一步，A 应用在命令行向 B 发出请求。</p>
+<p>第二步，B 网站验证通过以后，直接返回令牌。</p>
+<p>这种方式给出的令牌，是针对第三方应用的，而不是针对用户的，即有可能多个用户共享同一个令牌。</p>
+<h4 id="令牌的使用"><a href="#令牌的使用" class="headerlink" title="令牌的使用"></a>令牌的使用</h4><p>A 网站拿到令牌以后，就可以向 B 网站的 API 请求数据了。</p>
+<p>此时，每个发到 API 的请求，都必须带有令牌。具体做法是在请求的头信息，加上一个<code>Authorization</code>字段，令牌就放在这个字段里面。</p>
+<blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt; curl -H <span class="string">"Authorization: Bearer ACCESS_TOKEN"</span> \</span><br><span class="line">&gt; <span class="string">"https://api.b.com"</span></span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>上面命令中，<code>ACCESS_TOKEN</code>就是拿到的令牌。</p>
+<h4 id="更新令牌"><a href="#更新令牌" class="headerlink" title="更新令牌"></a>更新令牌</h4><p>令牌的有效期到了，如果让用户重新走一遍上面的流程，再申请一个新的令牌，很可能体验不好，而且也没有必要。OAuth 2.0 允许用户自动更新令牌。</p>
+<p>具体方法是，B 网站颁发令牌的时候，一次性颁发两个令牌，一个用于获取数据，另一个用于获取新的令牌（refresh token 字段）。令牌到期前，用户使用 refresh token 发一个请求，去更新令牌。</p>
+<blockquote>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&gt; https:<span class="comment">//b.com/oauth/token?</span></span><br><span class="line">&gt;   grant_type=refresh_token&amp;</span><br><span class="line">&gt;   client_id=CLIENT_ID&amp;</span><br><span class="line">&gt;   client_secret=CLIENT_SECRET&amp;</span><br><span class="line">&gt;   refresh_token=REFRESH_TOKEN</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>上面 URL 中，<code>grant_type</code>参数为<code>refresh_token</code>表示要求更新令牌，<code>client_id</code>参数和<code>client_secret</code>参数用于确认身份，<code>refresh_token</code>参数就是用于更新令牌的令牌。</p>
+<h2 id="第三方授权例子"><a href="#第三方授权例子" class="headerlink" title="第三方授权例子"></a>第三方授权例子</h2><h4 id="一、场景举例"><a href="#一、场景举例" class="headerlink" title="一、场景举例"></a>一、场景举例</h4><p>举例来说，A 网站允许使用B网站账号登录，背后就是下面的流程。</p>
+<blockquote>
+<ol>
+<li>A 网站让用户跳转到B网站。</li>
+<li>B要求用户登录，然后询问”A 网站要求获得 xx 权限，你是否同意？”</li>
+<li>用户同意，B就会重定向回 A 网站，同时发回一个授权码。</li>
+<li>A 网站使用授权码，向 B 请求令牌。</li>
+<li>B网站返回令牌.</li>
+<li>A 网站使用令牌，向B资源服务器请求用户数据。</li>
+</ol>
+</blockquote>
+<h4 id="授权流程"><a href="#授权流程" class="headerlink" title="授权流程"></a>授权流程</h4><p><img src="/img/1558938880561.png" alt="1558938880561"></p>
+<ol>
+<li>Authrization Request<br>客户端向用户请求对资源服务器的<code>authorization grant</code>。</li>
+<li>Authorization Grant（Get）<br>如果用户授权该次请求，客户端将收到一个<code>authorization grant</code>。</li>
+<li>Authorization Grant（Post）<br>客户端向授权服务器发送它自己的客户端身份标识和上一步中的<code>authorization grant</code>，请求访问令牌。</li>
+<li>Access Token（Get）<br>如果客户端身份被认证，并且<code>authorization grant</code>也被验证通过，授权服务器将为客户端派发<code>access token</code>。授权阶段至此全部结束。</li>
+<li>Access Token（Post &amp;&amp; Validate）<br>客户端向资源服务器发送<code>access token</code>用于验证并请求资源信息。</li>
+<li>Protected Resource（Get）<br>如果<code>access token</code>验证通过，资源服务器将向客户端返回资源信息。</li>
+</ol>
+<h4 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h4><ol>
+<li>User Authorization Request</li>
+</ol>
+<p>首先，客户端构造了一个用于请求<code>authorization code</code>的URL并引导<code>User-agent</code>跳转访问。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">https://authorization-server.com/auth</span><br><span class="line"> ?response_type=code</span><br><span class="line"> &amp;client_id=29352915982374239857</span><br><span class="line"> &amp;redirect_uri=https%3A%2F%2Fexample-client.com%2Fcallback</span><br><span class="line"> &amp;scope=create+delete</span><br><span class="line"> &amp;state=xcoiv98y2kd22vusuye3kch</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>response_type=code<br>此参数和参数值用于提示授权服务器当前客户端正在进行<code>Authorization Code</code>授权流程。</li>
+<li>client_id<br>客户端身份标识。</li>
+<li>redirect_uri<br>标识授权服务器接收客户端请求后返回给<code>User-agent</code>的跳转访问地址。</li>
+<li>scope<br>指定客户端请求的访问级别。</li>
+<li>state<br>由客户端生成的随机字符串，步骤2中用户进行授权客户端的请求时也会携带此字符串用于比较，这是为了防止<code>CSRF</code>攻击。</li>
+</ul>
+<ol start="2">
+<li>User Authorizes Applcation</li>
+</ol>
+<p>当用户点击上文中的示例链接时，用户必须已经在授权服务中进行登录（否则将会跳转到登录界面，<strong>不过 OAuth 2 并不关心认证过程</strong>），然后授权服务会提示用户授权或拒绝应用程序访问其帐户。以下是授权应用程序的示例：</p>
+<p><img src="https://images2018.cnblogs.com/blog/647983/201805/647983-20180504165552108-84866874.png" alt="img"></p>
+<ol start="3">
+<li>Authorization Code Grant</li>
+</ol>
+<p>如果用户确认授权，授权服务器将重定向<code>User-agent</code>至之前客户端提供的指向客户端的<code>redirect_uri</code>地址，并附带<code>code</code>和<code>state</code>参数（由之前客户端提供），于是客户端便能直接读取到<code>authorization code</code>值。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">https://example-client.com/redirect</span><br><span class="line"> ?code=g0ZGZmNjVmOWIjNTk2NTk4ZTYyZGI3</span><br><span class="line"> &amp;state=xcoiv98y2kd22vusuye3kch</span><br></pre></td></tr></table></figure>
+
+<p><code>state</code>值将与客户端在请求中最初设置的值相同。客户端将检查重定向中的状态值是否与最初设置的状态值相匹配。这可以防止CSRF和其他相关攻击。</p>
+<p><code>code</code>是授权服务器生成的<code>authorization code</code>值。<code>code</code>相对较短，通常持续1到10分钟，具体取决于授权服务器设置。</p>
+<ol start="4">
+<li>Access Token Request</li>
+</ol>
+<p>现在客户端已经拥有了服务器派发的<code>authorization code</code>，接下来便可以使用<code>authorization code</code>和其他参数向服务器请求<code>access token</code>（POST方式）。其他相关参数如下：</p>
+<ul>
+<li>grant_type=authorization_code - 这告诉服务器当前客户端正在使用<code>Authorization Code</code>授权流程。</li>
+<li>code - 应用程序包含它在重定向中给出的授权码。</li>
+<li>redirect_uri - 与请求<code>authorization code</code>时使用的<code>redirect_uri</code>相同。某些资源（API）不需要此参数。</li>
+<li>client_id - 客户端标识。</li>
+<li>client_secret - 应用程序的客户端密钥。这确保了获取<code>access token</code>的请求只能从客户端发出，而不能从可能截获<code>authorization code</code>的攻击者发出。</li>
+</ul>
+<ol start="5">
+<li>Access Token Grant</li>
+</ol>
+<p>服务器将会验证第4步中的请求参数，当验证通过后（校验<code>authorization code</code>是否过期，<code>client id</code>和<code>client secret</code>是否匹配等），服务器将向客户端返回<code>access token</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;access_token&quot;:&quot;MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3&quot;,</span><br><span class="line">  &quot;token_type&quot;:&quot;bearer&quot;,</span><br><span class="line">  &quot;expires_in&quot;:3600,</span><br><span class="line">  &quot;refresh_token&quot;:&quot;IwOGYzYTlmM2YxOTQ5MGE3YmNmMDFkNTVk&quot;,</span><br><span class="line">  &quot;scope&quot;:&quot;create delete&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>至此，授权流程全部结束。直到<code>access token</code> 过期或失效之前，客户端可以通过资源服务器API访问用户的帐户，并具备<code>scope</code>中给定的操作权限。</p>
+<h2 id="Ory-Hydra-OAuth2-0-框架"><a href="#Ory-Hydra-OAuth2-0-框架" class="headerlink" title="Ory Hydra OAuth2.0 框架"></a>Ory Hydra OAuth2.0 框架</h2><p>ORY Hydra解决了身份验证和授权问题，是OAuth 2.0和OpenID Connect提供商。</p>
+<h4 id="什么是ORY-Hydra"><a href="#什么是ORY-Hydra" class="headerlink" title="什么是ORY Hydra"></a>什么是ORY Hydra</h4><p>ORY Hydra是OAuth 2.0和OpenID Connect Provider。因此，它能够发出访问，刷新和ID令牌。与其他项目相反，ORY Hydra不提供用户管理（登录，注销，配置文件管理，注册），而是使用基于重定向的流和REST API将用户身份验证（登录）委派给您实现的服务，控制。这允许您构建适合您的用户管理，使用您喜欢的前端技术，以及您的用例所需的身份验证机制（例如基于令牌的2FA，SMS 2FA）。</p>
+<p>因此，ORY Hydra是最灵活的OAuth 2.0和OpenID Connect提供商，为您提供了实现业务逻辑的极大自由，并且仍然可以从OAuth 2.0和OpenID Connect中获得所有好处。</p>
+<p>除了OAuth 2.0功能之外，ORY Hydra还为加密密钥提供安全存储（例如，用于签署JSON Web令牌），并且能够管理OAuth 2.0客户端。</p>
+<p>ORY Hydra是OpenID Connect认证（待定），并实现了OpenID Foundation规定的所有要求。因此，它正确地实现了IETF和OpenID Foundation所预期的不同OAuth 2.0和OpenID Connect流程。</p>
+<h4 id="什么是OAuth2-0"><a href="#什么是OAuth2-0" class="headerlink" title="什么是OAuth2.0"></a>什么是OAuth2.0</h4><p><a href="https://tools.ietf.org/html/rfc6749" target="_blank" rel="noopener">OAuth 2.0授权框架</a>是IETF Internet工程任务组（IETF）发布的<a href="https://www.ietf.org/rfc.html" target="_blank" rel="noopener">Request for Comments</a>文档系列中的备忘录。“请求注释”（RFC）文档系列中的备忘录包含有关Internet的技术和组织说明。它们涵盖了计算机网络的许多方面，包括协议，程序，程序和概念[…]。</p>
+<p>OAuth 2.0授权框架允许第三方应用程序通过编排资源所有者和HTTP服务之间的批准交互，或者通过允许第三方应用程序来代表资源所有者获得对HTTP服务的有限访问权限以自己的名义获取访问权限。</p>
+<p>在传统的客户端 - 服务器身份验证模型中，客户端通过使用资源所有者的凭据向服务器进行身份验证来请求服务器上的访问受限资源（受保护资源）。为了向第三方应用程序提供对受限资源的访问，资源所有者与第三方共享其凭据。这会产生一些问题和限制。</p>
+<p>OAuth通过引入授权层并将客户端的角色与资源所有者的角色分开来解决这些问题。在OAuth中，客户端请求访问由资源所有者控制并由资源服务器托管的资源，并发出与资源所有者不同的凭据集。</p>
+<p>客户端不是使用资源所有者的凭证来访问受保护资源，而是获取访问令牌 - 表示特定范围，生命周期和其他访问属性的字符串。授权服务器在资源所有者的批准下向第三方客户端颁发访问令牌。客户端使用访问令牌来访问资源服务器托管的受保护资源</p>
+<h4 id="什么是OpenID-Connect-1-0"><a href="#什么是OpenID-Connect-1-0" class="headerlink" title="什么是OpenID Connect 1.0"></a>什么是OpenID Connect 1.0</h4><p>OpenID Connect 1.0是OAuth 2.0协议之上的简单身份层。它使客户端能够根据授权服务器执行的身份验证来验证最终用户的身份，以及以可互操作和类似REST的方式获取有关最终用户的基本配置文件信息。</p>
+<p>作为背景，OAuth 2.0授权框架和OAuth 2.0承载令牌使用规范为第三方应用程序提供了一个通用框架，以获取和使用对HTTP资源的有限访问。它们定义了获取和使用访问令牌来访问资源的机制，但没有定义标准方法来提供身份信息。值得注意的是，如果没有分析OAuth 2.0，它就无法提供有关最终用户身份验证的信息。</p>
+<p>OpenID Connect实现身份验证，作为OAuth 2.0授权过程的扩展。</p>
+<p>OpenID Connect允许所有类型的客户端（包括基于Web，移动和JavaScript客户端）请求和接收有关经过身份验证的会话和最终用户的信息。规范套件是可扩展的，允许参与者在对它们有意义时使用可选功能，例如身份数据加密，OpenID提供程序的发现和会话管理。</p>
+<h4 id="ORY-Hydra-介绍"><a href="#ORY-Hydra-介绍" class="headerlink" title="ORY Hydra 介绍"></a>ORY Hydra 介绍</h4><p>Hydra是OAuth 2.0授权框架和OpenID Connect Core 1.0的服务器实现。现有的OAuth2实现通常作为库或SDK（如 <a href="https://github.com/oauthjs/node-oauth2-server" target="_blank" rel="noopener">node-oauth2-server</a>或 <a href="https://github.com/ory/fosite" target="_blank" rel="noopener">fosite）提供</a>，或作为具有用户管理和用户界面的全功能身份解决方案（如<a href="https://www.keycloak.org/" target="_blank" rel="noopener">Keycloak</a>或<a href="https://www.okta.com/" target="_blank" rel="noopener">Okta）提供</a>。</p>
+<p>在不了解整个规范的情况下实现和使用OAuth2具有挑战性，并且即使在使用SDK时也容易出错。Hydra的主要目标是使OAuth 2.0和OpenID Connect 1.0的设置更轻松，更易于使用。</p>
+<p>Hydra实现OAuth2和OpenID Connect 1.0中描述的流程，而不强制您使用“Hydra用户管理”或某些模板引擎或预定义的前端。相反，它依赖于HTTP重定向和加密方法来验证用户同意，允许您将Hydra与任何身份验证端点一起使用，无论是<a href="https://github.com/go-authboss/authboss" target="_blank" rel="noopener">authboss</a>， <a href="https://auth0.com/" target="_blank" rel="noopener">auth0.com</a>还是您的专有PHP身份验证。</p>
+<h4 id="ORY-Hydra-不管理用户"><a href="#ORY-Hydra-不管理用户" class="headerlink" title="ORY Hydra 不管理用户"></a>ORY Hydra 不管理用户</h4><p>要理解的第一个重要概念是ORY Hydra是OAuth 2.0授权和OpenID Connect服务器。有些人将这些功能误认为存储用户数据并将您登录的系统。事实并非如此。相反，此类服务器负责将用户凭据（通常是用户名和密码）“转换”为OAuth 2.0访问和刷新令牌以及OpenID Connect ID令牌。它基本上就像您使用会话数据存储cookie，但更灵活，它也适用于第三方应用程序。</p>
+<p>ORY Hydra不存储用户配置文件，用户名，密码。此功能取决于您。ORY Hydra使用我们称之为<strong>用户登录和同意流的东西</strong>。此流使用HTTP重定向将任何传入的授权请求（“请给我一个访问令牌。”）转发给<strong>登录提供者</strong>和<strong>同意提供者</strong>。这些应用程序是您实现的。它可以是新应用程序或您现有的登录系统。从较高的层面来看，这些提供商可归纳为：</p>
+<ul>
+<li>登录提供者负责通过验证他或她的凭证（例如用户名+密码）来验证用户（“登录”）。</li>
+<li>同意提供商负责允许OAuth 2.0应用程序代表用户获取令牌（“您是否希望允许foobar-app访问您的所有个人消息和图像？”。</li>
+</ul>
+<h4 id="词汇表"><a href="#词汇表" class="headerlink" title="词汇表"></a>词汇表</h4><p>在我们深入了解所有内容如何组合在一起的细节之前，让我们先了解一些术语。您会发现这些术语分散在OAuth2和OpenID Connect生态系统中。</p>
+<p>对于本指南，我们决定使用更简单易用的术语，例如，<em>用户</em>而不是<em>资源所有者</em>。如果您熟悉OAuth2详细信息，则可以在阅读术语表后更轻松地浏览这些文档。</p>
+<ol>
+<li>该<strong>资源的所有者</strong>是谁授权的应用程序来访问他们的帐户的用户。应用程序对用户帐户的访问权限仅限于授予授权的“范围”（例如，读取或写入访问）。我们将在此页面上将资源所有者称为<em>用户</em>或<em>最终用户</em>。</li>
+<li>所述<strong>的OAuth 2.0授权服务器</strong>实现的OAuth 2.0协议（以及任选的ID连接）并且用作终点如<code>/oauth2/auth</code>或<code>/oauth2/token</code>。在我们的例子中，这是<strong>ORY Hydra</strong>。</li>
+<li>该<strong>资源提供</strong>的是一种服务-好-提供资源。这些资源（例如博客文章，打印机，待办事项列表）由上述资源所有者（用户）拥有。</li>
+<li>该<strong>OAuth 2.0用户端</strong>是<em>应用程序</em>想要访问资源所有者的资源（又名获得写访问用户的图像）。这样的客户端可以要求授权服务器代表资源所有者发布访问令牌。通常，授权服务器将询问用户他/她是否“给予该应用程序”，例如对个人图像的写访问。</li>
+<li>该<strong>身份提供商</strong>是一种服务（“应用程序” /“网站”）的登录界面。身份提供者通常也允许用户注册，并且还可能具有管理界面以管理身份（删除用户，禁止用户，创建用户……）。</li>
+<li><strong>用户代理</strong>通常是一个浏览器。</li>
+<li><strong>OpenID Connect</strong>是一种建立在OAuth 2.0之上的协议，它能够联合身份验证。</li>
+</ol>
+<h4 id="典型的OAuth-2-0流程如下所示："><a href="#典型的OAuth-2-0流程如下所示：" class="headerlink" title="典型的OAuth 2.0流程如下所示："></a>典型的OAuth 2.0流程如下所示：</h4><ol>
+<li>开发人员在授权服务器（ORY Hydra）上注册OAuth 2.0客户端，目的是代表用户获取信息。</li>
+<li>应用程序UI要求用户授权应用程序代表他/她访问信息/数据。</li>
+<li>用户被重定向到授权服务器。</li>
+<li>授权服务器确认用户的身份，并要求用户授予OAuth 2.0客户端某些权限。</li>
+<li>授权服务器发出OAuth 2.0客户端用于代表用户访问资源的令牌。</li>
+</ol>
+<h4 id="登录认证网络流程图"><a href="#登录认证网络流程图" class="headerlink" title="登录认证网络流程图"></a>登录认证网络流程图</h4><p>​    <img src="/img/1558940908929.png" alt="1558940908929"></p>
+<h2 id="我们的OAuth2-实现"><a href="#我们的OAuth2-实现" class="headerlink" title="我们的OAuth2 实现"></a>我们的OAuth2 实现</h2><p><img src="/img/1558945515537.png" alt="1558945515537"></p>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;">
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Golang/" rel="tag"><i class="fa fa-tag"></i> Golang</a>
+          
+            <a href="/tags/Orm/" rel="tag"><i class="fa fa-tag"></i> Orm</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/05/22/11.Golang/Golang工具包/go-micro 框架使用/" rel="next" title>
+                <i class="fa fa-chevron-left"></i> 
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="刘小恺(Kyle)">
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">197</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">52</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">60</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#OAuth2-的简单解释"><span class="nav-text">OAuth2 的简单解释</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#一个关于小区送快递的场景"><span class="nav-text">一个关于小区送快递的场景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#小区授权机制设计"><span class="nav-text">小区授权机制设计</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#OAuth-的具体作用"><span class="nav-text">OAuth 的具体作用</span></a></li></ol></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#OAuth2的一些基本概念"><span class="nav-text">OAuth2的一些基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#OAuth2-相关角色"><span class="nav-text">OAuth2 相关角色</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#令牌与密码"><span class="nav-text">令牌与密码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#OpenID"><span class="nav-text">OpenID</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OAuth2-0-的授权模式与使用"><span class="nav-text">OAuth2.0 的授权模式与使用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Auth2-0的四种授权模式"><span class="nav-text">Auth2.0的四种授权模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#授权码模式"><span class="nav-text">授权码模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#隐藏模式"><span class="nav-text">隐藏模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#密码模式"><span class="nav-text">密码模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#客户端模式"><span class="nav-text">客户端模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#令牌的使用"><span class="nav-text">令牌的使用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#更新令牌"><span class="nav-text">更新令牌</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第三方授权例子"><span class="nav-text">第三方授权例子</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#一、场景举例"><span class="nav-text">一、场景举例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#授权流程"><span class="nav-text">授权流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#流程"><span class="nav-text">流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ory-Hydra-OAuth2-0-框架"><span class="nav-text">Ory Hydra OAuth2.0 框架</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#什么是ORY-Hydra"><span class="nav-text">什么是ORY Hydra</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#什么是OAuth2-0"><span class="nav-text">什么是OAuth2.0</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#什么是OpenID-Connect-1-0"><span class="nav-text">什么是OpenID Connect 1.0</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ORY-Hydra-介绍"><span class="nav-text">ORY Hydra 介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ORY-Hydra-不管理用户"><span class="nav-text">ORY Hydra 不管理用户</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#词汇表"><span class="nav-text">词汇表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#典型的OAuth-2-0流程如下所示："><span class="nav-text">典型的OAuth 2.0流程如下所示：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#登录认证网络流程图"><span class="nav-text">登录认证网络流程图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#我们的OAuth2-实现"><span class="nav-text">我们的OAuth2 实现</span></a></li></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

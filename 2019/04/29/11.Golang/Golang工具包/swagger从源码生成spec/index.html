@@ -1,0 +1,2134 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="从源码生成spec文档spec 生成命令12345678910111213141516171819Usage:  swagger [OPTIONS] generate spec [spec-OPTIONS]generate a swagger spec document from a go applicationApplication Options:  -q, --quiet">
+<meta name="keywords" content="Golang">
+<meta property="og:type" content="article">
+<meta property="og:title" content="swagger从源码生成spec">
+<meta property="og:url" content="http://blog.kyleliu.cn/2019/04/29/11.Golang/Golang工具包/swagger从源码生成spec/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="从源码生成spec文档spec 生成命令12345678910111213141516171819Usage:  swagger [OPTIONS] generate spec [spec-OPTIONS]generate a swagger spec document from a go applicationApplication Options:  -q, --quiet">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-05-27T09:16:45.737Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="swagger从源码生成spec">
+<meta name="twitter:description" content="从源码生成spec文档spec 生成命令12345678910111213141516171819Usage:  swagger [OPTIONS] generate spec [spec-OPTIONS]generate a swagger spec document from a go applicationApplication Options:  -q, --quiet">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2019/04/29/11.Golang/Golang工具包/swagger从源码生成spec/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>swagger从源码生成spec | 刘小恺(Kyle) 的个人博客</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/04/29/11.Golang/Golang工具包/swagger从源码生成spec/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">swagger从源码生成spec
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-04-29 13:45:00" itemprop="dateCreated datePublished" datetime="2019-04-29T13:45:00+08:00">2019-04-29</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Golang/" itemprop="url" rel="index"><span itemprop="name">Golang</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Golang/Golang工具包/" itemprop="url" rel="index"><span itemprop="name">Golang工具包</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/04/29/11.Golang/Golang工具包/swagger从源码生成spec/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/04/29/11.Golang/Golang工具包/swagger从源码生成spec/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="从源码生成spec文档"><a href="#从源码生成spec文档" class="headerlink" title="从源码生成spec文档"></a>从源码生成spec文档</h3><h4 id="spec-生成命令"><a href="#spec-生成命令" class="headerlink" title="spec 生成命令"></a>spec 生成命令</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Usage:</span><br><span class="line">  swagger [OPTIONS] generate spec [spec-OPTIONS]</span><br><span class="line"></span><br><span class="line">generate a swagger spec document from a go application</span><br><span class="line"></span><br><span class="line">Application Options:</span><br><span class="line">  -q, --quiet               silence logs</span><br><span class="line">  -o, --output=LOG-FILE     redirect logs to file</span><br><span class="line"></span><br><span class="line">Help Options:</span><br><span class="line">  -h, --help                Show this help message</span><br><span class="line"></span><br><span class="line">[spec command options]</span><br><span class="line">      -b, --base-path=      the base path to use (default: .)</span><br><span class="line">      -t, --tags=           build tags</span><br><span class="line">      -m, --scan-models     includes models that were annotated with &apos;swagger:model&apos;</span><br><span class="line">          --compact         when present, doesn&apos;t prettify the json</span><br><span class="line">      -o, --output=         the file to write to</span><br><span class="line">      -i, --input=          the file to use as input</span><br></pre></td></tr></table></figure>
+
+<h4 id="spec生成方法"><a href="#spec生成方法" class="headerlink" title="spec生成方法"></a>spec生成方法</h4><h5 id="生成包的spec"><a href="#生成包的spec" class="headerlink" title="生成包的spec"></a>生成包的spec</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">swagger generate spec -o ./swagger.json</span><br></pre></td></tr></table></figure>
+
+<p>如果不提供一个mian文件给swagger， swagger 将遍历包中的左右文件以及文件的依赖并生成spec</p>
+<p>如果想要提供给swagger一个main文件，可以在main文件中添加如下注释:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">//go:generate swagger generate spec</span><br></pre></td></tr></table></figure>
+
+<p>它使用go工具加载器加载应用程序，然后扫描代码库使用的所有软件包。这意味着对于可被发现的东西，它需要通过主包触发的代码路径来访问。</p>
+<h5 id="合并yml文件定义的spec"><a href="#合并yml文件定义的spec" class="headerlink" title="合并yml文件定义的spec"></a>合并yml文件定义的spec</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">swagger generate spec -i ./swagger.yml -o ./swagger.json</span><br></pre></td></tr></table></figure>
+
+<h5 id="生成yaml格式的spec文件"><a href="#生成yaml格式的spec文件" class="headerlink" title="生成yaml格式的spec文件"></a>生成yaml格式的spec文件</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">swagger generate spec -o ./swagger.yml</span><br></pre></td></tr></table></figure>
+
+<h4 id="Spec生成规则"><a href="#Spec生成规则" class="headerlink" title="Spec生成规则"></a>Spec生成规则</h4><h5 id="swagger-meta"><a href="#swagger-meta" class="headerlink" title="swagger:meta"></a>swagger:meta</h5><p>配置 包spec文件的一些原数据，</p>
+<p>语法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">swagger:meta</span><br></pre></td></tr></table></figure>
+
+<p>可配置的属性如下</p>
+<table>
+<thead>
+<tr>
+<th>Annotation</th>
+<th>Format</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Terms Of Service</strong></td>
+<td>allows for either a url or a free text definition describing the terms of services for the API</td>
+</tr>
+<tr>
+<td><strong>Consumes</strong></td>
+<td>a list of default (global) mime type values, one per line, for the content the API receives. <a href="https://goswagger.io/use/spec/meta.html#supported-mime-types" target="_blank" rel="noopener">List of supported mime types</a></td>
+</tr>
+<tr>
+<td><strong>Produces</strong></td>
+<td>a list of default (global) mime type values, one per line, for the content the API sends. <a href="https://goswagger.io/use/spec/meta.html#supported-mime-types" target="_blank" rel="noopener">List of supported mime types</a></td>
+</tr>
+<tr>
+<td><strong>Schemes</strong></td>
+<td>a list of default schemes the API accept (possible values: http, https, ws, wss) https is preferred as default when configured</td>
+</tr>
+<tr>
+<td><strong>Version</strong></td>
+<td>the current version of the API</td>
+</tr>
+<tr>
+<td><strong>Host</strong></td>
+<td>the host from where the spec is served</td>
+</tr>
+<tr>
+<td><strong>Base path</strong></td>
+<td>the default base path for this API</td>
+</tr>
+<tr>
+<td><strong>Contact</strong></td>
+<td>the name of for the person to contact concerning the API eg. John Doe <a href="mailto:&#x6a;&#111;&#x68;&#110;&#64;&#98;&#x6c;&#x6f;&#x67;&#x73;&#46;&#99;&#111;&#109;" target="_blank" rel="noopener">&#x6a;&#111;&#x68;&#110;&#64;&#98;&#x6c;&#x6f;&#x67;&#x73;&#46;&#99;&#111;&#109;</a> <a href="http://john.blogs.com/" target="_blank" rel="noopener">http://john.blogs.com</a></td>
+</tr>
+<tr>
+<td><strong>License</strong></td>
+<td>the name of the license followed by the URL of the license eg. MIT <a href="https://opensource.org/license/MIT" target="_blank" rel="noopener">http://opensource.org/license/MIT</a></td>
+</tr>
+<tr>
+<td><strong>Security</strong></td>
+<td>a dictionary of key: []string{scopes}</td>
+</tr>
+<tr>
+<td><strong>SecurityDefinitions</strong></td>
+<td>list of supported authorization types <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#securityDefinitionsObject" target="_blank" rel="noopener">https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#securityDefinitionsObject</a></td>
+</tr>
+<tr>
+<td><strong>Extensions</strong></td>
+<td>list of extensions to Swagger Schema. The field name MUST begin with x-, for example, x-internal-id. The value can be null, a primitive, an array or an object.</td>
+</tr>
+</tbody></table>
+<p>示例:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Package classification Petstore API.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// the purpose of this application is to provide an application</span></span><br><span class="line"><span class="comment">// that is using plain go code to define an API</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// This should demonstrate all the possible comment annotations</span></span><br><span class="line"><span class="comment">// that are available to turn go code into a fully compliant swagger 2.0 spec</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// Terms Of Service:</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// there are no TOS at this moment, use at your own risk we take no responsibility</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//     Schemes: http, https</span></span><br><span class="line"><span class="comment">//     Host: localhost</span></span><br><span class="line"><span class="comment">//     BasePath: /v2</span></span><br><span class="line"><span class="comment">//     Version: 0.0.1</span></span><br><span class="line"><span class="comment">//     License: MIT http://opensource.org/licenses/MIT</span></span><br><span class="line"><span class="comment">//     Contact: John Doe&lt;john.doe@example.com&gt; http://john.doe.com</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//     Consumes:</span></span><br><span class="line"><span class="comment">//     - application/json</span></span><br><span class="line"><span class="comment">//     - application/xml</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//     Produces:</span></span><br><span class="line"><span class="comment">//     - application/json</span></span><br><span class="line"><span class="comment">//     - application/xml</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//     Security:</span></span><br><span class="line"><span class="comment">//     - api_key:</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//     SecurityDefinitions:</span></span><br><span class="line"><span class="comment">//     api_key:</span></span><br><span class="line"><span class="comment">//          type: apiKey</span></span><br><span class="line"><span class="comment">//          name: KEY</span></span><br><span class="line"><span class="comment">//          in: header</span></span><br><span class="line"><span class="comment">//     oauth2:</span></span><br><span class="line"><span class="comment">//         type: oauth2</span></span><br><span class="line"><span class="comment">//         authorizationUrl: /oauth2/auth</span></span><br><span class="line"><span class="comment">//         tokenUrl: /oauth2/token</span></span><br><span class="line"><span class="comment">//         in: header</span></span><br><span class="line"><span class="comment">//         scopes:</span></span><br><span class="line"><span class="comment">//           bar: foo</span></span><br><span class="line"><span class="comment">//         flow: accessCode</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//     Extensions:</span></span><br><span class="line"><span class="comment">//     x-meta-value: value</span></span><br><span class="line"><span class="comment">//     x-meta-array:</span></span><br><span class="line"><span class="comment">//       - value1</span></span><br><span class="line"><span class="comment">//       - value2</span></span><br><span class="line"><span class="comment">//     x-meta-array-obj:</span></span><br><span class="line"><span class="comment">//       - name: obj</span></span><br><span class="line"><span class="comment">//         value: field</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// swagger:meta</span></span><br><span class="line"><span class="keyword">package</span> classification</span><br></pre></td></tr></table></figure>
+
+<h5 id="swagger-route"><a href="#swagger-route" class="headerlink" title="swagger:route"></a>swagger:route</h5><p>路径配置的方法， 此操作获取一个唯一ID，用于后面该方法的名称</p>
+<p>语法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">swagger:route [method] [path pattern] [?tag1 tag2 tag3] [operation id]</span><br></pre></td></tr></table></figure>
+
+<p>属性</p>
+<table>
+<thead>
+<tr>
+<th>Annotation</th>
+<th>Format</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Consumes</strong></td>
+<td>a list of operation specific mime type values, one per line, for the content the API receives</td>
+</tr>
+<tr>
+<td><strong>Produces</strong></td>
+<td>a list of operation specific mime type values, one per line, for the content the API sends</td>
+</tr>
+<tr>
+<td><strong>Schemes</strong></td>
+<td>a list of operation specific schemes the API accept (possible values: http, https, ws, wss) https is preferred as default when configured</td>
+</tr>
+<tr>
+<td><strong>Security</strong></td>
+<td>a dictionary of key: []string{scopes}</td>
+</tr>
+<tr>
+<td><strong>Responses</strong></td>
+<td>a dictionary of status code to named response</td>
+</tr>
+</tbody></table>
+<p>示例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">// ServeAPI serves the API for this record store</span><br><span class="line">func ServeAPI(host, basePath string, schemes []string) error &#123;</span><br><span class="line"></span><br><span class="line">    // swagger:route GET /pets pets users listPets</span><br><span class="line">    //</span><br><span class="line">    // Lists pets filtered by some parameters.</span><br><span class="line">    //</span><br><span class="line">    // This will show all available pets by default.</span><br><span class="line">    // You can get the pets that are out of stock</span><br><span class="line">    //</span><br><span class="line">    //     Consumes:</span><br><span class="line">    //     - application/json</span><br><span class="line">    //     - application/x-protobuf</span><br><span class="line">    //</span><br><span class="line">    //     Produces:</span><br><span class="line">    //     - application/json</span><br><span class="line">    //     - application/x-protobuf</span><br><span class="line">    //</span><br><span class="line">    //     Schemes: http, https, ws, wss</span><br><span class="line">    //</span><br><span class="line">    //     Security:</span><br><span class="line">    //       api_key:</span><br><span class="line">    //       oauth: read, write</span><br><span class="line">    //</span><br><span class="line">    //     Responses:</span><br><span class="line">    //       default: genericError</span><br><span class="line">    //       200: someResponse</span><br><span class="line">    //       422: validationError</span><br><span class="line">    mountItem(&quot;GET&quot;, basePath+&quot;/pets&quot;, nil)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="swagger-parameters"><a href="#swagger-parameters" class="headerlink" title="swagger:parameters"></a>swagger:parameters</h5><p>参数注释结构连接到一个或多个操作。 生成的swagger spec中的参数可以由多个结构组成。</p>
+<p>语法</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">swagger:parameters [operationid1 operationid2]</span><br></pre></td></tr></table></figure>
+
+<p>参数</p>
+<table>
+<thead>
+<tr>
+<th>Annotation</th>
+<th>Format</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>In</strong></td>
+<td>where to find the parameter</td>
+</tr>
+<tr>
+<td><strong>Collection Format</strong></td>
+<td>when a slice the formatter for the collection when serialized on the request</td>
+</tr>
+<tr>
+<td><strong>Maximum</strong></td>
+<td>specifies the maximum a number or integer value can have</td>
+</tr>
+<tr>
+<td><strong>Minimum</strong></td>
+<td>specifies the minimum a number or integer value can have</td>
+</tr>
+<tr>
+<td><strong>Multiple of</strong></td>
+<td>specifies a value a number or integer value must be a multiple of</td>
+</tr>
+<tr>
+<td><strong>Minimum length</strong></td>
+<td>the minimum length for a string value</td>
+</tr>
+<tr>
+<td><strong>Maximum length</strong></td>
+<td>the maximum length for a string value</td>
+</tr>
+<tr>
+<td><strong>Pattern</strong></td>
+<td>a regular expression a string value needs to match</td>
+</tr>
+<tr>
+<td><strong>Minimum items</strong></td>
+<td>the minimum number of items a slice needs to have</td>
+</tr>
+<tr>
+<td><strong>Maximum items</strong></td>
+<td>the maximum number of items a slice can have</td>
+</tr>
+<tr>
+<td><strong>Unique</strong></td>
+<td>when set to true the slice can only contain unique items</td>
+</tr>
+<tr>
+<td><strong>Required</strong></td>
+<td>when set to true this value needs to be present in the request</td>
+</tr>
+<tr>
+<td><strong>Example</strong></td>
+<td>an example value, parsed as the field’s type (objects and slices are parsed as JSON)</td>
+</tr>
+</tbody></table>
+<p>对于slice属性，还需要定义一些项。这可能是一个嵌套集合，用于指示嵌套级别，值是一个基于0的索引</p>
+<table>
+<thead>
+<tr>
+<th>Annotation</th>
+<th>Format</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Items.n.Maximum</strong></td>
+<td>specifies the maximum a number or integer value can have at the level <em>n</em></td>
+</tr>
+<tr>
+<td><strong>Items.n.Minimum</strong></td>
+<td>specifies the minimum a number or integer value can have at the level <em>n</em></td>
+</tr>
+<tr>
+<td><strong>Items.n.Multiple of</strong></td>
+<td>specifies a value a number or integer value must be a multiple of</td>
+</tr>
+<tr>
+<td><strong>Items.n.Minimum length</strong></td>
+<td>the minimum length for a string value at the level <em>n</em></td>
+</tr>
+<tr>
+<td><strong>Items.n.Maximum length</strong></td>
+<td>the maximum length for a string value at the level <em>n</em></td>
+</tr>
+<tr>
+<td><strong>Items.n.Pattern</strong></td>
+<td>a regular expression a string value needs to match at the level <em>n</em></td>
+</tr>
+<tr>
+<td><strong>Items.n.Minimum items</strong></td>
+<td>the minimum number of items a slice needs to have at the level <em>n</em></td>
+</tr>
+<tr>
+<td><strong>Items.n.Maximum items</strong></td>
+<td>the maximum number of items a slice can have at the level <em>n</em></td>
+</tr>
+<tr>
+<td><strong>Items.n.Unique</strong></td>
+<td>when set to true the slice can only contain unique items at the level <em>n</em></td>
+</tr>
+</tbody></table>
+<p>示例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">// swagger:parameters listBars addBars</span><br><span class="line">type BarSliceParam struct &#123;</span><br><span class="line">    // a BarSlice has bars which are strings</span><br><span class="line">    //</span><br><span class="line">    // min items: 3</span><br><span class="line">    // max items: 10</span><br><span class="line">    // unique: true</span><br><span class="line">    // items.minItems: 4</span><br><span class="line">    // items.maxItems: 9</span><br><span class="line">    // items.items.minItems: 5</span><br><span class="line">    // items.items.maxItems: 8</span><br><span class="line">    // items.items.items.minLength: 3</span><br><span class="line">    // items.items.items.maxLength: 10</span><br><span class="line">    // items.items.items.pattern: \w+</span><br><span class="line">    // collection format: pipe</span><br><span class="line">    // in: query</span><br><span class="line">    // example: [[[&quot;bar_000&quot;]]]</span><br><span class="line">    BarSlice [][][]string `json:&quot;bar_slice&quot;`</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="swagger-operation"><a href="#swagger-operation" class="headerlink" title="swagger:operation"></a>swagger:operation</h5><p><strong>操作</strong>注释将路径链接到方法</p>
+<p>语法</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">swagger:operation [method] [path pattern] [?tag1 tag2 tag3] [operation id]</span><br></pre></td></tr></table></figure>
+
+<p>参数</p>
+<table>
+<thead>
+<tr>
+<th>Field Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>tags</td>
+<td>[<code>string</code>]</td>
+<td>A list of tags for API documentation control. Tags can be used for logical grouping of operations by resources or any other qualifier.</td>
+</tr>
+<tr>
+<td>summary</td>
+<td><code>string</code></td>
+<td>A short summary of what the operation does. For maximum readability in the swagger-ui, this field SHOULD be less than 120 characters.</td>
+</tr>
+<tr>
+<td>description</td>
+<td><code>string</code></td>
+<td>A verbose explanation of the operation behavior. <a href="https://guides.github.com/features/mastering-markdown/#GitHub-flavored-markdown" target="_blank" rel="noopener">GFM syntax</a> can be used for rich text representation.</td>
+</tr>
+<tr>
+<td>externalDocs</td>
+<td><a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#externalDocumentationObject" target="_blank" rel="noopener">External Documentation Object</a></td>
+<td>Additional external documentation for this operation.</td>
+</tr>
+<tr>
+<td>operationId</td>
+<td><code>string</code></td>
+<td>Unique string used to identify the operation. The id MUST be unique among all operations described in the API. Tools and libraries MAY use the operationId to uniquely identify an operation, therefore, it is recommended to follow common programming naming conventions.</td>
+</tr>
+<tr>
+<td>consumes</td>
+<td>[<code>string</code>]</td>
+<td>A list of MIME types the operation can consume. This overrides the <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swaggerConsumes" target="_blank" rel="noopener"><code>consumes</code></a>definition at the Swagger Object. An empty value MAY be used to clear the global definition. Value MUST be as described under <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#mimeTypes" target="_blank" rel="noopener">Mime Types</a>.</td>
+</tr>
+<tr>
+<td>produces</td>
+<td>[<code>string</code>]</td>
+<td>A list of MIME types the operation can produce. This overrides the <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swaggerProduces" target="_blank" rel="noopener"><code>produces</code></a>definition at the Swagger Object. An empty value MAY be used to clear the global definition. Value MUST be as described under <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#mimeTypes" target="_blank" rel="noopener">Mime Types</a>.</td>
+</tr>
+<tr>
+<td>parameters</td>
+<td>[<a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#parameterObject" target="_blank" rel="noopener">Parameter Object</a> | <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#referenceObject" target="_blank" rel="noopener">Reference Object</a>]</td>
+<td>A list of parameters that are applicable for this operation. If a parameter is already defined at the <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#pathItemParameters" target="_blank" rel="noopener">Path Item</a>, the new definition will override it, but can never remove it. The list MUST NOT include duplicated parameters. A unique parameter is defined by a combination of a <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#parameterName" target="_blank" rel="noopener">name</a> and <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#parameterIn" target="_blank" rel="noopener">location</a>. The list can use the <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#referenceObject" target="_blank" rel="noopener">Reference Object</a> to link to parameters that are defined at the <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swaggerParameters" target="_blank" rel="noopener">Swagger Object’s parameters</a>. There can be one “body” parameter at most.</td>
+</tr>
+<tr>
+<td>responses</td>
+<td><a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#responsesObject" target="_blank" rel="noopener">Responses Object</a></td>
+<td><strong>Required.</strong> The list of possible responses as they are returned from executing this operation.</td>
+</tr>
+<tr>
+<td>schemes</td>
+<td>[<code>string</code>]</td>
+<td>The transfer protocol for the operation. Values MUST be from the list: <code>&quot;http&quot;</code>, <code>&quot;https&quot;</code>, <code>&quot;ws&quot;</code>, <code>&quot;wss&quot;</code>. The value overrides the Swagger Object <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swaggerSchemes" target="_blank" rel="noopener"><code>schemes</code></a>definition.</td>
+</tr>
+<tr>
+<td>deprecated</td>
+<td><code>boolean</code></td>
+<td>Declares this operation to be deprecated. Usage of the declared operation should be refrained. Default value is <code>false</code>.</td>
+</tr>
+<tr>
+<td>security</td>
+<td>[<a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#securityRequirementObject" target="_blank" rel="noopener">Security Requirement Object</a>]</td>
+<td>A declaration of which security schemes are applied for this operation. The list of values describes alternative security schemes that can be used (that is, there is a logical OR between the security requirements). This definition overrides any declared top-level <a href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swaggerSecurity" target="_blank" rel="noopener"><code>security</code></a>. To remove a top-level security declaration, an empty array can be used.</td>
+</tr>
+</tbody></table>
+<p>示例</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">//</span> <span class="string">ServeAPI</span> <span class="string">serves</span> <span class="string">the</span> <span class="string">API</span> <span class="string">for</span> <span class="string">this</span> <span class="string">record</span> <span class="string">store</span></span><br><span class="line"><span class="string">func</span> <span class="string">ServeAPI(host,</span> <span class="string">basePath</span> <span class="string">string,</span> <span class="string">schemes</span> <span class="string">[]string)</span> <span class="string">(err</span> <span class="string">error)</span> <span class="string">&#123;</span></span><br><span class="line">    <span class="string">//</span> <span class="attr">swagger:operation</span> <span class="string">GET</span> <span class="string">/pets</span> <span class="string">getPet</span></span><br><span class="line">    <span class="string">//</span></span><br><span class="line">    <span class="string">//</span> <span class="string">Returns</span> <span class="string">all</span> <span class="string">pets</span> <span class="string">from</span> <span class="string">the</span> <span class="string">system</span> <span class="string">that</span> <span class="string">the</span> <span class="string">user</span> <span class="string">has</span> <span class="string">access</span> <span class="string">to</span></span><br><span class="line">    <span class="string">//</span></span><br><span class="line">    <span class="string">//</span> <span class="string">Could</span> <span class="string">be</span> <span class="string">any</span> <span class="string">pet</span></span><br><span class="line">    <span class="string">//</span></span><br><span class="line">    <span class="string">//</span> <span class="meta">---</span></span><br><span class="line">    <span class="string">//</span> <span class="attr">produces:</span></span><br><span class="line">    <span class="string">//</span> <span class="bullet">-</span> <span class="string">application/json</span></span><br><span class="line">    <span class="string">//</span> <span class="bullet">-</span> <span class="string">application/xml</span></span><br><span class="line">    <span class="string">//</span> <span class="bullet">-</span> <span class="string">text/xml</span></span><br><span class="line">    <span class="string">//</span> <span class="bullet">-</span> <span class="string">text/html</span></span><br><span class="line">    <span class="string">//</span> <span class="attr">parameters:</span></span><br><span class="line">    <span class="string">//</span> <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">tags</span></span><br><span class="line">    <span class="string">//</span>   <span class="attr">in:</span> <span class="string">query</span></span><br><span class="line">    <span class="string">//</span>   <span class="attr">description:</span> <span class="string">tags</span> <span class="string">to</span> <span class="string">filter</span> <span class="string">by</span></span><br><span class="line">    <span class="string">//</span>   <span class="attr">required:</span> <span class="literal">false</span></span><br><span class="line">    <span class="string">//</span>   <span class="attr">type:</span> <span class="string">array</span></span><br><span class="line">    <span class="string">//</span>   <span class="attr">items:</span></span><br><span class="line">    <span class="string">//</span>     <span class="attr">type:</span> <span class="string">string</span></span><br><span class="line">    <span class="string">//</span>   <span class="attr">collectionFormat:</span> <span class="string">csv</span></span><br><span class="line">    <span class="string">//</span> <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">limit</span></span><br><span class="line">    <span class="string">//</span>   <span class="attr">in:</span> <span class="string">query</span></span><br><span class="line">    <span class="string">//</span>   <span class="attr">description:</span> <span class="string">maximum</span> <span class="string">number</span> <span class="string">of</span> <span class="string">results</span> <span class="string">to</span> <span class="string">return</span></span><br><span class="line">    <span class="string">//</span>   <span class="attr">required:</span> <span class="literal">false</span></span><br><span class="line">    <span class="string">//</span>   <span class="attr">type:</span> <span class="string">integer</span></span><br><span class="line">    <span class="string">//</span>   <span class="attr">format:</span> <span class="string">int32</span></span><br><span class="line">    <span class="string">//</span> <span class="attr">responses:</span></span><br><span class="line">    <span class="string">//</span>   <span class="string">'200'</span><span class="string">:</span></span><br><span class="line">    <span class="string">//</span>     <span class="attr">description:</span> <span class="string">pet</span> <span class="string">response</span></span><br><span class="line">    <span class="string">//</span>     <span class="attr">schema:</span></span><br><span class="line">    <span class="string">//</span>       <span class="attr">type:</span> <span class="string">array</span></span><br><span class="line">    <span class="string">//</span>       <span class="attr">items:</span></span><br><span class="line">    <span class="string">//</span>         <span class="string">"$ref"</span><span class="string">:</span> <span class="string">"#/definitions/pet"</span></span><br><span class="line">    <span class="string">//</span>   <span class="attr">default:</span></span><br><span class="line">    <span class="string">//</span>     <span class="attr">description:</span> <span class="string">unexpected</span> <span class="string">error</span></span><br><span class="line">    <span class="string">//</span>     <span class="attr">schema:</span></span><br><span class="line">    <span class="string">//</span>       <span class="string">"$ref"</span><span class="string">:</span> <span class="string">"#/definitions/errorModel"</span></span><br><span class="line">    <span class="string">mountItem("GET",</span> <span class="string">basePath+"/pets",</span> <span class="string">nil)</span></span><br><span class="line"></span><br><span class="line">    <span class="string">return</span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="swagger-response"><a href="#swagger-response" class="headerlink" title="swagger:response"></a>swagger:response</h5><p>读取用swagger:response修饰的结构， 并使用该信息填充相应的标题和模式</p>
+<p>swagger：route可以指定状态代码的响应名称，然后匹配的响应将用于swagger定义中的该操作。</p>
+<p>语法</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">swagger:response [?response name]</span><br></pre></td></tr></table></figure>
+
+<p>属性</p>
+<table>
+<thead>
+<tr>
+<th>Annotation</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>In</strong></td>
+<td>where to find the field</td>
+</tr>
+<tr>
+<td><strong>Collection Format</strong></td>
+<td>when a slice the formatter for the collection when serialized on the request</td>
+</tr>
+<tr>
+<td><strong>Maximum</strong></td>
+<td>specifies the maximum a number or integer value can have</td>
+</tr>
+<tr>
+<td><strong>Minimum</strong></td>
+<td>specifies the minimum a number or integer value can have</td>
+</tr>
+<tr>
+<td><strong>Multiple of</strong></td>
+<td>specifies a value a number or integer value must be a multiple of</td>
+</tr>
+<tr>
+<td><strong>Minimum length</strong></td>
+<td>the minimum length for a string value</td>
+</tr>
+<tr>
+<td><strong>Maximum length</strong></td>
+<td>the maximum length for a string value</td>
+</tr>
+<tr>
+<td><strong>Pattern</strong></td>
+<td>a regular expression a string value needs to match</td>
+</tr>
+<tr>
+<td><strong>Minimum items</strong></td>
+<td>the minimum number of items a slice needs to have</td>
+</tr>
+<tr>
+<td><strong>Maximum items</strong></td>
+<td>the maximum number of items a slice can have</td>
+</tr>
+<tr>
+<td><strong>Unique</strong></td>
+<td>when set to true the slice can only contain unique items</td>
+</tr>
+<tr>
+<td><strong>Example</strong></td>
+<td>an example value, parsed as the field’s type (objects and slices are parsed as JSON)</td>
+</tr>
+</tbody></table>
+<p>对于切片属性，还有要定义的项目。这可能是嵌套集合，用于指示嵌套级别，该值是基于0的索引，因此items.minLength与items.0.minLength相同</p>
+<table>
+<thead>
+<tr>
+<th>Annotation</th>
+<th>Format</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Items.n.Maximum</strong></td>
+<td>specifies the maximum a number or integer value can have at the level <em>n</em></td>
+</tr>
+<tr>
+<td><strong>Items.n.Minimum</strong></td>
+<td>specifies the minimum a number or integer value can have at the level <em>n</em></td>
+</tr>
+<tr>
+<td><strong>Items.n.Multiple of</strong></td>
+<td>specifies a value a number or integer value must be a multiple of</td>
+</tr>
+<tr>
+<td><strong>Items.n.Minimum length</strong></td>
+<td>the minimum length for a string value at the level <em>n</em></td>
+</tr>
+<tr>
+<td><strong>Items.n.Maximum length</strong></td>
+<td>the maximum length for a string value at the level <em>n</em></td>
+</tr>
+<tr>
+<td><strong>Items.n.Pattern</strong></td>
+<td>a regular expression a string value needs to match at the level <em>n</em></td>
+</tr>
+<tr>
+<td><strong>Items.n.Minimum items</strong></td>
+<td>the minimum number of items a slice needs to have at the level <em>n</em></td>
+</tr>
+<tr>
+<td><strong>Items.n.Maximum items</strong></td>
+<td>the maximum number of items a slice can have at the level <em>n</em></td>
+</tr>
+<tr>
+<td><strong>Items.n.Unique</strong></td>
+<td>when set to true the slice can only contain unique items at the level <em>n</em></td>
+</tr>
+</tbody></table>
+<p>示例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">// A ValidationError is an error that is used when the required input fails validation.</span><br><span class="line">// swagger:response validationError</span><br><span class="line">type ValidationError struct &#123;</span><br><span class="line">    // The error message</span><br><span class="line">    // in: body</span><br><span class="line">    Body struct &#123;</span><br><span class="line">        // The validation message</span><br><span class="line">        //</span><br><span class="line">        // Required: true</span><br><span class="line">        // Example: Expected type int</span><br><span class="line">        Message string</span><br><span class="line">        // An optional field name to which this validation applies</span><br><span class="line">        FieldName string</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="swagger-momdel"><a href="#swagger-momdel" class="headerlink" title="swagger:momdel"></a>swagger:momdel</h5><p>定义结构数据</p>
+<p>语法</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">swagger:model [?model name]</span><br></pre></td></tr></table></figure>
+
+<p>属性</p>
+<table>
+<thead>
+<tr>
+<th>Annotation</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Maximum</strong></td>
+<td>specifies the maximum a number or integer value can have</td>
+</tr>
+<tr>
+<td><strong>Minimum</strong></td>
+<td>specifies the minimum a number or integer value can have</td>
+</tr>
+<tr>
+<td><strong>Multiple of</strong></td>
+<td>specifies a value a number or integer value must be a multiple of</td>
+</tr>
+<tr>
+<td><strong>Minimum length</strong></td>
+<td>the minimum length for a string value</td>
+</tr>
+<tr>
+<td><strong>Maximum length</strong></td>
+<td>the maximum length for a string value</td>
+</tr>
+<tr>
+<td><strong>Pattern</strong></td>
+<td>a regular expression a string value needs to match</td>
+</tr>
+<tr>
+<td><strong>Minimum items</strong></td>
+<td>the minimum number of items a slice needs to have</td>
+</tr>
+<tr>
+<td><strong>Maximum items</strong></td>
+<td>the maximum number of items a slice can have</td>
+</tr>
+<tr>
+<td><strong>Unique</strong></td>
+<td>when set to true the slice can only contain unique items</td>
+</tr>
+<tr>
+<td><strong>Required</strong></td>
+<td>when set to true this value needs to be set on the schema</td>
+</tr>
+<tr>
+<td><strong>Read Only</strong></td>
+<td>when set to true this value will be marked as read-only and is not required in request bodies</td>
+</tr>
+<tr>
+<td><strong>Example</strong></td>
+<td>an example value, parsed as the field’s type (objects and slices are parsed as JSON)</td>
+</tr>
+</tbody></table>
+<p>对于切片属性，还有要定义的项目。这可能是嵌套集合，用于指示嵌套级别，该值是基于0的索引，因此items.minLength与items.0.minLength相同</p>
+<table>
+<thead>
+<tr>
+<th>Annotation</th>
+<th>Format</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Items.n.Maximum</strong></td>
+<td>specifies the maximum a number or integer value can have at the level <em>n</em></td>
+</tr>
+<tr>
+<td><strong>Items.n.Minimum</strong></td>
+<td>specifies the minimum a number or integer value can have at the level <em>n</em></td>
+</tr>
+<tr>
+<td><strong>Items.n.Multiple of</strong></td>
+<td>specifies a value a number or integer value must be a multiple of</td>
+</tr>
+<tr>
+<td><strong>Items.n.Minimum length</strong></td>
+<td>the minimum length for a string value at the level <em>n</em></td>
+</tr>
+<tr>
+<td><strong>Items.n.Maximum length</strong></td>
+<td>the maximum length for a string value at the level <em>n</em></td>
+</tr>
+<tr>
+<td><strong>Items.n.Pattern</strong></td>
+<td>a regular expression a string value needs to match at the level <em>n</em></td>
+</tr>
+<tr>
+<td><strong>Items.n.Minimum items</strong></td>
+<td>the minimum number of items a slice needs to have at the level <em>n</em></td>
+</tr>
+<tr>
+<td><strong>Items.n.Maximum items</strong></td>
+<td>the maximum number of items a slice can have at the level <em>n</em></td>
+</tr>
+<tr>
+<td><strong>Items.n.Unique</strong></td>
+<td>when set to true the slice can only contain unique items at the level <em>n</em></td>
+</tr>
+</tbody></table>
+<p>示例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">// User represents the user for this application</span><br><span class="line">//</span><br><span class="line">// A user is the security principal for this application.</span><br><span class="line">// It&apos;s also used as one of main axes for reporting.</span><br><span class="line">//</span><br><span class="line">// A user can have friends with whom they can share what they like.</span><br><span class="line">//</span><br><span class="line">// swagger:model</span><br><span class="line">type User struct &#123;</span><br><span class="line">    // the id for this user</span><br><span class="line">    //</span><br><span class="line">    // required: true</span><br><span class="line">    // min: 1</span><br><span class="line">    ID int64 `json:&quot;id&quot;`</span><br><span class="line"></span><br><span class="line">    // the name for this user</span><br><span class="line">    // required: true</span><br><span class="line">    // min length: 3</span><br><span class="line">    Name string `json:&quot;name&quot;`</span><br><span class="line"></span><br><span class="line">    // the email address for this user</span><br><span class="line">    //</span><br><span class="line">    // required: true</span><br><span class="line">    // example: user@provider.net</span><br><span class="line">    Email strfmt.Email `json:&quot;login&quot;`</span><br><span class="line"></span><br><span class="line">    // the friends for this user</span><br><span class="line">    Friends []User `json:&quot;friends&quot;`</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="swagger-allOf"><a href="#swagger-allOf" class="headerlink" title="swagger:allOf"></a>swagger:allOf</h5><p>将嵌入类型标记为allOf的成员</p>
+<p>语法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">swagger:allOf</span><br></pre></td></tr></table></figure>
+
+<p>示例</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// A SimpleOne is a model with a few simple fields</span></span><br><span class="line"><span class="keyword">type</span> SimpleOne <span class="keyword">struct</span> &#123;</span><br><span class="line">    ID   <span class="keyword">int64</span>  <span class="string">`json:"id"`</span></span><br><span class="line">    Name <span class="keyword">string</span> <span class="string">`json:"name"`</span></span><br><span class="line">    Age  <span class="keyword">int32</span>  <span class="string">`json:"age"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// A Something struct is used by other structs</span></span><br><span class="line"><span class="keyword">type</span> Something <span class="keyword">struct</span> &#123;</span><br><span class="line">    DID <span class="keyword">int64</span>  <span class="string">`json:"did"`</span></span><br><span class="line">    Cat <span class="keyword">string</span> <span class="string">`json:"cat"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Notable is a model in a transitive package.</span></span><br><span class="line"><span class="comment">// it's used for embedding in another model</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// swagger:model withNotes</span></span><br><span class="line"><span class="keyword">type</span> Notable <span class="keyword">struct</span> &#123;</span><br><span class="line">    Notes <span class="keyword">string</span> <span class="string">`json:"notes"`</span></span><br><span class="line"></span><br><span class="line">    Extra <span class="keyword">string</span> <span class="string">`json:"extra"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// An AllOfModel is composed out of embedded structs but it should build</span></span><br><span class="line"><span class="comment">// an allOf property</span></span><br><span class="line"><span class="keyword">type</span> AllOfModel <span class="keyword">struct</span> &#123;</span><br><span class="line">    <span class="comment">// swagger:allOf</span></span><br><span class="line">    SimpleOne</span><br><span class="line">    <span class="comment">// swagger:allOf</span></span><br><span class="line">    mods.Notable</span><br><span class="line"></span><br><span class="line">    Something <span class="comment">// not annotated with anything, so should be included</span></span><br><span class="line"></span><br><span class="line">    CreatedAt strfmt.DateTime <span class="string">`json:"createdAt"`</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="swagger-strfmt"><a href="#swagger-strfmt" class="headerlink" title="swagger:strfmt"></a>swagger:strfmt</h5><p><strong>strfmt</strong>标注名称的类型为字符串格式。该名称是必需的，将用作此特定字符串格式的格式名称。</p>
+<p>语法</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">swagger:strfmt [name]</span><br></pre></td></tr></table></figure>
+
+<p>字符串格式包含</p>
+<ul>
+<li>uuid, uuid3, uuid4, uuid5</li>
+<li>email</li>
+<li>uri (absolute)</li>
+<li>hostname</li>
+<li>ipv4</li>
+<li>ipv6</li>
+<li>credit card</li>
+<li>isbn, isbn10, isbn13</li>
+<li>social security number</li>
+<li>hexcolor</li>
+<li>rgbcolor</li>
+<li>date</li>
+<li>date-time</li>
+<li>duration</li>
+<li>password</li>
+<li>custom string formats</li>
+</ul>
+<p>示例</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">init</span><span class="params">()</span></span> &#123;</span><br><span class="line">  eml := Email(<span class="string">""</span>)</span><br><span class="line">  Default.Add(<span class="string">"email"</span>, &amp;eml, govalidator.IsEmail)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Email represents the email string format as specified by the json schema spec</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// swagger:strfmt email</span></span><br><span class="line"><span class="keyword">type</span> Email <span class="keyword">string</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// MarshalText turns this instance into text</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e Email)</span> <span class="title">MarshalText</span><span class="params">()</span> <span class="params">([]<span class="keyword">byte</span>, error)</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> []<span class="keyword">byte</span>(<span class="keyword">string</span>(e)), <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// UnmarshalText hydrates this instance from text</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *Email)</span> <span class="title">UnmarshalText</span><span class="params">(data []<span class="keyword">byte</span>)</span> <span class="title">error</span></span> &#123; <span class="comment">// validation is performed later on</span></span><br><span class="line">    *e = Email(<span class="keyword">string</span>(data))</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b *Email)</span> <span class="title">Scan</span><span class="params">(raw <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    <span class="keyword">switch</span> v := raw.(<span class="keyword">type</span>) &#123;</span><br><span class="line">    <span class="keyword">case</span> []<span class="keyword">byte</span>:</span><br><span class="line">        *b = Email(<span class="keyword">string</span>(v))</span><br><span class="line">    <span class="keyword">case</span> <span class="keyword">string</span>:</span><br><span class="line">        *b = Email(v)</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">        <span class="keyword">return</span> fmt.Errorf(<span class="string">"cannot sql.Scan() strfmt.Email from: %#v"</span>, v)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(b Email)</span> <span class="title">Value</span><span class="params">()</span> <span class="params">(driver.Value, error)</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> driver.Value(<span class="keyword">string</span>(b)), <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="swagger-discriminated"><a href="#swagger-discriminated" class="headerlink" title="swagger:discriminated"></a>swagger:discriminated</h5><p>将嵌入类型标记为allOf的成员并设置x-class值。在接口定义上，对允许<em>swagger：name的</em>方法有另一个注释</p>
+<p>语法</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">swagger:allOf org.example.something.TypeName</span><br></pre></td></tr></table></figure>
+
+<p>示例</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// TeslaCar is a tesla car</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// swagger:model</span></span><br><span class="line"><span class="keyword">type</span> TeslaCar <span class="keyword">interface</span> &#123;</span><br><span class="line">    <span class="comment">// The model of tesla car</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="comment">// discriminator: true</span></span><br><span class="line">    <span class="comment">// swagger:name model</span></span><br><span class="line">    Model() <span class="keyword">string</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// AutoPilot returns true when it supports autopilot</span></span><br><span class="line">    <span class="comment">// swagger:name autoPilot</span></span><br><span class="line">    AutoPilot() <span class="keyword">bool</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// The ModelS version of the tesla car</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// swagger:model modelS</span></span><br><span class="line"><span class="keyword">type</span> ModelS <span class="keyword">struct</span> &#123;</span><br><span class="line">    <span class="comment">// swagger:allOf com.tesla.models.ModelS</span></span><br><span class="line">    TeslaCar</span><br><span class="line">    <span class="comment">// The edition of this Model S</span></span><br><span class="line">    Edition <span class="keyword">string</span> <span class="string">`json:"edition"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// The ModelX version of the tesla car</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// swagger:model modelX</span></span><br><span class="line"><span class="keyword">type</span> ModelX <span class="keyword">struct</span> &#123;</span><br><span class="line">    <span class="comment">// swagger:allOf com.tesla.models.ModelX</span></span><br><span class="line">    TeslaCar</span><br><span class="line">    <span class="comment">// The number of doors on this Model X</span></span><br><span class="line">    Doors <span class="keyword">int32</span> <span class="string">`json:"doors"`</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="swagger-ignore"><a href="#swagger-ignore" class="headerlink" title="swagger:ignore"></a>swagger:ignore</h5><p>将结构标记为从Swagger规范输出中显式忽略</p>
+<p>语法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">swagger:ignore</span><br></pre></td></tr></table></figure>
+
+<h3 id="在线swagger-editor-文档编辑器"><a href="#在线swagger-editor-文档编辑器" class="headerlink" title="在线swagger editor 文档编辑器"></a>在线swagger editor 文档编辑器</h3><h4 id="启动方式"><a href="#启动方式" class="headerlink" title="启动方式"></a>启动方式</h4><ol>
+<li><p>镜像拉取</p>
+<p>docker pull swaggerapi/swagger-editor</p>
+</li>
+<li><p>镜像运行</p>
+<p>docker run –rm -p 80:8080 swaggerapi/swagger-editor</p>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;">
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Golang/" rel="tag"><i class="fa fa-tag"></i> Golang</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/12/12.区块链/Hyperledger fabric/3.Fabric 示例应用搭建/" rel="next" title="Fabric 示例应用搭建">
+                <i class="fa fa-chevron-left"></i> Fabric 示例应用搭建
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/04/29/11.Golang/Golang工具包/使用 godoc 生成文档/" rel="prev" title>
+                 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="刘小恺(Kyle)">
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">197</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">52</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">60</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#从源码生成spec文档"><span class="nav-text">从源码生成spec文档</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#spec-生成命令"><span class="nav-text">spec 生成命令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#spec生成方法"><span class="nav-text">spec生成方法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#生成包的spec"><span class="nav-text">生成包的spec</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#合并yml文件定义的spec"><span class="nav-text">合并yml文件定义的spec</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#生成yaml格式的spec文件"><span class="nav-text">生成yaml格式的spec文件</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Spec生成规则"><span class="nav-text">Spec生成规则</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#swagger-meta"><span class="nav-text">swagger:meta</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#swagger-route"><span class="nav-text">swagger:route</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#swagger-parameters"><span class="nav-text">swagger:parameters</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#swagger-operation"><span class="nav-text">swagger:operation</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#swagger-response"><span class="nav-text">swagger:response</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#swagger-momdel"><span class="nav-text">swagger:momdel</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#swagger-allOf"><span class="nav-text">swagger:allOf</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#swagger-strfmt"><span class="nav-text">swagger:strfmt</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#swagger-discriminated"><span class="nav-text">swagger:discriminated</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#swagger-ignore"><span class="nav-text">swagger:ignore</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在线swagger-editor-文档编辑器"><span class="nav-text">在线swagger editor 文档编辑器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#启动方式"><span class="nav-text">启动方式</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

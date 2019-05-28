@@ -589,8 +589,10 @@
 <p>第5步：将本地代码编译成动态库(Windows系统下是.dll文件，如果是Linux系统下是.so文件，如果是Mac系统下是.jnilib)</p>
 <p>第6步：通过Java命令执行Java程序，最终实现Java调用本地代码。</p>
 <h4 id="在Java开发中的静态类定义方法"><a href="#在Java开发中的静态类定义方法" class="headerlink" title="在Java开发中的静态类定义方法"></a>在Java开发中的静态类定义方法</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NDKTools</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        System.loadLibrary(<span class="string">"ndkdemotest-jni"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">native</span> String <span class="title">getStringFromNDK</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <h3 id="2-在python中怎么调用-so文件"><a href="#2-在python中怎么调用-so文件" class="headerlink" title="2. 在python中怎么调用.so文件"></a>2. 在python中怎么调用.so文件</h3><p>在linux系统中可以使用python的ctypes库来导入并调用.sh静态库</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> ctypes <span class="keyword">import</span> cdll</span><br><span class="line"> </span><br><span class="line">cur = cdll.LoadLibrary(<span class="string">'./libmax.so'</span>)</span><br><span class="line"> </span><br><span class="line">a = cur.``max(<span class="number">1</span>, <span class="number">2</span>)</span><br></pre></td></tr></table></figure>
+
 <h3 id="3-IDA工具的使用"><a href="#3-IDA工具的使用" class="headerlink" title="3. IDA工具的使用"></a><strong>3. IDA工具的使用</strong></h3><p><img src="/img/1551410628783.png" alt="1551410628783"></p>
 <p>这里有多个窗口，也有多个视图，用到最多的就是：</p>
 <p><strong>1、Function Window对应的so函数区域：这里我们可以使用ctrl+f进行函数的搜索</strong></p>
@@ -617,7 +619,7 @@
 <p>有时候，字符串是一个非常重要的信息，特别是对于破解的时候，可能就是密码，或者是密码库信息。</p>
 <p><strong>3、Ctrl+S快捷键，有两个用途，在正常打开so文件的IDA View视图的时候，可以查看so对应的Segement信息</strong></p>
 <p><img src="/img/1551410751137.png" alt="1551410751137"></p>
-<p>可以快速得到，一个段的开始位置和结束位置，不过这个位置是相对位置，不是so映射到内存之后的位置，关于so中的段信息，不了解的同学可以参看这篇文章：<a href="http://mp.weixin.qq.com/s?__biz=MzIzNDA3MDgwNA==&amp;mid=400057744&amp;idx=1&amp;sn=32d7f6fdb1bd18509232e6106b8bbae6&amp;scene=21#wechat_redirect" target="_blank" rel="noopener">Android中so文件格式详解</a> 这篇文章介绍的很很清楚了，这里就不在作介绍了。</p>
+<p>可以快速得到，一个段的开始位置和结束位置，不过这个位置是相对位置，不是so映射到内存之后的位置，关于so中的段信息，不了解的同学可以参看这篇文章：<a href="http://mp.weixin.qq.com/s?__biz=MzIzNDA3MDgwNA==&mid=400057744&idx=1&sn=32d7f6fdb1bd18509232e6106b8bbae6&scene=21#wechat_redirect" target="_blank" rel="noopener">Android中so文件格式详解</a> 这篇文章介绍的很很清楚了，这里就不在作介绍了。</p>
 <p>当在调试页面的候，ctrl+s可以快速定位到我们想要调试的so文件映射到内存的地址：</p>
 <p><img src="/img/1551410781138.png" alt="1551410781138"></p>
 <p>因为一般一个程序，肯定会包含多个so文件的，比如系统的so就有好多的，一般都是在/system/lib下面，当然也有我们自己的so，这里我们看到这里的开始位置和结束位置就是这个so文件映射到内存中：</p>
@@ -662,7 +664,8 @@
 <p>ADD    加指令<br>SUB    减指令<br>STR    把寄存器内容存到栈上去<br>LDR    把栈上内容载入一寄存器中<br>.W    是一个可选的指令宽度说明符。它不会影响为此指令的行为，它只是确保生成 32 位指令。Infocenter.arm.com的详细信息<br>BL    执行函数调用，并把使lr指向调用者(caller)的下一条指令，即函数的返回地址<br>BLX    同上，但是在ARM和thumb指令集间切换。<br>CMP    指令进行比较两个操作数的大小</p>
 <p><strong>4、ARM指令简单代码段分析</strong></p>
 <p>C代码：</p>
-<p>#include &lt;stdio.h&gt;<br>int func(int a, int b, int c, int d, int e, int f)<br>{<br>​    int g = a + b + c + d + e + f;<br>​    return g;<br>}</p>
+<p>#include &lt;stdio.h&gt;<br>int func(int a, int b, int c, int d, int e, int f)<br>{
+​    int g = a + b + c + d + e + f;<br>​    return g;<br>}</p>
 <p>对应的ARM指令：</p>
 <p>add r0, r1  将参数a和参数b相加再把结果赋值给r0<br>ldr.w r12, [sp]  把最的一个参数f从栈上装载到r12寄存器<br>add r0, r2  把参数c累加到r0上<br>ldr.w r9, [sp, #4]  把参数e从栈上装载到r9寄存器<br>add r0, r3  累加d累加到r0<br>add r0, r12  累加参数f到r0<br>add r0, r9  累加参数e到r0</p>
 <h2 id="二、构造so案例"><a href="#二、构造so案例" class="headerlink" title="二、构造so案例"></a><strong>二、构造so案例</strong></h2><p>好了，关于ARM指令的相关知识，就介绍这么多了，不过我们在调试分析的时候，肯定不能做到全部的了解，因为本身ARM指令语法就比较复杂，不过幸好大学学习了汇编语言，所以稍微能看懂点，如果不懂汇编的同学那就可能需要补习一下了，因为我们在使用IDA分析so文件的时候，不会汇编的话，那是肯定行不通的，所以我们必须要看懂汇编代码的，如果遇到特殊指令不了解的同学，可以网上搜一下即可。</p>
@@ -1030,8 +1033,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/03/01/02.python爬虫/爬虫扩展功能/Android逆向-动态分析破解APk(破解加固)/" rel="next" title="Android逆向-动态分析破解Apk(破解加固)">
-                <i class="fa fa-chevron-left"></i> Android逆向-动态分析破解Apk(破解加固)
+              <a href="/2019/02/27/02.python爬虫/爬虫扩展功能/Android反编译爬虫((裁判文书app示例))/" rel="next" title="Android反编译尝试(裁判文书app示例)">
+                <i class="fa fa-chevron-left"></i> Android反编译尝试(裁判文书app示例)
               </a>
             
           </div>
@@ -1040,8 +1043,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/03/01/02.python爬虫/爬虫扩展功能/Android逆向-静态分析破解APk/" rel="prev" title="Android逆向-静态分析破解Apk">
-                Android逆向-静态分析破解Apk <i class="fa fa-chevron-right"></i>
+              <a href="/2019/03/01/02.python爬虫/爬虫扩展功能/Android逆向-动态分析破解APk(破解加固)/" rel="prev" title="Android逆向-动态分析破解Apk(破解加固)">
+                Android逆向-动态分析破解Apk(破解加固) <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>

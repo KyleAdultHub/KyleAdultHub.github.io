@@ -493,8 +493,7 @@
 <th>差额</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td>T0</td>
 <td>A 转给 B</td>
 <td>他人向 A 交易的输出</td>
@@ -518,8 +517,7 @@
 <td>X 签名确认</td>
 <td>输入减输出，为交易服务费</td>
 </tr>
-</tbody>
-</table>
+</tbody></table>
 <p>需要注意，刚放进网络中的交易（深度为 0）并非是实时得到确认的。进入网络中的交易存在被推翻的可能性，一般要再生成几个新的区块后（深度大于 0）才认为该交易被确认。</p>
 <p>下面分别介绍比特币网络中的重要概念和主要设计思路。</p>
 <h4 id="账户-地址"><a href="#账户-地址" class="headerlink" title="账户(地址)"></a>账户(地址)</h4><p>比特币采用了非对称的加密算法，用户自己保留私钥，对自己发出的交易进行签名确认，并公开公钥。</p>
@@ -542,9 +540,12 @@
 <li>转账将消耗掉属于你自己的UTXO， 同时生成新的UTXO， 并用接受者的公钥锁定。</li>
 </ul>
 <h4 id="交易的原理"><a href="#交易的原理" class="headerlink" title="交易的原理"></a>交易的原理</h4><h5 id="一笔交易包含的信息"><a href="#一笔交易包含的信息" class="headerlink" title="一笔交易包含的信息"></a>一笔交易包含的信息</h5><ul>
-<li>交易的输入的交易 ID（UTXO）</li>
-<li>交易的金额: 多少钱，和输入的差额为交易的服务费</li>
-<li>时间戳: 交易合适能生效</li>
+<li><p>交易的输入的交易 ID（UTXO）</p>
+</li>
+<li><p>交易的金额: 多少钱，和输入的差额为交易的服务费</p>
+</li>
+<li><p>时间戳: 交易合适能生效</p>
+</li>
 <li><p>锁定脚本（用接受者的公钥哈希）- 将比特币地址锁定到接收者</p>
 </li>
 <li><p>解锁脚本（发送者用私钥对交易的数字签名, 发送者的公钥）-  用来证明比特币确实属于发送者，并保证内容不被篡改</p>
@@ -558,9 +559,12 @@
 </li>
 <li><p>交易的size要小于区块size的上限 （比如比特币之前的大小限制是1M  ）</p>
 </li>
-<li>交易的输入UTXO是存在的</li>
-<li>交易输入UTXO没有被其他交易引用-防止双花（Double Spending）</li>
-<li>输入总金额 &gt; 输出的总金额</li>
+<li><p>交易的输入UTXO是存在的</p>
+</li>
+<li><p>交易输入UTXO没有被其他交易引用-防止双花（Double Spending）</p>
+</li>
+<li><p>输入总金额 &gt; 输出的总金额</p>
+</li>
 <li><p>解锁脚本的验证</p>
 </li>
 <li><p>将合格的交易加入到本地的Transaction数据库中，并将合法的交易转给临近节点</p>
@@ -575,7 +579,7 @@
 </ul>
 </li>
 <li>值的盲区 <ul>
-<li>一个 UTXO 脚本没有办法提供资金的颗粒度可控的出金操作。比如, 一个预言合约（oracle contract ）的其中一个强大的用例就是一个套期保值的合约，A 和 B 都把价值1000\$的 BTC 放到合约中，30 天后，这个合约把价值 1000\$的 BTC 发给了 A，剩下的发给了B。 这就需要合约要确定 1BTC 以美元计值多少钱。然而，因为 UTXO 是不可分割的，为实现此合约，唯一的方法是非常低效地采用许多有不同面值的 UTXO（例如有 2^k 的 UTXO，其中 K可以最大到 30)并使预言合约挑出正确的 UTXO 发送给 A 和 B。</li>
+<li>一个 UTXO 脚本没有办法提供资金的颗粒度可控的出金操作。比如, 一个预言合约（oracle contract ）的其中一个强大的用例就是一个套期保值的合约，A 和 B 都把价值1000$的 BTC 放到合约中，30 天后，这个合约把价值 1000$的 BTC 发给了 A，剩下的发给了B。 这就需要合约要确定 1BTC 以美元计值多少钱。然而，因为 UTXO 是不可分割的，为实现此合约，唯一的方法是非常低效地采用许多有不同面值的 UTXO（例如有 2^k 的 UTXO，其中 K可以最大到 30)并使预言合约挑出正确的 UTXO 发送给 A 和 B。</li>
 </ul>
 </li>
 <li>状态缺失 <ul>
@@ -599,12 +603,15 @@
 </ul>
 <p>以 P2PKH 为例，输出脚本的格式为</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scriptPubKey: OP_DUP OP_HASH160 &lt;pubKeyHash&gt; OP_EQUALVERIFY OP_CHECKSIG</span><br></pre></td></tr></table></figure>
+
 <p>其中，OP_DUP 是复制栈顶元素；OP_HASH160 是计算 hash 值；OP_EQUALVERIFY 判断栈顶两元素是否相等；OP_CHECKSIG 判断签名是否合法。这条指令实际上保证了只有 pubKey 的拥有者才能合法引用这个输出。</p>
 <p>另外一个交易如果要花费这个输出，在引用这个输出的时候，需要提供认领(输入)脚本格式为</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scriptSig: &lt;sig&gt; &lt;pubKey&gt;</span><br></pre></td></tr></table></figure>
+
 <p>其中， 是拿 pubKey 对应的私钥对交易（全部交易的输出、输入和脚本）Hash 值进行签名，pubKey 的 Hash 值需要等于 pubKeyHash。</p>
 <p>进行交易验证时，会按照先 scriptSig 后 scriptPubKey 的顺序进行依次入栈处理，即完整指令为：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;sig&gt; &lt;pubKey&gt; OP_DUP OP_HASH160 &lt;pubKeyHash&gt; OP_EQUALVERIFY OP_CHECKSIG</span><br></pre></td></tr></table></figure>
+
 <p>读者可以按照栈的过程来进行推算，理解整个脚本的验证过程。</p>
 <p>引入脚本机制带来了灵活性，但也引入了更多的安全风险。比特币脚本支持的指令集十分简单，基于栈的处理方式，并且非图灵完备，此外还添加了额外的一些限制（大小限制等）。</p>
 <h5 id="比特币脚本语言-基于栈的脚本语言"><a href="#比特币脚本语言-基于栈的脚本语言" class="headerlink" title="比特币脚本语言-基于栈的脚本语言"></a>比特币脚本语言-基于栈的脚本语言</h5><ul>

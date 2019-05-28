@@ -475,6 +475,7 @@
         <h3 id="1-过拟合问题"><a href="#1-过拟合问题" class="headerlink" title="1.过拟合问题"></a>1.过拟合问题</h3><h4 id="过拟合问题描述"><a href="#过拟合问题描述" class="headerlink" title="过拟合问题描述"></a>过拟合问题描述</h4><p>常用的机器学习优化算法，包括线性回归和逻辑回归，它们能够有效地解决许多问题，但是当将它们应用到某些特定的机器学习应用时，会遇到过拟合(over-fitting)的问题，可能会导致它们效果很差。使用正则化技术可以减少过拟合问题。<br>如果我们有非常多的特征，我们通过学习得到的假设可能能够非常好地适应训练集（代价函数可能几乎为0），但是可能会不能推广到新的数据。<br>下图是一个回归问题的例子：</p>
 <p><img src="/img/1541172957837.png" alt="1541172957837"></p>
 <a id="more"></a>
+
 <p>第一个模型是一个线性模型，欠拟合，不能很好地适应我们的训练集；第三个模型是一个四次方的模型，过于强调拟合原始数据，而丢失了算法的本质：预测新数据。我们可以看出，若给出一个新的值使之预测，它将表现的很差，是过拟合，虽然能非常好地适应我们的训练集但在新输入变量进行预测时可能会效果不好；而中间的模型似乎最合适。<br>分类问题中也存在这样的问题：</p>
 <p><img src="/img/1541173045662.png" alt="1541173045662"></p>
 <p>就以多项式理解， 的次数越高，拟合的越好，但相应的预测的能力就可能变差。</p>
@@ -506,6 +507,7 @@
 <p><img src="/img/1541175045035.png" alt="1541175045035"></p>
 <p><strong>用Python实现</strong></p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">costReg</span><span class="params">(theta, X, y, learningRate)</span>:</span></span><br><span class="line">	theta = np.matrix(theta)</span><br><span class="line">	X = np.matrix(X)</span><br><span class="line">	y = np.matrix(y)</span><br><span class="line">	first = np.multiply(‐y, np.log(sigmoid(X*theta.T)))</span><br><span class="line">	second = np.multiply((<span class="number">1</span> ‐ y), np.log(<span class="number">1</span> ‐ sigmoid(X*theta.T)))</span><br><span class="line">	reg = (learningRate / (<span class="number">2</span> * len(X))* np.sum(np.power(theta[:,<span class="number">1</span>:theta.shape[<span class="number">1</span>]],<span class="number">2</span>))</span><br><span class="line">	<span class="keyword">return</span> np.sum(first ‐ second) / (len(X)) + reg</span><br></pre></td></tr></table></figure>
+
 <p><strong>要最小化该代价函数，通过求导，得出梯度下降算法为：</strong></p>
 <p><img src="/img/1541175163753.png" alt="1541175163753"></p>
 <p>注：看上去同线性回归一样，但是知道 $h_θ(x) = g(θ^TX)$ ，所以与线性回归不同。 Octave 中，我们依旧可以用fminuc 函数来求解代价函数最小化的参数，值得注意的是θ0参数的更新规则与其他情况不同。 </p>

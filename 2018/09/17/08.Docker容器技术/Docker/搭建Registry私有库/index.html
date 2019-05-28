@@ -469,29 +469,39 @@
 <p> 官方在Docker hub上提供了registry的镜像（<a href="https://hub.docker.com/_/registry/" target="_blank" rel="noopener">详情</a>），我们可以直接使用该registry镜像来构建一个容器，搭建我们自己的私有仓库服务。Tag为latest的registry镜像是0.9.1版本的，我们直接采用2.1.1版本。</p>
 <a id="more"></a>
 <h3 id="2-Registry的部署"><a href="#2-Registry的部署" class="headerlink" title="2.Registry的部署"></a>2.Registry的部署</h3><p><strong>运行下面命令获取registry镜像</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> sudo docker pull registry:2.1.1</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> sudo docker pull registry:2.1.1</span><br></pre></td></tr></table></figure>
+
 <p><strong>然后启动一个容器</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> sudo docker run -d -v /opt/data/registry/:/var/lib/registry -p 5000:5000 --restart=always --name registry registry:2.1.1</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> sudo docker run -d -v /opt/data/registry/:/var/lib/registry -p 5000:5000 --restart=always --name registry registry:2.1.1</span><br></pre></td></tr></table></figure>
+
 <p><strong>验证服务是否启动成功</strong></p>
 <p>说明我们已经启动了registry服务，打开浏览器输入<a href="http://127.0.0.1:5000/v2" target="_blank" rel="noopener">http://127.0.0.1:5000/v2</a></p>
 <h3 id="3-验证"><a href="#3-验证" class="headerlink" title="3.验证"></a>3.验证</h3><p><strong>向仓库中push镜像</strong></p>
 <p>现在我们通过将镜像push到registry来验证一下。我的机器上有个hello-world的镜像，我们要通过docker tag将该镜像标志为要推送到私有仓库，</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> sudo docker tag hello-world 127.0.0.1:5000/hello-world</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> sudo docker tag hello-world 127.0.0.1:5000/hello-world</span><br></pre></td></tr></table></figure>
+
 <p>接下来，我们运行docker push将hello-world镜像push到我们的私有仓库中，</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> sudo docker push 127.0.0.1:5000/hello-world</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> sudo docker push 127.0.0.1:5000/hello-world</span><br></pre></td></tr></table></figure>
+
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">The push refers to a repository [127.0.0.1:5000/hello-world] (len: 1)</span><br><span class="line"></span><br><span class="line">975b84d108f1: Image successfully pushed</span><br><span class="line"></span><br><span class="line">3f12c794407e: Image successfully pushed</span><br><span class="line"></span><br><span class="line">latest: digest: sha256:1c7adb1ac65df0bebb40cd4a84533f787148b102684b74cb27a1982967008e4b size: 2744</span><br></pre></td></tr></table></figure>
+
 <p>现在我们可以查看我们本地/opt/registry目录下已经有了刚推送上来的hello-world。我们也在浏览器中输入<a href="http://127.0.0.1:5000/v2/_catalog，如下图所示，" target="_blank" rel="noopener">http://127.0.0.1:5000/v2/_catalog，如下图所示，</a></p>
 <p><strong>从镜像库中拉取镜像</strong></p>
 <p>现在我们可以先将我们本地的127.0.0.1:5000/hello-world和hello-world先删除掉，</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> sudo docker rmi hello-world</span></span><br><span class="line"></span><br><span class="line"><span class="meta">$</span><span class="bash"> sudo docker rmi 127.0.0.1:5000/hello-world</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> sudo docker rmi hello-world</span><br><span class="line"></span><br><span class="line"><span class="meta">$</span> sudo docker rmi 127.0.0.1:5000/hello-world</span><br></pre></td></tr></table></figure>
+
 <p>然后使用docker pull从我们的私有仓库中获取hello-world镜像，</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> sudo docker pull 127.0.0.1:5000/hello-world</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> sudo docker pull 127.0.0.1:5000/hello-world</span><br></pre></td></tr></table></figure>
+
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">Using default tag: latest</span><br><span class="line"></span><br><span class="line">latest: Pulling from hello-world</span><br><span class="line"></span><br><span class="line">b901d36b6f2f: Pull complete</span><br><span class="line"></span><br><span class="line">0a6ba66e537a: Pull complete</span><br><span class="line"></span><br><span class="line">Digest: sha256:1c7adb1ac65df0bebb40cd4a84533f787148b102684b74cb27a1982967008e4b</span><br><span class="line"></span><br><span class="line">Status: Downloaded newer image for 127.0.0.1:5000/hello-world:latest</span><br><span class="line"></span><br><span class="line">lienhua34@lienhua34-Compaq-Presario-CQ35-Notebook-PC ~ $ sudo docker images</span><br><span class="line"></span><br><span class="line">REPOSITORY TAG IMAGE ID CREATED VIRTUAL SIZE</span><br><span class="line"></span><br><span class="line">registry 2.1.1 b91f745cd233 5 days ago 220.1 MB</span><br><span class="line"></span><br><span class="line">ubuntu 14.04 a5a467fddcb8 6 days ago 187.9 MB</span><br><span class="line"></span><br><span class="line">127.0.0.1:5000/hello-world latest 0a6ba66e537a 2 weeks ago 960 B</span><br></pre></td></tr></table></figure>
+
 <h3 id="4-查询镜像库"><a href="#4-查询镜像库" class="headerlink" title="4.查询镜像库"></a>4.查询镜像库</h3><p><strong>查询镜像库中的镜像</strong></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://10.0.110.218:5000/v2/_catalog</span><br></pre></td></tr></table></figure>
+
 <h3 id="5-错误排查"><a href="#5-错误排查" class="headerlink" title="5.错误排查"></a>5.错误排查</h3><p><strong>错误描述</strong></p>
 <p>在push 到docker registry时，可能会报错：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">The push refers to a repository [192.168.1.100:5000/registry]</span><br><span class="line"></span><br><span class="line">Get https://192.168.1.100:5000/v1/_ping: http: server gave HTTP response to HTTPS client</span><br></pre></td></tr></table></figure>
+
 <p>这个问题可能是由于客户端采用https，docker registry未采用https服务所致。一种处理方式是把客户对地址“192.168.1.100:5000”请求改为http。</p>
 <p>目前很多文章都是通过修改docker的配置文件“etc/systemconfig/docker”，重启docker来解决这个问题。但发现docker1.12.3版本并无此文件，根据网上创建此文件，并填入相应内容，重启docker无效果，仍然报此错误。</p>
 <p> <strong>解决办法</strong></p>

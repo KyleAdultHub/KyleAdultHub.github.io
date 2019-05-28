@@ -526,6 +526,7 @@
 <p><img src="/img/1551409757817.png" alt="1551409757817"></p>
 <p>看到这张图了，阿里还挺会制造氛围的，那么其实很简单，我们输入密码就可以破解了，下面我们就来看看如何获取这个密码。</p>
 <h3 id="第一步：使用apktool来破解apk"><a href="#第一步：使用apktool来破解apk" class="headerlink" title="第一步：使用apktool来破解apk"></a><strong>第一步：使用apktool来破解apk</strong></h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar apktool_2.0.0rc4.jar d -d AliCraceme_1.apk -o out</span><br></pre></td></tr></table></figure>
+
 <p><img src="/img/1551409769124.png" alt="1551409769124"></p>
 <p>这里的命令不做解释了。</p>
 <p><strong>但是有一个参数必须带上，那就是：-d</strong></p>
@@ -548,15 +549,18 @@
 <p>找到入口Activity之后，我们直接在他的onCreate方法的第一行加上waitForDebugger代码即可，找到对应的MainActivity的smali源码：</p>
 <p>然后添加一行代码：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">invoke-<span class="keyword">static</span> &#123;&#125;, Landroid/os/Debug;-&gt;waitForDebugger()V</span><br></pre></td></tr></table></figure>
+
 <p>这个是smali语法的，其实对应的Java代码就是：<strong>android.os.Debug.waitForDebugger();</strong></p>
 <p><img src="/img/1551409836324.png" alt="1551409836324"></p>
 <p>这里把Java语言翻译成smali语法的，不难，网上有smali的语法解析，这里不想再解释了。</p>
 <h3 id="第三步：回编译apk并且进行签名安装"><a href="#第三步：回编译apk并且进行签名安装" class="headerlink" title="第三步：回编译apk并且进行签名安装"></a><strong>第三步：回编译apk并且进行签名安装</strong></h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar apktool_2.0.0rc4.jar b -d out -o debug.apk</span><br></pre></td></tr></table></figure>
+
 <p>还是使用apktool进行回编译</p>
 <p><img src="/img/1551409847720.png" alt="1551409847720"></p>
 <p>编译完成之后，将得到debug.apk文件，但是这个apk是没有签名的，所以是不能安装的，那么下面我们需要在进行签名，这里我们使用Android中的测试程序的签名文件和sign.jar工具进行签名：</p>
 <p><img src="/img/1551409870379.png" alt="1551409870379"></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar .\sign\signapk.jar .\sign\testkey.x509.pem .\sign\testkey.pk8 debug.apk debug.sig.apk</span><br></pre></td></tr></table></figure>
+
 <p><img src="/img/1551409887896.png" alt="1551409887896"></p>
 <p>签名之后，我们就可以进行安装了。</p>
 <h3 id="第四步：在Eclipse中新建一个Java工程，导入smali源码"><a href="#第四步：在Eclipse中新建一个Java工程，导入smali源码" class="headerlink" title="第四步：在Eclipse中新建一个Java工程，导入smali源码"></a><strong>第四步：在Eclipse中新建一个Java工程，导入smali源码</strong></h3><p>这里我们新建一个Java工程，记住不是Android工程，因为我们最后调试其实是借助于Java的调试器，然后勾选掉Use default location选项，选择我们的smali源码目录，也就是我们上面反编译之后的out目录，点击完成</p>
@@ -763,8 +767,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/03/01/02.python爬虫/爬虫扩展功能/Android逆向-静态分析破解APk/" rel="next" title="Android逆向-静态分析破解Apk">
-                <i class="fa fa-chevron-left"></i> Android逆向-静态分析破解Apk
+              <a href="/2019/03/01/02.python爬虫/爬虫扩展功能/Android逆向-动态分析破解APk(破解加固)/" rel="next" title="Android逆向-动态分析破解Apk(破解加固)">
+                <i class="fa fa-chevron-left"></i> Android逆向-动态分析破解Apk(破解加固)
               </a>
             
           </div>
@@ -773,8 +777,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/03/21/12.区块链/Hyperledger fabric/1.Fabric网络搭建/" rel="prev" title="Fabric网络搭建">
-                Fabric网络搭建 <i class="fa fa-chevron-right"></i>
+              <a href="/2019/03/01/02.python爬虫/爬虫扩展功能/Android逆向-静态分析破解APk/" rel="prev" title="Android逆向-静态分析破解Apk">
+                Android逆向-静态分析破解Apk <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>

@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Chaincode 介绍chaincode作用Fabric的Chaincode是一段运行在容器中的程序。Chaincode是客户端程序和Fabric之间的桥梁。 通过Chaincode客户端程序可以发起交易，查询交易。 chaincode 运行环境Chaincode是运行在Dokcer容器中，因此相对来说安全。 支持语言目前支持 java,node，go,go是最稳定的。其他还在完善。 chain">
+<meta name="keywords" content="区块链,Fabric">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Fabric 智能合约编写">
+<meta property="og:url" content="http://blog.kyleliu.cn/2019/06/11/12.区块链/Hyperledger fabric/Fabric智能合约编写/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="Chaincode 介绍chaincode作用Fabric的Chaincode是一段运行在容器中的程序。Chaincode是客户端程序和Fabric之间的桥梁。 通过Chaincode客户端程序可以发起交易，查询交易。 chaincode 运行环境Chaincode是运行在Dokcer容器中，因此相对来说安全。 支持语言目前支持 java,node，go,go是最稳定的。其他还在完善。 chain">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-06-16T03:13:59.268Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Fabric 智能合约编写">
+<meta name="twitter:description" content="Chaincode 介绍chaincode作用Fabric的Chaincode是一段运行在容器中的程序。Chaincode是客户端程序和Fabric之间的桥梁。 通过Chaincode客户端程序可以发起交易，查询交易。 chaincode 运行环境Chaincode是运行在Dokcer容器中，因此相对来说安全。 支持语言目前支持 java,node，go,go是最稳定的。其他还在完善。 chain">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2019/06/11/12.区块链/Hyperledger fabric/Fabric智能合约编写/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Fabric 智能合约编写 | 刘小恺(Kyle) 的个人博客</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/06/11/12.区块链/Hyperledger fabric/Fabric智能合约编写/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Fabric 智能合约编写
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-06-11 20:22:00" itemprop="dateCreated datePublished" datetime="2019-06-11T20:22:00+08:00">2019-06-11</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/区块链/" itemprop="url" rel="index"><span itemprop="name">区块链</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/区块链/Hyperledger-fabric/" itemprop="url" rel="index"><span itemprop="name">Hyperledger fabric</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/06/11/12.区块链/Hyperledger fabric/Fabric智能合约编写/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/06/11/12.区块链/Hyperledger fabric/Fabric智能合约编写/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="Chaincode-介绍"><a href="#Chaincode-介绍" class="headerlink" title="Chaincode 介绍"></a>Chaincode 介绍</h3><h4 id="chaincode作用"><a href="#chaincode作用" class="headerlink" title="chaincode作用"></a>chaincode作用</h4><p>Fabric的Chaincode是一段运行在容器中的程序。Chaincode是客户端程序和Fabric之间的桥梁。</p>
+<p>通过Chaincode客户端程序可以发起交易，查询交易。</p>
+<h4 id="chaincode-运行环境"><a href="#chaincode-运行环境" class="headerlink" title="chaincode 运行环境"></a>chaincode 运行环境</h4><p>Chaincode是运行在Dokcer容器中，因此相对来说安全。</p>
+<h4 id="支持语言"><a href="#支持语言" class="headerlink" title="支持语言"></a>支持语言</h4><p>目前支持 java,node，go,go是最稳定的。其他还在完善。</p>
+<h4 id="chaincode-运行和使用步骤"><a href="#chaincode-运行和使用步骤" class="headerlink" title="chaincode 运行和使用步骤"></a>chaincode 运行和使用步骤</h4><ol>
+<li><p>创建代码目录</p>
+<p>mkdir -p  {path}</p>
+</li>
+<li><p>存放编写好的chaincode源代码</p>
+</li>
+<li><p>部署chaincode</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">peer chaincode install -n &#123;chaincodeId&#125; -v &#123;version&#125; -p &#123;path&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>实例化chaincode</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">peer chaincode instantiate -o &#123;order_address&#125; -C &#123;channel&#125; -n &#123;chaincodeId&#125; -v &#123;version&#125; -c '&#123;"Args": ["init", "a", "100", "b", "200"]&#125;' -P "OR('Org1MSP.member', 'Org2MSP.member')"</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>调用chaincode</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">peer chaincode invoke -o &#123;order_address&#125; -C &#123;chainnel&#125; -n &#123;chaincodeId&#125; -v &#123;version&#125; -c '&#123;"Args":["invoke", "1", "a", "b"]&#125;'</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h3 id="Golang-版Chaincode-编写规范"><a href="#Golang-版Chaincode-编写规范" class="headerlink" title="Golang 版Chaincode 编写规范"></a>Golang 版Chaincode 编写规范</h3><h4 id="Chaincode-代码结构"><a href="#Chaincode-代码结构" class="headerlink" title="Chaincode 代码结构"></a>Chaincode 代码结构</h4><h5 id="包名"><a href="#包名" class="headerlink" title="包名"></a>包名</h5><p>一个chaincode通常是一个 Goalng源文件，包名必须是main ——   package main</p>
+<h5 id="shim包"><a href="#shim包" class="headerlink" title="shim包"></a>shim包</h5><p>“github.com/hyperledger/fabric/core/shaincode/shim”</p>
+<p>pb  “github.com/hyperledger/fabric/protos/peer”</p>
+<p>shim提供了Fabric系统的上下文环境，包含了Chaincode和Fabic交互的接口。</p>
+<p>在Chaincode中，执行赋值，查询，等功能都是需要通过shim.</p>
+<h5 id="定义结构体"><a href="#定义结构体" class="headerlink" title="定义结构体"></a>定义结构体</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> chainCodeExample <span class="keyword">struct</span> &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>chaincode必须定义一个结构体，结构体的名称可以是任意符合Golang命名规范的字符串，并且必须实现Init 和 Invoke 接口方法；</p>
+<h5 id="实现Init方法"><a href="#实现Init方法" class="headerlink" title="实现Init方法"></a>实现Init方法</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *chainCodeExample)</span> <span class="title">Init</span><span class="params">(stub shim.ChaincodeStubInterface)</span> <span class="title">pb</span>.<span class="title">Response</span></span> &#123;</span><br><span class="line">    Func, args := stub.GetFunvtionAndParameters()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Init方法是系统初始化方法，当执行命令 peer chaincode instantiate 实例化chaincode的时候调用该方法；</p>
+<h5 id="实现Invoke方法"><a href="#实现Invoke方法" class="headerlink" title="实现Invoke方法"></a>实现Invoke方法</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *chainCodeExample)</span> <span class="title">Invoke</span> <span class="params">(stub shim.ChaincodeStubInterface)</span> <span class="title">pb</span>.<span class="title">Response</span></span> &#123;</span><br><span class="line">    Func, args := stub.GetFunvtionAndParameters()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Invoke方法主要是写入数据等对链进行查询和插入修改等操作的主要方法；</p>
+<h4 id="shim包核心方法"><a href="#shim包核心方法" class="headerlink" title="shim包核心方法"></a>shim包核心方法</h4><h5 id="Success"><a href="#Success" class="headerlink" title="Success"></a>Success</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *chainCodeExample)</span> <span class="title">Invoke</span> <span class="params">(stub shim.ChaincodeStubInterface)</span> <span class="title">pb</span>.<span class="title">Response</span></span> &#123;</span><br><span class="line">    Func, args := stub.GetFunvtionAndParameters()</span><br><span class="line">    <span class="keyword">return</span> shim.Success([]<span class="keyword">byte</span>(<span class="string">"success invoke"</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Success 方法负责将正确的消息返回给调用chaincode 的客户端</p>
+<h5 id="Error"><a href="#Error" class="headerlink" title="Error"></a>Error</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *chainCodeExample)</span> <span class="title">Invoke</span> <span class="params">(stub shim.ChaincodeStubInterface)</span> <span class="title">pb</span>.<span class="title">Response</span></span> &#123;</span><br><span class="line">    Func, args := stub.GetFunvtionAndParameters()</span><br><span class="line">    <span class="keyword">return</span> shim.Success([]<span class="keyword">byte</span>(<span class="string">"success invoke"</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Error方法将错误的信息返回给调用Chaincode的客户端。</p>
+<h5 id="LogLevel"><a href="#LogLevel" class="headerlink" title="LogLevel"></a>LogLevel</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *chainCodeExample)</span> <span class="title">Invoke</span> <span class="params">(stub shim.ChaincodeStubInterface)</span> <span class="title">pb</span>.<span class="title">Response</span></span> &#123;</span><br><span class="line">    logLevel, _ := shim.LogLevel(<span class="string">"DEBUG"</span>)</span><br><span class="line">    shim.SetLoggingLevel(logLevel)</span><br><span class="line">    <span class="keyword">return</span> shim.Success([]<span class="keyword">byte</span>(<span class="string">"success invoke and not opter!"</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>LogLevel 方法负责修改Chaincode 中运行日志级别</p>
+<h4 id="Chaincode-StubInterface-接口方法"><a href="#Chaincode-StubInterface-接口方法" class="headerlink" title="Chaincode StubInterface 接口方法"></a>Chaincode StubInterface 接口方法</h4><p>shim包提供了一个接口 ChaincodeStubInte， 在Invoke方法和Init 方法中该接口作为参数传入方法中；</p>
+<h5 id="ChaincodeStubInte-主要方法"><a href="#ChaincodeStubInte-主要方法" class="headerlink" title="ChaincodeStubInte 主要方法"></a><strong>ChaincodeStubInte 主要方法</strong></h5><ul>
+<li>GetFunctionAndParameters                   获取调用链码的方法名和参数列表</li>
+<li>PutState                                                      存储数据到账本中</li>
+<li>DelState                                                       删除账本中的数据</li>
+<li>GetState                                                       从账本中获取指定数据</li>
+<li>CreateCompositeKey                                 创建符合键</li>
+<li>GetStateByPartialCompositeKey            通过符合键取值</li>
+<li>SplitCompositeKey                                     拆分复合键</li>
+<li>GetStateByRange                                        查询指定key 指定范围的历史记录</li>
+<li>GetHistoryForKey                                        获取指定key的历史记录</li>
+<li>GetTxID                                                         获取交易编号</li>
+<li>GetTxTimestamp                                         获取交易的时间</li>
+<li>GetCreator                                                    获取交易的创建者</li>
+<li>InvokeChaincode                                         调用其他的链码</li>
+</ul>
+<h5 id="1、-PutState方法"><a href="#1、-PutState方法" class="headerlink" title="1、 PutState方法"></a>1、 PutState方法</h5><p>将调用者的数据存储到Fabric链上</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *chainCodeExample)</span> <span class="title">Invoke</span> <span class="params">(stub shim.ChaincodeStubInterface)</span> <span class="title">pb</span>.<span class="title">Response</span></span> &#123;</span><br><span class="line">    stub.PutState(<span class="string">"a"</span>, []<span class="keyword">byte</span>(<span class="string">"test"</span>))</span><br><span class="line">    <span class="keyword">return</span> shim.Success([]<span class="keyword">byte</span>(<span class="string">"success invoke"</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="2、-GetState方法"><a href="#2、-GetState方法" class="headerlink" title="2、 GetState方法"></a>2、 GetState方法</h5><p>将调用者的数据存储到Fabric链上</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *chainCodeExample)</span> <span class="title">Invoke</span> <span class="params">(stub shim.ChaincodeStubInterface)</span> <span class="title">pb</span>.<span class="title">Response</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> keyValue []<span class="keyword">byte</span></span><br><span class="line">    <span class="keyword">var</span> err error</span><br><span class="line">    keyValue, err = stub.GetState(<span class="string">"getKey"</span>)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        retutn shim.Error(<span class="string">"find error"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    reutrn shim.Success(keyValue)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="3、GetStateByRange方法"><a href="#3、GetStateByRange方法" class="headerlink" title="3、GetStateByRange方法"></a>3、GetStateByRange方法</h5><p>根据Key的范围来查询相关数据</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *chainCodeExample)</span> <span class="title">Invoke</span> <span class="params">(stub shim.ChaincodeStubInterface)</span> <span class="title">pb</span>.<span class="title">Response</span></span> &#123;</span><br><span class="line">    startKey := <span class="string">"startKey"</span></span><br><span class="line">    enKey := <span class="string">"endKey"</span></span><br><span class="line">    keysIter, err := stub.GetStateByRange(startKey, endKey)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> shim.Error(fmt.Sprintf(<span class="string">"GetStateByRange find err: %s"</span>, err))</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">defer</span> keysIter.Close()</span><br><span class="line">    <span class="keyword">var</span> keyValues <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span></span><br><span class="line">    <span class="keyword">for</span> keysIter.HasNext() &#123;</span><br><span class="line">        response, iterError := keysIter.Next()</span><br><span class="line">        <span class="keyword">if</span> iterError != <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> shim.Error(fmt.Sprintf(<span class="string">"find and error %s"</span>, iterErr))</span><br><span class="line">        &#125;</span><br><span class="line">        keyValues[response.Key] = response.Value</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> key, value := <span class="keyword">range</span> keyValues &#123;</span><br><span class="line">        fmt.Printf(<span class="string">"key %d contains %s\n"</span>, key, value)</span><br><span class="line">    &#125;</span><br><span class="line">    jsonKeys, err := json.Marshal(keys)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> shim.Error(fmt.Sprintf(<span class="string">"find error on marshaling json: %s"</span>, err))</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> shim.Success(jsonKeys)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="4、GetHistoryForKey方法"><a href="#4、GetHistoryForKey方法" class="headerlink" title="4、GetHistoryForKey方法"></a>4、GetHistoryForKey方法</h5><p>查询某个键的历史记录</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *chainCodeExample)</span> <span class="title">Invoke</span> <span class="params">(stub shim.ChaincodeStubInterface)</span> <span class="title">pb</span>.<span class="title">Response</span></span> &#123;</span><br><span class="line">	keyName := <span class="string">"key"</span></span><br><span class="line">    keysIter, err := stub.GetHistoryForKey(keyName)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> shim.Error(fmt.Sprintf(<span class="string">"GetHistoryForKey failed err: %s"</span>, err))</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">defer</span> keysIter.Close()</span><br><span class="line">    <span class="keyword">var</span> keys []<span class="keyword">string</span></span><br><span class="line">    <span class="keyword">for</span> keysIter.HasNext() &#123;</span><br><span class="line">        response, iterError := keysIter.Next()</span><br><span class="line">        <span class="keyword">if</span> iterError != <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> shim.Error(fmt.Sprintf(<span class="string">"iter occur error %s"</span>, iterErr))</span><br><span class="line">        &#125;</span><br><span class="line">        txid := response.TxId</span><br><span class="line">        txvalue := response.Value</span><br><span class="line">        txstatus := response.IsDelete</span><br><span class="line">        txtimesamp := response.Timestamp</span><br><span class="line">        tm := time.Unix(txtimesamp.Seconds, <span class="number">0</span>)</span><br><span class="line">        datestr := tm.Format(<span class="string">"2006-01-02 03:04:05 PM"</span>)</span><br><span class="line">        fmt.Printf(<span class="string">"Tx info - txid: %s value: %s if delete: %t datetime: %s \n"</span>, txid, <span class="keyword">string</span>(txvalue), txstatus, datestr)</span><br><span class="line">        keys = <span class="built_in">append</span>(keys, txid)</span><br><span class="line">    &#125;</span><br><span class="line">    jsonKeys, err := json.Marshal(keys)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> shim.Error(fmt.Sprintf(<span class="string">"find error on marshaling json: %s"</span>, err))</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> shim.Success(jsonKeys)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="5、DelState-方法"><a href="#5、DelState-方法" class="headerlink" title="5、DelState 方法"></a>5、DelState 方法</h5><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *chainCodeExample)</span> <span class="title">Invoke</span> <span class="params">(stub shim.ChaincodeStubInterface)</span> <span class="title">pb</span>.<span class="title">Response</span></span> &#123;</span><br><span class="line">    delKey := <span class="string">"testKey"</span></span><br><span class="line">    err := stub.DelState(delKey)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> shim.Error(<span class="string">"delete error !"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    reutrn shim.Success([]<span class="keyword">byte</span>(<span class="string">"delete success !"</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="6、CreateCompositeKey-方法"><a href="#6、CreateCompositeKey-方法" class="headerlink" title="6、CreateCompositeKey 方法"></a>6、CreateCompositeKey 方法</h5><p>负责创建组合键</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *chainCodeExample)</span> <span class="title">Invoke</span> <span class="params">(stub shim.ChaincodeStubInterface)</span> <span class="title">pb</span>.<span class="title">Response</span></span> &#123;</span><br><span class="line">	params := []<span class="keyword">string</span>(<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>)</span><br><span class="line">	cparams := <span class="string">"test_params"</span></span><br><span class="line">	keyName := <span class="string">"testKey"</span></span><br><span class="line">	cKey, _ := stub.CreateCompositeKey(keyName, params)</span><br><span class="line">	err := stub.PutState(ckey, []<span class="keyword">byte</span>(c_params))</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        fmt.Println(<span class="string">"find errors %s"</span>, err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> shim.Success([]<span class="keyword">byte</span>(cKey))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="7、GetStateByPartialCompositeKey-和-SplitCompositeKey-方法"><a href="#7、GetStateByPartialCompositeKey-和-SplitCompositeKey-方法" class="headerlink" title="7、GetStateByPartialCompositeKey  和 SplitCompositeKey 方法"></a>7、GetStateByPartialCompositeKey  和 SplitCompositeKey 方法</h5><p>用来查询复合键的值</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *chainCodeExample)</span> <span class="title">Invoke</span> <span class="params">(stub shim.ChaincodeStubInterface)</span> <span class="title">pb</span>.<span class="title">Response</span></span> &#123;</span><br><span class="line">	params := []<span class="keyword">string</span>(<span class="string">"a"</span>, <span class="string">"b"</span>)</span><br><span class="line">	keyName := <span class="string">"testKey"</span></span><br><span class="line">	response, err := stub.GetStateByPartialCompositeKey(keyName, params)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        error_str := fmt.Sprintf(<span class="string">"find error: %s"</span>, err)</span><br><span class="line">        <span class="keyword">return</span> shim.Error(error_str)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> response.Close()</span><br><span class="line">	<span class="keyword">var</span> i <span class="keyword">int</span></span><br><span class="line">	<span class="keyword">var</span> tlist []<span class="keyword">string</span></span><br><span class="line">	<span class="keyword">for</span> i = <span class="number">0</span>; response.HasNext; i++ &#123;</span><br><span class="line">        responseRange, err := response.Next()</span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">            err_str := fmt.Springf(<span class="string">"find error: %s"</span>, err)</span><br><span class="line">            fmt.Println(err_str)</span><br><span class="line">            <span class="keyword">return</span> shim.Error(error_str)</span><br><span class="line">        &#125;</span><br><span class="line">        value1, compositeKeyParts, _ := stub.SplitCompositeKey(responseRange.Key)</span><br><span class="line">        value2 := compositeKeyParts[<span class="number">0</span>]</span><br><span class="line">        value3 := compositeKeyParts[<span class="number">1</span>]</span><br><span class="line">        fmt.Printf(<span class="string">"find value v1:%s v2:%s v3:%s\n"</span>, value1, value2, value3)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> shim.Success(<span class="string">"success"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="8、GetTxTimestamp方法"><a href="#8、GetTxTimestamp方法" class="headerlink" title="8、GetTxTimestamp方法"></a>8、GetTxTimestamp方法</h5><p>负责好偶去当前客户端发送交易的时间戳</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *chainCodeExample)</span> <span class="title">Invoke</span> <span class="params">(stub shim.ChaincodeStubInterface)</span> <span class="title">pb</span>.<span class="title">Response</span></span> &#123;</span><br><span class="line">    txTime, err := stub.GetTxTimestamp()</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        fmt.Printf(<span class="string">"Error getting transaction timestamp: %s"</span>, err)</span><br><span class="line">        <span class="keyword">return</span> shim.Error(fmt.Springf(<span class="string">"Error getting transaction timestamp: %s', err))</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">    tm := time.Unix(txTime.Seconds, 0)</span></span><br><span class="line"><span class="string">    fmt.Printf("</span>Transaction Time: %v\n<span class="string">", time.Format("</span><span class="number">2006</span><span class="number">-01</span><span class="number">-02</span> <span class="number">03</span>:<span class="number">04</span>:<span class="number">05</span> PM<span class="string">"))</span></span><br><span class="line"><span class="string">    return shim.Success([]byte(fmt.Springf("</span>time is : %s<span class="string">", tm.Format("</span><span class="number">2006</span><span class="number">-01</span><span class="number">-02</span> <span class="number">03</span>:<span class="number">04</span>:<span class="number">05</span> PM<span class="string">"))))</span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="9、InvokeChaincode方法"><a href="#9、InvokeChaincode方法" class="headerlink" title="9、InvokeChaincode方法"></a>9、InvokeChaincode方法</h5><p>用来在chaincode中调用其他的chaincode链码</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *chainCodeExample)</span> <span class="title">Invoke</span> <span class="params">(stub shim.ChaincodeStubInterface)</span> <span class="title">pb</span>.<span class="title">Response</span></span> &#123;</span><br><span class="line">    chaincodeId := <span class="string">"chaincode2"</span></span><br><span class="line">    channelId := <span class="string">"channel2"</span></span><br><span class="line">    params1 := []<span class="keyword">string</span>&#123;<span class="string">"query"</span>, <span class="string">"a"</span>&#125;</span><br><span class="line">    queryArgs := <span class="built_in">make</span>([][]<span class="keyword">byte</span>, <span class="built_in">len</span>(params1))</span><br><span class="line">    <span class="keyword">for</span> i, arg := <span class="keyword">range</span> params1 &#123;</span><br><span class="line">        queryArgs[i] = []<span class="keyword">byte</span>(arg)</span><br><span class="line">    &#125;</span><br><span class="line">    response := stub.InvokeChaincode(chaincodeId, params1, channelId)</span><br><span class="line">    <span class="keyword">if</span> response.Status != shim.OD &#123;</span><br><span class="line">        errStr := fmt.Sprintf(<span class="string">"Failed to query chaincode, got error: %s"</span>, response.Payload)</span><br><span class="line">        fmt.Printf(errStr)</span><br><span class="line">        <span class="keyword">return</span> shim.Error(errStr)</span><br><span class="line">    &#125;</span><br><span class="line">    result := <span class="keyword">string</span>(response.Payload)</span><br><span class="line">    fmt.Printf(<span class="string">"invoke chaincode %s"</span>, result)</span><br><span class="line">    <span class="keyword">return</span> shim.Success([]<span class="keyword">byte</span>(<span class="string">"success invoke chaincode and not opter!"</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Chaincode-操作命令"><a href="#Chaincode-操作命令" class="headerlink" title="Chaincode 操作命令"></a>Chaincode 操作命令</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Available Commands:</span><br><span class="line">	install</span><br><span class="line">	instantiate</span><br><span class="line">	invoke</span><br><span class="line">	list</span><br><span class="line">	package</span><br><span class="line">	query</span><br><span class="line">	signpackage</span><br><span class="line">	upgrade</span><br><span class="line">Flags:</span><br><span class="line">		--cafile</span><br><span class="line">    -o, --orderer</span><br><span class="line">        --tls</span><br><span class="line">        --transient</span><br><span class="line">Global Flags:</span><br><span class="line">		--logging-level</span><br><span class="line">		--test.coverprofile</span><br><span class="line">	-v, --version</span><br></pre></td></tr></table></figure>
+
+<h3 id="Chaincode背书规则指定"><a href="#Chaincode背书规则指定" class="headerlink" title="Chaincode背书规则指定"></a>Chaincode背书规则指定</h3><h4 id="背书介绍"><a href="#背书介绍" class="headerlink" title="背书介绍"></a>背书介绍</h4><p>Fabaric 中对数据参与方对数据的确认是真实通过Chaincode来进行的。</p>
+<p><strong>什么是背书呢？</strong></p>
+<p>背书就是仪表交易被确认的过程。大概意思就是交易你必须背会一本书才能操作。</p>
+<p>背书策略被用来指示对相关的参与方如何对交易进行确认。当一个节点接收到一个交易请求的时候，会调用vscc系统（系统Chaincode，专门负责处理背书相关的操作）与交易的Chaincode共同来验证交易的合法性。在vscc和交易的 Chaincode共同对交易的确认中，通常会做一下的校验。</p>
+<ol>
+<li>所有的背书是否有效</li>
+<li>参与背书的数量是否满足要求</li>
+<li>所有背书参与方是否满足要求</li>
+</ol>
+<h4 id="指定背书规则的方法"><a href="#指定背书规则的方法" class="headerlink" title="指定背书规则的方法"></a>指定背书规则的方法</h4><p>背书策略的设置是通过Chaincode部署时instantiate命令中的-p参数来设置的。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">peer chaincode instantiate -o &#123;order_address&#125; -C &#123;channel&#125; -n &#123;chaincodeId&#125; -v &#123;version&#125; -c '&#123;"Args": ["init", "a", "100", "b", "200"]&#125;' -P "OR('Org1MSP.member', 'Org2MSP.member')"</span><br></pre></td></tr></table></figure>
+
+<p>这个参数包说明是当前Chaincode发起的交易，需要组织编号为 Org1MSP的组织编号为Org2MSP的组织中的任何一个用户共同参与交易的确认并且同意。这样交易才能生效并且记录到 区块链中。</p>
+<p>通过上述背书策略的示例我们可以知道背书策略是通过一定的关键字和系统的属性组成的。</p>
+<h4 id="背书编写示例"><a href="#背书编写示例" class="headerlink" title="背书编写示例"></a>背书编写示例</h4><ol>
+<li><p>逻辑与关系</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AND('Org1MSP.member', 'Org2MSP.member', 'Org3MSP.member')</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>逻辑或关系</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">OR('Org1MSP.member', 'Org2MSP.member', 'Org3MSP.member')</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>逻辑与或关系并存</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">OR('Org1MSP.member', AND('Org2MSP.member', 'Org3MSP.member'))</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;">
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/区块链/" rel="tag"><i class="fa fa-tag"></i> 区块链</a>
+          
+            <a href="/tags/Fabric/" rel="tag"><i class="fa fa-tag"></i> Fabric</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/05/27/11.Golang/Golang工具包/oauth2原理及应用/" rel="next" title="oauth2原理及应用">
+                <i class="fa fa-chevron-left"></i> oauth2原理及应用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/06/21/12.区块链/Hyperledger fabric/Fabric架构/" rel="prev" title="Fabric架构">
+                Fabric架构 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="刘小恺(Kyle)">
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">199</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">52</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">60</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Chaincode-介绍"><span class="nav-text">Chaincode 介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#chaincode作用"><span class="nav-text">chaincode作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#chaincode-运行环境"><span class="nav-text">chaincode 运行环境</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#支持语言"><span class="nav-text">支持语言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#chaincode-运行和使用步骤"><span class="nav-text">chaincode 运行和使用步骤</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Golang-版Chaincode-编写规范"><span class="nav-text">Golang 版Chaincode 编写规范</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Chaincode-代码结构"><span class="nav-text">Chaincode 代码结构</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#包名"><span class="nav-text">包名</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#shim包"><span class="nav-text">shim包</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#定义结构体"><span class="nav-text">定义结构体</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#实现Init方法"><span class="nav-text">实现Init方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#实现Invoke方法"><span class="nav-text">实现Invoke方法</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#shim包核心方法"><span class="nav-text">shim包核心方法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Success"><span class="nav-text">Success</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Error"><span class="nav-text">Error</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#LogLevel"><span class="nav-text">LogLevel</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Chaincode-StubInterface-接口方法"><span class="nav-text">Chaincode StubInterface 接口方法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#ChaincodeStubInte-主要方法"><span class="nav-text">ChaincodeStubInte 主要方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1、-PutState方法"><span class="nav-text">1、 PutState方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2、-GetState方法"><span class="nav-text">2、 GetState方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3、GetStateByRange方法"><span class="nav-text">3、GetStateByRange方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4、GetHistoryForKey方法"><span class="nav-text">4、GetHistoryForKey方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5、DelState-方法"><span class="nav-text">5、DelState 方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#6、CreateCompositeKey-方法"><span class="nav-text">6、CreateCompositeKey 方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#7、GetStateByPartialCompositeKey-和-SplitCompositeKey-方法"><span class="nav-text">7、GetStateByPartialCompositeKey  和 SplitCompositeKey 方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#8、GetTxTimestamp方法"><span class="nav-text">8、GetTxTimestamp方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#9、InvokeChaincode方法"><span class="nav-text">9、InvokeChaincode方法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Chaincode-操作命令"><span class="nav-text">Chaincode 操作命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Chaincode背书规则指定"><span class="nav-text">Chaincode背书规则指定</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#背书介绍"><span class="nav-text">背书介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#指定背书规则的方法"><span class="nav-text">指定背书规则的方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#背书编写示例"><span class="nav-text">背书编写示例</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

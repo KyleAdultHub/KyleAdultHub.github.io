@@ -1,0 +1,1972 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="ECMAScript简介介绍ES6， 全称 ECMAScript 6.0 ，是 JavaScript 的下一个版本标准，2015.06 发版。 ES6 主要是为了解决 ES5 的先天不足，比如 JavaScript 里并没有类的概念，但是目前浏览器的 JavaScript 是 ES5 版本，大多数高版本的浏览器也支持 ES6，不过只实现了 ES6 的部分特性和功能。 ECMAScript 的背景J">
+<meta name="keywords" content="前端,JavaScript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ES6 新语法 (一)">
+<meta property="og:url" content="http://blog.kyleliu.cn/2019/07/09/03.web前端/JavaScript/ES6 新语法(一)/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="ECMAScript简介介绍ES6， 全称 ECMAScript 6.0 ，是 JavaScript 的下一个版本标准，2015.06 发版。 ES6 主要是为了解决 ES5 的先天不足，比如 JavaScript 里并没有类的概念，但是目前浏览器的 JavaScript 是 ES5 版本，大多数高版本的浏览器也支持 ES6，不过只实现了 ES6 的部分特性和功能。 ECMAScript 的背景J">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-07-09T13:06:00.030Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ES6 新语法 (一)">
+<meta name="twitter:description" content="ECMAScript简介介绍ES6， 全称 ECMAScript 6.0 ，是 JavaScript 的下一个版本标准，2015.06 发版。 ES6 主要是为了解决 ES5 的先天不足，比如 JavaScript 里并没有类的概念，但是目前浏览器的 JavaScript 是 ES5 版本，大多数高版本的浏览器也支持 ES6，不过只实现了 ES6 的部分特性和功能。 ECMAScript 的背景J">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2019/07/09/03.web前端/JavaScript/ES6 新语法(一)/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>ES6 新语法 (一) | 刘小恺(Kyle) 的个人博客</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/07/09/03.web前端/JavaScript/ES6 新语法(一)/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">ES6 新语法 (一)
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-07-09 13:37:00" itemprop="dateCreated datePublished" datetime="2019-07-09T13:37:00+08:00">2019-07-09</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/web前端/" itemprop="url" rel="index"><span itemprop="name">web前端</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/web前端/JavaScript/" itemprop="url" rel="index"><span itemprop="name">JavaScript</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/07/09/03.web前端/JavaScript/ES6 新语法(一)/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/07/09/03.web前端/JavaScript/ES6 新语法(一)/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="ECMAScript简介"><a href="#ECMAScript简介" class="headerlink" title="ECMAScript简介"></a>ECMAScript简介</h3><h4 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h4><p>ES6， 全称 ECMAScript 6.0 ，是 JavaScript 的下一个版本标准，2015.06 发版。</p>
+<p>ES6 主要是为了解决 ES5 的先天不足，比如 JavaScript 里并没有类的概念，但是目前浏览器的 JavaScript 是 ES5 版本，大多数高版本的浏览器也支持 ES6，不过只实现了 ES6 的部分特性和功能。</p>
+<h4 id="ECMAScript-的背景"><a href="#ECMAScript-的背景" class="headerlink" title="ECMAScript 的背景"></a>ECMAScript 的背景</h4><p>JavaScript 是大家所了解的语言名称，但是这个语言名称是商标（ Oracle 公司注册的商标）。因此，JavaScript 的正式名称是 ECMAScript 。1996年11月，JavaScript 的创造者网景公司将 JS 提交给国际化标准组织 ECMA（European computer manufactures association，欧洲计算机制造联合会），希望这种语言能够成为国际标准，随后 ECMA 发布了规定浏览器脚本语言的标准，即 ECMAScript。这也有利于这门语言的开放和中立。</p>
+<h4 id="ECMAScript的历史"><a href="#ECMAScript的历史" class="headerlink" title="ECMAScript的历史"></a>ECMAScript的历史</h4><p>ES6 是 ECMAScript 标准十余年来变动最大的一个版本，为其添加了许多新的语法特性。</p>
+<ul>
+<li>1997 年 ECMAScript 1.0 诞生。</li>
+<li>1998 年 6 月 ECMAScript 2.0 诞生，包含一些小的更改，用于同步独立的 ISO 国际标准。</li>
+<li>1999 年 12 月 ECMAScript 3.0诞生，它是一个巨大的成功，在业界得到了广泛的支持，它奠定了 JS 的基本语法，被其后版本完全继承。直到今天，我们一开始学习 JS ，其实就是在学 3.0 版的语法。</li>
+<li>2000 年的 ECMAScript 4.0 是当下 ES6 的前身，但由于这个版本太过激烈，对 ES 3 做了彻底升级，所以暂时被”和谐”了。</li>
+<li>2009 年 12 月，ECMAScript 5.0 版正式发布。ECMA 专家组预计 ECMAScript 的第五个版本会在 2013 年中期到 2018 年作为主流的开发标准。2011年6月，ES 5.1 版发布，并且成为 ISO 国际标准。</li>
+<li>2013 年，ES6 草案冻结，不再添加新的功能，新的功能将被放到 ES7 中；2015年6月， ES6 正式通过，成为国际标准。</li>
+</ul>
+<h3 id="webpack"><a href="#webpack" class="headerlink" title="webpack"></a>webpack</h3><h4 id="webpack介绍"><a href="#webpack介绍" class="headerlink" title="webpack介绍"></a>webpack介绍</h4><p>webpack 是一个现代 JavaScript 应用程序的静态模块打包器 (module bundler) 。当 webpack 处理应用程序时，它会递归地构建一个依赖关系图 (dependency graph) ，其中包含应用程序需要的每个模块，然后将所有这些模块打包成一个或多个 bundle 。</p>
+<h4 id="web的是个核心概念"><a href="#web的是个核心概念" class="headerlink" title="web的是个核心概念"></a>web的是个核心概念</h4><ul>
+<li>入口 (entry)</li>
+<li>输出 (output)</li>
+<li>loader</li>
+<li>插件 (plugins)</li>
+</ul>
+<h4 id="入口-entry"><a href="#入口-entry" class="headerlink" title="入口(entry)"></a>入口(entry)</h4><p>入口会指示 webpack 应该使用哪个模块，来作为构建其内部依赖图的开始。进入入口起点后，webpack 会找出有哪些模块和库是入口起点（直接和间接）依赖的。在 webpack 中入口有多种方式来定义，如下面例子：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 单个入口（简写）语法:</span></span><br><span class="line"><span class="keyword">const</span> config = &#123;</span><br><span class="line">  entry: <span class="string">"./src/main.js"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 对象语法:</span></span><br><span class="line"><span class="keyword">const</span> config = &#123;</span><br><span class="line">  app: <span class="string">"./src/main.js"</span>,</span><br><span class="line">  vendors: <span class="string">"./src/vendors.js"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="输出-output"><a href="#输出-output" class="headerlink" title="输出(output)"></a>输出(output)</h4><p>output 属性会告诉 webpack 在哪里输出它创建的 bundles ，以及如何命名这些文件，默认值为 ./dist:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> config = &#123;</span><br><span class="line">  entry: <span class="string">"./src/main.js"</span>,</span><br><span class="line">  output: &#123;</span><br><span class="line">    filename: <span class="string">"bundle.js"</span>,</span><br><span class="line">    path: path.resolve(__dirname, <span class="string">'dist'</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="loader"><a href="#loader" class="headerlink" title="loader"></a>loader</h4><p>loader 让 webpack 可以去处理那些非 JavaScript 文件（ webpack 自身只理解 JavaScript ）。loader 可以将所有类型的文件转换为 webpack 能够有效处理的模块，例如，开发的时候使用 ES6 ，通过 loader 将 ES6 的语法转为 ES5 ，如下配置：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> config = &#123;</span><br><span class="line">  entry: <span class="string">"./src/main.js"</span>,</span><br><span class="line">  output: &#123;</span><br><span class="line">    filename: <span class="string">"bundle.js"</span>,</span><br><span class="line">    path: path.resolve(__dirname, <span class="string">'dist'</span>)</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="built_in">module</span>: &#123;</span><br><span class="line">    rules: [</span><br><span class="line">      &#123;</span><br><span class="line">          test: <span class="regexp">/\.js$/</span>,</span><br><span class="line">          exclude: <span class="regexp">/node_modules/</span>,</span><br><span class="line">          loader: <span class="string">"babel-loader"</span>,</span><br><span class="line">          options: [</span><br><span class="line">            presets: [<span class="string">"env"</span>]</span><br><span class="line">          ]</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="插件-plugins"><a href="#插件-plugins" class="headerlink" title="插件(plugins)"></a>插件(plugins)</h4><p>loader 被用于转换某些类型的模块，而插件则可以做更多的事情。包括打包优化、压缩、定义环境变量等等。插件的功能强大，是 webpack 扩展非常重要的利器，可以用来处理各种各样的任务。使用一个插件也非常容易，只需要 require() ，然后添加到 plugins 数组中。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 通过 npm 安装</span></span><br><span class="line"><span class="keyword">const</span> HtmlWebpackPlugin = <span class="built_in">require</span>(<span class="string">'html-webpack-plugin'</span>);</span><br><span class="line"><span class="comment">// 用于访问内置插件 </span></span><br><span class="line"><span class="keyword">const</span> webpack = <span class="built_in">require</span>(<span class="string">'webpack'</span>); </span><br><span class="line"> </span><br><span class="line"><span class="keyword">const</span> config = &#123;</span><br><span class="line">  <span class="built_in">module</span>: &#123;</span><br><span class="line">    rules: [</span><br><span class="line">      &#123;</span><br><span class="line">          test: <span class="regexp">/\.js$/</span>,</span><br><span class="line">          exclude: <span class="regexp">/node_modules/</span>,</span><br><span class="line">          loader: <span class="string">"babel-loader"</span></span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;,</span><br><span class="line">  plugins: [</span><br><span class="line">    <span class="keyword">new</span> HtmlWebpackPlugin(&#123;<span class="attr">template</span>: <span class="string">'./src/index.html'</span>&#125;)</span><br><span class="line">  ]</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="利用-webpack-搭建应用"><a href="#利用-webpack-搭建应用" class="headerlink" title="利用 webpack 搭建应用"></a>利用 webpack 搭建应用</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>);</span><br><span class="line"> </span><br><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">  mode: <span class="string">"development"</span>, <span class="comment">// "production" | "development"</span></span><br><span class="line">  <span class="comment">// 选择 development 为开发模式， production 为生产模式</span></span><br><span class="line">  entry: <span class="string">"./src/main.js"</span>,</span><br><span class="line">  output: &#123;</span><br><span class="line">    filename: <span class="string">"bundle.js"</span>,</span><br><span class="line">    path: path.resolve(__dirname, <span class="string">'dist'</span>)</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="built_in">module</span>: &#123;</span><br><span class="line">    rules: [</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.js$/</span>,</span><br><span class="line">        exclude: <span class="regexp">/node_modules/</span>,</span><br><span class="line">        loader: <span class="string">"babel-loader"</span>,</span><br><span class="line">        options: [</span><br><span class="line">          presets: [<span class="string">"env"</span>]</span><br><span class="line">        ]</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;,</span><br><span class="line">  plugins: [</span><br><span class="line">    ...</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="ES6-新语法特性"><a href="#ES6-新语法特性" class="headerlink" title="ES6 新语法特性"></a>ES6 新语法特性</h3><h4 id="let-与-const"><a href="#let-与-const" class="headerlink" title="let 与 const"></a>let 与 const</h4><p><strong>let 的使用方法</strong></p>
+<p>let 生命的是块级的变量，声明的变量只在 let 命令所在的代码块内有效。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="keyword">let</span> a = <span class="number">0</span>;</span><br><span class="line">  a   <span class="comment">// 0</span></span><br><span class="line">&#125;</span><br><span class="line">a   <span class="comment">// 报错 ReferenceError: a is not defined</span></span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">let</span> a = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">var</span> b = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line">a  <span class="comment">// ReferenceError: a is not defined</span></span><br><span class="line">b  <span class="comment">// 1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// for 循环计数器很适合用 let</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">  setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(i);</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 输出十个 10</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">let</span> j = <span class="number">0</span>; j &lt; <span class="number">10</span>; j++) &#123;</span><br><span class="line">  setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(j);</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 输出 0123456789</span></span><br></pre></td></tr></table></figure>
+
+<p>变量 i 是用 var 声明的，在全局范围内有效，所以全局中只有一个变量 i, 每次循环时，setTimeout 定时器里面的 i 指的是全局变量 i ，而循环里的十个 setTimeout 是在循环结束后才执行，所以此时的 i 都是 10。</p>
+<p>变量 j 是用 let 声明的，当前的 i 只在本轮循环中有效，每次循环的 j 其实都是一个新的变量，所以 setTimeout 定时器里面的 j 其实是不同的变量，即最后输出12345。（若每次循环的变量 j 都是重新声明的，如何知道前一个循环的值？这是因为 JavaScript 引擎内部会记住前一个循环的值）。</p>
+<p><strong>let的特点</strong></p>
+<ul>
+<li>let 声明的变量代码块内有效；</li>
+<li>不能重复声明；</li>
+<li>不存在变量提升，在声明之前饮用会报错；</li>
+</ul>
+<h4 id="const-命令"><a href="#const-命令" class="headerlink" title="const 命令"></a>const 命令</h4><p>const 声明一个只读变量，声明之后不允许改变。意味着，一旦声明必须初始化，否则会报错。</p>
+<p><strong>基本用法</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> PI = <span class="string">"3.1415926"</span>;</span><br><span class="line">PI  <span class="comment">// 3.1415926</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> MY_AGE;  <span class="comment">// SyntaxError: Missing initializer in const declaration</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>暂时性死区</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> PI = <span class="string">"a"</span>;</span><br><span class="line"><span class="keyword">if</span>(<span class="literal">true</span>)&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(PI);  <span class="comment">// ReferenceError: PI is not defined</span></span><br><span class="line">  <span class="keyword">const</span> PI = <span class="string">"3.1415926"</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ES6 明确规定，代码块内如果存在 let 或者 const，代码块会对这些命令声明的变量从块的开始就形成一个封闭作用域。代码块内，在声明变量 PI 之前使用它会报错。</p>
+<h3 id="解构赋值"><a href="#解构赋值" class="headerlink" title="解构赋值"></a>解构赋值</h3><h4 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h4><p>解构赋值是对赋值运算符的扩展。</p>
+<p>他是一种针对数组或者对象进行模式匹配，然后对其中的变量进行赋值。</p>
+<p>在代码书写上简洁且易读，语义更加清晰明了；也方便了复杂对象中数据字段获取。</p>
+<h4 id="解构模型"><a href="#解构模型" class="headerlink" title="解构模型"></a>解构模型</h4><p>在解构中，有下面两部分参与：</p>
+<p>解构的源，解构赋值表达式的右边部分。解构的目标，解构赋值表达式的左边部分。</p>
+<h4 id="数组模型的解构-Array"><a href="#数组模型的解构-Array" class="headerlink" title="数组模型的解构(Array)"></a>数组模型的解构(Array)</h4><p><strong>基本</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> [a, b, c] = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]; <span class="comment">// a = 1 // b = 2 // c = 3</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>可嵌套</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> [a, [[b], c]] = [<span class="number">1</span>, [[<span class="number">2</span>], <span class="number">3</span>]]; <span class="comment">// a = 1 // b = 2 // c = 3</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>可忽略</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> [a, , b] = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]; <span class="comment">// a = 1 // b = 3</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>不完全解构</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> [a = <span class="number">1</span>, b] = []; <span class="comment">// a = 1, b = undefined</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>剩余运算符</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> [a, ...b] = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]; <span class="comment">//a = 1 //b = [2, 3]</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>字符串等</strong></p>
+<p>在数组的解构中，解构的目标若为可遍历对象，皆可进行解构赋值。可遍历对象即实现 Iterator 接口的数据。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> [a, b, c, d, e] = <span class="string">'hello'</span>; <span class="comment">// a = 'h' // b = 'e' // c = 'l' // d = 'l' // e = 'o'</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>解构默认值</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> [a = <span class="number">2</span>] = [<span class="literal">undefined</span>]; <span class="comment">// a = 2</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 当解构模式有匹配结果，且匹配结果是 undefined 时，会触发默认值作为返回结果。</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> [a = <span class="number">3</span>, b = a] = [];     <span class="comment">// a = 3, b = 3 </span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> [a = <span class="number">3</span>, b = a] = [<span class="number">1</span>];    <span class="comment">// a = 1, b = 1 </span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> [a = <span class="number">3</span>, b = a] = [<span class="number">1</span>, <span class="number">2</span>]; <span class="comment">// a = 1, b = 2</span></span><br><span class="line"><span class="comment">// a 与 b 匹配结果为 undefined ，触发默认值：a = 3; b = a =3</span></span><br><span class="line"><span class="comment">// a 正常解构赋值，匹配结果：a = 1，b 匹配结果 undefined ，触发默认值：b = a =1</span></span><br><span class="line"><span class="comment">// a 与 b 正常解构赋值，匹配结果：a = 1，b = 2</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="对象模型的解构（Object）"><a href="#对象模型的解构（Object）" class="headerlink" title="对象模型的解构（Object）"></a>对象模型的解构（Object）</h4><p><strong>基本</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> &#123; foo, bar &#125; = &#123; <span class="attr">foo</span>: <span class="string">'aaa'</span>, <span class="attr">bar</span>: <span class="string">'bbb'</span> &#125;; </span><br><span class="line"></span><br><span class="line"><span class="comment">// foo = 'aaa' </span></span><br><span class="line"></span><br><span class="line"><span class="comment">// bar = 'bbb'  </span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> &#123; <span class="attr">baz</span> : foo &#125; = &#123; <span class="attr">baz</span> : <span class="string">'ddd'</span> &#125;; </span><br><span class="line"></span><br><span class="line"><span class="comment">// foo = 'ddd'</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>可嵌套可忽略</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> obj = &#123;<span class="attr">p</span>: [<span class="string">'hello'</span>, &#123;<span class="attr">y</span>: <span class="string">'world'</span>&#125;] &#125;; </span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> &#123;<span class="attr">p</span>: [x, &#123; y &#125;] &#125; = obj;</span><br><span class="line"></span><br><span class="line"><span class="comment">// x = 'hello' </span></span><br><span class="line"></span><br><span class="line"><span class="comment">// y = 'world' </span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> obj = &#123;<span class="attr">p</span>: [<span class="string">'hello'</span>, &#123;<span class="attr">y</span>: <span class="string">'world'</span>&#125;] &#125;; </span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> &#123;<span class="attr">p</span>: [x, &#123;  &#125;] &#125; = obj; </span><br><span class="line"></span><br><span class="line"><span class="comment">// x = 'hello'</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>不完全解构</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> obj = &#123;<span class="attr">p</span>: [&#123;<span class="attr">y</span>: <span class="string">'world'</span>&#125;] &#125;; </span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> &#123;<span class="attr">p</span>: [&#123; y &#125;, x ] &#125; = obj; </span><br><span class="line"></span><br><span class="line"><span class="comment">// x = undefined </span></span><br><span class="line"></span><br><span class="line"><span class="comment">// y = 'world'</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>剩余运算符</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> &#123;a, b, ...rest&#125; = &#123;<span class="attr">a</span>: <span class="number">10</span>, <span class="attr">b</span>: <span class="number">20</span>, <span class="attr">c</span>: <span class="number">30</span>, <span class="attr">d</span>: <span class="number">40</span>&#125;; </span><br><span class="line"></span><br><span class="line"><span class="comment">// a = 10 </span></span><br><span class="line"></span><br><span class="line"><span class="comment">// b = 20 </span></span><br><span class="line"></span><br><span class="line"><span class="comment">// rest = &#123;c: 30, d: 40&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>解构默认值</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> &#123;a = <span class="number">10</span>, b = <span class="number">5</span>&#125; = &#123;<span class="attr">a</span>: <span class="number">3</span>&#125;; </span><br><span class="line"></span><br><span class="line"><span class="comment">// a = 3; b = 5; </span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> &#123;<span class="attr">a</span>: aa = <span class="number">10</span>, <span class="attr">b</span>: bb = <span class="number">5</span>&#125; = &#123;<span class="attr">a</span>: <span class="number">3</span>&#125;; </span><br><span class="line"></span><br><span class="line"><span class="comment">// aa = 3; bb = 5;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="ES6-Symbol"><a href="#ES6-Symbol" class="headerlink" title="ES6 Symbol"></a>ES6 Symbol</h3><h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><p>ES6 引入了一种新的原始数据类型 Symbol ，表示独一无二的值，最大的用法是用来定义对象的唯一属性名。</p>
+<p>ES6 数据类型除了 Number 、 String 、 Boolean 、 Objec t、 null 和 undefined ，还新增了 Symbol 。</p>
+<h4 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h4><p>Symbol 函数栈不能用 new 命令，因为 Symbol 是原始数据类型，不是对象。可以接受一个字符串作为参数，为新创建的 Symbol 提供描述，用来显示在控制台或者作为字符串的时候使用，便于区分。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> sy = <span class="built_in">Symbol</span>(<span class="string">"KK"</span>);</span><br><span class="line"><span class="built_in">console</span>.log(sy);   <span class="comment">// Symbol(KK)</span></span><br><span class="line"><span class="keyword">typeof</span>(sy);        <span class="comment">// "symbol"</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// 相同参数 Symbol() 返回的值不相等</span></span><br><span class="line"><span class="keyword">let</span> sy1 = <span class="built_in">Symbol</span>(<span class="string">"kk"</span>); </span><br><span class="line">sy === sy1;       <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h4><p><strong>作为属性名</strong></p>
+<p>由于每一个 Symbol 的值都是不相等的，所以 Symbol 作为对象的属性名，可以保证属性不重名。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> sy = <span class="built_in">Symbol</span>(<span class="string">"key1"</span>);</span><br><span class="line"> </span><br><span class="line"><span class="comment">// 写法1</span></span><br><span class="line"><span class="keyword">let</span> syObject = &#123;&#125;;</span><br><span class="line">syObject[sy] = <span class="string">"kk"</span>;</span><br><span class="line"><span class="built_in">console</span>.log(syObject);    <span class="comment">// &#123;Symbol(key1): "kk"&#125;</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// 写法2</span></span><br><span class="line"><span class="keyword">let</span> syObject = &#123;</span><br><span class="line">  [sy]: <span class="string">"kk"</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="built_in">console</span>.log(syObject);    <span class="comment">// &#123;Symbol(key1): "kk"&#125;</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// 写法3</span></span><br><span class="line"><span class="keyword">let</span> syObject = &#123;&#125;;</span><br><span class="line"><span class="built_in">Object</span>.defineProperty(syObject, sy, &#123;<span class="attr">value</span>: <span class="string">"kk"</span>&#125;);</span><br><span class="line"><span class="built_in">console</span>.log(syObject);   <span class="comment">// &#123;Symbol(key1): "kk"&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>Symbol 作为对象属性名时不能用.运算符，要用方括号。因为.运算符后面是字符串，所以取到的是字符串 sy 属性，而不是 Symbol 值 sy 属性。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> syObject = &#123;&#125;;</span><br><span class="line">syObject[sy] = <span class="string">"kk"</span>;</span><br><span class="line"> </span><br><span class="line">syObject[sy];  <span class="comment">// "kk"</span></span><br><span class="line">syObject.sy;   <span class="comment">// undefined</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>注意点</strong></p>
+<p>Symbol 值作为属性名时，该属性是公有属性不是私有属性，可以在类的外部访问。但是不会出现在 for…in 、 for…of 的循环中，也不会被 Object.keys() 、 Object.getOwnPropertyNames() 返回。如果要读取到一个对象的 Symbol 属性，可以通过 Object.getOwnPropertySymbols() 和 Reflect.ownKeys() 取到。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> syObject = &#123;&#125;;</span><br><span class="line">syObject[sy] = <span class="string">"kk"</span>;</span><br><span class="line"><span class="built_in">console</span>.log(syObject);</span><br><span class="line"> </span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">let</span> i <span class="keyword">in</span> syObject) &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(i);</span><br><span class="line">&#125;    <span class="comment">// 无输出</span></span><br><span class="line"> </span><br><span class="line"><span class="built_in">Object</span>.keys(syObject);                     <span class="comment">// []</span></span><br><span class="line"><span class="built_in">Object</span>.getOwnPropertySymbols(syObject);    <span class="comment">// [Symbol(key1)]</span></span><br><span class="line"><span class="built_in">Reflect</span>.ownKeys(syObject);                 <span class="comment">// [Symbol(key1)]</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>定义常量</strong></p>
+<p>在 ES5 使用字符串表示常量。例如：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> COLOR_RED = <span class="string">"red"</span>;</span><br><span class="line"><span class="keyword">const</span> COLOR_YELLOW = <span class="string">"yellow"</span>;</span><br><span class="line"><span class="keyword">const</span> COLOR_BLUE = <span class="string">"blue"</span>;</span><br></pre></td></tr></table></figure>
+
+<p>但是用字符串不能保证常量是独特的，这样会引起一些问题：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> COLOR_RED = <span class="string">"red"</span>;</span><br><span class="line"><span class="keyword">const</span> COLOR_YELLOW = <span class="string">"yellow"</span>;</span><br><span class="line"><span class="keyword">const</span> COLOR_BLUE = <span class="string">"blue"</span>;</span><br><span class="line"><span class="keyword">const</span> MY_BLUE = <span class="string">"blue"</span>；</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getConstantName</span>(<span class="params">color</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">switch</span> (color) &#123;</span><br><span class="line">        <span class="keyword">case</span> COLOR_RED :</span><br><span class="line">            <span class="keyword">return</span> <span class="string">"COLOR_RED"</span>;</span><br><span class="line">        <span class="keyword">case</span> COLOR_YELLOW :</span><br><span class="line">            <span class="keyword">return</span> <span class="string">"COLOR_YELLOW "</span>;</span><br><span class="line">        <span class="keyword">case</span> COLOR_BLUE:</span><br><span class="line">            <span class="keyword">return</span> <span class="string">"COLOR_BLUE"</span>;</span><br><span class="line">        <span class="keyword">case</span> MY_BLUE:</span><br><span class="line">            <span class="keyword">return</span> <span class="string">"MY_BLUE"</span>;         </span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> Exception(<span class="string">'Can'</span>t find <span class="keyword">this</span> color<span class="string">');</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>但是使用 Symbol 定义常量，这样就可以保证这一组常量的值都不相等。用 Symbol 来修改上面的例子。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> COLOR_RED = <span class="built_in">Symbol</span>(<span class="string">"red"</span>);</span><br><span class="line"><span class="keyword">const</span> COLOR_YELLOW = <span class="built_in">Symbol</span>(<span class="string">"yellow"</span>);</span><br><span class="line"><span class="keyword">const</span> COLOR_BLUE = <span class="built_in">Symbol</span>(<span class="string">"blue"</span>);</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getConstantName</span>(<span class="params">color</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">switch</span> (color) &#123;</span><br><span class="line">        <span class="keyword">case</span> COLOR_RED :</span><br><span class="line">            <span class="keyword">return</span> <span class="string">"COLOR_RED"</span>;</span><br><span class="line">        <span class="keyword">case</span> COLOR_YELLOW :</span><br><span class="line">            <span class="keyword">return</span> <span class="string">"COLOR_YELLOW "</span>;</span><br><span class="line">        <span class="keyword">case</span> COLOR_BLUE:</span><br><span class="line">            <span class="keyword">return</span> <span class="string">"COLOR_BLUE"</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> Exception(<span class="string">'Can'</span>t find <span class="keyword">this</span> color<span class="string">');</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>Symbol 的值是唯一的，所以不会出现相同值得常量，即可以保证 switch 按照代码预想的方式执行。</p>
+<p>*<em>Symbol.for() *</em></p>
+<p>Symbol.for() 类似单例模式，首先会在全局搜索被登记的 Symbol 中是否有该字符串参数作为名称的 Symbol 值，如果有即返回该 Symbol 值，若没有则新建并返回一个以该字符串参数为名称的 Symbol 值，并登记在全局环境中供搜索。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> yellow = <span class="built_in">Symbol</span>(<span class="string">"Yellow"</span>);</span><br><span class="line"><span class="keyword">let</span> yellow1 = <span class="built_in">Symbol</span>.for(<span class="string">"Yellow"</span>);</span><br><span class="line">yellow === yellow1;      <span class="comment">// false</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">let</span> yellow2 = <span class="built_in">Symbol</span>.for(<span class="string">"Yellow"</span>);</span><br><span class="line">yellow1 === yellow2;     <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Symbol.keyFor()</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> yellow1 = <span class="built_in">Symbol</span>.for(<span class="string">"Yellow"</span>);</span><br><span class="line"><span class="built_in">Symbol</span>.keyFor(yellow1);    <span class="comment">// "Yellow"</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="ES6-Map-与-Set"><a href="#ES6-Map-与-Set" class="headerlink" title="ES6 Map 与 Set"></a>ES6 Map 与 Set</h3><h4 id="Map-对象"><a href="#Map-对象" class="headerlink" title="Map 对象"></a>Map 对象</h4><p>Map 对象保存键值对。任何值(对象或者原始值) 都可以作为一个键或一个值。</p>
+<h4 id="Maps-与Objects-的区别"><a href="#Maps-与Objects-的区别" class="headerlink" title="Maps 与Objects 的区别"></a>Maps 与Objects 的区别</h4><ul>
+<li>一个 Object 的键只能是字符串或者 Symbols，但一个 Map 的键可以是任意值。</li>
+<li>Map 中的键值是有序的（FIFO 原则），而添加到对象中的键则不是。</li>
+<li>Map 的键值对个数可以从 size 属性获取，而 Object 的键值对个数只能手动计算。</li>
+<li>Object 都有自己的原型，原型链上的键名有可能和你自己在对象上的设置的键名产生冲突。</li>
+</ul>
+<h4 id="Map-中的key"><a href="#Map-中的key" class="headerlink" title="Map 中的key"></a>Map 中的key</h4><p><strong>key 是字符串</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> myMap = <span class="keyword">new</span> <span class="built_in">Map</span>(); </span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> keyString = <span class="string">"a string"</span>;    </span><br><span class="line"></span><br><span class="line">myMap.set(keyString, <span class="string">"和键'a string'关联的值"</span>);   </span><br><span class="line"></span><br><span class="line">myMap.get(keyString);    <span class="comment">// "和键'a string'关联的值" </span></span><br><span class="line"></span><br><span class="line">myMap.get(<span class="string">"a string"</span>);   <span class="comment">// "和键'a string'关联的值"  ，因为 keyString === 'a string'</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>key 是对象</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> myMap = <span class="keyword">new</span> <span class="built_in">Map</span>(); </span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> keyObj = &#123;&#125;    </span><br><span class="line"></span><br><span class="line">myMap.set(keyObj, <span class="string">"和键 keyObj 关联的值"</span>); ﻿ </span><br><span class="line"></span><br><span class="line">myMap.get(keyObj); <span class="comment">// "和键 keyObj 关联的值" </span></span><br><span class="line"></span><br><span class="line">myMap.get(&#123;&#125;); <span class="comment">// undefined, 因为 keyObj !== &#123;&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>key 是函数</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> myMap = <span class="keyword">new</span> <span class="built_in">Map</span>(); </span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> keyFunc = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;&#125;, <span class="comment">// 函数   </span></span><br><span class="line"></span><br><span class="line">myMap.set(keyFunc, <span class="string">"和键 keyFunc 关联的值"</span>);   </span><br><span class="line"></span><br><span class="line">myMap.get(keyFunc); <span class="comment">// "和键 keyFunc 关联的值" </span></span><br><span class="line"></span><br><span class="line">myMap.get(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;) <span class="comment">// undefined, 因为 keyFunc !== function () &#123;&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>key 是 NaN</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> myMap = <span class="keyword">new</span> <span class="built_in">Map</span>(); </span><br><span class="line"></span><br><span class="line">myMap.set(<span class="literal">NaN</span>, <span class="string">"not a number"</span>);   </span><br><span class="line"></span><br><span class="line">myMap.get(<span class="literal">NaN</span>); <span class="comment">// "not a number"   </span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> otherNaN = <span class="built_in">Number</span>(<span class="string">"foo"</span>); </span><br><span class="line"></span><br><span class="line">myMap.get(otherNaN); <span class="comment">// "not a number"</span></span><br><span class="line"><span class="comment">// 虽然 NaN 和任何值甚至和自己都不相等(NaN !== NaN 返回true)，NaN作为Map的键来说是没有区别的。</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Map-的迭代"><a href="#Map-的迭代" class="headerlink" title="Map 的迭代"></a>Map 的迭代</h4><p><strong>for…of</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> myMap = <span class="keyword">new</span> <span class="built_in">Map</span>();</span><br><span class="line">myMap.set(<span class="number">0</span>, <span class="string">"zero"</span>);</span><br><span class="line">myMap.set(<span class="number">1</span>, <span class="string">"one"</span>);</span><br><span class="line"> </span><br><span class="line"><span class="comment">// 将会显示两个 log。 一个是 "0 = zero" 另一个是 "1 = one"</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> [key, value] <span class="keyword">of</span> myMap) &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(key + <span class="string">" = "</span> + value);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> [key, value] <span class="keyword">of</span> myMap.entries()) &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(key + <span class="string">" = "</span> + value);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/* 这个 entries 方法返回一个新的 Iterator 对象，它按插入顺序包含了 Map 对象中每个元素的 [key, value] 数组。 */</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// 将会显示两个log。 一个是 "0" 另一个是 "1"</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> key <span class="keyword">of</span> myMap.keys()) &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(key);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/* 这个 keys 方法返回一个新的 Iterator 对象， 它按插入顺序包含了 Map 对象中每个元素的键。 */</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// 将会显示两个log。 一个是 "zero" 另一个是 "one"</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> value <span class="keyword">of</span> myMap.values()) &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(value);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/* 这个 values 方法返回一个新的 Iterator 对象，它按插入顺序包含了 Map 对象中每个元素的值。 */</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>forEach</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> myMap = <span class="keyword">new</span> <span class="built_in">Map</span>();</span><br><span class="line">myMap.set(<span class="number">0</span>, <span class="string">"zero"</span>);</span><br><span class="line">myMap.set(<span class="number">1</span>, <span class="string">"one"</span>);</span><br><span class="line"> </span><br><span class="line"><span class="comment">// 将会显示两个 logs。 一个是 "0 = zero" 另一个是 "1 = one"</span></span><br><span class="line">myMap.forEach(<span class="function"><span class="keyword">function</span>(<span class="params">value, key</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(key + <span class="string">" = "</span> + value);</span><br><span class="line">&#125;, myMap)</span><br></pre></td></tr></table></figure>
+
+<h4 id="Map对象的操作"><a href="#Map对象的操作" class="headerlink" title="Map对象的操作"></a>Map对象的操作</h4><p><strong>Map 与 Array的转换</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> kvArray = [[<span class="string">"key1"</span>, <span class="string">"value1"</span>], [<span class="string">"key2"</span>, <span class="string">"value2"</span>]];</span><br><span class="line"> </span><br><span class="line"><span class="comment">// Map 构造函数可以将一个 二维 键值对数组转换成一个 Map 对象</span></span><br><span class="line"><span class="keyword">var</span> myMap = <span class="keyword">new</span> <span class="built_in">Map</span>(kvArray);</span><br><span class="line"> </span><br><span class="line"><span class="comment">// 使用 Array.from 函数可以将一个 Map 对象转换成一个二维键值对数组</span></span><br><span class="line"><span class="keyword">var</span> outArray = <span class="built_in">Array</span>.from(myMap);</span><br></pre></td></tr></table></figure>
+
+<p><strong>Map 的克隆</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> myMap1 = <span class="keyword">new</span> <span class="built_in">Map</span>([[<span class="string">"key1"</span>, <span class="string">"value1"</span>], [<span class="string">"key2"</span>, <span class="string">"value2"</span>]]);</span><br><span class="line"><span class="keyword">var</span> myMap2 = <span class="keyword">new</span> <span class="built_in">Map</span>(myMap1);</span><br><span class="line"> </span><br><span class="line"><span class="built_in">console</span>.log(original === clone); </span><br><span class="line"><span class="comment">// 打印 false。 Map 对象构造函数生成实例，迭代出新的对象。</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Map 的合并</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> first = <span class="keyword">new</span> <span class="built_in">Map</span>([[<span class="number">1</span>, <span class="string">'one'</span>], [<span class="number">2</span>, <span class="string">'two'</span>], [<span class="number">3</span>, <span class="string">'three'</span>],]);</span><br><span class="line"><span class="keyword">var</span> second = <span class="keyword">new</span> <span class="built_in">Map</span>([[<span class="number">1</span>, <span class="string">'uno'</span>], [<span class="number">2</span>, <span class="string">'dos'</span>]]);</span><br><span class="line"> </span><br><span class="line"><span class="comment">// 合并两个 Map 对象时，如果有重复的键值，则后面的会覆盖前面的，对应值即 uno，dos， three</span></span><br><span class="line"><span class="keyword">var</span> merged = <span class="keyword">new</span> <span class="built_in">Map</span>([...first, ...second]);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Set-对象"><a href="#Set-对象" class="headerlink" title="Set 对象"></a>Set 对象</h4><p>Set 对象允许你存储任何类型的唯一值，无论是原始值或者是对象引用。</p>
+<p><strong>Set 中的特殊值</strong></p>
+<p>Set 对象存储的值总是唯一的，所以需要判断两个值是否恒等。有几个特殊值需要特殊对待：</p>
+<ul>
+<li>+0 与 -0 在存储判断唯一性的时候是恒等的，所以不重复；</li>
+<li>undefined 与 undefined 是恒等的，所以不重复；</li>
+<li>NaN 与 NaN 是不恒等的，但是在 Set 中只能存一个，不重复。</li>
+</ul>
+<p><strong>基本使用</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> mySet = <span class="keyword">new</span> <span class="built_in">Set</span>();</span><br><span class="line"> </span><br><span class="line">mySet.add(<span class="number">1</span>); <span class="comment">// Set(1) &#123;1&#125;</span></span><br><span class="line">mySet.add(<span class="number">5</span>); <span class="comment">// Set(2) &#123;1, 5&#125;</span></span><br><span class="line">mySet.add(<span class="number">5</span>); <span class="comment">// Set(2) &#123;1, 5&#125; 这里体现了值的唯一性</span></span><br><span class="line">mySet.add(<span class="string">"some text"</span>); </span><br><span class="line"><span class="comment">// Set(3) &#123;1, 5, "some text"&#125; 这里体现了类型的多样性</span></span><br><span class="line"><span class="keyword">var</span> o = &#123;<span class="attr">a</span>: <span class="number">1</span>, <span class="attr">b</span>: <span class="number">2</span>&#125;; </span><br><span class="line">mySet.add(o);</span><br><span class="line">mySet.add(&#123;<span class="attr">a</span>: <span class="number">1</span>, <span class="attr">b</span>: <span class="number">2</span>&#125;); </span><br><span class="line"><span class="comment">// Set(5) &#123;1, 5, "some text", &#123;…&#125;, &#123;…&#125;&#125; </span></span><br><span class="line"><span class="comment">// 这里体现了对象之间引用不同不恒等，即使值相同，Set 也能存储</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Set 类型转换</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Array 转 Set</span></span><br><span class="line"><span class="keyword">var</span> mySet = <span class="keyword">new</span> <span class="built_in">Set</span>([<span class="string">"value1"</span>, <span class="string">"value2"</span>, <span class="string">"value3"</span>]);</span><br><span class="line"><span class="comment">// 用...操作符，将 Set 转 Array</span></span><br><span class="line"><span class="keyword">var</span> myArray = [...mySet];</span><br><span class="line"><span class="built_in">String</span></span><br><span class="line"><span class="comment">// String 转 Set</span></span><br><span class="line"><span class="keyword">var</span> mySet = <span class="keyword">new</span> <span class="built_in">Set</span>(<span class="string">'hello'</span>);  <span class="comment">// Set(4) &#123;"h", "e", "l", "o"&#125;</span></span><br><span class="line"><span class="comment">// 注：Set 中 toString 方法是不能将 Set 转换成 String</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Set-对象的作用"><a href="#Set-对象的作用" class="headerlink" title="Set 对象的作用"></a>Set 对象的作用</h4><p><strong>数组去重</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> mySet = <span class="keyword">new</span> <span class="built_in">Set</span>([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">4</span>]); </span><br><span class="line"></span><br><span class="line">[...mySet]; <span class="comment">// [1, 2, 3, 4]</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>并集</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a = <span class="keyword">new</span> <span class="built_in">Set</span>([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]); </span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> b = <span class="keyword">new</span> <span class="built_in">Set</span>([<span class="number">4</span>, <span class="number">3</span>, <span class="number">2</span>]); </span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> union = <span class="keyword">new</span> <span class="built_in">Set</span>([...a, ...b]); <span class="comment">// &#123;1, 2, 3, 4&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>交集</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a = <span class="keyword">new</span> <span class="built_in">Set</span>([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]); </span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> b = <span class="keyword">new</span> <span class="built_in">Set</span>([<span class="number">4</span>, <span class="number">3</span>, <span class="number">2</span>]); </span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> intersect = <span class="keyword">new</span> <span class="built_in">Set</span>([...a].filter(<span class="function"><span class="params">x</span> =&gt;</span> b.has(x))); <span class="comment">// &#123;2, 3&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>差集</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a = <span class="keyword">new</span> <span class="built_in">Set</span>([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]); </span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> b = <span class="keyword">new</span> <span class="built_in">Set</span>([<span class="number">4</span>, <span class="number">3</span>, <span class="number">2</span>]); </span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> difference = <span class="keyword">new</span> <span class="built_in">Set</span>([...a].filter(<span class="function"><span class="params">x</span> =&gt;</span> !b.has(x))); <span class="comment">// &#123;1&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="ES6-Reflect-与-Proxy"><a href="#ES6-Reflect-与-Proxy" class="headerlink" title="ES6 Reflect 与 Proxy"></a>ES6 Reflect 与 Proxy</h3><h4 id="概述-1"><a href="#概述-1" class="headerlink" title="概述"></a>概述</h4><p>Proxy 与 Reflect 是 ES6 为了操作对象引入的 API 。</p>
+<p>Proxy 可以对目标对象的读取、函数调用等操作进行拦截，然后进行操作处理。它不直接操作对象，而是像代理模式，通过对象的代理对象进行操作，在进行这些操作时，可以添加一些需要的额外操作。</p>
+<p>Reflect 可以用于获取目标对象的行为，它与 Object 类似，但是更易读，为操作对象提供了一种更优雅的方式。它的方法与 Proxy 是对应的。</p>
+<h4 id="Proxy基本用法"><a href="#Proxy基本用法" class="headerlink" title="Proxy基本用法"></a>Proxy基本用法</h4><p>一个 Proxy 对象由两个部分组成： target 、 handler 。</p>
+<p>在通过 Proxy 构造函数生成实例对象时，需要提供这两个参数。 target 即目标对象， handler 是一个对象，声明了代理 target 的指定行为。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> target = &#123;</span><br><span class="line">    name: <span class="string">'Tom'</span>,</span><br><span class="line">    age: <span class="number">24</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> handler = &#123;</span><br><span class="line">    get: <span class="function"><span class="keyword">function</span>(<span class="params">target, key</span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'getting '</span>+key);</span><br><span class="line">        <span class="keyword">return</span> target[key]; <span class="comment">// 不是target.key</span></span><br><span class="line">    &#125;,</span><br><span class="line">    set: <span class="function"><span class="keyword">function</span>(<span class="params">target, key, value</span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'setting '</span>+key);</span><br><span class="line">        target[key] = value;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(target, handler)</span><br><span class="line">proxy.name     <span class="comment">// 实际执行 handler.get</span></span><br><span class="line">proxy.age = <span class="number">25</span> <span class="comment">// 实际执行 handler.set</span></span><br><span class="line"><span class="comment">// getting name</span></span><br><span class="line"><span class="comment">// setting age</span></span><br><span class="line"><span class="comment">// 25</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// target 可以为空对象</span></span><br><span class="line"><span class="keyword">let</span> targetEpt = &#123;&#125;</span><br><span class="line"><span class="keyword">let</span> proxyEpt = <span class="keyword">new</span> <span class="built_in">Proxy</span>(targetEpt, handler)</span><br><span class="line"><span class="comment">// 调用 get 方法，此时目标对象为空，没有 name 属性</span></span><br><span class="line">proxyEpt.name <span class="comment">// getting name</span></span><br><span class="line"><span class="comment">// 调用 set 方法，向目标对象中添加了 name 属性</span></span><br><span class="line">proxyEpt.name = <span class="string">'Tom'</span></span><br><span class="line"><span class="comment">// setting name</span></span><br><span class="line"><span class="comment">// "Tom"</span></span><br><span class="line"><span class="comment">// 再次调用 get ，此时已经存在 name 属性</span></span><br><span class="line">proxyEpt.name</span><br><span class="line"><span class="comment">// getting name</span></span><br><span class="line"><span class="comment">// "Tom"</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// 通过构造函数新建实例时其实是对目标对象进行了浅拷贝，因此目标对象与代理对象会互相影响</span></span><br><span class="line">targetEpt)</span><br><span class="line"><span class="comment">// &#123;name: "Tom"&#125;</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// handler 对象也可以为空，相当于不设置拦截操作，直接访问目标对象</span></span><br><span class="line"><span class="keyword">let</span> targetEmpty = &#123;&#125;</span><br><span class="line"><span class="keyword">let</span> proxyEmpty = <span class="keyword">new</span> <span class="built_in">Proxy</span>(targetEmpty,&#123;&#125;)</span><br><span class="line">proxyEmpty.name = <span class="string">"Tom"</span></span><br><span class="line">targetEmpty) <span class="comment">// &#123;name: "Tom"&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Proxy实例方法"><a href="#Proxy实例方法" class="headerlink" title="Proxy实例方法"></a>Proxy实例方法</h4><p><strong>get 方法</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">get(target, propKey, receiver)</span><br></pre></td></tr></table></figure>
+
+<p>用于 target 对象上 propKey 的读取操作。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> exam =&#123;</span><br><span class="line">    name: <span class="string">"Tom"</span>,</span><br><span class="line">    age: <span class="number">24</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(exam, &#123;</span><br><span class="line">  get(target, propKey, receiver) &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'Getting '</span> + propKey);</span><br><span class="line">    <span class="keyword">return</span> target[propKey];</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br><span class="line">proxy.name </span><br><span class="line"><span class="comment">// Getting name</span></span><br><span class="line"><span class="comment">// "Tom"</span></span><br></pre></td></tr></table></figure>
+
+<p>get() 方法可以继承。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(&#123;&#125;, &#123;</span><br><span class="line">  get(target, propKey, receiver) &#123;</span><br><span class="line">      <span class="comment">// 实现私有属性读取保护</span></span><br><span class="line">      <span class="keyword">if</span>(propKey[<span class="number">0</span>] === <span class="string">'_'</span>)&#123;</span><br><span class="line">          <span class="keyword">throw</span> <span class="keyword">new</span> Erro(<span class="string">`Invalid attempt to get private     "<span class="subst">$&#123;propKey&#125;</span>"`</span>);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="built_in">console</span>.log(<span class="string">'Getting '</span> + propKey);</span><br><span class="line">      <span class="keyword">return</span> target[propKey];</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"> </span><br><span class="line"><span class="keyword">let</span> obj = <span class="built_in">Object</span>.create(proxy);</span><br><span class="line">obj.name</span><br><span class="line"><span class="comment">// Getting name</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>set 方法</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set(target, propKey, value, receiver)</span><br></pre></td></tr></table></figure>
+
+<p>用于拦截 target 对象上的 propKey 的赋值操作。如果目标对象自身的某个属性，不可写且不可配置，那么set方法将不起作用。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> validator = &#123;</span><br><span class="line">    set: <span class="function"><span class="keyword">function</span>(<span class="params">obj, prop, value</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (prop === <span class="string">'age'</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!<span class="built_in">Number</span>.isInteger(value)) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">TypeError</span>(<span class="string">'The age is not an integer'</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (value &gt; <span class="number">200</span>) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">RangeError</span>(<span class="string">'The age seems invalid'</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 对于满足条件的 age 属性以及其他属性，直接保存</span></span><br><span class="line">        obj[prop] = value;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">let</span> proxy= <span class="keyword">new</span> <span class="built_in">Proxy</span>(&#123;&#125;, validator)</span><br><span class="line">proxy.age = <span class="number">100</span>;</span><br><span class="line">proxy.age           <span class="comment">// 100</span></span><br><span class="line">proxy.age = <span class="string">'oppps'</span> <span class="comment">// 报错</span></span><br><span class="line">proxy.age = <span class="number">300</span>     <span class="comment">// 报错</span></span><br></pre></td></tr></table></figure>
+
+<p>第四个参数 receiver 表示原始操作行为所在对象，一般是 Proxy 实例本身。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> handler = &#123;</span><br><span class="line">    set: <span class="function"><span class="keyword">function</span>(<span class="params">obj, prop, value, receiver</span>) </span>&#123;</span><br><span class="line">        obj[prop] = receiver;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">const</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(&#123;&#125;, handler);</span><br><span class="line">proxy.name= <span class="string">'Tom'</span>;</span><br><span class="line">proxy.name=== proxy <span class="comment">// true</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">const</span> exam = &#123;&#125;</span><br><span class="line"><span class="built_in">Object</span>.setPrototypeOf(exam, proxy)</span><br><span class="line">exam.name = <span class="string">"Tom"</span></span><br><span class="line">exam.name === exam <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p>注意，严格模式下，set代理如果没有返回true，就会报错。</p>
+<p><strong>apply 方法</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apply(target, ctx, args)</span><br></pre></td></tr></table></figure>
+
+<p>用于拦截函数的调用、call 和 reply 操作。target 表示目标对象，ctx 表示目标对象上下文，args 表示目标对象的参数数组。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">sub</span>(<span class="params">a, b</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a - b;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> handler = &#123;</span><br><span class="line">    apply: <span class="function"><span class="keyword">function</span>(<span class="params">target, ctx, args</span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'handle apply'</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Reflect</span>.apply(...arguments);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(sub, handler)</span><br><span class="line">proxy(<span class="number">2</span>, <span class="number">1</span>) </span><br><span class="line"><span class="comment">// handle apply</span></span><br><span class="line"><span class="comment">// 1</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>has 方法</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">has(target, propKey)</span><br></pre></td></tr></table></figure>
+
+<p>用于拦截 HasProperty 操作，即在判断 target 对象是否存在 propKey 属性时，会被这个方法拦截。此方法不判断一个属性是对象自身的属性，还是继承的属性。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span>  handler = &#123;</span><br><span class="line">    has: <span class="function"><span class="keyword">function</span>(<span class="params">target, propKey</span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"handle has"</span>);</span><br><span class="line">        <span class="keyword">return</span> propKey <span class="keyword">in</span> target;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> exam = &#123;<span class="attr">name</span>: <span class="string">"Tom"</span>&#125;</span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(exam, handler)</span><br><span class="line"><span class="string">'name'</span> <span class="keyword">in</span> proxy</span><br><span class="line"><span class="comment">// handle has</span></span><br><span class="line"><span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p>注意：此方法不拦截 for … in 循环。</p>
+<p><strong>construct 方法</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">construct(target, args)</span><br></pre></td></tr></table></figure>
+
+<p>用于拦截 new 命令。返回值必须为对象。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> handler = &#123;</span><br><span class="line">    construct: <span class="function"><span class="keyword">function</span>(<span class="params">target, args, newTarget</span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"handle construct"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Reflect</span>.construct(target, args, newTarget);</span><br><span class="line">    &#125; &#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">exam</span> </span>= &#123;</span><br><span class="line">    <span class="keyword">constructor</span>(name)&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(exam,handler)</span><br><span class="line"><span class="keyword">new</span> proxy(<span class="string">"Tom"</span>)</span><br><span class="line"><span class="comment">// handle construct</span></span><br><span class="line"><span class="comment">// exam &#123;name: "Tom"&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>deleteProperty 方法</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">deleteProperty(target, propKey)</span><br></pre></td></tr></table></figure>
+
+<p>用于拦截 delete 操作，如果这个方法抛出错误或者返回 false ，propKey 属性就无法被 delete 命令删除。</p>
+<p><strong>defineProperty 方法</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">defineProperty(target, propKey, propDesc)</span><br></pre></td></tr></table></figure>
+
+<p>用于拦截 Object.definePro若目标对象不可扩展，增加目标对象上不存在的属性会报错；</p>
+<p>若属性不可写或不可配置，则不能改变这些属性。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> handler = &#123;</span><br><span class="line">    defineProperty: <span class="function"><span class="keyword">function</span>(<span class="params">target, propKey, propDesc</span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"handle defineProperty"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;plet target = &#123;&#125;</span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(target, handler)</span><br><span class="line">proxy.name = <span class="string">"Tom"</span></span><br><span class="line"><span class="comment">// handle defineProperty</span></span><br><span class="line">target</span><br><span class="line"><span class="comment">// &#123;name: "Tom"&#125;</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// defineProperty 返回值为false，添加属性操作无效</span></span><br><span class="line"><span class="keyword">let</span> handler1 = &#123;</span><br><span class="line">    defineProperty: <span class="function"><span class="keyword">function</span>(<span class="params">target, propKey, propDesc</span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"handle defineProperty"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> target1 = &#123;&#125;</span><br><span class="line"><span class="keyword">let</span> proxy1 = <span class="keyword">new</span> <span class="built_in">Proxy</span>(target1, handler1)</span><br><span class="line">proxy1.name = <span class="string">"Jerry"</span></span><br><span class="line">target1</span><br><span class="line"><span class="comment">// &#123;&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>getOwnPropertyDescriptor方法</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">getOwnPropertyDescriptor(target, propKey)</span><br></pre></td></tr></table></figure>
+
+<p>用于拦截 Object.getOwnPropertyD() 返回值为属性描述对象或者 undefined 。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> handler = &#123;</span><br><span class="line">    getOwnPropertyDescriptor: <span class="function"><span class="keyword">function</span>(<span class="params">target, propKey</span>)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Object</span>.getOwnPropertyDescriptor(target, propKey);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;ilet target = &#123;<span class="attr">name</span>: <span class="string">"Tom"</span>&#125;</span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(target, handler)</span><br><span class="line"><span class="built_in">Object</span>.getOwnPropertyDescriptor(proxy, <span class="string">'name'</span>)</span><br><span class="line"><span class="comment">// &#123;value: "Tom", writable: true, enumerable: true, configurable: </span></span><br><span class="line"><span class="comment">// true&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>getPrototypeOf 方法</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">getPrototypeOf(target)</span><br></pre></td></tr></table></figure>
+
+<p>主要用于拦截获取对象原型的操作。包括以下操作：</p>
+<ul>
+<li>Object.prototype.<em>proto</em></li>
+<li>Object.prototype.isPrototypeOf()</li>
+<li>Object.getPrototypeOf()</li>
+<li>Reflect.getPrototypeOf()</li>
+<li>instanceof</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> exam = &#123;&#125;</span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(&#123;&#125;,&#123;</span><br><span class="line">    getPrototypeOf: <span class="function"><span class="keyword">function</span>(<span class="params">target</span>)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> exam;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"><span class="built_in">Object</span>.getPrototypeOf(proxy) <span class="comment">// &#123;&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>注意，返回值必须是对象或者 null ，否则报错。另外，如果目标对象不可扩展（non-extensible），getPrototypeOf 方法必须返回目标对象的原型对象。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(&#123;&#125;,&#123;</span><br><span class="line">    getPrototypeOf: <span class="function"><span class="keyword">function</span>(<span class="params">target</span>)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"><span class="built_in">Object</span>.getPrototypeOf(proxy)</span><br><span class="line"><span class="comment">// TypeError: 'getPrototypeOf' on proxy: trap returned neither object // nor null</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>isExtensible 方法</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">isExtensible(target)</span><br></pre></td></tr></table></figure>
+
+<p>用于拦截 Object.isExtensible 操作。</p>
+<p>该方法只能返回布尔值，否则返回值会被自动转为布尔值。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(&#123;&#125;,&#123;</span><br><span class="line">    isExtensible:<span class="function"><span class="keyword">function</span>(<span class="params">target</span>)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"><span class="built_in">Object</span>.isExtensible(proxy) <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p>注意：它的返回值必须与目标对象的isExtensible属性保持一致，否则会抛出错误。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(&#123;&#125;,&#123;</span><br><span class="line">    isExtensible:<span class="function"><span class="keyword">function</span>(<span class="params">target</span>)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br><span class="line"><span class="built_in">Object</span>.isExtensible(proxy)</span><br><span class="line"><span class="comment">// TypeError: 'isExtensible' on proxy: trap result does not reflect </span></span><br><span class="line"><span class="comment">// extensibility of proxy target (which is 'true')</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>ownKeys 方法</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ownKeys(target)</span><br></pre></td></tr></table></figure>
+
+<p>用于拦截对象自身属性的读取操作。主要包括以下操作：</p>
+<ul>
+<li>Object.getOwnPropertyNames()</li>
+<li>Object.getOwnPropertySymbols()</li>
+<li>Object.keys()</li>
+<li>or…in</li>
+</ul>
+<p>方法返回的数组成员，只能是字符串或 Symbol 值，否则会报错。</p>
+<p>若目标对象中含有不可配置的属性，则必须将这些属性在结果中返回，否则就会报错。</p>
+<p>若目标对象不可扩展，则必须全部返回且只能返回目标对象包含的所有属性，不能包含不存在的属性，否则也会报错。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>( &#123;</span><br><span class="line">  name: <span class="string">"Tom"</span>,</span><br><span class="line">  age: <span class="number">24</span></span><br><span class="line">&#125;, &#123;</span><br><span class="line">    ownKeys(target) &#123;</span><br><span class="line">        <span class="keyword">return</span> [<span class="string">'name'</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="built_in">Object</span>.keys(proxy)</span><br><span class="line"><span class="comment">// [ 'name' ]f返回结果中，三类属性会被过滤：</span></span><br><span class="line"><span class="comment">//          - 目标对象上没有的属性</span></span><br><span class="line"><span class="comment">//          - 属性名为 Symbol 值的属性</span></span><br><span class="line"><span class="comment">//          - 不可遍历的属性</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">let</span> target = &#123;</span><br><span class="line">  name: <span class="string">"Tom"</span>,</span><br><span class="line">  [<span class="built_in">Symbol</span>.for(<span class="string">'age'</span>)]: <span class="number">24</span>,</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 添加不可遍历属性 'gender'</span></span><br><span class="line"><span class="built_in">Object</span>.defineProperty(target, <span class="string">'gender'</span>, &#123;</span><br><span class="line">  enumerable: <span class="literal">false</span>,</span><br><span class="line">  configurable: <span class="literal">true</span>,</span><br><span class="line">  writable: <span class="literal">true</span>,</span><br><span class="line">  value: <span class="string">'male'</span></span><br><span class="line">&#125;);</span><br><span class="line"><span class="keyword">let</span> handler = &#123;</span><br><span class="line">    ownKeys(target) &#123;</span><br><span class="line">        <span class="keyword">return</span> [<span class="string">'name'</span>, <span class="string">'parent'</span>, <span class="built_in">Symbol</span>.for(<span class="string">'age'</span>), <span class="string">'gender'</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(target, handler);</span><br><span class="line"><span class="built_in">Object</span>.keys(proxy)</span><br><span class="line"><span class="comment">// ['name']</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>preventExtensions 方法</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">preventExtensions(target)</span><br></pre></td></tr></table></figure>
+
+<p>拦截 Object.preventExtensions 操作。</p>
+<p>该方法必须返回一个布尔值，否则会自动转为布尔值。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 只有目标对象不可扩展时（即 Object.isExtensible(proxy) 为 false ），</span></span><br><span class="line"><span class="comment">// proxy.preventExtensions 才能返回 true ，否则会报错</span></span><br><span class="line"><span class="keyword">var</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(&#123;&#125;, &#123;</span><br><span class="line">  preventExtensions: <span class="function"><span class="keyword">function</span>(<span class="params">target</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 由于 proxy.preventExtensions 返回 true，此处也会返回 true，因此会报错</span></span><br><span class="line"><span class="built_in">Object</span>.preventExtensions(proxy) 被<span class="comment">// TypeError: 'preventExtensions' on proxy: trap returned truish but // the proxy target is extensible</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// 解决方案</span></span><br><span class="line"> <span class="keyword">var</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(&#123;&#125;, &#123;</span><br><span class="line">  preventExtensions: <span class="function"><span class="keyword">function</span>(<span class="params">target</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 返回前先调用 Object.preventExtensions</span></span><br><span class="line">    <span class="built_in">Object</span>.preventExtensions(target);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="built_in">Object</span>.preventExtensions(proxy)</span><br><span class="line"><span class="comment">// Proxy &#123;&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>setPrototypeOf 方法</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setPrototypeOf</span><br></pre></td></tr></table></figure>
+
+<p>主要用来拦截 Object.setPrototypeOf 方法。</p>
+<p>返回值必须为布尔值，否则会被自动转为布尔值。</p>
+<p>若目标对象不可扩展，setPrototypeOf 方法不得改变目标对象的原型。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> proto = &#123;&#125;</span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;&#125;, &#123;</span><br><span class="line">    setPrototypeOf: <span class="function"><span class="keyword">function</span>(<span class="params">target, proto</span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"setPrototypeOf"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">);</span><br><span class="line"><span class="built_in">Object</span>.setPrototypeOf(proxy, proto);</span><br><span class="line"><span class="comment">// setPrototypeOf</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>revocable 方法</strong></p>
+<p>用于返回一个可取消的 Proxy 实例。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> &#123;proxy, revoke&#125; = <span class="built_in">Proxy</span>.revocable(&#123;&#125;, &#123;&#125;);</span><br><span class="line">proxy.name = <span class="string">"Tom"</span>;</span><br><span class="line">revoke();</span><br><span class="line">proxy.name </span><br><span class="line"><span class="comment">// TypeError: Cannot perform 'get' on a proxy that has been revoked</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Reflect介绍"><a href="#Reflect介绍" class="headerlink" title="Reflect介绍"></a>Reflect介绍</h4><p>ES6 中将 Object 的一些明显属于语言内部的方法移植到了 Reflect 对象上（当前某些方法会同时存在于 Object 和 Reflect 对象上），未来的新方法会只部署在 Reflect 对象上。</p>
+<p>Reflect 对象对某些方法的返回结果进行了修改，使其更合理。</p>
+<p>Reflect 对象使用函数的方式实现了 Object 的命令式操作。</p>
+<h4 id="Reflect静态方法"><a href="#Reflect静态方法" class="headerlink" title="Reflect静态方法"></a>Reflect静态方法</h4><p><strong>Reflect.get</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Reflect</span>.get(target, name, receiver)</span><br></pre></td></tr></table></figure>
+
+<p>查找并返回 target 对象的 name 属性。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> exam = &#123;</span><br><span class="line">    name: <span class="string">"Tom"</span>,</span><br><span class="line">    age: <span class="number">24</span>,</span><br><span class="line">    get info()&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.name + <span class="keyword">this</span>.age;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">Reflect</span>.get(exam, <span class="string">'name'</span>); <span class="comment">// "Tom"</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// 当 target 对象中存在 name 属性的 getter 方法， getter 方法的 this 会绑定 // receiver</span></span><br><span class="line"><span class="keyword">let</span> receiver = &#123;</span><br><span class="line">    name: <span class="string">"Jerry"</span>,</span><br><span class="line">    age: <span class="number">20</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">Reflect</span>.get(exam, <span class="string">'info'</span>, receiver); <span class="comment">// Jerry20</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// 当 name 为不存在于 target 对象的属性时，返回 undefined</span></span><br><span class="line"><span class="built_in">Reflect</span>.get(exam, <span class="string">'birth'</span>); <span class="comment">// undefined</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// 当 target 不是对象时，会报错</span></span><br><span class="line"><span class="built_in">Reflect</span>.get(<span class="number">1</span>, <span class="string">'name'</span>); <span class="comment">// TypeError</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Reflect.set</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Reflect</span>.set(target, name, value, receiver)</span><br></pre></td></tr></table></figure>
+
+<p>将 target 的 name 属性设置为 value。返回值为 boolean ，true 表示修改成功，false 表示失败。当 target 为不存在的对象时，会报错。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> exam = &#123;</span><br><span class="line">    name: <span class="string">"Tom"</span>,</span><br><span class="line">    age: <span class="number">24</span>,</span><br><span class="line">    set info(value)&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.age = value;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">exam.age; <span class="comment">// 24</span></span><br><span class="line"><span class="built_in">Reflect</span>.set(exam, <span class="string">'age'</span>, <span class="number">25</span>); <span class="comment">// true</span></span><br><span class="line">exam.age; <span class="comment">// 25</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// value 为空时会将 name 属性清除</span></span><br><span class="line"><span class="built_in">Reflect</span>.set(exam, <span class="string">'age'</span>, ); <span class="comment">// true</span></span><br><span class="line">exam.age; <span class="comment">// undefined</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// 当 target 对象中存在 name 属性 setter 方法时，setter 方法中的 this 会绑定 // receiver , 所以修改的实际上是 receiver 的属性,</span></span><br><span class="line"><span class="keyword">let</span> receiver = &#123;</span><br><span class="line">    age: <span class="number">18</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">Reflect</span>.set(exam, <span class="string">'info'</span>, <span class="number">1</span>, receiver); <span class="comment">// true</span></span><br><span class="line">receiver.age; <span class="comment">// 1</span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">let</span> receiver1 = &#123;</span><br><span class="line">    name: <span class="string">'oppps'</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">Reflect</span>.set(exam, <span class="string">'info'</span>, <span class="number">1</span>, receiver1);</span><br><span class="line">receiver1.age; <span class="comment">// 1</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Reflect.has</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Reflect</span>.has(obj, name)</span><br></pre></td></tr></table></figure>
+
+<p>是 name in obj 指令的函数化，用于查找 name 属性在 obj 对象中是否存在。返回值为 boolean。如果 obj 不是对象则会报错 TypeError。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> exam = &#123;</span><br><span class="line">    name: <span class="string">"Tom"</span>,</span><br><span class="line">    age: <span class="number">24</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">Reflect</span>.has(exam, <span class="string">'name'</span>); <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Reflect.deleteProperty</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Reflect.deleteProperty(obj, property)</span><br></pre></td></tr></table></figure>
+
+<p>是 delete obj[property] 的函数化，用于删除 obj 对象的 property 属性，返回值为 boolean。如果 obj 不是对象则会报错 TypeError。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> exam = &#123;</span><br><span class="line">    name: <span class="string">"Tom"</span>,</span><br><span class="line">    age: <span class="number">24</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">Reflect</span>.deleteProperty(exam , <span class="string">'name'</span>); <span class="comment">// true</span></span><br><span class="line">exam <span class="comment">// &#123;age: 24&#125; </span></span><br><span class="line"><span class="comment">// property 不存在时，也会返回 true</span></span><br><span class="line"><span class="built_in">Reflect</span>.deleteProperty(exam , <span class="string">'name'</span>); <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Reflect.construct</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Reflect.construct(obj, args)</span><br></pre></td></tr></table></figure>
+
+<p>等同于 new target(…args)。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">exam</span>(<span class="params">name</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.name = name;</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">Reflect</span>.construct(exam, [<span class="string">'Tom'</span>]); <span class="comment">// exam &#123;name: "Tom"&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Reflect.getPrototypeOf</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Reflect</span>.getPrototypeOf(obj)</span><br></pre></td></tr></table></figure>
+
+<p>用于读取 obj 的 _proto_ 属性。在 obj 不是对象时不会像 Object 一样把 obj 转为对象，而是会报错。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Exam</span></span>&#123;&#125;</span><br><span class="line"><span class="keyword">let</span> obj = <span class="keyword">new</span> Exam()</span><br><span class="line"><span class="built_in">Reflect</span>.getPrototypeOf(obj) === Exam.prototype <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Reflect.setPrototypeOf</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Reflect</span>.setPrototypeOf(obj, newProto)</span><br></pre></td></tr></table></figure>
+
+<p>用于设置目标对象的 prototype。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> obj =&#123;&#125;</span><br><span class="line"><span class="built_in">Reflect</span>.setPrototypeOf(obj, <span class="built_in">Array</span>.prototype); <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Reflect.apply</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Reflect</span>.apply(func, thisArg, args)</span><br></pre></td></tr></table></figure>
+
+<p>等同于 Function.prototype.apply.call(func, thisArg, args) 。func 表示目标函数；thisArg 表示目标函数绑定的 this 对象；args 表示目标函数调用时传入的参数列表，可以是数组或类似数组的对象。若目标函数无法调用，会抛出 TypeError 。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Reflect</span>.apply(<span class="built_in">Math</span>.max, <span class="built_in">Math</span>, [<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">3</span>, <span class="number">1</span>]); <span class="comment">// 5</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Reflect.defineProperty</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Reflect</span>.defineProperty(target, propertyKey, attributes)</span><br></pre></td></tr></table></figure>
+
+<p>用于为目标对象定义属性。如果 target 不是对象，会抛出错误。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> myDate= &#123;&#125;</span><br><span class="line"><span class="built_in">Reflect</span>.defineProperty(MyDate, <span class="string">'now'</span>, &#123;</span><br><span class="line">  value: <span class="function"><span class="params">()</span> =&gt;</span> <span class="built_in">Date</span>.now()</span><br><span class="line">&#125;); <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Reflect.getOwnPropertyDescriptor</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Reflect</span>.getOwnPropertyDescriptor(target, propertyKey)</span><br></pre></td></tr></table></figure>
+
+<p>用于得到 target 对象的 propertyKey 属性的描述对象。在 target 不是对象时，会抛出错误表示参数非法，不会将非对象转换为对象。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> exam = &#123;&#125;</span><br><span class="line"><span class="built_in">Reflect</span>.defineProperty(exam, <span class="string">'name'</span>, &#123;</span><br><span class="line">  value: <span class="literal">true</span>,</span><br><span class="line">  enumerable: <span class="literal">false</span>,</span><br><span class="line">&#125;)</span><br><span class="line"><span class="built_in">Reflect</span>.getOwnPropertyDescriptor(exam, <span class="string">'name'</span>)</span><br><span class="line"><span class="comment">// &#123; configurable: false, enumerable: false, value: true, writable:</span></span><br><span class="line"><span class="comment">// false&#125;</span></span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment">// propertyKey 属性在 target 对象中不存在时，返回 undefined</span></span><br><span class="line"><span class="built_in">Reflect</span>.getOwnPropertyDescriptor(exam, <span class="string">'age'</span>) <span class="comment">// undefined</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Reflect.isExtensible</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Reflect</span>.isExtensible(target)</span><br></pre></td></tr></table></figure>
+
+<p>用于判断 target 对象是否可扩展。返回值为 boolean 。如果 target 参数不是对象，会抛出错误。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> exam = &#123;&#125;</span><br><span class="line"><span class="built_in">Reflect</span>.isExtensible(exam) <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Reflect.preventExtensions</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Reflect</span>.preventExtensions(target)</span><br></pre></td></tr></table></figure>
+
+<p>用于让 target 对象变为不可扩展。如果 target 参数不是对象，会抛出错误。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> exam = &#123;&#125;</span><br><span class="line"><span class="built_in">Reflect</span>.preventExtensions(exam) <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Reflect.ownKeys</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Reflect</span>.ownKeys(target)</span><br></pre></td></tr></table></figure>
+
+<p>用于返回 target 对象的所有属性，等同于 Object.getOwnPropertyNames 与Object.getOwnPropertySymbols 之和。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> exam = &#123;</span><br><span class="line">  name: <span class="number">1</span>,</span><br><span class="line">  [<span class="built_in">Symbol</span>.for(<span class="string">'age'</span>)]: <span class="number">4</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">Reflect</span>.ownKeys(exam) <span class="comment">// ["name", Symbol(age)]</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Proxy-和-Reflect组合使用"><a href="#Proxy-和-Reflect组合使用" class="headerlink" title="Proxy 和 Reflect组合使用"></a>Proxy 和 Reflect组合使用</h4><p>Reflect 对象的方法与 Proxy 对象的方法是一一对应的。所以 Proxy 对象的方法可以通过调用 Reflect 对象的方法获取默认行为，然后进行额外操作。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> exam = &#123;</span><br><span class="line">    name: <span class="string">"Tom"</span>,</span><br><span class="line">    age: <span class="number">24</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> handler = &#123;</span><br><span class="line">    get: <span class="function"><span class="keyword">function</span>(<span class="params">target, key</span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"getting "</span>+key);</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Reflect</span>.get(target, key);</span><br><span class="line">    &#125;,</span><br><span class="line">    set: <span class="function"><span class="keyword">function</span>(<span class="params">target, key, value</span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"setting "</span>+key+<span class="string">" to "</span>+value)</span><br><span class="line">        <span class="built_in">Reflect</span>.set(target, key, value);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> proxy = <span class="keyword">new</span> <span class="built_in">Proxy</span>(exam, handler)</span><br><span class="line">proxy.name = <span class="string">"Jerry"</span></span><br><span class="line">proxy.name</span><br><span class="line"><span class="comment">// setting name to Jerry</span></span><br><span class="line"><span class="comment">// getting name</span></span><br><span class="line"><span class="comment">// "Jerry"</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>使用场景拓展</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 定义 Set 集合</span></span><br><span class="line"><span class="keyword">const</span> queuedObservers = <span class="keyword">new</span> <span class="built_in">Set</span>();</span><br><span class="line"><span class="comment">// 把观察者函数都放入 Set 集合中</span></span><br><span class="line"><span class="keyword">const</span> observe = <span class="function"><span class="params">fn</span> =&gt;</span> queuedObservers.add(fn);</span><br><span class="line"><span class="comment">// observable 返回原始对象的代理，拦截赋值操作</span></span><br><span class="line"><span class="keyword">const</span> observable = <span class="function"><span class="params">obj</span> =&gt;</span> <span class="keyword">new</span> <span class="built_in">Proxy</span>(obj, &#123;set&#125;);</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">set</span>(<span class="params">target, key, value, receiver</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// 获取对象的赋值操作</span></span><br><span class="line">  <span class="keyword">const</span> result = <span class="built_in">Reflect</span>.set(target, key, value, receiver);</span><br><span class="line">  <span class="comment">// 执行所有观察者</span></span><br><span class="line">  queuedObservers.forEach(<span class="function"><span class="params">observer</span> =&gt;</span> observer());</span><br><span class="line">  <span class="comment">// 执行赋值操作</span></span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;">
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/前端/" rel="tag"><i class="fa fa-tag"></i> 前端</a>
+          
+            <a href="/tags/JavaScript/" rel="tag"><i class="fa fa-tag"></i> JavaScript</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/01/10.数据存储/GlusterFS/GlusterFS/" rel="next" title="GlusterFS 原理及使用">
+                <i class="fa fa-chevron-left"></i> GlusterFS 原理及使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/07/09/03.web前端/JavaScript/ES6 新语法(二)/" rel="prev" title>
+                 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="刘小恺(Kyle)">
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">204</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">53</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">63</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#ECMAScript简介"><span class="nav-text">ECMAScript简介</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#介绍"><span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ECMAScript-的背景"><span class="nav-text">ECMAScript 的背景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ECMAScript的历史"><span class="nav-text">ECMAScript的历史</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#webpack"><span class="nav-text">webpack</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#webpack介绍"><span class="nav-text">webpack介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#web的是个核心概念"><span class="nav-text">web的是个核心概念</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#入口-entry"><span class="nav-text">入口(entry)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#输出-output"><span class="nav-text">输出(output)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#loader"><span class="nav-text">loader</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#插件-plugins"><span class="nav-text">插件(plugins)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#利用-webpack-搭建应用"><span class="nav-text">利用 webpack 搭建应用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES6-新语法特性"><span class="nav-text">ES6 新语法特性</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#let-与-const"><span class="nav-text">let 与 const</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#const-命令"><span class="nav-text">const 命令</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解构赋值"><span class="nav-text">解构赋值</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#概念"><span class="nav-text">概念</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#解构模型"><span class="nav-text">解构模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数组模型的解构-Array"><span class="nav-text">数组模型的解构(Array)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#对象模型的解构（Object）"><span class="nav-text">对象模型的解构（Object）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES6-Symbol"><span class="nav-text">ES6 Symbol</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#概述"><span class="nav-text">概述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基本用法"><span class="nav-text">基本用法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用场景"><span class="nav-text">使用场景</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES6-Map-与-Set"><span class="nav-text">ES6 Map 与 Set</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Map-对象"><span class="nav-text">Map 对象</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Maps-与Objects-的区别"><span class="nav-text">Maps 与Objects 的区别</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Map-中的key"><span class="nav-text">Map 中的key</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Map-的迭代"><span class="nav-text">Map 的迭代</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Map对象的操作"><span class="nav-text">Map对象的操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Set-对象"><span class="nav-text">Set 对象</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Set-对象的作用"><span class="nav-text">Set 对象的作用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES6-Reflect-与-Proxy"><span class="nav-text">ES6 Reflect 与 Proxy</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#概述-1"><span class="nav-text">概述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Proxy基本用法"><span class="nav-text">Proxy基本用法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Proxy实例方法"><span class="nav-text">Proxy实例方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Reflect介绍"><span class="nav-text">Reflect介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Reflect静态方法"><span class="nav-text">Reflect静态方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Proxy-和-Reflect组合使用"><span class="nav-text">Proxy 和 Reflect组合使用</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

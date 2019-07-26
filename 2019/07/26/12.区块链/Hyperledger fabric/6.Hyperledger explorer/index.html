@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="该篇文档的前提是已经存在部署好的fabric网络, 并且在peer节点有运行的自定义链码 Explorer 区块链浏览器部署区块链网络部署(前提) 在部署 Explorer项目前提前要有存在的区块链网络，这里说一下区块链网络部署时应该注意点的点   在区块链网络中启动操作服务器 如果要使用区块链监控，在启动网络的时候应该加上如下环境变量 12- ORDERER_OPERATIONS_LISTENA">
+<meta name="keywords" content="区块链">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hyperleder explorer 部署">
+<meta property="og:url" content="http://blog.kyleliu.cn/2019/07/26/12.区块链/Hyperledger fabric/6.Hyperledger explorer/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="该篇文档的前提是已经存在部署好的fabric网络, 并且在peer节点有运行的自定义链码 Explorer 区块链浏览器部署区块链网络部署(前提) 在部署 Explorer项目前提前要有存在的区块链网络，这里说一下区块链网络部署时应该注意点的点   在区块链网络中启动操作服务器 如果要使用区块链监控，在启动网络的时候应该加上如下环境变量 12- ORDERER_OPERATIONS_LISTENA">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-07-26T03:54:11.047Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hyperleder explorer 部署">
+<meta name="twitter:description" content="该篇文档的前提是已经存在部署好的fabric网络, 并且在peer节点有运行的自定义链码 Explorer 区块链浏览器部署区块链网络部署(前提) 在部署 Explorer项目前提前要有存在的区块链网络，这里说一下区块链网络部署时应该注意点的点   在区块链网络中启动操作服务器 如果要使用区块链监控，在启动网络的时候应该加上如下环境变量 12- ORDERER_OPERATIONS_LISTENA">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2019/07/26/12.区块链/Hyperledger fabric/6.Hyperledger explorer/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Hyperleder explorer 部署 | 刘小恺(Kyle) 的个人博客</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/07/26/12.区块链/Hyperledger fabric/6.Hyperledger explorer/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Hyperleder explorer 部署
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-07-26 10:40:00" itemprop="dateCreated datePublished" datetime="2019-07-26T10:40:00+08:00">2019-07-26</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/区块链/" itemprop="url" rel="index"><span itemprop="name">区块链</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/区块链/Hyperledger-fabric/" itemprop="url" rel="index"><span itemprop="name">Hyperledger fabric</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/07/26/12.区块链/Hyperledger fabric/6.Hyperledger explorer/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/07/26/12.区块链/Hyperledger fabric/6.Hyperledger explorer/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><code>该篇文档的前提是已经存在部署好的fabric网络, 并且在peer节点有运行的自定义链码</code></p>
+<h2 id="Explorer-区块链浏览器部署"><a href="#Explorer-区块链浏览器部署" class="headerlink" title="Explorer 区块链浏览器部署"></a>Explorer 区块链浏览器部署</h2><h3 id="区块链网络部署-前提"><a href="#区块链网络部署-前提" class="headerlink" title="区块链网络部署(前提)"></a>区块链网络部署(前提)</h3><blockquote>
+<p>在部署 Explorer项目前提前要有存在的区块链网络，这里说一下区块链网络部署时应该注意点的点</p>
+</blockquote>
+<ol>
+<li><p>在区块链网络中启动操作服务器</p>
+<p>如果要使用区块链监控，在启动网络的时候应该加上如下环境变量</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="string">ORDERER_OPERATIONS_LISTENADDRESS=0.0.0.0:8443</span>  <span class="comment"># operation RESTful API</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">ORDERER_METRICS_PROVIDER=prometheus</span> <span class="comment"># prometheus will pull metrics from orderer via /metrics RESTful API</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>务必开启gossip</p>
+<p>开启gossip， 使区块链网络开启发现服务</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">- CORE_PEER_GOSSIP_BOOTSTRAP=X.X.X.X:XXXX</span><br><span class="line">- CORE_PEER_GOSSIP_EXTERNALENDPOINT=X.X.X.X:XXXX</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h3 id="项目拉取"><a href="#项目拉取" class="headerlink" title="项目拉取"></a>项目拉取</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/hyperledger/blockchain-explorer.git</span><br><span class="line">cd blockchain-explorer</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装数据库"><a href="#安装数据库" class="headerlink" title="安装数据库"></a>安装数据库</h3><h4 id="配置prostgreSQL数据库"><a href="#配置prostgreSQL数据库" class="headerlink" title="配置prostgreSQL数据库"></a>配置prostgreSQL数据库</h4><ol>
+<li><p>第一种配置方法</p>
+<p>cd blockchain-explorer/app  修改 explorerconfig.json</p>
+</li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">"postgreSQL": &#123;</span><br><span class="line">	"host": "127.0.0.1",</span><br><span class="line">	"port": "5432",</span><br><span class="line">    "database": "fabricexplorer",</span><br><span class="line">	"username": "hppoc",</span><br><span class="line">    "passwd": "password"</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>第二种配置方法</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">export DATABASE_HOST=127.0.0.1</span><br><span class="line">export DATABASE_PORT=5432</span><br><span class="line">export DATABASE_DATABASE=fabricexplorer</span><br><span class="line">export DATABASE_USERNAME=hppoc</span><br><span class="line">export DATABASE_PASSWD=pass12345</span><br></pre></td></tr></table></figure>
+
+<h4 id="给执行sql脚本的目录带执行权限"><a href="#给执行sql脚本的目录带执行权限" class="headerlink" title="给执行sql脚本的目录带执行权限"></a>给执行sql脚本的目录带执行权限</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chomd -R 775 /blockchain-explorer/app/persistence/fabric/postgreSQL/db</span><br></pre></td></tr></table></figure>
+
+<h4 id="执行数据库脚本"><a href="#执行数据库脚本" class="headerlink" title="执行数据库脚本"></a>执行数据库脚本</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd blockchain-explorer/app/persistence/fabric/postgreSQL/db</span><br><span class="line">sudo -u postgres ./createdb.sh</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置身份认证"><a href="#配置身份认证" class="headerlink" title="配置身份认证"></a>配置身份认证</h3><h4 id="配置jwt"><a href="#配置jwt" class="headerlink" title="配置jwt"></a>配置jwt</h4><p>​    cd blockchain-explorer/app   修改explorerconfig.json 文件</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">"jwt": &#123;</span><br><span class="line">	"secret" : "a secret phrase!!",   # 用来签名payload的密钥</span><br><span class="line">	"expiresIn": "2 days"             # token 过期时间 Eg: 60, "2 days", "10h", "7d".</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置explorer-链接到区块链网络"><a href="#配置explorer-链接到区块链网络" class="headerlink" title="配置explorer 链接到区块链网络"></a>配置explorer 链接到区块链网络</h3><h4 id="配置-explorer-链接区块链网络"><a href="#配置-explorer-链接区块链网络" class="headerlink" title="配置 explorer 链接区块链网络"></a>配置 explorer 链接区块链网络</h4><ol>
+<li><p>配置网络文件位置: /blockchain-explorer/app/platform/fabric/config.json</p>
+</li>
+<li><p>配置链接文件位置: /blockchain-explorer/app/platform/fabric/connection-profile</p>
+</li>
+</ol>
+<h4 id="配置-prometheus-链接到操作服务器"><a href="#配置-prometheus-链接到操作服务器" class="headerlink" title="配置 prometheus 链接到操作服务器"></a>配置 prometheus 链接到操作服务器</h4><p>​     1. 配置文件位置: app/platform/fabric/artifacts/operations/balance-transfer/prometheus.yml</p>
+<h4 id="安装并配置-grafana"><a href="#安装并配置-grafana" class="headerlink" title="安装并配置 grafana"></a>安装并配置 grafana</h4><ol>
+<li>配置文件位置: app/platform/fabric/artifacts/operations/balance-transfer/balance-transfer-grafana-dashboard.json</li>
+</ol>
+<p>​     2. 配置文件位置: app/platform/fabric/artifacts/operations/grafana_conf/provisioning/dashboards/dashboard.yaml</p>
+<p>​     3. 配置文件位置: app/platform/fabric/artifacts/operations/grafana_conf/provisioning/datasources/datasource.yaml</p>
+<h3 id="Build-Explorer-项目"><a href="#Build-Explorer-项目" class="headerlink" title="Build Explorer 项目"></a>Build Explorer 项目</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./main.sh clean</span><br><span class="line">./main.sh install</span><br></pre></td></tr></table></figure>
+
+<h3 id="运行Explorer项目"><a href="#运行Explorer项目" class="headerlink" title="运行Explorer项目"></a>运行Explorer项目</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">cd blockchain-explorer/app  修改explorerconfig.json 同步频率 主机类型 区块同步时间的详细配置</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 普通方式运行和停止</span><br><span class="line">cd blockchain-explorer/</span><br><span class="line">./start.sh (it will have the backend up).</span><br><span class="line">./start.sh debug (it will have the backend in debug mode).</span><br><span class="line">./start.sh print (it will print help).</span><br><span class="line">Launch the URL http(s)://localhost:8080 on a browser.</span><br><span class="line">./stop.sh (it will stop the node server).</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> Sync方式运行和停止</span><br><span class="line">cd blockchain-explorer/</span><br><span class="line">./syncstart.sh (it will have the sync node up).</span><br><span class="line">./syncstop.sh (it will stop the sync node).</span><br></pre></td></tr></table></figure>
+
+<h2 id="Explorer-Docker-部署"><a href="#Explorer-Docker-部署" class="headerlink" title="Explorer Docker 部署"></a>Explorer Docker 部署</h2><blockquote>
+<p>前提:</p>
+<ol>
+<li>bash</li>
+<li>Docker</li>
+<li>Docker Compose</li>
+</ol>
+<p>仓库地址:</p>
+<ul>
+<li>Hyperledger Explorer docker repository <code>https://hub.docker.com/r/hyperledger/explorer/</code></li>
+<li>Hyperledger Explorer PostgreSQL docker repository <code>https://hub.docker.com/r/hyperledger/explorer-db</code></li>
+</ul>
+</blockquote>
+<h3 id="区块链网络部署-前提-1"><a href="#区块链网络部署-前提-1" class="headerlink" title="区块链网络部署(前提)"></a>区块链网络部署(前提)</h3><blockquote>
+<p>在部署 Explorer项目前提前要有存在的区块链网络，这里说一下区块链网络部署时应该注意点的点</p>
+</blockquote>
+<ol>
+<li><p>在区块链网络中启动操作服务器</p>
+<p>如果要使用区块链监控，在启动网络的时候应该加上如下环境变量</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="string">ORDERER_OPERATIONS_LISTENADDRESS=0.0.0.0:8443</span>  <span class="comment"># operation RESTful API</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">ORDERER_METRICS_PROVIDER=prometheus</span> <span class="comment"># prometheus will pull metrics from orderer via /metrics RESTful API</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>务必开启gossip</p>
+<p>开启gossip， 使区块链网络开启发现服务</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">- CORE_PEER_GOSSIP_BOOTSTRAP=X.X.X.X:XXXX</span><br><span class="line">- CORE_PEER_GOSSIP_EXTERNALENDPOINT=X.X.X.X:XXXX</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h3 id="Explorer项目拉取"><a href="#Explorer项目拉取" class="headerlink" title="Explorer项目拉取"></a>Explorer项目拉取</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/hyperledger/blockchain-explorer.git</span><br><span class="line">cd blockchain-explorer</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置Explorer"><a href="#配置Explorer" class="headerlink" title="配置Explorer"></a>配置Explorer</h3><h4 id="配置explorer和fabric网络的连接"><a href="#配置explorer和fabric网络的连接" class="headerlink" title="配置explorer和fabric网络的连接"></a>配置explorer和fabric网络的连接</h4><p>参考配置文件位置: </p>
+<ul>
+<li>examples/net1/config.json     连接的主配置文件</li>
+<li>examples/net1/connection-profile     和 fabric 的连接配置</li>
+<li>examples/net1/crypto      网络传输加密文件目录(如果有的话)</li>
+</ul>
+<h4 id="配置-prometheus"><a href="#配置-prometheus" class="headerlink" title="配置 prometheus"></a>配置 prometheus</h4><p>参考配置文件位置: </p>
+<p>app/platform/fabric/artifacts/operations/balance-transfer/prometheus.yml</p>
+<h4 id="配置-grafana"><a href="#配置-grafana" class="headerlink" title="配置 grafana"></a>配置 grafana</h4><p>参考配置文件位置: </p>
+<p>app/platform/fabric/artifacts/operations/balance-transfer/balance-transfer-grafana-dashboard.json      一个dashboard的详细配置</p>
+<p>app/platform/fabric/artifacts/operations/grafana_conf/provisioning/dashboards/dashboard.yaml   dashboard的存储目录等基本配置</p>
+<p>app/platform/fabric/artifacts/operations/grafana_conf/provisioning/datasources/datasource.yaml   数据源的配置</p>
+<h3 id="配置docker-compose-文件"><a href="#配置docker-compose-文件" class="headerlink" title="配置docker-compose 文件"></a>配置docker-compose 文件</h3><h4 id="配置网络"><a href="#配置网络" class="headerlink" title="配置网络"></a>配置网络</h4><p>配置网络，可以指定已经存在的网络，如果和区块链网络在同一台机器上可以使用区块链网络</p>
+<p>如果和区块链网络是分开部署的，可以指定一个其他的任意网络</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">networks:</span></span><br><span class="line">    <span class="string">mynetwork.com:</span></span><br><span class="line"><span class="attr">        external:</span></span><br><span class="line"><span class="attr">            name:</span> <span class="string">net_byfn</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="配置数据库"><a href="#配置数据库" class="headerlink" title="配置数据库"></a>配置数据库</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">environment:</span>     <span class="comment"># 配置数据库名称，用户密码等</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">DATABASE_DATABASE=fabricexplorer</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">DATABASE_USERNAME=hppoc</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">DATABASE_PASSWORD=password</span></span><br><span class="line"><span class="attr">  volumes:</span>    <span class="comment"># 配置数据库创建监本位置；  配置数据库持久化的位置</span></span><br><span class="line"><span class="bullet">    -</span> <span class="string">./app/persistence/fabric/postgreSQL/db/createdb.sh:/docker-entrypoint-initdb.d/createdb.sh</span></span><br><span class="line"><span class="attr">    - pgdata:</span><span class="string">/var/lib/postgresql/data</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="配置-explorer"><a href="#配置-explorer" class="headerlink" title="配置 explorer"></a>配置 explorer</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">environment:</span></span><br><span class="line"><span class="bullet">     -</span> <span class="string">DATABASE_HOST=explorerdb.mynetwork.com</span>      <span class="comment"># 连接的数据库配置</span></span><br><span class="line"><span class="bullet">     -</span> <span class="string">DATABASE_USERNAME=hppoc</span></span><br><span class="line"><span class="bullet">     -</span> <span class="string">DATABASE_PASSWD=password</span></span><br><span class="line"><span class="bullet">     -</span> <span class="string">DISCOVERY_AS_LOCALHOST=false</span>          <span class="comment"># 如果是通过桥接的方式连接到区块链网络，务必设置为false</span></span><br><span class="line"><span class="attr">   volumes:</span>      <span class="comment"># 引用的配置文件位置配置</span></span><br><span class="line"><span class="bullet">     -</span> <span class="string">./examples/net1/config.json:/opt/explorer/app/platform/fabric/config.json</span></span><br><span class="line"><span class="bullet">     -</span> <span class="string">./examples/net1/connection-profile:/opt/explorer/app/platform/fabric/connection-profile</span></span><br><span class="line"><span class="bullet">     -</span> <span class="string">./examples/net1/crypto:/tmp/crypto</span></span><br><span class="line"><span class="attr">     - walletstore:</span><span class="string">/opt/wallet</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="配置-prometheus-1"><a href="#配置-prometheus-1" class="headerlink" title="配置 prometheus"></a>配置 prometheus</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">volumes:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./app/platform/fabric/artifacts/operations/balance-transfer/prometheus.yml:/etc/prometheus/prometheus.yml</span>    <span class="comment"># 引用的配置文件位置</span></span><br><span class="line"><span class="attr">      - prometheus-storage:</span><span class="string">/prometheus</span>      <span class="comment"># prometheus数据持久化的位置</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="配置-grafana-1"><a href="#配置-grafana-1" class="headerlink" title="配置 grafana"></a>配置 grafana</h4><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">volumes:</span>  <span class="comment"># 配置引用配置文件的位置，以及数据持久化的文职</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">./app/platform/fabric/artifacts/operations/balance-transfer/balance-transfer-grafana-dashboard.json:/var/lib/grafana/dashboards/mydashboard.json</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">./app/platform/fabric/artifacts/operations/grafana_conf/provisioning:/etc/grafana/provisioning</span></span><br><span class="line"><span class="attr">  - grafana-storage:</span><span class="string">/var/lib/grafana</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="docker-compose-yaml-文件的示例"><a href="#docker-compose-yaml-文件的示例" class="headerlink" title="docker-compose.yaml 文件的示例"></a>docker-compose.yaml 文件的示例</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="string">'2.1'</span></span><br><span class="line"></span><br><span class="line"><span class="attr">volumes:</span></span><br><span class="line"><span class="attr">  pgdata:</span></span><br><span class="line"><span class="attr">  walletstore:</span></span><br><span class="line"><span class="attr">  grafana-storage:</span></span><br><span class="line"><span class="attr">  prometheus-storage:</span></span><br><span class="line"></span><br><span class="line"><span class="attr">networks:</span></span><br><span class="line">  <span class="string">mynetwork.com:</span></span><br><span class="line"><span class="attr">    external:</span></span><br><span class="line"><span class="attr">      name:</span> <span class="string">net_byfn</span></span><br><span class="line"></span><br><span class="line"><span class="attr">services:</span></span><br><span class="line">  <span class="string">explorerdb.mynetwork.com:</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">hyperledger/explorer-db:latest</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">explorerdb.mynetwork.com</span></span><br><span class="line"><span class="attr">    hostname:</span> <span class="string">explorerdb.mynetwork.com</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">DATABASE_DATABASE=fabricexplorer</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">DATABASE_USERNAME=hppoc</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">DATABASE_PASSWORD=password</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./app/persistence/fabric/postgreSQL/db/createdb.sh:/docker-entrypoint-initdb.d/createdb.sh</span></span><br><span class="line"><span class="attr">      - pgdata:</span><span class="string">/var/lib/postgresql/data</span></span><br><span class="line"><span class="attr">    networks:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">mynetwork.com</span></span><br><span class="line"></span><br><span class="line">  <span class="string">explorer.mynetwork.com:</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">hyperledger/explorer:latest</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">explorer.mynetwork.com</span></span><br><span class="line"><span class="attr">    hostname:</span> <span class="string">explorer.mynetwork.com</span></span><br><span class="line"><span class="attr">    environment:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">DATABASE_HOST=explorerdb.mynetwork.com</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">DATABASE_USERNAME=hppoc</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">DATABASE_PASSWD=password</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">DISCOVERY_AS_LOCALHOST=false</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./examples/net1/config.json:/opt/explorer/app/platform/fabric/config.json</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./examples/net1/connection-profile:/opt/explorer/app/platform/fabric/connection-profile</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./examples/net1/crypto:/tmp/crypto</span></span><br><span class="line"><span class="attr">      - walletstore:</span><span class="string">/opt/wallet</span></span><br><span class="line"><span class="attr">    command:</span> <span class="string">sh</span> <span class="bullet">-c</span> <span class="string">"sleep 16&amp;&amp; node /opt/explorer/main.js &amp;&amp; tail -f /dev/null"</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="number">8090</span><span class="string">:8080</span></span><br><span class="line"><span class="attr">    networks:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">mynetwork.com</span></span><br><span class="line"></span><br><span class="line"><span class="attr">  proms:</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">proms</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">prom/prometheus:latest</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./app/platform/fabric/artifacts/operations/balance-transfer/prometheus.yml:/etc/prometheus/prometheus.yml</span></span><br><span class="line"><span class="attr">      - prometheus-storage:</span><span class="string">/prometheus</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">'9090:9090'</span></span><br><span class="line"><span class="attr">    networks:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">mynetwork.com</span></span><br><span class="line"></span><br><span class="line"><span class="attr">  grafana:</span></span><br><span class="line"><span class="attr">    container_name:</span> <span class="string">grafana</span></span><br><span class="line"><span class="attr">    image:</span> <span class="string">grafana/grafana:latest</span></span><br><span class="line"><span class="attr">    volumes:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./app/platform/fabric/artifacts/operations/balance-transfer/balance-transfer-grafana-dashboard.json:/var/lib/grafana/dashboards/mydashboard.json</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">./app/platform/fabric/artifacts/operations/grafana_conf/provisioning:/etc/grafana/provisioning</span></span><br><span class="line"><span class="attr">      - grafana-storage:</span><span class="string">/var/lib/grafana</span></span><br><span class="line"><span class="attr">    ports:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">'3000:3000'</span></span><br><span class="line"><span class="attr">    networks:</span></span><br><span class="line"><span class="bullet">      -</span> <span class="string">mynetwork.com</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="启动网络"><a href="#启动网络" class="headerlink" title="启动网络"></a>启动网络</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;">
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/区块链/" rel="tag"><i class="fa fa-tag"></i> 区块链</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/16/03.web前端/VUE/webpack 使用/" rel="next" title="webpack 使用">
+                <i class="fa fa-chevron-left"></i> webpack 使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="刘小恺(Kyle)">
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">207</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">54</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">65</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Explorer-区块链浏览器部署"><span class="nav-text">Explorer 区块链浏览器部署</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#区块链网络部署-前提"><span class="nav-text">区块链网络部署(前提)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#项目拉取"><span class="nav-text">项目拉取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装数据库"><span class="nav-text">安装数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#配置prostgreSQL数据库"><span class="nav-text">配置prostgreSQL数据库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#给执行sql脚本的目录带执行权限"><span class="nav-text">给执行sql脚本的目录带执行权限</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#执行数据库脚本"><span class="nav-text">执行数据库脚本</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置身份认证"><span class="nav-text">配置身份认证</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#配置jwt"><span class="nav-text">配置jwt</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置explorer-链接到区块链网络"><span class="nav-text">配置explorer 链接到区块链网络</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#配置-explorer-链接区块链网络"><span class="nav-text">配置 explorer 链接区块链网络</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置-prometheus-链接到操作服务器"><span class="nav-text">配置 prometheus 链接到操作服务器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#安装并配置-grafana"><span class="nav-text">安装并配置 grafana</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Build-Explorer-项目"><span class="nav-text">Build Explorer 项目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#运行Explorer项目"><span class="nav-text">运行Explorer项目</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Explorer-Docker-部署"><span class="nav-text">Explorer Docker 部署</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#区块链网络部署-前提-1"><span class="nav-text">区块链网络部署(前提)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Explorer项目拉取"><span class="nav-text">Explorer项目拉取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置Explorer"><span class="nav-text">配置Explorer</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#配置explorer和fabric网络的连接"><span class="nav-text">配置explorer和fabric网络的连接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置-prometheus"><span class="nav-text">配置 prometheus</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置-grafana"><span class="nav-text">配置 grafana</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置docker-compose-文件"><span class="nav-text">配置docker-compose 文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#配置网络"><span class="nav-text">配置网络</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置数据库"><span class="nav-text">配置数据库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置-explorer"><span class="nav-text">配置 explorer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置-prometheus-1"><span class="nav-text">配置 prometheus</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置-grafana-1"><span class="nav-text">配置 grafana</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#docker-compose-yaml-文件的示例"><span class="nav-text">docker-compose.yaml 文件的示例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#启动网络"><span class="nav-text">启动网络</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

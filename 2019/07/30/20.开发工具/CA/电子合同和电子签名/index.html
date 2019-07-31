@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="电子合同的简介什么是电子合同电子合同实现了合同的签约方可以通过互联网进行签订，广泛应用于互联网金融、电子商务、O2O等行业，是互联网中一项相当重要的基础性服务，也是从事互联网行业的产品经理必须着重研究学习的领域。电子合同的有效性来自于电子签名，本篇文章将详细解析电子合同及电子签名的原理以及电子合同的产品设计思路。 依据2013年商务部公布的《电子合同在线订立流程规范》, 电子合同是指”平等主体的自">
+<meta name="keywords" content="true">
+<meta property="og:type" content="article">
+<meta property="og:title" content="电子合同和电子签名">
+<meta property="og:url" content="http://blog.kyleliu.cn/2019/07/30/20.开发工具/CA/电子合同和电子签名/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="电子合同的简介什么是电子合同电子合同实现了合同的签约方可以通过互联网进行签订，广泛应用于互联网金融、电子商务、O2O等行业，是互联网中一项相当重要的基础性服务，也是从事互联网行业的产品经理必须着重研究学习的领域。电子合同的有效性来自于电子签名，本篇文章将详细解析电子合同及电子签名的原理以及电子合同的产品设计思路。 依据2013年商务部公布的《电子合同在线订立流程规范》, 电子合同是指”平等主体的自">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1564485754288.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1564544923537.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1564552068365.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1564552089601.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1564554804359.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1564554824267.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1564554875250.png">
+<meta property="og:updated_time" content="2019-07-31T07:57:30.815Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="电子合同和电子签名">
+<meta name="twitter:description" content="电子合同的简介什么是电子合同电子合同实现了合同的签约方可以通过互联网进行签订，广泛应用于互联网金融、电子商务、O2O等行业，是互联网中一项相当重要的基础性服务，也是从事互联网行业的产品经理必须着重研究学习的领域。电子合同的有效性来自于电子签名，本篇文章将详细解析电子合同及电子签名的原理以及电子合同的产品设计思路。 依据2013年商务部公布的《电子合同在线订立流程规范》, 电子合同是指”平等主体的自">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/img/1564485754288.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2019/07/30/20.开发工具/CA/电子合同和电子签名/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>电子合同和电子签名 | 刘小恺(Kyle) 的个人博客</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/07/30/20.开发工具/CA/电子合同和电子签名/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">电子合同和电子签名
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-07-30 17:40:00" itemprop="dateCreated datePublished" datetime="2019-07-30T17:40:00+08:00">2019-07-30</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/开发工具/" itemprop="url" rel="index"><span itemprop="name">开发工具</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/开发工具/CA/" itemprop="url" rel="index"><span itemprop="name">CA</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/07/30/20.开发工具/CA/电子合同和电子签名/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/07/30/20.开发工具/CA/电子合同和电子签名/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="电子合同的简介"><a href="#电子合同的简介" class="headerlink" title="电子合同的简介"></a>电子合同的简介</h2><h3 id="什么是电子合同"><a href="#什么是电子合同" class="headerlink" title="什么是电子合同"></a>什么是电子合同</h3><p>电子合同实现了合同的签约方可以通过互联网进行签订，广泛应用于互联网金融、电子商务、O2O等行业，是互联网中一项相当重要的基础性服务，也是从事互联网行业的产品经理必须着重研究学习的领域。电子合同的有效性来自于电子签名，本篇文章将详细解析电子合同及电子签名的原理以及电子合同的产品设计思路。</p>
+<p>依据2013年商务部公布的《电子合同在线订立流程规范》, 电子合同是指”平等主体的自然人、法人、其他组织之间以数据电文为载体, 并利用电子通信手段设立、变更、终止民事权利义务关系的协议”。 而根据《电子签名法》的规定, 数据电文是指”以电子、光学、磁或者类似手段生成、发送、接收或者储存的信息”。据此, 我们理解, 电子合同是以数据电文为载体, 以电子通信为手段的协议, 适用关于数据电文的相关规定。</p>
+<h3 id="电子合同的属性"><a href="#电子合同的属性" class="headerlink" title="电子合同的属性"></a>电子合同的属性</h3><p>根据《合同法》的规定, 当事人订立合同, 有书面形式、口头形式和其他形式。法律、行政法规规定采用书面形式应当采用书面形式。当事人约定采用书面形式的, 应当采用书面形式。同时, 《合同法》也规定, 书面形式是指合同书、信件和数据电文(包括电报、电传、传真、电子数据交换和电子邮件)等可以有形地表现所载内容的形式。据此, 结合上述论述, 电<strong>子合同既然以数据电文作为载体, 即能够作为书面形式合同的一种</strong>, 得到《合同法》的认可与适用。</p>
+<h3 id="电子合同的电子签名"><a href="#电子合同的电子签名" class="headerlink" title="电子合同的电子签名"></a>电子合同的电子签名</h3><p>考虑到一份成立并生效的电子合同需要合意的达成作为先决条件, 又结合电子合同与传统纸质合同相比采用了新的信息承载方式, 所以电子合同作为一种特殊的数据电文, 除了要满足传统合同所要求的法律要件外, 还需要满足<strong>《电子签名法》中关于数据电文的意思表示达成方式的法律要件</strong>。</p>
+<h3 id="电子合同的组成"><a href="#电子合同的组成" class="headerlink" title="电子合同的组成"></a>电子合同的组成</h3><p>结合法律法规, 一份完整的数据电文主要包括: 数据电文和电子签名；</p>
+<p><strong>其中电子签名又包括 数字证书、可信时间戳 和 其他信息。如下图所列示。</strong></p>
+<p><img src="/img/1564485754288.png" alt="1564485754288"></p>
+<h2 id="CA-证书法律效益-有效性"><a href="#CA-证书法律效益-有效性" class="headerlink" title="CA 证书法律效益(有效性)"></a>CA 证书法律效益(有效性)</h2><h3 id="电子签名法条例"><a href="#电子签名法条例" class="headerlink" title="电子签名法条例"></a>电子签名法条例</h3><p><strong>第十一条</strong>：</p>
+<ol>
+<li><p>书面形式是指合同书、信件和数据电文（包括电报、电传、传真、电子数据交换和电子邮件）等可以有形地表现所载内容的形式。</p>
+<blockquote>
+<p>该条例确定了电子合同属于书面合同的一种，得到了合同法的任何和适用；</p>
+</blockquote>
+</li>
+</ol>
+<p><strong>第十三条</strong>: </p>
+<ol>
+<li><p>电子签名制作数据用于电子签名时，属于电子签名人专有；</p>
+</li>
+<li><p>签署时电子签名制作数据仅由电子签名人控制；</p>
+</li>
+<li><p>签署后对电子签名的任何改动能够被发现；</p>
+</li>
+<li><p>签署后对数据电文内容和形式的任何改动能够被发现。</p>
+<blockquote>
+<p><strong>该条例规不仅认可了可靠电子签名（电子签章）的法律效力，同时也对可靠电子签名（电子签章）做出了要求：锁定签约主体真实身份、有效防止文件篡改、精确记录签约时间。</strong></p>
+</blockquote>
+</li>
+</ol>
+<p><strong>第十四条:</strong> </p>
+<ol>
+<li><p><strong>可靠的电子签名</strong>与手写签名或者盖章具有同等的法律效力</p>
+<blockquote>
+<p>“可靠的电子签名”: 就是采用合法CA签发的数字证书签署产生的数字签名</p>
+</blockquote>
+</li>
+</ol>
+<p><strong>第十六条</strong>:</p>
+<ol>
+<li><p>电子签名法第十六条: 电子签名需要有第三方认证的，由依法设立的电子认证服务提供者提供认证服务。</p>
+<blockquote>
+<p>该条例规定了电子签名的认证来源</p>
+</blockquote>
+</li>
+</ol>
+<blockquote>
+<p>总结:  </p>
+<p>电子签名是由依法设立的电子认证服务提供者提供的法律认可的一种书面形式的合同；</p>
+<p>并且有效的电子合同需要满足电子签名法第十三条以下四个属性, 简称为: “<strong>真实身份、真实意愿、签名未改、原文未改</strong>“</p>
+</blockquote>
+<h3 id="合法的第三发CA机构"><a href="#合法的第三发CA机构" class="headerlink" title="合法的第三发CA机构"></a>合法的第三发CA机构</h3><p>具有法律效益的国家CA机构有大约37家左右，任何一家都可以作为电子合同的第三方认证机构；</p>
+<p>比较常用的CA机构有: 沃通CA、CFCA 等。。。</p>
+<h2 id="电子签名技术原理-确保有效性"><a href="#电子签名技术原理-确保有效性" class="headerlink" title="电子签名技术原理(确保有效性)"></a>电子签名技术原理(确保有效性)</h2><p>电子签名满足电子签名法第十四条的规定，需要满足四个属性，简称为“<strong>身份真实、真实意愿、签名未改、原文未改</strong>”，是进行产品设计时要考虑的首要因素。</p>
+<p>这些属性，电子签名认证提供商需要充分考虑， 只有满足了这些属性，才能确保电子签名具有一定的有效性；</p>
+<p><img src="/img/1564544923537.png" alt="1564544923537"></p>
+<h3 id="1-真实身份"><a href="#1-真实身份" class="headerlink" title="1. 真实身份"></a>1. 真实身份</h3><p>对签约方真实身份的确定，是通过各种实名认证方式来进行保证，所以实名认证是电子合同产品设计中必不可少的一环。实名认证功能可以由电子合同服务提供商提供，也可以由其他第三方符合要求的服务商提供。</p>
+<p>实名认证分为多种方式，可靠性和用户体验各有不同，要根据产品需求灵活选用。</p>
+<h3 id="2-真实意愿"><a href="#2-真实意愿" class="headerlink" title="2. 真实意愿"></a>2. 真实意愿</h3><p>意愿认证是指在每一次签署前对用户的身份进行确认，保证是用户本人操作的认证方式。我们常见的用户密码登录其实就是一种意愿认证，但由于目前登录密码丢失、被盗取、被破解的风险很高，所以对于涉及金额较大和较重要的电子合同，产品设计中要考虑加入其他意愿认证方式进行可靠性强化。</p>
+<p>常见的意愿认证方式有：指纹登入、短信验证码登入、语音验证码登入、人脸识别登入、UKEY登入等。各种意愿认证方式同样可靠性和用户体验各有不同，根据不同产品要求可以进行选用。</p>
+<p>比如在比特币网络中，用户如果想要进行交易，则必须用保存在本地的私钥进行签名才能进行交易，因此也确保了真是意愿性；</p>
+<h3 id="3-签名未改及原文未改"><a href="#3-签名未改及原文未改" class="headerlink" title="3. 签名未改及原文未改"></a><strong>3. 签名未改及原文未改</strong></h3><p>签名未改及原文未改是通过数字签名技术+时间戳+CA机构颁发的数字证书一起保证和实现的，数字签名技术是其中的核心部分，时间戳和数字证书的实现方式都使用到数字签名。</p>
+<p>对于数字签名和非对称算法等内容，可以参考区块链部分的密码学文章；</p>
+<p><strong>下面介绍一下数字签名在电子签名中的应用:</strong></p>
+<p>假设一个用户A执行了电子合同签约，则服务端先对电子合同原文进行哈希算法，得到电子合同原文的哈希值。然后使用用户A的私钥对哈希值进行加密，把加密得到的数字签名连同电子合同一起发送出去。</p>
+<p><img src="/img/1564552068365.png" alt="1564552068365"></p>
+<p>用户B收到带数字签名的电子合同后，先对原文用哈希算法得到哈希值，然后使用用户A的公钥对数字签名进行解密（对于用户A的公钥可信度是由CA机构的数字证书来保证，只要是国家认证的CA机构颁发的数字证书都认为是可信的，在此不展开讲解），解密得到的哈希值与原文用哈希算法得到哈希值进行比对，如果哈希值一致，则证明电子合同确实是A所签署的，并且没有被纂改过，也就达到验证“签名未改、原文未改”的目的。</p>
+<p><img src="/img/1564552089601.png" alt="1564552089601"></p>
+<p><strong>时间戳在电子合同中的应用：</strong></p>
+<p>签订时间同样是电子签名成立和有效性关键环节，电子签名一般使用时间戳技术来对电子合同的签订时间进行有效确认。原理是对电子合同进行一次哈希运算，将哈希值发送给时间戳签发中心，时间戳签发中心使用数字签名技术对哈希值和当前时间进行一次数字签名。</p>
+<p>由于对于电子合同哈希值具有唯一性，所以时间戳的数字签名可以确认电子合同签约的时间点，这样就保证了“签名未改”的实现。</p>
+<h2 id="如何接入第三方CA机构-CFCA安心签-供应链金融-为例"><a href="#如何接入第三方CA机构-CFCA安心签-供应链金融-为例" class="headerlink" title="如何接入第三方CA机构(CFCA安心签 + 供应链金融  为例)"></a>如何接入第三方CA机构(CFCA安心签 + 供应链金融  为例)</h2><h3 id="CFCA的证据保全与司法服务"><a href="#CFCA的证据保全与司法服务" class="headerlink" title="CFCA的证据保全与司法服务"></a>CFCA的证据保全与司法服务</h3><p>CFCA为证据采集、证据准备及证据受理提供全流程服务。</p>
+<p>在证据采集阶段，电子证据保全系统通过采集客户业务活动过程中产生的电子数据，进行保全，形成电子证据，并出具证据保全报告。</p>
+<p>在证据准备阶段，通过数字签名验证平台为客户业务活动中使用的数字签名进行验证，并出具数字签名验证报告。</p>
+<p>在证据受理阶段，司法机关通过法律服务平台对数字签名验证报告和证据保全报告等电子证据进行专业化在线验证。</p>
+<h3 id="CFCA-对供应链金融的解决方法"><a href="#CFCA-对供应链金融的解决方法" class="headerlink" title="CFCA 对供应链金融的解决方法"></a>CFCA 对供应链金融的解决方法</h3><h4 id="业务概述"><a href="#业务概述" class="headerlink" title="业务概述"></a><strong>业务概述</strong></h4><p>　　随着社会化生产方式的不断深入，市场竞争已经从单一客户之间的竞争转变为供应链与供应链之间的竞争，同一供应链内部各方相互依存，同时赊销已成为交易的主流方式，处于供应链中上游的供应商，很难通过传统的信贷方式获得银行的资金支持，而资金短缺又会直接导致后续环节的停滞。</p>
+<p>　　2011年以来，各家商业银行受到信贷规模的限制，可以发放的贷款额度十分有限，但是通过承兑、票据、信用证等延期支付工具，既能够增强企业之间的互相信任，也稳定了一批客户，银行业空前重视供应链金融业务。面对国内互联网金融的飞速发展，传统线下的供应链金融模式已经很难满足企业客户对于高效、便捷、不受时空限制的需求，利用线上供应链金融平台实现线上业务办理已是趋势。</p>
+<p>　　传统供应链金融采用现场面签的方式，而采用互联网模式的供应链金融面临的最大的挑战还是法律风险、交易风险、技术风险，引入CFCA数字证书体系可以有效的解决上述风险。</p>
+<h4 id="平台价值"><a href="#平台价值" class="headerlink" title="平台价值"></a><strong>平台价值</strong></h4><p>​    <img src="/img/1564554804359.png" alt="1564554804359"></p>
+<h4 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a><strong>解决方案</strong></h4><p>​    <img src="/img/1564554824267.png" alt="1564554824267"></p>
+<h4 id="总体架构"><a href="#总体架构" class="headerlink" title="总体架构"></a><strong>总体架构</strong></h4><p>　　<strong>·</strong>参与各方（融资企业、核心企业、商业银行）获得由供应链金融平台发放的数字证书，登录平台、签署电子合同时使用证书做身份验证和电子签名；</p>
+<p>　　<strong>·</strong>供应链金融平台调用RA系统实现证书管理功能，调用签名验签服务器实现签名验签的功能，RA系统连接CFCA的CA系统完成证书签发和管理。</p>
+<h4 id="业务流程"><a href="#业务流程" class="headerlink" title="业务流程"></a><strong>业务流程</strong></h4><p>​    <img src="/img/1564554875250.png" alt="1564554875250"></p>
+<h4 id="方案特点"><a href="#方案特点" class="headerlink" title="方案特点"></a><strong>方案特点</strong></h4><p><strong>用户真实身份</strong></p>
+<p>　　线下面对面并使用纸质证件代表参与各方的身份，线上使用数字证书实现高强度的身份认证，并解决用户身份真实性验证问题，防止假冒用户恶意操作；</p>
+<p><strong>电子合同法律效力</strong></p>
+<p>　　在平台签署电子合同时使用电子签名技术，符合电子签名法的要求，从而保证平台签署的电子合同具有法律效力；</p>
+<p><strong>电子合同信息做到防篡改和保密</strong></p>
+<p>　　平台各参与方签署电子合同包含敏感业务信息，使用签名和加密技术实现敏感业务信息的防篡改和保密；</p>
+<p><strong>平台用户的易操作性</strong></p>
+<p>　　数字证书和签名技术已经是广泛应用的成熟技术，目前在网上银行广泛使用，平台用户已经成熟掌握该技术的操作和使用。</p>
+<h3 id="安心签平台接入流程"><a href="#安心签平台接入流程" class="headerlink" title="安心签平台接入流程"></a>安心签平台接入流程</h3><h4 id="安心签平台介绍"><a href="#安心签平台介绍" class="headerlink" title="安心签平台介绍"></a>安心签平台介绍</h4><p>安心签是中国金融认证中心（以下简称“CFCA”）旗下的第三方电子缔约服务平台，为持有有效数字证书的用户提供数据电文或电子缔约文件的在线签署、存储和管理服务。</p>
+<h3 id="名词介绍"><a href="#名词介绍" class="headerlink" title="名词介绍"></a>名词介绍</h3><p><strong>客户平台</strong>:  与安心签对接的电子合同建设方。</p>
+<p><strong>平台用户</strong>: 客户平台的用户，通过客户平台方使用安心签电子合同服务。</p>
+<p><strong>用户三要素</strong>: 用户名、证件类型、证件号码，用以判断用户身份及唯一性，相同的三要素视为同一个用户。</p>
+<h3 id="业务流程分类"><a href="#业务流程分类" class="headerlink" title="业务流程分类"></a>业务流程分类</h3><p>客户平台与安心签对接，实现电子合同签署，根据业务场景，可以分为以下四种方式。</p>
+<p><strong>1. 证书托管 + 合同模板方式</strong></p>
+<p>平台用户通过客户平台在安心签开户，安心签自动为用户生成数字证书并保存在安心签中。客户平台预先生成合同模板并保存在安心签中。合同签署时，客户平台将关键信息及用户信息传给安心签，安心签自动将关键信息填入相应的合同模板中，并调用用户证书进行签署，生成电子合同。</p>
+<p><strong>2.证书托管 + 自定义合同方式</strong></p>
+<p>平台用户通过客户平台在安心签开户，安心签自动为用户生成数字证书并保存在安心签中。合同签署时，客户平台将合同文件和用户信息传给安心签，安心签调用用户证书在合同的指定位置进行签署，生成电子合同。</p>
+<p>上述两种方式的区别在于，如果每份合同差别不大，则适用合同模板的方式；如果每份合同差别较大，则适用自定义合同的方式。</p>
+<p><strong>3.自有证书签署 + 合同模板方式</strong></p>
+<p>如果客户平台或平台用户不希望安心签托管证书，平台用户可以通过客户平台在安心签开户，并绑定自有的CFCA证书，即在安心签中使用用户自己保管的CFCA证书（该证书信息必须已经收录在网络身份认证平台数据库中，具体业务中客户若需要绑定自有证书，请技术支持与业务确认该信息）。客户平台预先生成合同模板并保存在安心签中。合同签署时，客户平台将关键信息及用户信息传给安心签，安心签自动将关键信息填入相应的合同模板中，生成合同全文，获取合同摘要（哈希值），客户平台在用户本地调用用户证书对合同摘要进行签署（签名值），并将签名值发送到安心签，生成电子合同。</p>
+<p><strong>4.证书托管 + 合同模板方式</strong></p>
+<p>如果客户平台或平台用户不希望安心签托管证书，平台用户可以通过客户平台在安心签开户，并绑定自有的CFCA证书，即在安心签中使用用户自己保管的CFCA证书（该证书信息必须已经收录在网络身份认证平台数据库中，具体业务中客户若需要绑定自有证书，请技术支持与业务确认该信息）。合同签署时，客户平台将合同文件和用户信息传给安心签。客户平台在获取合同摘要（哈希值）后，在用户本地调用用户证书对合同摘要进行签署（签名值），并将签名值发送到安心签，生成电子合同。</p>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;">
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/true/" rel="tag"><i class="fa fa-tag"></i> true</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/26/12.区块链/Hyperledger fabric/6.Hyperledger explorer/" rel="next" title="Hyperleder explorer 部署">
+                <i class="fa fa-chevron-left"></i> Hyperleder explorer 部署
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="刘小恺(Kyle)">
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">208</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">55</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">65</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#电子合同的简介"><span class="nav-text">电子合同的简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是电子合同"><span class="nav-text">什么是电子合同</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#电子合同的属性"><span class="nav-text">电子合同的属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#电子合同的电子签名"><span class="nav-text">电子合同的电子签名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#电子合同的组成"><span class="nav-text">电子合同的组成</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CA-证书法律效益-有效性"><span class="nav-text">CA 证书法律效益(有效性)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#电子签名法条例"><span class="nav-text">电子签名法条例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#合法的第三发CA机构"><span class="nav-text">合法的第三发CA机构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#电子签名技术原理-确保有效性"><span class="nav-text">电子签名技术原理(确保有效性)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-真实身份"><span class="nav-text">1. 真实身份</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-真实意愿"><span class="nav-text">2. 真实意愿</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-签名未改及原文未改"><span class="nav-text">3. 签名未改及原文未改</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何接入第三方CA机构-CFCA安心签-供应链金融-为例"><span class="nav-text">如何接入第三方CA机构(CFCA安心签 + 供应链金融  为例)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CFCA的证据保全与司法服务"><span class="nav-text">CFCA的证据保全与司法服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CFCA-对供应链金融的解决方法"><span class="nav-text">CFCA 对供应链金融的解决方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#业务概述"><span class="nav-text">业务概述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#平台价值"><span class="nav-text">平台价值</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#解决方案"><span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#总体架构"><span class="nav-text">总体架构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#业务流程"><span class="nav-text">业务流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#方案特点"><span class="nav-text">方案特点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安心签平台接入流程"><span class="nav-text">安心签平台接入流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#安心签平台介绍"><span class="nav-text">安心签平台介绍</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#名词介绍"><span class="nav-text">名词介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#业务流程分类"><span class="nav-text">业务流程分类</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

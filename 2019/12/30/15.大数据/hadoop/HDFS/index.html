@@ -120,7 +120,7 @@
 
 
   <meta name="description" content="HDFS 基本概念HDFS 思想设计思想分而治之: 将大文件、大批量文件， 分布式存放在大量服务器上，以便于采取分而治之的方式对海量数据进行运算分析； 在大数据系统中的应用为各类分布式运算框架(如: mapreduce, spark, tez, …) 提供数据存储服务 重点概念文件切块， 副本存放， 原数据管理 HDFS的概念和特性概念首先，它是一个文件系统，用于存储文件，通过统一的命名空间——目">
-<meta name="keywords" content="大数据">
+<meta name="keywords" content="大数据,HADOOP">
 <meta property="og:type" content="article">
 <meta property="og:title" content="HDFS">
 <meta property="og:url" content="http://blog.kyleliu.cn/2019/12/30/15.大数据/hadoop/HDFS/index.html">
@@ -130,7 +130,7 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/1577692810378.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/1577692929653.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/1577693922715.png">
-<meta property="og:updated_time" content="2019-12-30T10:53:00.181Z">
+<meta property="og:updated_time" content="2020-01-17T03:20:36.605Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="HDFS">
 <meta name="twitter:description" content="HDFS 基本概念HDFS 思想设计思想分而治之: 将大文件、大批量文件， 分布式存放在大量服务器上，以便于采取分而治之的方式对海量数据进行运算分析； 在大数据系统中的应用为各类分布式运算框架(如: mapreduce, spark, tez, …) 提供数据存储服务 重点概念文件切块， 副本存放， 原数据管理 HDFS的概念和特性概念首先，它是一个文件系统，用于存储文件，通过统一的命名空间——目">
@@ -540,12 +540,13 @@
 <h3 id="原数据手动查看"><a href="#原数据手动查看" class="headerlink" title="原数据手动查看"></a>原数据手动查看</h3><p>hdfs命令</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hdfs oev -i edits -o edits.xml</span><br><span class="line">hdfs oiv -i fsimage_0000000000000000087 -p XML -o fsimage.xml</span><br></pre></td></tr></table></figure>
 
-<h3 id="元数据的checkpoint"><a href="#元数据的checkpoint" class="headerlink" title="元数据的checkpoint"></a>元数据的checkpoint</h3><p>每隔一段时间，会由secondary namenode 将namenode上积累的所有edits和一个最新的fsimage下载到本地(只有第一次merge才会下载fsimage)，并加载到内存进行merge(这个过程称之为checkpoint)</p>
+<h3 id="元数据的checkpoint"><a href="#元数据的checkpoint" class="headerlink" title="元数据的checkpoint"></a>元数据的checkpoint</h3><p>由于在数据备份的时候会占用计算资源，所以为了减轻namenode的负载，通常可以将数据备份的工作交给另外一个专门用来做数据备份的namenode–&gt; sencondary namenode</p>
+<p>每隔一段时间，会由secondary namenode 将namenode上积累的所有edits和一个最新的fsimage下载到本地(只有第一次merge才会下载fsimage)，并加载到内存进行merge(这个过程称之为checkpoint)</p>
 <p><img src="/img/1577693922715.png" alt="1577693922715"></p>
 <h3 id="namenode的一些情况"><a href="#namenode的一些情况" class="headerlink" title="namenode的一些情况"></a>namenode的一些情况</h3><p><strong>namenode如果宕机，hdfs是否还能正常提供服务</strong></p>
 <p>不能，secondarynamenode虽然有元数据信息，但是不能更新元数据， 不能充当namenode使用</p>
 <p><strong>如果namenode的硬盘损坏，元数据是否能回复，能恢复多少?</strong></p>
-<p>可以恢复最后一次merge之前的数据， 只需要将namenode的数据目录替换成namenode的数据目录</p>
+<p>可以恢复最后一次merge之前的数据， 只需要将secondarynamenode的数据目录替换成namenode的数据目录</p>
 <p><strong>配置namenode的工作目录时，有哪些可以注意的事项</strong></p>
 <p>可以将namenode的元数据保存到多块物理磁盘上例如如下的namenode配置</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.name.dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">value</span>&gt;</span>/home/hadoop/name1,/home/hadoop/name2<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br></pre></td></tr></table></figure>
@@ -763,6 +764,8 @@
           
             <a href="/tags/大数据/" rel="tag"><i class="fa fa-tag"></i> 大数据</a>
           
+            <a href="/tags/HADOOP/" rel="tag"><i class="fa fa-tag"></i> HADOOP</a>
+          
         </div>
       
 
@@ -803,6 +806,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/01/10/15.大数据/hadoop/MAPREDUCE/" rel="prev" title="MAPREDUCE">
+                MAPREDUCE <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -877,7 +884,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">227</span>
+                    <span class="site-state-item-count">229</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -1175,7 +1182,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">71</span>
+                      
+                    
+                    <span class="site-state-item-count">72</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>

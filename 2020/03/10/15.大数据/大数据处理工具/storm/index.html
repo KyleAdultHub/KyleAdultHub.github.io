@@ -1,0 +1,1992 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="流式计算和storm介绍什么是离线计算离线计算：批量获取数据、批量传输数据、周期性批量计算数据、数据展示 代表技术：Sqoop批量导入数据、HDFS批量存储数据、MapReduce批量计算数据、Hive批量计算数据、任务调度 什么是流式计算流式计算：数据实时产生、数据实时传输、数据实时计算、实时展示 代表技术：Flume实时获取数据、Kafka/metaq实时数据存储、Storm/JStorm实时">
+<meta name="keywords" content="大数据">
+<meta property="og:type" content="article">
+<meta property="og:title" content="storm">
+<meta property="og:url" content="http://blog.kyleliu.cn/2020/03/10/15.大数据/大数据处理工具/storm/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的个人博客">
+<meta property="og:description" content="流式计算和storm介绍什么是离线计算离线计算：批量获取数据、批量传输数据、周期性批量计算数据、数据展示 代表技术：Sqoop批量导入数据、HDFS批量存储数据、MapReduce批量计算数据、Hive批量计算数据、任务调度 什么是流式计算流式计算：数据实时产生、数据实时传输、数据实时计算、实时展示 代表技术：Flume实时获取数据、Kafka/metaq实时数据存储、Storm/JStorm实时">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1583828661423.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1583829287411.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1583829319405.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1583829359441.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1583829969384.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1583829986939.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1583832014008.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1583833270500.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1583833293835.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1583833626450.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1583833649405.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1583835238933.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1583835379230.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1583836641903.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1583836893868.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1583837267075.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1583837643662.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1583837698684.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1583837747089.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1583838793812.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1583838800997.png">
+<meta property="og:updated_time" content="2020-03-10T11:25:37.613Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="storm">
+<meta name="twitter:description" content="流式计算和storm介绍什么是离线计算离线计算：批量获取数据、批量传输数据、周期性批量计算数据、数据展示 代表技术：Sqoop批量导入数据、HDFS批量存储数据、MapReduce批量计算数据、Hive批量计算数据、任务调度 什么是流式计算流式计算：数据实时产生、数据实时传输、数据实时计算、实时展示 代表技术：Flume实时获取数据、Kafka/metaq实时数据存储、Storm/JStorm实时">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/img/1583828661423.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2020/03/10/15.大数据/大数据处理工具/storm/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>storm | 刘小恺(Kyle) 的个人博客</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/03/10/15.大数据/大数据处理工具/storm/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">storm
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-03-10 16:00:00" itemprop="dateCreated datePublished" datetime="2020-03-10T16:00:00+08:00">2020-03-10</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/大数据/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/大数据/大数据处理/" itemprop="url" rel="index"><span itemprop="name">大数据处理</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/03/10/15.大数据/大数据处理工具/storm/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/03/10/15.大数据/大数据处理工具/storm/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="流式计算和storm介绍"><a href="#流式计算和storm介绍" class="headerlink" title="流式计算和storm介绍"></a>流式计算和storm介绍</h2><h3 id="什么是离线计算"><a href="#什么是离线计算" class="headerlink" title="什么是离线计算"></a>什么是离线计算</h3><p>离线计算：批量获取数据、批量传输数据、<strong>周期性</strong>批量计算数据、数据展示</p>
+<p>代表技术：Sqoop批量导入数据、HDFS批量存储数据、MapReduce批量计算数据、Hive批量计算数据、任务调度</p>
+<h3 id="什么是流式计算"><a href="#什么是流式计算" class="headerlink" title="什么是流式计算"></a>什么是流式计算</h3><p>流式计算：数据实时产生、数据实时传输、数据实时计算、实时展示</p>
+<p>代表技术：Flume实时获取数据、Kafka/metaq实时数据存储、Storm/JStorm实时数据计算、Redis实时结果缓存、持久化存储(mysql)。</p>
+<p>一句话总结：将源源不断产生的数据实时收集并实时计算，尽可能快的得到计算结果</p>
+<h3 id="离线计算和实时计算的区别"><a href="#离线计算和实时计算的区别" class="headerlink" title="离线计算和实时计算的区别"></a>离线计算和实时计算的区别</h3><p>最大的区别：实时收集、实时计算、实时展示</p>
+<h3 id="什么是storm"><a href="#什么是storm" class="headerlink" title="什么是storm"></a>什么是storm</h3><p>Storm用来实时处理数据，特点：低延迟、高可用、分布式、可扩展、数据不丢失。提供简单容易理解的接口，便于开发。</p>
+<h3 id="Storm-与-Hadoop的区别"><a href="#Storm-与-Hadoop的区别" class="headerlink" title="Storm 与 Hadoop的区别"></a>Storm 与 Hadoop的区别</h3><ul>
+<li><p>Storm用于实时计算，Hadoop用于离线计算。</p>
+</li>
+<li><p>Storm处理的数据保存在内存中，源源不断；Hadoop处理的数据保存在文件系统中，一批一批。</p>
+</li>
+<li><p>Storm的数据通过网络传输进来；Hadoop的数据保存在磁盘中。</p>
+</li>
+<li><p>Storm与Hadoop的编程模型相似(对比图如下)</p>
+</li>
+</ul>
+<p><img src="/img/1583828661423.png" alt="1583828661423"></p>
+<h3 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h3><ul>
+<li><p><strong>日志分析</strong></p>
+<ul>
+<li>从<strong>海量</strong>日志中分析出特定的数据，并将分析的结果存入外部存储器用来辅佐决策。</li>
+</ul>
+</li>
+<li><p><strong>管道系统</strong></p>
+<ul>
+<li>将一个数据从一个系统传输到另外一个系统，比如将数据库同步到Hadoop</li>
+</ul>
+</li>
+<li><p><strong>消息转化器</strong></p>
+<ul>
+<li>将接受到的消息按照某种格式进行转化，存储到另外一个系统如消息中间件</li>
+</ul>
+</li>
+</ul>
+<h2 id="Storm-架构"><a href="#Storm-架构" class="headerlink" title="Storm 架构"></a>Storm 架构</h2><h3 id="Storm核心组件"><a href="#Storm核心组件" class="headerlink" title="Storm核心组件"></a>Storm核心组件</h3><p><img src="/img/1583829287411.png" alt="1583829287411"></p>
+<ul>
+<li><p>Nimbus：负责资源分配和任务调度。</p>
+</li>
+<li><p>Supervisor：负责接受nimbus分配的任务，启动和停止属于自己管理的worker进程。—通过配置文件设置当前supervisor上启动多少个worker。</p>
+</li>
+<li><p>Worker：运行具体处理组件逻辑的进程。Worker运行的任务类型只有两种，一种是Spout任务，一种是Bolt任务。</p>
+</li>
+<li><p>Task：worker中每一个spout/bolt的线程称为一个task. 在storm0.8之后，task不再与物理线程对应，不同spout/bolt的task可能会共享一个物理线程，该线程称为executor。</p>
+</li>
+</ul>
+<h3 id="Storm-编程模型"><a href="#Storm-编程模型" class="headerlink" title="Storm 编程模型"></a>Storm 编程模型</h3><p> <img src="/img/1583829319405.png" alt="1583829319405"></p>
+<ul>
+<li><p>Topology：Storm中运行的一个实时应用程序的名称。（拓扑）</p>
+</li>
+<li><p>Spout：在一个topology中获取<strong>源数据流</strong>的组件。</p>
+<p>通常情况下spout会从外部数据源中读取数据，然后转换为topology内部的源数据。</p>
+</li>
+<li><p>Bolt：接受数据然后执行处理的组件,用户可以在其中执行自己想要的操作。</p>
+</li>
+<li><p>Tuple：一次消息传递的基本单元，理解为一组消息就是一个Tuple。</p>
+</li>
+<li><p>StreamGrouping:数据分组策略， 一共有7种</p>
+</li>
+</ul>
+<h3 id="流式计算的一般架构"><a href="#流式计算的一般架构" class="headerlink" title="流式计算的一般架构"></a>流式计算的一般架构</h3><p><img src="/img/1583829359441.png" alt="1583829359441"></p>
+<ul>
+<li><p>其中flume用来获取数据。</p>
+</li>
+<li><p>Kafka用来临时保存数据。</p>
+</li>
+<li><p>Strom用来计算数据。</p>
+</li>
+<li><p>Redis是个内存数据库，用来保存数据。</p>
+</li>
+</ul>
+<h2 id="Storm-集群部署与操作"><a href="#Storm-集群部署与操作" class="headerlink" title="Storm 集群部署与操作"></a>Storm 集群部署与操作</h2><h3 id="集群部署流程"><a href="#集群部署流程" class="headerlink" title="集群部署流程"></a>集群部署流程</h3><h4 id="基础环境准备"><a href="#基础环境准备" class="headerlink" title="基础环境准备"></a>基础环境准备</h4><ol>
+<li><p>配置所有机器hosts</p>
+<p>vi /etc/hosts</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">xx.xx.xx.xx storm01 zk01 hadoop01</span><br><span class="line">xx.xx.xx.xx9 storm02 zk02 hadoop02</span><br><span class="line">xx.xx.xx.xx storm03 zk03 hadoop03</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>关闭防火墙</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chkconfig iptables off  &amp;&amp; setenforce 0</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>创建storm用户</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">groupadd stormuser &amp;&amp;　useradd stormuser &amp;&amp; usermod -a -G stormuser stormuser</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>创建工作目录</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mkdir /export</span><br><span class="line">mkdir /export/servers</span><br><span class="line">chmod 755 -R /export</span><br><span class="line"><span class="meta">#</span> 切换到realtime用户下</span><br><span class="line">su stormuser</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h4 id="安装包下载"><a href="#安装包下载" class="headerlink" title="安装包下载"></a>安装包下载</h4><ol>
+<li><p>下载安装包</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget http://124.202.164.6/files/1139000006794ECA/apache.fayea.com/storm/apache-storm-0.9.5/apache-storm-0.9.5.tar.gz</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>解压安装包</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf apache-storm-0.9.5.tar.gz -C /export/servers/</span><br><span class="line">cd /export/servers/</span><br><span class="line">ln -s apache-storm-0.9.5 storm</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h4 id="配置文件修改与安装包同步"><a href="#配置文件修改与安装包同步" class="headerlink" title="配置文件修改与安装包同步"></a>配置文件修改与安装包同步</h4><ol>
+<li><p>修改配置文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mv /export/servers/storm/conf/storm.yaml /export/servers/storm/conf/storm.yaml.bak</span><br><span class="line">vi /export/servers/storm/conf/storm.yaml</span><br></pre></td></tr></table></figure>
+
+<p>输入以下内容：</p>
+<p>​    指定集群中的机器，nimbus host 机器， JVM的参数配置， 以及supervisor启动worker对应的端口号</p>
+<p><img src="/img/1583829969384.png" alt="1583829969384"></p>
+</li>
+<li><p>分发安装包</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">scp -r /export/servers/apache-storm-0.9.5 storm02:/export/servers</span><br><span class="line"><span class="meta">#</span> 然后分别在各机器上创建软连接</span><br><span class="line">cd /export/servers/</span><br><span class="line">ln -s apache-storm-0.9.5 storm</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h4 id="启动集群"><a href="#启动集群" class="headerlink" title="启动集群"></a>启动集群</h4><ol>
+<li><p>在nimbus.host所属的机器上启动 nimbus服务</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /export/servers/storm/bin/</span><br><span class="line">nohup ./storm nimbus &amp;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在nimbus.host所属的机器上启动ui服务</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /export/servers/storm/bin/</span><br><span class="line">nohup ./storm ui &amp;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在其它个点击上启动supervisor服务(拓展节点的时候，重复分发安装包，并执行该命令)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /export/servers/storm/bin/</span><br><span class="line">nohup ./storm supervisor &amp;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h4 id="查看集群"><a href="#查看集群" class="headerlink" title="查看集群"></a>查看集群</h4><p>​    访问nimbus.host:/8080，即可看到storm的ui界面。</p>
+<p>​    <img src="/img/1583829986939.png" alt="1583829986939"></p>
+<h3 id="Storm-的集群命令"><a href="#Storm-的集群命令" class="headerlink" title="Storm 的集群命令"></a>Storm 的集群命令</h3><p>有许多简单且有用的命令可以用来管理拓扑，它们可以提交、杀死、禁用、再平衡拓扑。</p>
+<h4 id="任务提交命令"><a href="#任务提交命令" class="headerlink" title="任务提交命令"></a>任务提交命令</h4><p>命令格式</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">storm jar 【jar路径】 【拓扑包名.拓扑类名】 【拓扑名称】</span><br></pre></td></tr></table></figure>
+
+<p>命令示例</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/storm jar examples/storm-starter/storm-starter-topologies-0.9.6.jar storm.starter.WordCountTopology wordcount</span><br></pre></td></tr></table></figure>
+
+<h4 id="杀死任务命令"><a href="#杀死任务命令" class="headerlink" title="杀死任务命令"></a>杀死任务命令</h4><p>命令格式</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">storm kill 【拓扑名称】 -w 10（执行kill命令时可以通过-w [等待秒数]指定拓扑停用以后的等待时间）</span><br></pre></td></tr></table></figure>
+
+<p>命令示例</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">storm kill topology-name -w 10</span><br></pre></td></tr></table></figure>
+
+<h4 id="停用任务命令"><a href="#停用任务命令" class="headerlink" title="停用任务命令"></a>停用任务命令</h4><p>命令格式</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">storm deactivte  【拓扑名称】</span><br></pre></td></tr></table></figure>
+
+<p>命令示例</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">storm deactivte topology-name</span><br></pre></td></tr></table></figure>
+
+<p>我们能够挂起或停用运行中的拓扑。当停用拓扑时，所有已分发的元组都会得到处理，但是spouts的nextTuple方法不会被调用。销毁一个拓扑，可以使用kill命令。它会以一种安全的方式销毁一个拓扑，首先停用拓扑，在等待拓扑消息的时间段内允许拓扑完成当前的数据流。</p>
+<h4 id="启用任务命令"><a href="#启用任务命令" class="headerlink" title="启用任务命令"></a>启用任务命令</h4><p>命令格式</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">storm activate【拓扑名称】</span><br></pre></td></tr></table></figure>
+
+<p>命令示例</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">storm activate topology-name</span><br></pre></td></tr></table></figure>
+
+<h4 id="重新部署任务命令"><a href="#重新部署任务命令" class="headerlink" title="重新部署任务命令"></a>重新部署任务命令</h4><p>命令格式</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">storm rebalance  【拓扑名称】</span><br></pre></td></tr></table></figure>
+
+<p>命令示例</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">storm rebalance topology-name</span><br></pre></td></tr></table></figure>
+
+<p>​    再平衡使你重分配集群任务。这是个很强大的命令。比如，你向一个运行中的集群增加了节点。再平衡命令将会停用拓扑，然后在相应超时时间之后重分配工人，并重启拓扑。</p>
+<h3 id="Storm日志"><a href="#Storm日志" class="headerlink" title="Storm日志"></a>Storm日志</h3><h4 id="nimbus的日志信息"><a href="#nimbus的日志信息" class="headerlink" title="nimbus的日志信息"></a>nimbus的日志信息</h4><p>在nimbus的服务器上</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /export/servers/storm/logs</span><br><span class="line">tail -100f /export/servers/storm/logs/nimbus.log</span><br></pre></td></tr></table></figure>
+
+<h4 id="查看ui运行日志信息"><a href="#查看ui运行日志信息" class="headerlink" title="查看ui运行日志信息"></a>查看ui运行日志信息</h4><p>在ui的服务器上，一般和nimbus一个服务器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /export/servers/storm/logs</span><br><span class="line">tail -100f /export/servers/storm/logs/ui.log</span><br></pre></td></tr></table></figure>
+
+<h4 id="查看supervisor运行日志信息"><a href="#查看supervisor运行日志信息" class="headerlink" title="查看supervisor运行日志信息"></a>查看supervisor运行日志信息</h4><p>在supervisor服务上</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /export/servers/storm/logs</span><br><span class="line">tail -100f /export/servers/storm/logs/supervisor.log</span><br></pre></td></tr></table></figure>
+
+<h4 id="查看supervisor上worker运行日志信息"><a href="#查看supervisor上worker运行日志信息" class="headerlink" title="查看supervisor上worker运行日志信息"></a>查看supervisor上worker运行日志信息</h4><p>在supervisor服务上</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /export/servers/storm/logs</span><br><span class="line">tail -100f /export/servers/storm/logs/worker-6702.log</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/1583832014008.png" alt="1583832014008"></p>
+<h2 id="Storm流式计算生命周期"><a href="#Storm流式计算生命周期" class="headerlink" title="Storm流式计算生命周期"></a>Storm流式计算生命周期</h2><h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>storm 执行流式数据处理函数的生命周期主要是通过Spout和Bolt 这两个组件的生命周期</p>
+<p><strong>Spout组件涉及到的方法有：</strong></p>
+<ul>
+<li><p>declareOutputFields()   (调用一次)</p>
+</li>
+<li><p>open()     (调用一次)</p>
+</li>
+<li><p>activate()      (调用一次)</p>
+</li>
+<li><p>nextTuple()     （循环调用 ）</p>
+</li>
+<li><p>disactive()        (手动调用)</p>
+</li>
+</ul>
+<p><strong>Bolt组件涉及到的方法有</strong></p>
+<ul>
+<li><p>declareOutputFileds()      (调用一次)</p>
+</li>
+<li><p>prepare()     (调用一次)</p>
+</li>
+<li><p>execute()    （循环执行）</p>
+</li>
+</ul>
+<p><strong>执行顺序？</strong></p>
+<ol>
+<li><p>在客户端将jar包提交到集群上的时候，执行 spout 、bolt 的构造方法以及declareOutputFields（）</p>
+</li>
+<li><p>spout执行open方法一次，得到conf一些配置信息</p>
+</li>
+<li><p>activate让处理的信息发送到bolt中</p>
+</li>
+<li><p>Bolt 中 prepare 方法只执行一次</p>
+</li>
+<li><p>Spout 中 nextTuple不断的循环执行</p>
+</li>
+<li><p>Blot 中 execute  不断的循环执行</p>
+</li>
+</ol>
+<h3 id="Stream-Grouping"><a href="#Stream-Grouping" class="headerlink" title="Stream Grouping"></a>Stream Grouping</h3><h4 id="Stream-Grouping-的作用"><a href="#Stream-Grouping-的作用" class="headerlink" title="Stream Grouping 的作用"></a>Stream Grouping 的作用</h4><p>Storm 的Tuple  从 Spout 中 分发到 Bolt， 以及从Bolt 分发的Bolt 的过程中，Storm定义了一些内置的分发方法和规则，</p>
+<p>这些规则通过一些条件或者随机将具有相同特征的tuple分发到同一Bolt中进行处理，这样有利于对不同特征的数据进行集中统计</p>
+<p>下面介绍一些常用的Grouping 种类</p>
+<h3 id="Stream-Grouping-种类"><a href="#Stream-Grouping-种类" class="headerlink" title="Stream Grouping 种类"></a>Stream Grouping 种类</h3><ul>
+<li><p>Shuffle Grouping: 随机分组， 随机派发stream里面的tuple，保证每个bolt接收到的tuple数目大致相同。</p>
+</li>
+<li><p>Fields Grouping：按字段分组，比如按userid来分组，具有同样userid的tuple会被分到相同的Bolts里的一个task，而不同的userid则会被分配到不同的bolts里的task。</p>
+</li>
+<li><p>All Grouping：广播发送，对于每一个tuple，所有的bolts都会收到。</p>
+</li>
+<li><p>Global Grouping：全局分组， 这个tuple被分配到storm中的一个bolt的其中一个task。再具体一点就是分配给id值最低的那个task。</p>
+</li>
+<li><p>Non Grouping：不分组，这stream grouping个分组的意思是说stream不关心到底谁会收到它的tuple。目前这种分组和Shuffle grouping是一样的效果，有一点不同的是storm会把这个bolt放到这个bolt的订阅者同一个线程里面去执行， 即减少跨主机socket通讯。</p>
+</li>
+<li><p>Direct Grouping： 直接分组， 这是一种比较特别的分组方法，用这种分组意味着消息的发送者指定由消息接收者的哪个task处理这个消息。只有被声明为Direct Stream的消息流可以声明这种分组方法。而且这种消息tuple必须使用emitDirect方法来发射。消息处理者可以通过TopologyContext来获取处理它的消息的task的id （OutputCollector.emit方法也会返回task的id）。</p>
+</li>
+</ul>
+<blockquote>
+<p>Local or shuffle grouping：如果目标bolt有一个或者多个task在同一个工作进程中，tuple将会被随机发生给这些tasks。否则，和普通的Shuffle Grouping行为一致。</p>
+</blockquote>
+<h3 id="单体统计案例"><a href="#单体统计案例" class="headerlink" title="单体统计案例"></a>单体统计案例</h3><h4 id="功能说明"><a href="#功能说明" class="headerlink" title="功能说明"></a>功能说明</h4><p>设计一个topology，来实现对文档里面的单词出现的频率进行统计。</p>
+<p>整个topology分为三个部分：</p>
+<ul>
+<li><p>RandomSentenceSpout：数据源，在已知的英文句子中，随机发送一条句子出去。</p>
+</li>
+<li><p>SplitSentenceBolt：负责将单行文本记录（句子）切分成单词</p>
+</li>
+<li><p>WordCountBolt：负责对单词的频率进行累加</p>
+</li>
+</ul>
+<h4 id="项目结构设计"><a href="#项目结构设计" class="headerlink" title="项目结构设计"></a>项目结构设计</h4><p><img src="/img/1583833270500.png" alt="1583833270500"></p>
+<h4 id="RandomSentenceSpout的实现"><a href="#RandomSentenceSpout的实现" class="headerlink" title="RandomSentenceSpout的实现"></a>RandomSentenceSpout的实现</h4><p><img src="/img/1583833293835.png" alt="1583833293835"></p>
+<h4 id="SplitSentenceBolt的实现"><a href="#SplitSentenceBolt的实现" class="headerlink" title="SplitSentenceBolt的实现"></a>SplitSentenceBolt的实现</h4><p><img src="/img/1583833626450.png" alt="1583833626450"></p>
+<h4 id="WordCountBolt的实现"><a href="#WordCountBolt的实现" class="headerlink" title="WordCountBolt的实现"></a>WordCountBolt的实现</h4><p><img src="/img/1583833649405.png" alt="1583833649405"></p>
+<h2 id="Storm-程序的并发机制"><a href="#Storm-程序的并发机制" class="headerlink" title="Storm 程序的并发机制"></a>Storm 程序的并发机制</h2><h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><ul>
+<li><p>Workers (JVMs): 在一个物理节点上可以运行一个或多个独立的JVM 进程。一个Topology可以包含一个或多个worker(并行的跑在不同的物理机上), 所以worker process就是执行一个topology的子集, <strong>并且worker只能对应于一个topology</strong> </p>
+</li>
+<li><p>Executors (threads): 在一个worker JVM进程中运行着多个Java线程。一个executor线程可以执行一个或多个tasks。但一般默认每个executor只执行一个task。一个worker可以包含一个或多个executor, 每个component (spout或bolt)至少对应于一个executor, 所以可以说executor执行一个compenent的子集, 同时一个executor只能对应于一个component。 </p>
+</li>
+<li><p>Tasks(bolt/spout instances)：Task就是具体的处理逻辑对象，每一个Spout和Bolt会被当作很多task在整个集群里面执行。每一个task对应到一个线程，而stream grouping则是定义怎么从一堆task发射tuple到另外一堆task。你可以调用TopologyBuilder.setSpout和TopBuilder.setBolt来设置并行度 — 也就是有多少个task。 </p>
+</li>
+</ul>
+<h3 id="配置并行度"><a href="#配置并行度" class="headerlink" title="配置并行度"></a>配置并行度</h3><h4 id="通过修改配置文件和代码配置冰心额度"><a href="#通过修改配置文件和代码配置冰心额度" class="headerlink" title="通过修改配置文件和代码配置冰心额度"></a>通过修改配置文件和代码配置冰心额度</h4><ul>
+<li><p>对于并发度的配置, 在storm里面可以在多个地方进行配置, 优先级为：</p>
+<p>defaults.yaml &lt; storm.yaml &lt; topology-specific configuration </p>
+<p>&lt; internal component-specific configuration &lt; external component-specific configuration </p>
+</li>
+<li><p>worker processes的数目, 可以通过配置文件和代码中配置, worker就是执行进程, 所以考虑并发的效果, 数目至少应该大于machines的数目 </p>
+</li>
+<li><p>executor的数目, component的并发线程数，只能在代码中配置(通过setBolt和setSpout的参数), 例如, setBolt(“green-bolt”, new GreenBolt(), 2) </p>
+</li>
+<li><p>tasks的数目, 可以不配置, 默认和executor1:1, 也可以通过setNumTasks()配置 </p>
+</li>
+<li><p>Topology的worker数通过config设置，即执行该topology的worker（java）进程数。它可以通过 storm rebalance 命令任意调整。 </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Config conf = newConfig();</span><br><span class="line">conf.setNumWorkers(<span class="number">2</span>); <span class="comment">//用2个worker</span></span><br><span class="line">topologyBuilder.setSpout(<span class="string">"blue-spout"</span>, newBlueSpout(), <span class="number">2</span>); <span class="comment">//设置2个并发度</span></span><br><span class="line">topologyBuilder.setBolt(<span class="string">"green-bolt"</span>, newGreenBolt(), <span class="number">2</span>).setNumTasks(<span class="number">4</span>).shuffleGrouping(<span class="string">"blue-spout"</span>); <span class="comment">//设置2个并发度，4个任务</span></span><br><span class="line">topologyBuilder.setBolt(<span class="string">"yellow-bolt"</span>, newYellowBolt(), <span class="number">6</span>).shuffleGrouping(<span class="string">"green-bolt"</span>); <span class="comment">//设置6个并发度</span></span><br><span class="line">StormSubmitter.submitTopology(<span class="string">"mytopology"</span>, conf, topologyBuilder.createTopology());</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h4 id="动态改变任务的并行度"><a href="#动态改变任务的并行度" class="headerlink" title="动态改变任务的并行度"></a>动态改变任务的并行度</h4><p>Storm支持在不 restart topology 的情况下, 动态的改变(增减) worker processes 的数目和 executors 的数目, 称为rebalancing. 通过Storm web UI，或者通过storm rebalance命令实现： </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">storm rebalance mytopology -n 5 -e a-spout=3 -e b-bolt=10</span><br></pre></td></tr></table></figure>
+
+<h2 id="Storm-的技术分析"><a href="#Storm-的技术分析" class="headerlink" title="Storm 的技术分析"></a>Storm 的技术分析</h2><h3 id="Storm的通讯技术"><a href="#Storm的通讯技术" class="headerlink" title="Storm的通讯技术"></a>Storm的通讯技术</h3><h4 id="通讯机制"><a href="#通讯机制" class="headerlink" title="通讯机制"></a>通讯机制</h4><p>Worker间的通信经常需要通过网络跨节点进行，Storm使用ZeroMQ或Netty(0.9以后默认使用)作为进程间通信的消息框架。</p>
+<p>Worker进程内部通信：<strong>不同worker的thread通信使用LMAX Disruptor来完成。</strong></p>
+<p>不同topologey之间的通信，Storm不负责，需要自己想办法实现，例如使用kafka等；</p>
+<h4 id="Worker-进程间通讯机制"><a href="#Worker-进程间通讯机制" class="headerlink" title="Worker 进程间通讯机制"></a>Worker 进程间通讯机制</h4><p>worker进程间消息传递机制，消息的接收和处理的大概流程见下图</p>
+<p><img src="/img/1583835238933.png" alt="1583835238933"></p>
+<ul>
+<li><p>对于worker进程来说，为了管理流入和传出的消息，每个worker进程有一个独立的接收线程(对配置的TCP端口supervisor.slots.ports进行监听);</p>
+</li>
+<li><p>对应Worker接收线程，每个worker存在一个独立的发送线程，它负责从worker的transfer-queue中读取消息，并通过网络发送给其他worker</p>
+</li>
+<li><p>每个executor有自己的incoming-queue和outgoing-queue。</p>
+</li>
+<li><p>Worker接收线程将收到的消息通过task编号传递给对应的executor(一个或多个)的incoming-queues;</p>
+</li>
+<li><p>每个executor有单独的线程分别来处理spout/bolt的业务逻辑，业务逻辑输出的中间数据会存放在outgoing-queue中，当executor的outgoing-queue中的tuple达到一定的阀值，executor的发送线程将批量获取outgoing-queue中的tuple,并发送到transfer-queue中。</p>
+</li>
+<li><p>每个worker进程控制一个或多个executor线程，用户可在代码中进行配置。其实就是我们在代码中设置的并发度个数。</p>
+</li>
+</ul>
+<h4 id="Worker-进程间通讯机制分析"><a href="#Worker-进程间通讯机制分析" class="headerlink" title="Worker 进程间通讯机制分析"></a>Worker 进程间通讯机制分析</h4><p><img src="/img/1583835379230.png" alt="1583835379230"></p>
+<ul>
+<li><p>Worker接受线程通过网络接受数据，并根据Tuple中包含的taskId，匹配到对应的executor；然后根据executor找到对应的incoming-queue，将数据存发送到incoming-queue队列中。</p>
+</li>
+<li><p>业务逻辑执行现成消费incoming-queue的数据，通过调用Bolt的execute(xxxx)方法，将Tuple作为参数传输给用户自定义的方法</p>
+</li>
+<li><p>业务逻辑执行完毕之后，将计算的中间数据发送给outgoing-queue队列，当outgoing-queue中的tuple达到一定的阀值，executor的发送线程将批量获取outgoing-queue中的tuple,并发送到Worker的transfer-queue中</p>
+</li>
+<li><p>Worker发送线程消费transfer-queue中数据，计算Tuple的目的地，连接不同的node+port将数据通过网络传输的方式传送给另一个的Worker。</p>
+</li>
+<li><p>另一个worker执行以上步骤1的操作。</p>
+</li>
+</ul>
+<h4 id="Disruptor-队列"><a href="#Disruptor-队列" class="headerlink" title="Disruptor  队列"></a>Disruptor  队列</h4><p><strong>disruptor是什么</strong></p>
+<p>1、 简单理解：Disruptor是一个Queue。Disruptor是实现了“队列”的功能，而且是一个有界队列。而队列的应用场景自然就是“生产者-消费者”模型。</p>
+<p>2、 在JDK中Queue有很多实现类，包括不限于ArrayBlockingQueue、LinkBlockingQueue，这两个底层的数据结构分别是数组和链表。数组查询快，链表增删快，能够适应大多数应用场景。</p>
+<p>3、 但是ArrayBlockingQueue、LinkBlockingQueue都是线程安全的。涉及到线程安全，就会有synchronized、lock等关键字，这就意味着CPU会打架。 </p>
+<p>4、 Disruptor一种线程之间信息无锁的交换方式（使用CAS（Compare And Swap/Set）操作）。</p>
+<p><strong>disruptor主要特点</strong></p>
+<p>Disruptor可以看成一个事件监听或消息机制，在队列中一边生产者放入消息，另外一边消费者并行取出处理.</p>
+<p>底层是单个数据结构：一个ring buffer。</p>
+<p>每个生产者和消费者都有一个次序计算器，以显示当前缓冲工作方式。</p>
+<p>每个生产者消费者能够操作自己的次序计数器的能够读取对方的计数器，生产者能够读取消费者的计算器确保其在没有锁的情况下是可写的。</p>
+<p><strong>核心组件</strong></p>
+<ul>
+<li><p>Ring Buffer 环形的缓冲区，负责对通过 Disruptor 进行交换的数据（事件）进行存储和更新。</p>
+</li>
+<li><p>Sequence 通过顺序递增的序号来编号管理通过其进行交换的数据（事件），对数据(事件)的处理过程总是沿着序号逐个递增处理。</p>
+</li>
+<li><p>RingBuffer底层是个数组，次序计算器是一个64bit long 整数型，平滑增长。</p>
+</li>
+</ul>
+<p><img src="/img/1583836641903.png" alt="1583836641903"></p>
+<p>​    1. 接受数据并写入到脚标31的位置，之后会沿着序号一直写入，但是不会绕过消费者所在的脚标。</p>
+<p>​    2. Joumaler和replicator同时读到24的位置，他们可以批量读取数据到30</p>
+<p>​    3. 消费逻辑线程读到了14的位置，但是没法继续读下去，因为他的sequence暂停在15的位置上，需要等到他的sequence给他序号。如果sequence能正常工作，就能读取到30的数据。</p>
+<h4 id="Worker间的网络通讯"><a href="#Worker间的网络通讯" class="headerlink" title="Worker间的网络通讯"></a>Worker间的网络通讯</h4><p><strong>Netty</strong></p>
+<p>Netty是一个NIO client-server(客户端服务器)框架，使用Netty可以快速开发网络应用，例如服务器和客户端协议。Netty提供了一种新的方式来使开发网络应用程序，这种新的方式使得它很容易使用和有很强的扩展性。Netty的内部实现时很复杂的，但是Netty提供了简单易用的api从网络处理代码中解耦业务逻辑。Netty是完全基于NIO实现的，所以整个Netty都是异步的。</p>
+<p><strong>ZeroMQ</strong></p>
+<p>ZeroMQ是一种基于消息队列的多线程网络库，其对套接字类型、连接处理、帧、甚至路由的底层细节进行抽象，提供跨越多种传输协议的套接字。ZeroMQ是网络通信中新的一层，介于应用层和传输层之间（按照TCP/IP划分），其是一个可伸缩层，可并行运行，分散在分布式系统间。</p>
+<p>ZeroMQ定位为：一个简单好用的传输层，像框架一样的一个socket library，他使得Socket编程更加简单、简洁和性能更高。是一个消息处理队列库，可在多个线程、内核和主机盒之间弹性伸缩。ZMQ的明确目标是“成为标准网络协议栈的一部分，之后进入Linux内核”。</p>
+<h3 id="Storm-组件本地目录结构"><a href="#Storm-组件本地目录结构" class="headerlink" title="Storm 组件本地目录结构"></a>Storm 组件本地目录结构</h3><p><img src="/img/1583836893868.png" alt="1583836893868"></p>
+<h3 id="Storm-zookeeper-目录树"><a href="#Storm-zookeeper-目录树" class="headerlink" title="Storm zookeeper 目录树"></a>Storm zookeeper 目录树</h3><p><img src="/img/1583837267075.png" alt="1583837267075"></p>
+<h3 id="Storm-任务提交过程"><a href="#Storm-任务提交过程" class="headerlink" title="Storm 任务提交过程"></a>Storm 任务提交过程</h3><p><strong>过程示意图</strong></p>
+<p><img src="/img/1583837643662.png" alt="1583837643662"></p>
+<p><strong>nimbus 创建的Topo对象示意图</strong></p>
+<p><img src="/img/1583837698684.png" alt="1583837698684"></p>
+<p><strong>详细任务提交过程</strong></p>
+<p><img src="/img/1583837747089.png" alt="1583837747089"></p>
+<h3 id="Storm-的容错机制"><a href="#Storm-的容错机制" class="headerlink" title="Storm 的容错机制"></a>Storm 的容错机制</h3><h4 id="总体介绍"><a href="#总体介绍" class="headerlink" title="总体介绍"></a>总体介绍</h4><ul>
+<li><p>在storm中，可靠的信息处理机制是从spout开始的。</p>
+</li>
+<li><p>一个提供了可靠的处理机制的spout需要记录他发射出去的tuple，当下游bolt处理tuple或者子tuple失败时spout能够重新发射。 </p>
+</li>
+<li><p>Storm通过调用Spout的nextTuple()发送一个tuple。为实现可靠的消息处理，首先要给每个发出的tuple带上唯一的ID，并且将ID作为参数传递给SoputOutputCollector的emit()方法：collector.emit(new Values(“value1”,”value2”), msgId); messageid就是用来标示唯一的tuple的，而rootid是随机生成的</p>
+</li>
+<li><p>给每个tuple指定ID告诉Storm系统，无论处理成功还是失败，spout都要接收tuple树上所有节点返回的通知。如果处理成功，spout的ack()方法将会对编号是msgId的消息应答确认；如果处理失败或者超时，会调用fail()方法。 </p>
+</li>
+</ul>
+<h4 id="基本实现"><a href="#基本实现" class="headerlink" title="基本实现"></a>基本实现</h4><p>Storm 系统中有一组叫做”acker”的特殊的任务，它们负责跟踪DAG（有向无环图）中的每个消息。</p>
+<p>acker任务保存了spout id到一对值的映射。第一个值就是spout的任务id，通过这个id，acker就知道消息处理完成时该通知哪个spout任务。第二个值是一个64bit的数字，我们称之为”ack val”， 它是树中所有消息的随机id的异或计算结果。</p>
+<p>ack val表示了整棵树的的状态，无论这棵树多大，只需要这个固定大小的数字就可以跟踪整棵树。当消息被创建和被应答的时候都会有相同的消息id发送过来做异或。 每当acker发现一棵树的ack val值为0的时候，它就知道这棵树已经被完全处理了</p>
+<p><img src="/img/1583838793812.png" alt="1583838793812"></p>
+<p> <img src="/img/1583838800997.png" alt="1583838800997"></p>
+<h4 id="可靠性配置"><a href="#可靠性配置" class="headerlink" title="可靠性配置"></a>可靠性配置</h4><p>有三种方法可以去掉消息的可靠性： </p>
+<ol>
+<li><p>将参数Config.TOPOLOGY_ACKERS设置为0，通过此方法，当Spout发送一个消息的时候，它的ack方法将不会被调用;</p>
+</li>
+<li><p>Spout发送一个消息时，不指定此消息的messageID。当需要关闭特定消息可靠性的时候，可以使用此方法； </p>
+</li>
+<li><p>最后，如果你不在意某个消息派生出来的子孙消息的可靠性，则此消息派生出来的子消息在发送时不要做锚定，即在emit方法中不指定输入消息。因为这些子孙消息没有被锚定在任何tuple tree中，因此他们的失败不会引起任何spout重新发送消息。</p>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;">
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/大数据/" rel="tag"><i class="fa fa-tag"></i> 大数据</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/02/23/15.大数据/大数据集群工具/hbase/" rel="next" title="hbase">
+                <i class="fa fa-chevron-left"></i> hbase
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="刘小恺(Kyle)">
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">235</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">65</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">72</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#流式计算和storm介绍"><span class="nav-text">流式计算和storm介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是离线计算"><span class="nav-text">什么是离线计算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是流式计算"><span class="nav-text">什么是流式计算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#离线计算和实时计算的区别"><span class="nav-text">离线计算和实时计算的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是storm"><span class="nav-text">什么是storm</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Storm-与-Hadoop的区别"><span class="nav-text">Storm 与 Hadoop的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#应用场景"><span class="nav-text">应用场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storm-架构"><span class="nav-text">Storm 架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Storm核心组件"><span class="nav-text">Storm核心组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Storm-编程模型"><span class="nav-text">Storm 编程模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#流式计算的一般架构"><span class="nav-text">流式计算的一般架构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storm-集群部署与操作"><span class="nav-text">Storm 集群部署与操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#集群部署流程"><span class="nav-text">集群部署流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#基础环境准备"><span class="nav-text">基础环境准备</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#安装包下载"><span class="nav-text">安装包下载</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置文件修改与安装包同步"><span class="nav-text">配置文件修改与安装包同步</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#启动集群"><span class="nav-text">启动集群</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#查看集群"><span class="nav-text">查看集群</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Storm-的集群命令"><span class="nav-text">Storm 的集群命令</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#任务提交命令"><span class="nav-text">任务提交命令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#杀死任务命令"><span class="nav-text">杀死任务命令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#停用任务命令"><span class="nav-text">停用任务命令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#启用任务命令"><span class="nav-text">启用任务命令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#重新部署任务命令"><span class="nav-text">重新部署任务命令</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Storm日志"><span class="nav-text">Storm日志</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#nimbus的日志信息"><span class="nav-text">nimbus的日志信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#查看ui运行日志信息"><span class="nav-text">查看ui运行日志信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#查看supervisor运行日志信息"><span class="nav-text">查看supervisor运行日志信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#查看supervisor上worker运行日志信息"><span class="nav-text">查看supervisor上worker运行日志信息</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storm流式计算生命周期"><span class="nav-text">Storm流式计算生命周期</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#介绍"><span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Stream-Grouping"><span class="nav-text">Stream Grouping</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Stream-Grouping-的作用"><span class="nav-text">Stream Grouping 的作用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Stream-Grouping-种类"><span class="nav-text">Stream Grouping 种类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#单体统计案例"><span class="nav-text">单体统计案例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#功能说明"><span class="nav-text">功能说明</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#项目结构设计"><span class="nav-text">项目结构设计</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RandomSentenceSpout的实现"><span class="nav-text">RandomSentenceSpout的实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SplitSentenceBolt的实现"><span class="nav-text">SplitSentenceBolt的实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#WordCountBolt的实现"><span class="nav-text">WordCountBolt的实现</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storm-程序的并发机制"><span class="nav-text">Storm 程序的并发机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概念"><span class="nav-text">概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置并行度"><span class="nav-text">配置并行度</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#通过修改配置文件和代码配置冰心额度"><span class="nav-text">通过修改配置文件和代码配置冰心额度</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#动态改变任务的并行度"><span class="nav-text">动态改变任务的并行度</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storm-的技术分析"><span class="nav-text">Storm 的技术分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Storm的通讯技术"><span class="nav-text">Storm的通讯技术</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#通讯机制"><span class="nav-text">通讯机制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Worker-进程间通讯机制"><span class="nav-text">Worker 进程间通讯机制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Worker-进程间通讯机制分析"><span class="nav-text">Worker 进程间通讯机制分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Disruptor-队列"><span class="nav-text">Disruptor  队列</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Worker间的网络通讯"><span class="nav-text">Worker间的网络通讯</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Storm-组件本地目录结构"><span class="nav-text">Storm 组件本地目录结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Storm-zookeeper-目录树"><span class="nav-text">Storm zookeeper 目录树</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Storm-任务提交过程"><span class="nav-text">Storm 任务提交过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Storm-的容错机制"><span class="nav-text">Storm 的容错机制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#总体介绍"><span class="nav-text">总体介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基本实现"><span class="nav-text">基本实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#可靠性配置"><span class="nav-text">可靠性配置</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

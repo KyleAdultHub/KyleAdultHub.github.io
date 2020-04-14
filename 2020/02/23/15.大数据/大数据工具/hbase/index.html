@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="hbase简介hbase介绍HBASE是一个高可靠性、高性能、面向列、可伸缩的分布式存储系统，利用HBASE技术可在廉价PC Server上搭建起大规模结构化存储集群。 HBASE的目标是存储并处理大型的数据，更具体来说是仅需使用普通的硬件配置，就能够处理由成千上万的行和列所组成的大型数据。 HBASE是Google Bigtable的开源实现，但是也有很多不同之处。比如：Google Bigta">
+<meta name="keywords" content="大数据">
+<meta property="og:type" content="article">
+<meta property="og:title" content="hbase">
+<meta property="og:url" content="http://blog.kyleliu.cn/2020/02/23/15.大数据/大数据工具/hbase/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的云笔记">
+<meta property="og:description" content="hbase简介hbase介绍HBASE是一个高可靠性、高性能、面向列、可伸缩的分布式存储系统，利用HBASE技术可在廉价PC Server上搭建起大规模结构化存储集群。 HBASE的目标是存储并处理大型的数据，更具体来说是仅需使用普通的硬件配置，就能够处理由成千上万的行和列所组成的大型数据。 HBASE是Google Bigtable的开源实现，但是也有很多不同之处。比如：Google Bigta">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1582431153457.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1582433726696.png">
+<meta property="og:updated_time" content="2020-04-09T02:29:23.990Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="hbase">
+<meta name="twitter:description" content="hbase简介hbase介绍HBASE是一个高可靠性、高性能、面向列、可伸缩的分布式存储系统，利用HBASE技术可在廉价PC Server上搭建起大规模结构化存储集群。 HBASE的目标是存储并处理大型的数据，更具体来说是仅需使用普通的硬件配置，就能够处理由成千上万的行和列所组成的大型数据。 HBASE是Google Bigtable的开源实现，但是也有很多不同之处。比如：Google Bigta">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/img/1582431153457.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2020/02/23/15.大数据/大数据工具/hbase/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>hbase | 刘小恺(Kyle) 的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/02/23/15.大数据/大数据工具/hbase/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">hbase
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-02-23 11:31:00" itemprop="dateCreated datePublished" datetime="2020-02-23T11:31:00+08:00">2020-02-23</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/大数据/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/大数据/大数据工具/" itemprop="url" rel="index"><span itemprop="name">大数据工具</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/02/23/15.大数据/大数据工具/hbase/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/02/23/15.大数据/大数据工具/hbase/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="hbase简介"><a href="#hbase简介" class="headerlink" title="hbase简介"></a>hbase简介</h2><h3 id="hbase介绍"><a href="#hbase介绍" class="headerlink" title="hbase介绍"></a>hbase介绍</h3><p>HBASE是一个高可靠性、高性能、面向列、可伸缩的分布式存储系统，利用HBASE技术可在廉价PC Server上搭建起大规模结构化存储集群。</p>
+<p>HBASE的目标是存储并处理大型的数据，更具体来说是仅需使用普通的硬件配置，就能够处理由成千上万的行和列所组成的大型数据。</p>
+<p>HBASE是Google Bigtable的开源实现，但是也有很多不同之处。比如：Google Bigtable利用GFS作为其文件存储系统，HBASE利用Hadoop HDFS作为其文件存储系统；Google运行MAPREDUCE来处理Bigtable中的海量数据，HBASE同样利用Hadoop MapReduce来处理HBASE中的海量数据；Google Bigtable利用Chubby作为协同服务，HBASE利用Zookeeper作为对应。</p>
+<h3 id="与传统数据库对比"><a href="#与传统数据库对比" class="headerlink" title="与传统数据库对比"></a>与传统数据库对比</h3><p><strong>传统数据库的问题</strong></p>
+<p>1）数据量很大的时候无法存储</p>
+<p>2）没有很好的备份机制</p>
+<p>3）数据达到一定数量开始缓慢，很大的话基本无法支撑</p>
+<p><strong>hbase的优势</strong></p>
+<p>1）线性扩展，随着数据量增多可以通过节点扩展进行支撑</p>
+<p>2）数据存储在hdfs上，备份机制健全</p>
+<p>3）通过zookeeper协调查找数据，访问速度快。</p>
+<h3 id="hbase-集群中的角色"><a href="#hbase-集群中的角色" class="headerlink" title="hbase 集群中的角色"></a>hbase 集群中的角色</h3><ol>
+<li><p>一个或者多个主节点，Hmaster</p>
+<ul>
+<li>管理用户对Table表的增、删、改、查操作；</li>
+<li>管理HRegion服务器的负载均衡，调整HRegion分布；</li>
+<li>在HRegion分裂后，负责新HRegion的分配；</li>
+<li>在HRegion服务器停机后，负责失效HRegion服务器上的HRegion迁移。</li>
+</ul>
+<p>2、多个从节点，HregionServer</p>
+<ul>
+<li>表的增删改查数据。</li>
+<li>和hdfs交互，存取数据。</li>
+</ul>
+</li>
+</ol>
+<h3 id="zookeeper在hbase-中作用"><a href="#zookeeper在hbase-中作用" class="headerlink" title="zookeeper在hbase 中作用"></a>zookeeper在hbase 中作用</h3><ol>
+<li>保存Hmaster的地址和backup-master地址</li>
+<li>保存表-ROOT-的地址- hbase默认的根表，检索表。</li>
+<li>HRegionServer列表</li>
+</ol>
+<h2 id="hbase的安装"><a href="#hbase的安装" class="headerlink" title="hbase的安装"></a>hbase的安装</h2><ol>
+<li><p>上传hbase安装包到服务器集群</p>
+<p>hbase-x.xx.x.tar.gz</p>
+</li>
+<li><p>解压缩安装包</p>
+<p>tar -zxvf hbase-0.94.6.tar.gz</p>
+</li>
+<li><p>重命名解压后目录</p>
+<p>mv hbase-0.94.6.hbase</p>
+</li>
+<li><p>修改环境变量</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">su - root</span><br><span class="line">vi /etc/profile</span><br><span class="line"><span class="meta">#</span> 添加内容</span><br><span class="line"><span class="meta">#</span> export HBASE_HOME=/home/hadoop/hbase</span><br><span class="line"><span class="meta">#</span> export PATH=$PATH:$HBASE_HOME/bin</span><br><span class="line">source /etc/profile</span><br><span class="line">su - hadoop</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>修改配置文件</p>
+<p>进入 配置文件目录</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd $HABASE_HOME/conf</span><br></pre></td></tr></table></figure>
+
+<p>修改配置文件 hbase-env.sh (配置hbase环境变量)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">export JAVA_HOME=/usr/jdk   //jdk安装目录</span><br><span class="line">export JAVA_CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar</span><br><span class="line">export HBASE_CLASSPATH=/home/hadoop/hadoop/conf   //hadoop配置文件的位置</span><br><span class="line">export HBASE_MANAGES_ZK=true   #如果使用独立安装的zookeeper这个地方就是false</span><br></pre></td></tr></table></figure>
+
+<p>修改配置文件 hbase-site.xml  (配置hbase集群)</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>hbase.master<span class="tag">&lt;/<span class="name">name</span>&gt;</span>		#hbasemaster的主机和端口</span><br><span class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>master1:60000<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>hbase.master.maxclockskew<span class="tag">&lt;/<span class="name">name</span>&gt;</span>    #时间同步允许的时间差</span><br><span class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>180000<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>hbase.rootdir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>hdfs:// hadoop-cluster1/hbase<span class="tag">&lt;/<span class="name">value</span>&gt;</span>#hbase共享目录，持久化hbase数据</span><br><span class="line">  <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>hbase.cluster.distributed<span class="tag">&lt;/<span class="name">name</span>&gt;</span>  #是否分布式运行，false即为单机</span><br><span class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>true<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>hbase.zookeeper.quorum<span class="tag">&lt;/<span class="name">name</span>&gt;</span>#zookeeper地址</span><br><span class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>slave1, slave2,slave3<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>hbase.zookeeper.property.dataDir<span class="tag">&lt;/<span class="name">name</span>&gt;</span>#zookeeper配置信息快照的位置</span><br><span class="line">  <span class="tag">&lt;<span class="name">value</span>&gt;</span>/home/hadoop/hbase/tmp/zookeeper<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>修改配置文件 regionservers  集群从节点配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">slave1</span><br><span class="line">slave2</span><br><span class="line">slave3</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>把hadoop的hdfs-site.xml和core-site.xml 放到hbase/conf下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cp /home/hadoop/hadoop/etc/hadoop/hdfs-site.xml /home/hadoop/hbase/conf</span><br><span class="line">cp /home/hadoop/hadoop/etc/hadoop/core-site.xml /home/hadoop/hbase/conf</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>将hbase分发到各个主机</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">scp -r /home/hadoop/hbase hadoop@slave1:/home/hadoop/</span><br><span class="line">scp -r /home/hadoop/hbase hadoop@slave2:/home/hadoop/</span><br><span class="line">scp -r /home/hadoop/hbase hadoop@slave3:/home/hadoop/</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>启动hbase</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">start-hbase.sh</span><br></pre></td></tr></table></figure>
+
+<p>备注： 在master节点执行</p>
+</li>
+<li><p>查看状态</p>
+<p>查看hbase进行: jps</p>
+<p>进入hbase shell : hbase shell</p>
+<p>退出hbase shell:  quit</p>
+<p>查看hbase web: <a href="http://master:60010/" target="_blank" rel="noopener">http://master:60010/</a></p>
+</li>
+<li><p>启动Hmaster 主备</p>
+<p>在任意安装了hbase机器上启动hmaster</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">local-master-backup.sh start 1</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>添加hbase节点</p>
+<p>复制hbase安装目录到新节点上, 执行启动命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hbase-daemon.sh start regionserver</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h2 id="hbase-数据模型"><a href="#hbase-数据模型" class="headerlink" title="hbase 数据模型"></a>hbase 数据模型</h2><h3 id="row-key"><a href="#row-key" class="headerlink" title="row key"></a>row key</h3><p>与nosql数据库们一样,row key是用来检索记录的主键。访问HBASE table中的行，只有三种方式：</p>
+<p>1.通过单个row key访问</p>
+<p>2.通过row key的range（正则）</p>
+<p>3.全表扫描</p>
+<p>Row key行键 (Row key)可以是任意字符串(最大长度 是 64KB，实际应用中长度一般为 10-100bytes)，在HBASE内部，row key保存为字节数组。存储时，数据按照Row key的字典序(byte order)排序存储。设计key时，要充分排序存储这个特性，将经常一起读取的行存储放到一起。(位置相关性)</p>
+<h3 id="列簇-Columns-Family"><a href="#列簇-Columns-Family" class="headerlink" title="列簇(Columns Family)"></a>列簇(Columns Family)</h3><p>列簇 ：HBASE表中的每个列，都归属于某个列族。列族是表的schema的一部 分(而列不是)，必须在使用表之前定义。列名都以列族作为前缀。例如 courses:history，courses:math都属于courses 这个列族。</p>
+<h3 id="Cell"><a href="#Cell" class="headerlink" title="Cell"></a>Cell</h3><p>由{row key, columnFamily, version} 唯一确定的单元。cell中 的数据是没有类型的，全部是字节码形式存贮。</p>
+<p>关键字：无类型、字节码</p>
+<h3 id="时间戳-Time-Stamp"><a href="#时间戳-Time-Stamp" class="headerlink" title="时间戳(Time Stamp)"></a>时间戳(Time Stamp)</h3><p>HBASE 中通过rowkey和columns确定的为一个存贮单元称为cell。每个 cell都保存 着同一份数据的多个版本。版本通过时间戳来索引。时间戳的类型是 64位整型。时间戳可以由HBASE(在数据写入时自动 )赋值，此时时间戳是精确到毫秒 的当前系统时间。时间戳也可以由客户显式赋值。如果应用程序要避免数据版 本冲突，就必须自己生成具有唯一性的时间戳。每个 cell中，不同版本的数据按照时间倒序排序，即最新的数据排在最前面。</p>
+<p>为了避免数据存在过多版本造成的的管理 (包括存贮和索引)负担，HBASE提供 了两种数据版本回收方式。一是保存数据的最后n个版本，二是保存最近一段 时间内的版本（比如最近七天）。用户可以针对每个列族进行设置。</p>
+<h3 id="数据模型示意图"><a href="#数据模型示意图" class="headerlink" title="数据模型示意图"></a>数据模型示意图</h3><p><img src="/img/1582431153457.png" alt="1582431153457"></p>
+<h2 id="hbase-命令"><a href="#hbase-命令" class="headerlink" title="hbase 命令"></a>hbase 命令</h2><table>
+<thead>
+<tr>
+<th>名称</th>
+<th>命令表达式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>创建表</td>
+<td>create ‘表名’, ‘列族名1’,’列族名2’,’列族名N’</td>
+</tr>
+<tr>
+<td>查看所有表</td>
+<td>list</td>
+</tr>
+<tr>
+<td>描述表</td>
+<td>describe  ‘表名’</td>
+</tr>
+<tr>
+<td>判断表存在</td>
+<td>exists  ‘表名’</td>
+</tr>
+<tr>
+<td>判断是否禁用启用表</td>
+<td>is_enabled ‘表名’ ;  is_disabled ‘表名’</td>
+</tr>
+<tr>
+<td>添加记录</td>
+<td>put  ‘表名’, ‘rowKey’, ‘列族 : 列‘  ,  ‘值’</td>
+</tr>
+<tr>
+<td>查看记录rowkey下的所有数据</td>
+<td>get  ‘表名’ , ‘rowKey’</td>
+</tr>
+<tr>
+<td>查看表中的记录总数</td>
+<td>count  ‘表名’</td>
+</tr>
+<tr>
+<td>获取某个列族</td>
+<td>get ‘表名’,’rowkey’,’列族’</td>
+</tr>
+<tr>
+<td>获取某个列族的某个列</td>
+<td>get ‘表名’,’rowkey’,’列族：列’</td>
+</tr>
+<tr>
+<td>删除记录</td>
+<td>delete  ‘表名’ ,‘行名’ , ‘列族：列’</td>
+</tr>
+<tr>
+<td>删除整行</td>
+<td>deleteall ‘表名’,’rowkey’</td>
+</tr>
+<tr>
+<td>删除一张表</td>
+<td>先要屏蔽该表，才能对该表进行删除第一步 disable ‘表名’ ，第二步  drop ‘表名’</td>
+</tr>
+<tr>
+<td>清空表</td>
+<td>truncate ‘表名‘</td>
+</tr>
+<tr>
+<td>查看所有记录</td>
+<td>scan “表名”</td>
+</tr>
+<tr>
+<td>查看某个表某个列中所有数据</td>
+<td>scan 表名” , {COLUMNS=&gt;’列族名:列名’}</td>
+</tr>
+<tr>
+<td>更新记录</td>
+<td>就是重写一遍，进行覆盖，hbase没有修改，都是追加</td>
+</tr>
+</tbody></table>
+<h2 id="hbase-javaApi-操作"><a href="#hbase-javaApi-操作" class="headerlink" title="hbase javaApi 操作"></a>hbase javaApi 操作</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.conf.Configuration;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.Cell;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.CellUtil;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.HBaseConfiguration;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.HColumnDescriptor;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.HTableDescriptor;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.MasterNotRunningException;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.TableName;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.ZooKeeperConnectionException;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.client.Connection;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.client.ConnectionFactory;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.client.Delete;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.client.Get;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.client.HBaseAdmin;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.client.HConnection;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.client.HConnectionManager;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.client.Put;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.client.Result;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.client.ResultScanner;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.client.Scan;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.client.Table;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.filter.ColumnPrefixFilter;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.filter.CompareFilter;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.filter.FilterList;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.filter.FilterList.Operator;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.filter.RegexStringComparator;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.filter.RowFilter;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.filter.SingleColumnValueFilter;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.util.Bytes;</span><br><span class="line"><span class="keyword">import</span> org.junit.After;</span><br><span class="line"><span class="keyword">import</span> org.junit.Before;</span><br><span class="line"><span class="keyword">import</span> org.junit.Test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HbaseTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 配置ss</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="keyword">static</span> Configuration config = <span class="keyword">null</span>;</span><br><span class="line">	<span class="keyword">private</span> Connection connection = <span class="keyword">null</span>;</span><br><span class="line">	<span class="keyword">private</span> Table table = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Before</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">		config = HBaseConfiguration.create();<span class="comment">// 配置</span></span><br><span class="line">		config.set(<span class="string">"hbase.zookeeper.quorum"</span>, <span class="string">"master,work1,work2"</span>);<span class="comment">// zookeeper地址</span></span><br><span class="line">		config.set(<span class="string">"hbase.zookeeper.property.clientPort"</span>, <span class="string">"2181"</span>);<span class="comment">// zookeeper端口</span></span><br><span class="line">		connection = ConnectionFactory.createConnection(config);</span><br><span class="line">		table = connection.getTable(TableName.valueOf(<span class="string">"user"</span>));</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 创建一个表</span></span><br><span class="line"><span class="comment">	 * </span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@throws</span> Exception</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="meta">@Test</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">createTable</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">		<span class="comment">// 创建表管理类</span></span><br><span class="line">		HBaseAdmin admin = <span class="keyword">new</span> HBaseAdmin(config); <span class="comment">// hbase表管理</span></span><br><span class="line">		<span class="comment">// 创建表描述类</span></span><br><span class="line">		TableName tableName = TableName.valueOf(<span class="string">"test3"</span>); <span class="comment">// 表名称</span></span><br><span class="line">		HTableDescriptor desc = <span class="keyword">new</span> HTableDescriptor(tableName);</span><br><span class="line">		<span class="comment">// 创建列族的描述类</span></span><br><span class="line">		HColumnDescriptor family = <span class="keyword">new</span> HColumnDescriptor(<span class="string">"info"</span>); <span class="comment">// 列族</span></span><br><span class="line">		<span class="comment">// 将列族添加到表中</span></span><br><span class="line">		desc.addFamily(family);</span><br><span class="line">		HColumnDescriptor family2 = <span class="keyword">new</span> HColumnDescriptor(<span class="string">"info2"</span>); <span class="comment">// 列族</span></span><br><span class="line">		<span class="comment">// 将列族添加到表中</span></span><br><span class="line">		desc.addFamily(family2);</span><br><span class="line">		<span class="comment">// 创建表</span></span><br><span class="line">		admin.createTable(desc); <span class="comment">// 创建表</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Test</span></span><br><span class="line">	<span class="meta">@SuppressWarnings</span>(<span class="string">"deprecation"</span>)</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">deleteTable</span><span class="params">()</span> <span class="keyword">throws</span> MasterNotRunningException,</span></span><br><span class="line"><span class="function">			ZooKeeperConnectionException, Exception </span>&#123;</span><br><span class="line">		HBaseAdmin admin = <span class="keyword">new</span> HBaseAdmin(config);</span><br><span class="line">		admin.disableTable(<span class="string">"test3"</span>);</span><br><span class="line">		admin.deleteTable(<span class="string">"test3"</span>);</span><br><span class="line">		admin.close();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 向hbase中增加数据</span></span><br><span class="line"><span class="comment">	 * </span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@throws</span> Exception</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="meta">@SuppressWarnings</span>(&#123; <span class="string">"deprecation"</span>, <span class="string">"resource"</span> &#125;)</span><br><span class="line">	<span class="meta">@Test</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">insertData</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">		table.setAutoFlushTo(<span class="keyword">false</span>);</span><br><span class="line">		table.setWriteBufferSize(<span class="number">534534534</span>);</span><br><span class="line">		ArrayList&lt;Put&gt; arrayList = <span class="keyword">new</span> ArrayList&lt;Put&gt;();</span><br><span class="line">		<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">21</span>; i &lt; <span class="number">50</span>; i++) &#123;</span><br><span class="line">			Put put = <span class="keyword">new</span> Put(Bytes.toBytes(<span class="string">"1234"</span>+i));</span><br><span class="line">			put.add(Bytes.toBytes(<span class="string">"info"</span>), Bytes.toBytes(<span class="string">"name"</span>), Bytes.toBytes(<span class="string">"wangwu"</span>+i));</span><br><span class="line">			put.add(Bytes.toBytes(<span class="string">"info"</span>), Bytes.toBytes(<span class="string">"password"</span>), Bytes.toBytes(<span class="number">1234</span>+i));</span><br><span class="line">			arrayList.add(put);</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">//插入数据</span></span><br><span class="line">		table.put(arrayList);</span><br><span class="line">		<span class="comment">//提交</span></span><br><span class="line">		table.flushCommits();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 修改数据</span></span><br><span class="line"><span class="comment">	 * </span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@throws</span> Exception</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="meta">@Test</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">uodateData</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">		Put put = <span class="keyword">new</span> Put(Bytes.toBytes(<span class="string">"1234"</span>));</span><br><span class="line">		put.add(Bytes.toBytes(<span class="string">"info"</span>), Bytes.toBytes(<span class="string">"namessss"</span>), Bytes.toBytes(<span class="string">"lisi1234"</span>));</span><br><span class="line">		put.add(Bytes.toBytes(<span class="string">"info"</span>), Bytes.toBytes(<span class="string">"password"</span>), Bytes.toBytes(<span class="number">1234</span>));</span><br><span class="line">		<span class="comment">//插入数据</span></span><br><span class="line">		table.put(put);</span><br><span class="line">		<span class="comment">//提交</span></span><br><span class="line">		table.flushCommits();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 删除数据</span></span><br><span class="line"><span class="comment">	 * </span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@throws</span> Exception</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="meta">@Test</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">deleteDate</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">		Delete delete = <span class="keyword">new</span> Delete(Bytes.toBytes(<span class="string">"1234"</span>));</span><br><span class="line">		table.delete(delete);</span><br><span class="line">		table.flushCommits();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 单条查询</span></span><br><span class="line"><span class="comment">	 * </span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@throws</span> Exception</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="meta">@Test</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">queryData</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">		Get get = <span class="keyword">new</span> Get(Bytes.toBytes(<span class="string">"1234"</span>));</span><br><span class="line">		Result result = table.get(get);</span><br><span class="line">		System.out.println(Bytes.toInt(result.getValue(Bytes.toBytes(<span class="string">"info"</span>), Bytes.toBytes(<span class="string">"password"</span>))));</span><br><span class="line">		System.out.println(Bytes.toString(result.getValue(Bytes.toBytes(<span class="string">"info"</span>), Bytes.toBytes(<span class="string">"namessss"</span>))));</span><br><span class="line">		System.out.println(Bytes.toString(result.getValue(Bytes.toBytes(<span class="string">"info"</span>), Bytes.toBytes(<span class="string">"sex"</span>))));</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 全表扫描</span></span><br><span class="line"><span class="comment">	 * </span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@throws</span> Exception</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="meta">@Test</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">scanData</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">		Scan scan = <span class="keyword">new</span> Scan();</span><br><span class="line">		<span class="comment">//scan.addFamily(Bytes.toBytes("info"));</span></span><br><span class="line">		<span class="comment">//scan.addColumn(Bytes.toBytes("info"), Bytes.toBytes("password"));</span></span><br><span class="line">		scan.setStartRow(Bytes.toBytes(<span class="string">"wangsf_0"</span>));</span><br><span class="line">		scan.setStopRow(Bytes.toBytes(<span class="string">"wangwu"</span>));</span><br><span class="line">		ResultScanner scanner = table.getScanner(scan);</span><br><span class="line">		<span class="keyword">for</span> (Result result : scanner) &#123;</span><br><span class="line">			System.out.println(Bytes.toInt(result.getValue(Bytes.toBytes(<span class="string">"info"</span>), Bytes.toBytes(<span class="string">"password"</span>))));</span><br><span class="line">			System.out.println(Bytes.toString(result.getValue(Bytes.toBytes(<span class="string">"info"</span>), Bytes.toBytes(<span class="string">"name"</span>))));</span><br><span class="line">			<span class="comment">//System.out.println(Bytes.toInt(result.getValue(Bytes.toBytes("info2"), Bytes.toBytes("password"))));</span></span><br><span class="line">			<span class="comment">//System.out.println(Bytes.toString(result.getValue(Bytes.toBytes("info2"), Bytes.toBytes("name"))));</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 全表扫描的过滤器</span></span><br><span class="line"><span class="comment">	 * 列值过滤器</span></span><br><span class="line"><span class="comment">	 * </span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@throws</span> Exception</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="meta">@Test</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">scanDataByFilter1</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 创建全表扫描的scan</span></span><br><span class="line">		Scan scan = <span class="keyword">new</span> Scan();</span><br><span class="line">		<span class="comment">//过滤器：列值过滤器</span></span><br><span class="line">		SingleColumnValueFilter filter = <span class="keyword">new</span> SingleColumnValueFilter(Bytes.toBytes(<span class="string">"info"</span>),</span><br><span class="line">				Bytes.toBytes(<span class="string">"name"</span>), CompareFilter.CompareOp.EQUAL,</span><br><span class="line">				Bytes.toBytes(<span class="string">"zhangsan2"</span>));</span><br><span class="line">		<span class="comment">// 设置过滤器</span></span><br><span class="line">		scan.setFilter(filter);</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 打印结果集</span></span><br><span class="line">		ResultScanner scanner = table.getScanner(scan);</span><br><span class="line">		<span class="keyword">for</span> (Result result : scanner) &#123;</span><br><span class="line">			System.out.println(Bytes.toInt(result.getValue(Bytes.toBytes(<span class="string">"info"</span>), Bytes.toBytes(<span class="string">"password"</span>))));</span><br><span class="line">			System.out.println(Bytes.toString(result.getValue(Bytes.toBytes(<span class="string">"info"</span>), Bytes.toBytes(<span class="string">"name"</span>))));</span><br><span class="line">			<span class="comment">//System.out.println(Bytes.toInt(result.getValue(Bytes.toBytes("info2"), Bytes.toBytes("password"))));</span></span><br><span class="line">			<span class="comment">//System.out.println(Bytes.toString(result.getValue(Bytes.toBytes("info2"), Bytes.toBytes("name"))));</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * rowkey过滤器</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@throws</span> Exception</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="meta">@Test</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">scanDataByFilter2</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">// 创建全表扫描的scan</span></span><br><span class="line">		Scan scan = <span class="keyword">new</span> Scan();</span><br><span class="line">		<span class="comment">//匹配rowkey以wangsenfeng开头的</span></span><br><span class="line">		RowFilter filter = <span class="keyword">new</span> RowFilter(CompareFilter.CompareOp.EQUAL, <span class="keyword">new</span> RegexStringComparator(<span class="string">"^12341"</span>));</span><br><span class="line">		<span class="comment">// 设置过滤器</span></span><br><span class="line">		scan.setFilter(filter);</span><br><span class="line">		<span class="comment">// 打印结果集</span></span><br><span class="line">		ResultScanner scanner = table.getScanner(scan);</span><br><span class="line">		<span class="keyword">for</span> (Result result : scanner) &#123;</span><br><span class="line">			System.out.println(Bytes.toInt(result.getValue(Bytes.toBytes(<span class="string">"info"</span>), Bytes.toBytes(<span class="string">"password"</span>))));</span><br><span class="line">			System.out.println(Bytes.toString(result.getValue(Bytes.toBytes(<span class="string">"info"</span>), Bytes.toBytes(<span class="string">"name"</span>))));</span><br><span class="line">			<span class="comment">//System.out.println(Bytes.toInt(result.getValue(Bytes.toBytes("info2"), Bytes.toBytes("password"))));</span></span><br><span class="line">			<span class="comment">//System.out.println(Bytes.toString(result.getValue(Bytes.toBytes("info2"), Bytes.toBytes("name"))));</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 匹配列名前缀</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@throws</span> Exception</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="meta">@Test</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">scanDataByFilter3</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">// 创建全表扫描的scan</span></span><br><span class="line">		Scan scan = <span class="keyword">new</span> Scan();</span><br><span class="line">		<span class="comment">//匹配rowkey以wangsenfeng开头的</span></span><br><span class="line">		ColumnPrefixFilter filter = <span class="keyword">new</span> ColumnPrefixFilter(Bytes.toBytes(<span class="string">"na"</span>));</span><br><span class="line">		<span class="comment">// 设置过滤器</span></span><br><span class="line">		scan.setFilter(filter);</span><br><span class="line">		<span class="comment">// 打印结果集</span></span><br><span class="line">		ResultScanner scanner = table.getScanner(scan);</span><br><span class="line">		<span class="keyword">for</span> (Result result : scanner) &#123;</span><br><span class="line">			System.out.println(<span class="string">"rowkey："</span> + Bytes.toString(result.getRow()));</span><br><span class="line">			System.out.println(<span class="string">"info:name："</span></span><br><span class="line">					+ Bytes.toString(result.getValue(Bytes.toBytes(<span class="string">"info"</span>),</span><br><span class="line">							Bytes.toBytes(<span class="string">"name"</span>))));</span><br><span class="line">			<span class="comment">// 判断取出来的值是否为空</span></span><br><span class="line">			<span class="keyword">if</span> (result.getValue(Bytes.toBytes(<span class="string">"info"</span>), Bytes.toBytes(<span class="string">"age"</span>)) != <span class="keyword">null</span>) &#123;</span><br><span class="line">				System.out.println(<span class="string">"info:age："</span></span><br><span class="line">						+ Bytes.toInt(result.getValue(Bytes.toBytes(<span class="string">"info"</span>),</span><br><span class="line">								Bytes.toBytes(<span class="string">"age"</span>))));</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// 判断取出来的值是否为空</span></span><br><span class="line">			<span class="keyword">if</span> (result.getValue(Bytes.toBytes(<span class="string">"info"</span>), Bytes.toBytes(<span class="string">"sex"</span>)) != <span class="keyword">null</span>) &#123;</span><br><span class="line">				System.out.println(<span class="string">"infi:sex："</span></span><br><span class="line">						+ Bytes.toInt(result.getValue(Bytes.toBytes(<span class="string">"info"</span>),</span><br><span class="line">								Bytes.toBytes(<span class="string">"sex"</span>))));</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// 判断取出来的值是否为空</span></span><br><span class="line">			<span class="keyword">if</span> (result.getValue(Bytes.toBytes(<span class="string">"info2"</span>), Bytes.toBytes(<span class="string">"name"</span>)) != <span class="keyword">null</span>) &#123;</span><br><span class="line">				System.out</span><br><span class="line">				.println(<span class="string">"info2:name："</span></span><br><span class="line">						+ Bytes.toString(result.getValue(</span><br><span class="line">								Bytes.toBytes(<span class="string">"info2"</span>),</span><br><span class="line">								Bytes.toBytes(<span class="string">"name"</span>))));</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// 判断取出来的值是否为空</span></span><br><span class="line">			<span class="keyword">if</span> (result.getValue(Bytes.toBytes(<span class="string">"info2"</span>), Bytes.toBytes(<span class="string">"age"</span>)) != <span class="keyword">null</span>) &#123;</span><br><span class="line">				System.out.println(<span class="string">"info2:age："</span></span><br><span class="line">						+ Bytes.toInt(result.getValue(Bytes.toBytes(<span class="string">"info2"</span>),</span><br><span class="line">								Bytes.toBytes(<span class="string">"age"</span>))));</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// 判断取出来的值是否为空</span></span><br><span class="line">			<span class="keyword">if</span> (result.getValue(Bytes.toBytes(<span class="string">"info2"</span>), Bytes.toBytes(<span class="string">"sex"</span>)) != <span class="keyword">null</span>) &#123;</span><br><span class="line">				System.out.println(<span class="string">"info2:sex："</span></span><br><span class="line">						+ Bytes.toInt(result.getValue(Bytes.toBytes(<span class="string">"info2"</span>),</span><br><span class="line">								Bytes.toBytes(<span class="string">"sex"</span>))));</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 过滤器集合</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@throws</span> Exception</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="meta">@Test</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">scanDataByFilter4</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">		</span><br><span class="line">		<span class="comment">// 创建全表扫描的scan</span></span><br><span class="line">		Scan scan = <span class="keyword">new</span> Scan();</span><br><span class="line">		<span class="comment">//过滤器集合：MUST_PASS_ALL（and）,MUST_PASS_ONE(or)</span></span><br><span class="line">		FilterList filterList = <span class="keyword">new</span> FilterList(Operator.MUST_PASS_ONE);</span><br><span class="line">		<span class="comment">//匹配rowkey以wangsenfeng开头的</span></span><br><span class="line">		RowFilter filter = <span class="keyword">new</span> RowFilter(CompareFilter.CompareOp.EQUAL, <span class="keyword">new</span> RegexStringComparator(<span class="string">"^wangsenfeng"</span>));</span><br><span class="line">		<span class="comment">//匹配name的值等于wangsenfeng</span></span><br><span class="line">		SingleColumnValueFilter filter2 = <span class="keyword">new</span> SingleColumnValueFilter(Bytes.toBytes(<span class="string">"info"</span>),</span><br><span class="line">				Bytes.toBytes(<span class="string">"name"</span>), CompareFilter.CompareOp.EQUAL,</span><br><span class="line">				Bytes.toBytes(<span class="string">"zhangsan"</span>));</span><br><span class="line">		filterList.addFilter(filter);</span><br><span class="line">		filterList.addFilter(filter2);</span><br><span class="line">		<span class="comment">// 设置过滤器</span></span><br><span class="line">		scan.setFilter(filterList);</span><br><span class="line">		<span class="comment">// 打印结果集</span></span><br><span class="line">		ResultScanner scanner = table.getScanner(scan);</span><br><span class="line">		<span class="keyword">for</span> (Result result : scanner) &#123;</span><br><span class="line">			System.out.println(<span class="string">"rowkey："</span> + Bytes.toString(result.getRow()));</span><br><span class="line">			System.out.println(<span class="string">"info:name："</span></span><br><span class="line">					+ Bytes.toString(result.getValue(Bytes.toBytes(<span class="string">"info"</span>),</span><br><span class="line">							Bytes.toBytes(<span class="string">"name"</span>))));</span><br><span class="line">			<span class="comment">// 判断取出来的值是否为空</span></span><br><span class="line">			<span class="keyword">if</span> (result.getValue(Bytes.toBytes(<span class="string">"info"</span>), Bytes.toBytes(<span class="string">"age"</span>)) != <span class="keyword">null</span>) &#123;</span><br><span class="line">				System.out.println(<span class="string">"info:age："</span></span><br><span class="line">						+ Bytes.toInt(result.getValue(Bytes.toBytes(<span class="string">"info"</span>),</span><br><span class="line">								Bytes.toBytes(<span class="string">"age"</span>))));</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// 判断取出来的值是否为空</span></span><br><span class="line">			<span class="keyword">if</span> (result.getValue(Bytes.toBytes(<span class="string">"info"</span>), Bytes.toBytes(<span class="string">"sex"</span>)) != <span class="keyword">null</span>) &#123;</span><br><span class="line">				System.out.println(<span class="string">"infi:sex："</span></span><br><span class="line">						+ Bytes.toInt(result.getValue(Bytes.toBytes(<span class="string">"info"</span>),</span><br><span class="line">								Bytes.toBytes(<span class="string">"sex"</span>))));</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// 判断取出来的值是否为空</span></span><br><span class="line">			<span class="keyword">if</span> (result.getValue(Bytes.toBytes(<span class="string">"info2"</span>), Bytes.toBytes(<span class="string">"name"</span>)) != <span class="keyword">null</span>) &#123;</span><br><span class="line">				System.out</span><br><span class="line">				.println(<span class="string">"info2:name："</span></span><br><span class="line">						+ Bytes.toString(result.getValue(</span><br><span class="line">								Bytes.toBytes(<span class="string">"info2"</span>),</span><br><span class="line">								Bytes.toBytes(<span class="string">"name"</span>))));</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// 判断取出来的值是否为空</span></span><br><span class="line">			<span class="keyword">if</span> (result.getValue(Bytes.toBytes(<span class="string">"info2"</span>), Bytes.toBytes(<span class="string">"age"</span>)) != <span class="keyword">null</span>) &#123;</span><br><span class="line">				System.out.println(<span class="string">"info2:age："</span></span><br><span class="line">						+ Bytes.toInt(result.getValue(Bytes.toBytes(<span class="string">"info2"</span>),</span><br><span class="line">								Bytes.toBytes(<span class="string">"age"</span>))));</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// 判断取出来的值是否为空</span></span><br><span class="line">			<span class="keyword">if</span> (result.getValue(Bytes.toBytes(<span class="string">"info2"</span>), Bytes.toBytes(<span class="string">"sex"</span>)) != <span class="keyword">null</span>) &#123;</span><br><span class="line">				System.out.println(<span class="string">"info2:sex："</span></span><br><span class="line">						+ Bytes.toInt(result.getValue(Bytes.toBytes(<span class="string">"info2"</span>),</span><br><span class="line">								Bytes.toBytes(<span class="string">"sex"</span>))));</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@After</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">close</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">		table.close();</span><br><span class="line">		connection.close();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="MapReduce操作Hbase"><a href="#MapReduce操作Hbase" class="headerlink" title="MapReduce操作Hbase"></a>MapReduce操作Hbase</h2><h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>hbase 对Mapreduce提供了支持， 它实现了TableMapper类和TableReducer类，我们只需要继承这两个类即可。</p>
+<p>TableMapper: 实现了从hbase读取数据，并可以实现按行处理的功能</p>
+<p>TableReducer: 接受TableMapper的处理结果，并可以将数据输出到hbase新的表上</p>
+<h3 id="实现方法"><a href="#实现方法" class="headerlink" title="实现方法"></a>实现方法</h3><ol>
+<li><p>写个mapper继承TableMapper&lt;Text, IntWritable&gt;</p>
+<p>​    参数：Text：mapper的输出key类型； IntWritable：mapper的输出value类型。</p>
+<p>​        其中的map方法如下：</p>
+<p>​    map(ImmutableBytesWritable key, Result value,Context context)</p>
+<p>​     参数：key：rowKey；value： Result ，一行数据； context上下文</p>
+</li>
+<li><p>写个reduce继承TableReducer&lt;Text, IntWritable, ImmutableBytesWritable&gt;</p>
+<p>​    参数：Text:reducer的输入key； IntWritable：reduce的输入value；</p>
+<p>​     ImmutableBytesWritable：reduce输出到hbase中的rowKey类型。</p>
+<p>​        其中的reduce方法如下：</p>
+<p>​    reduce(Text key, Iterable<intwritable> values,Context context)</intwritable></p>
+<p>​    参数： key：reduce的输入key；values：reduce的输入value；</p>
+</li>
+</ol>
+<h3 id="实现示例"><a href="#实现示例" class="headerlink" title="实现示例"></a>实现示例</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.conf.Configuration;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.HBaseConfiguration;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.HColumnDescriptor;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.HTableDescriptor;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.client.HBaseAdmin;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.client.HTable;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.client.Put;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.client.Result;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.client.Scan;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.io.ImmutableBytesWritable;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.mapreduce.TableMapper;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.mapreduce.TableReducer;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.hbase.util.Bytes;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.io.IntWritable;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.io.Text;</span><br><span class="line"><span class="keyword">import</span> org.apache.hadoop.mapreduce.Job;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * mapreduce操作hbase</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> wilson</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HBaseMr</span> </span>&#123;</span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 创建hbase配置</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="keyword">static</span> Configuration config = <span class="keyword">null</span>;</span><br><span class="line">	<span class="keyword">static</span> &#123;</span><br><span class="line">		config = HBaseConfiguration.create();</span><br><span class="line">		config.set(<span class="string">"hbase.zookeeper.quorum"</span>, <span class="string">"slave1,slave2,slave3"</span>);</span><br><span class="line">		config.set(<span class="string">"hbase.zookeeper.property.clientPort"</span>, <span class="string">"2181"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 表信息</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String tableName = <span class="string">"word"</span>;<span class="comment">//表名1</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String colf = <span class="string">"content"</span>;<span class="comment">//列族</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String col = <span class="string">"info"</span>;<span class="comment">//列</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String tableName2 = <span class="string">"stat"</span>;<span class="comment">//表名2</span></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 初始化表结构，及其数据</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">initTB</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		HTable table=<span class="keyword">null</span>;</span><br><span class="line">		HBaseAdmin admin=<span class="keyword">null</span>;</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			admin = <span class="keyword">new</span> HBaseAdmin(config);<span class="comment">//创建表管理</span></span><br><span class="line">			<span class="comment">/*删除表*/</span></span><br><span class="line">			<span class="keyword">if</span> (admin.tableExists(tableName)||admin.tableExists(tableName2)) &#123;</span><br><span class="line">				System.out.println(<span class="string">"table is already exists!"</span>);</span><br><span class="line">				admin.disableTable(tableName);</span><br><span class="line">				admin.deleteTable(tableName);</span><br><span class="line">				admin.disableTable(tableName2);</span><br><span class="line">				admin.deleteTable(tableName2);</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">/*创建表*/</span></span><br><span class="line">				HTableDescriptor desc = <span class="keyword">new</span> HTableDescriptor(tableName);</span><br><span class="line">				HColumnDescriptor family = <span class="keyword">new</span> HColumnDescriptor(colf);</span><br><span class="line">				desc.addFamily(family);</span><br><span class="line">				admin.createTable(desc);</span><br><span class="line">				HTableDescriptor desc2 = <span class="keyword">new</span> HTableDescriptor(tableName2);</span><br><span class="line">				HColumnDescriptor family2 = <span class="keyword">new</span> HColumnDescriptor(colf);</span><br><span class="line">				desc2.addFamily(family2);</span><br><span class="line">				admin.createTable(desc2);</span><br><span class="line">			<span class="comment">/*插入数据*/</span></span><br><span class="line">				table = <span class="keyword">new</span> HTable(config,tableName);</span><br><span class="line">				table.setAutoFlush(<span class="keyword">false</span>);</span><br><span class="line">				table.setWriteBufferSize(<span class="number">500</span>);</span><br><span class="line">				List&lt;Put&gt; lp = <span class="keyword">new</span> ArrayList&lt;Put&gt;();</span><br><span class="line">				Put p1 = <span class="keyword">new</span> Put(Bytes.toBytes(<span class="string">"1"</span>));</span><br><span class="line">				p1.add(colf.getBytes(), col.getBytes(),	(<span class="string">"The Apache Hadoop software library is a framework"</span>).getBytes());</span><br><span class="line">				lp.add(p1);</span><br><span class="line">				Put p2 = <span class="keyword">new</span> Put(Bytes.toBytes(<span class="string">"2"</span>));p2.add(colf.getBytes(),col.getBytes(),(<span class="string">"The common utilities that support the other Hadoop modules"</span>).getBytes());</span><br><span class="line">				lp.add(p2);</span><br><span class="line">				Put p3 = <span class="keyword">new</span> Put(Bytes.toBytes(<span class="string">"3"</span>));</span><br><span class="line">				p3.add(colf.getBytes(), col.getBytes(),(<span class="string">"Hadoop by reading the documentation"</span>).getBytes());</span><br><span class="line">				lp.add(p3);</span><br><span class="line">				Put p4 = <span class="keyword">new</span> Put(Bytes.toBytes(<span class="string">"4"</span>));</span><br><span class="line">				p4.add(colf.getBytes(), col.getBytes(),(<span class="string">"Hadoop from the release page"</span>).getBytes());</span><br><span class="line">				lp.add(p4);</span><br><span class="line">				Put p5 = <span class="keyword">new</span> Put(Bytes.toBytes(<span class="string">"5"</span>));</span><br><span class="line">				p5.add(colf.getBytes(), col.getBytes(),(<span class="string">"Hadoop on the mailing list"</span>).getBytes());</span><br><span class="line">				lp.add(p5);</span><br><span class="line">				table.put(lp);</span><br><span class="line">				table.flushCommits();</span><br><span class="line">				lp.clear();</span><br><span class="line">		&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">			e.printStackTrace();</span><br><span class="line">		&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">			<span class="keyword">try</span> &#123;</span><br><span class="line">				<span class="keyword">if</span>(table!=<span class="keyword">null</span>)&#123;</span><br><span class="line">					table.close();</span><br><span class="line">				&#125;</span><br><span class="line">			&#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * MyMapper 继承 TableMapper</span></span><br><span class="line"><span class="comment">	 * TableMapper&lt;Text,IntWritable&gt; </span></span><br><span class="line"><span class="comment">	 * Text:输出的key类型，</span></span><br><span class="line"><span class="comment">	 * IntWritable：输出的value类型</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyMapper</span> <span class="keyword">extends</span> <span class="title">TableMapper</span>&lt;<span class="title">Text</span>, <span class="title">IntWritable</span>&gt; </span>&#123;</span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">static</span> IntWritable one = <span class="keyword">new</span> IntWritable(<span class="number">1</span>);</span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">static</span> Text word = <span class="keyword">new</span> Text();</span><br><span class="line">		<span class="meta">@Override</span></span><br><span class="line">		<span class="comment">//输入的类型为：key：rowKey； value：一行数据的结果集Result</span></span><br><span class="line">		<span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">map</span><span class="params">(ImmutableBytesWritable key, Result value,</span></span></span><br><span class="line"><span class="function"><span class="params">				Context context)</span> <span class="keyword">throws</span> IOException, InterruptedException </span>&#123;</span><br><span class="line">			<span class="comment">//获取一行数据中的colf：col</span></span><br><span class="line">			String words = Bytes.toString(value.getValue(Bytes.toBytes(colf), Bytes.toBytes(col)));<span class="comment">// 表里面只有一个列族，所以我就直接获取每一行的值</span></span><br><span class="line">			<span class="comment">//按空格分割</span></span><br><span class="line">			String itr[] = words.toString().split(<span class="string">" "</span>);</span><br><span class="line">			<span class="comment">//循环输出word和1</span></span><br><span class="line">			<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; itr.length; i++) &#123;</span><br><span class="line">				word.set(itr[i]);</span><br><span class="line">				context.write(word, one);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * MyReducer 继承 TableReducer</span></span><br><span class="line"><span class="comment">	 * TableReducer&lt;Text,IntWritable&gt; </span></span><br><span class="line"><span class="comment">	 * Text:输入的key类型，</span></span><br><span class="line"><span class="comment">	 * IntWritable：输入的value类型，</span></span><br><span class="line"><span class="comment">	 * ImmutableBytesWritable：输出类型，表示rowkey的类型</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyReducer</span> <span class="keyword">extends</span></span></span><br><span class="line"><span class="class">			<span class="title">TableReducer</span>&lt;<span class="title">Text</span>, <span class="title">IntWritable</span>, <span class="title">ImmutableBytesWritable</span>&gt; </span>&#123;</span><br><span class="line">		<span class="meta">@Override</span></span><br><span class="line">		<span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">reduce</span><span class="params">(Text key, Iterable&lt;IntWritable&gt; values,</span></span></span><br><span class="line"><span class="function"><span class="params">				Context context)</span> <span class="keyword">throws</span> IOException, InterruptedException </span>&#123;</span><br><span class="line">			<span class="comment">//对mapper的数据求和</span></span><br><span class="line">			<span class="keyword">int</span> sum = <span class="number">0</span>;</span><br><span class="line">			<span class="keyword">for</span> (IntWritable val : values) &#123;<span class="comment">//叠加</span></span><br><span class="line">				sum += val.get();</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// 创建put，设置rowkey为单词</span></span><br><span class="line">			Put put = <span class="keyword">new</span> Put(Bytes.toBytes(key.toString()));</span><br><span class="line">			<span class="comment">// 封装数据</span></span><br><span class="line">			put.add(Bytes.toBytes(colf), Bytes.toBytes(col),Bytes.toBytes(String.valueOf(sum)));</span><br><span class="line">			<span class="comment">//写到hbase,需要指定rowkey、put</span></span><br><span class="line">			context.write(<span class="keyword">new</span> ImmutableBytesWritable(Bytes.toBytes(key.toString())),put);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException,</span></span><br><span class="line"><span class="function">			ClassNotFoundException, InterruptedException </span>&#123;</span><br><span class="line">		config.set(<span class="string">"df.default.name"</span>, <span class="string">"hdfs://master:9000/"</span>);<span class="comment">//设置hdfs的默认路径</span></span><br><span class="line">		config.set(<span class="string">"hadoop.job.ugi"</span>, <span class="string">"hadoop,hadoop"</span>);<span class="comment">//用户名，组</span></span><br><span class="line">		config.set(<span class="string">"mapred.job.tracker"</span>, <span class="string">"master:9001"</span>);<span class="comment">//设置jobtracker在哪</span></span><br><span class="line">		<span class="comment">//初始化表</span></span><br><span class="line">		initTB();<span class="comment">//初始化表</span></span><br><span class="line">		<span class="comment">//创建job</span></span><br><span class="line">		Job job = <span class="keyword">new</span> Job(config, <span class="string">"HBaseMr"</span>);<span class="comment">//job</span></span><br><span class="line">		job.setJarByClass(HBaseMr.class);<span class="comment">//主类</span></span><br><span class="line">		<span class="comment">//创建scan</span></span><br><span class="line">		Scan scan = <span class="keyword">new</span> Scan();</span><br><span class="line">		<span class="comment">//可以指定查询某一列</span></span><br><span class="line">		scan.addColumn(Bytes.toBytes(colf), Bytes.toBytes(col));</span><br><span class="line">		<span class="comment">//创建查询hbase的mapper，设置表名、scan、mapper类、mapper的输出key、mapper的输出value</span></span><br><span class="line">		TableMapReduceUtil.initTableMapperJob(tableName, scan, MyMapper.class,Text.class, IntWritable.class, job);</span><br><span class="line">		<span class="comment">//创建写入hbase的reducer，指定表名、reducer类、job</span></span><br><span class="line">		TableMapReduceUtil.initTableReducerJob(tableName2, MyReducer.class, job);</span><br><span class="line">		System.exit(job.waitForCompletion(<span class="keyword">true</span>) ? <span class="number">0</span> : <span class="number">1</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="hbase-原理"><a href="#hbase-原理" class="headerlink" title="hbase 原理"></a>hbase 原理</h2><h3 id="示意图"><a href="#示意图" class="headerlink" title="示意图"></a>示意图</h3><p><img src="/img/1582433726696.png" alt="1582433726696"></p>
+<h3 id="写流程"><a href="#写流程" class="headerlink" title="写流程"></a>写流程</h3><p>1、 client向hregionserver发送写请求。</p>
+<p>2、 hregionserver将数据写到hlog（write ahead log）。为了数据的持久化和恢复。</p>
+<p>3、 hregionserver将数据写到内存（memstore）</p>
+<p>4、 反馈client写成功。</p>
+<h3 id="数据flush过程"><a href="#数据flush过程" class="headerlink" title="数据flush过程"></a>数据flush过程</h3><p>1、 当memstore数据达到阈值（默认是64M），将数据刷到硬盘，将内存中的数据删除，同时删除Hlog中的历史数据。</p>
+<p>2、 并将数据存储到hdfs中。</p>
+<p>3、 在hlog中做标记点。</p>
+<h3 id="数据合并过程"><a href="#数据合并过程" class="headerlink" title="数据合并过程"></a>数据合并过程</h3><p>1、 当数据块达到4块，hmaster将数据块加载到本地，进行合并</p>
+<p>2、 当合并的数据超过256M，进行拆分，将拆分后的region分配给不同的hregionserver管理</p>
+<p>3、 当hregionser宕机后，将hregionserver上的hlog拆分，然后分配给不同的hregionserver加载，修改.META.    </p>
+<p>4、 注意：hlog会同步到hdfs</p>
+<h3 id="hbase-读流程"><a href="#hbase-读流程" class="headerlink" title="hbase 读流程"></a>hbase 读流程</h3><p>1、 通过zookeeper和-ROOT- .META.表定位hregionserver。</p>
+<p>2、 数据从内存和硬盘合并后返回给client</p>
+<p>3、 数据块会缓存</p>
+<h3 id="hmaster的职责"><a href="#hmaster的职责" class="headerlink" title="hmaster的职责"></a>hmaster的职责</h3><p>1、管理用户对Table的增、删、改、查操作； </p>
+<p>2、记录region在哪台Hregion server上</p>
+<p>3、在Region Split后，负责新Region的分配； </p>
+<p>4、新机器加入时，管理HRegion Server的负载均衡，调整Region分布</p>
+<p>5、在HRegion Server宕机后，负责失效HRegion Server 上的Regions迁移。</p>
+<h3 id="hregionserver-的职责"><a href="#hregionserver-的职责" class="headerlink" title="hregionserver 的职责"></a>hregionserver 的职责</h3><p>HRegion Server主要负责响应用户I/O请求，向HDFS文件系统中读写数据，是HBASE中最核心的模块。</p>
+<p>HRegion Server管理了很多table的分区，也就是region。</p>
+<h3 id="client-职责"><a href="#client-职责" class="headerlink" title="client 职责"></a>client 职责</h3><p>Client</p>
+<p>HBASE Client使用HBASE的RPC机制与HMaster和RegionServer进行通信</p>
+<p>管理类操作：Client与HMaster进行RPC；</p>
+<p>数据读写类操作：Client与HRegionServer进行RPC。</p>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;">
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/大数据/" rel="tag"><i class="fa fa-tag"></i> 大数据</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/02/14/15.大数据/大数据工具/sqoop/" rel="next" title="sqoop">
+                <i class="fa fa-chevron-left"></i> sqoop
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/03/10/15.大数据/Storm/Storm/" rel="prev" title="storm">
+                storm <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="刘小恺(Kyle)">
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">261</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">68</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#hbase简介"><span class="nav-text">hbase简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#hbase介绍"><span class="nav-text">hbase介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#与传统数据库对比"><span class="nav-text">与传统数据库对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hbase-集群中的角色"><span class="nav-text">hbase 集群中的角色</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#zookeeper在hbase-中作用"><span class="nav-text">zookeeper在hbase 中作用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#hbase的安装"><span class="nav-text">hbase的安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#hbase-数据模型"><span class="nav-text">hbase 数据模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#row-key"><span class="nav-text">row key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#列簇-Columns-Family"><span class="nav-text">列簇(Columns Family)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Cell"><span class="nav-text">Cell</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#时间戳-Time-Stamp"><span class="nav-text">时间戳(Time Stamp)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据模型示意图"><span class="nav-text">数据模型示意图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#hbase-命令"><span class="nav-text">hbase 命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#hbase-javaApi-操作"><span class="nav-text">hbase javaApi 操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MapReduce操作Hbase"><span class="nav-text">MapReduce操作Hbase</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#介绍"><span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现方法"><span class="nav-text">实现方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现示例"><span class="nav-text">实现示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#hbase-原理"><span class="nav-text">hbase 原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#示意图"><span class="nav-text">示意图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#写流程"><span class="nav-text">写流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据flush过程"><span class="nav-text">数据flush过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据合并过程"><span class="nav-text">数据合并过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hbase-读流程"><span class="nav-text">hbase 读流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hmaster的职责"><span class="nav-text">hmaster的职责</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hregionserver-的职责"><span class="nav-text">hregionserver 的职责</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#client-职责"><span class="nav-text">client 职责</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="编程结构1234567891011121314151617181920public class SocketTextStreamWordCount &amp;#123;	public static void main(String[] args) throws Exception &amp;#123;		if (args.length != 2)&amp;#123;System.err.println(&quot;USAGE:\n">
+<meta name="keywords" content="大数据,Flink">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink DataSetAPI">
+<meta property="og:url" content="http://blog.kyleliu.cn/2020/04/10/15.大数据/Flink/6-Flink DataSetAPI/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的云笔记">
+<meta property="og:description" content="编程结构1234567891011121314151617181920public class SocketTextStreamWordCount &amp;#123;	public static void main(String[] args) throws Exception &amp;#123;		if (args.length != 2)&amp;#123;System.err.println(&quot;USAGE:\n">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-04-10T07:48:02.292Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flink DataSetAPI">
+<meta name="twitter:description" content="编程结构1234567891011121314151617181920public class SocketTextStreamWordCount &amp;#123;	public static void main(String[] args) throws Exception &amp;#123;		if (args.length != 2)&amp;#123;System.err.println(&quot;USAGE:\n">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2020/04/10/15.大数据/Flink/6-Flink DataSetAPI/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Flink DataSetAPI | 刘小恺(Kyle) 的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/04/10/15.大数据/Flink/6-Flink DataSetAPI/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Flink DataSetAPI
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-04-10 14:30:00" itemprop="dateCreated datePublished" datetime="2020-04-10T14:30:00+08:00">2020-04-10</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/大数据/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/大数据/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/04/10/15.大数据/Flink/6-Flink DataSetAPI/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/04/10/15.大数据/Flink/6-Flink DataSetAPI/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="编程结构"><a href="#编程结构" class="headerlink" title="编程结构"></a>编程结构</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SocketTextStreamWordCount</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (args.length != <span class="number">2</span>)&#123;</span><br><span class="line">System.err.println(<span class="string">"USAGE:\nSocketTextStreamWordCount &lt;hostname&gt; &lt;port&gt;"</span>);</span><br><span class="line">			<span class="keyword">return</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		String hostName = args[<span class="number">0</span>];</span><br><span class="line">		Integer port = Integer.parseInt(args[<span class="number">1</span>]);</span><br><span class="line">		<span class="keyword">final</span> StreamExecutionEnvironment env = StreamExecutionEnvironment</span><br><span class="line">				.getExecutionEnvironment();</span><br><span class="line">		DataStream&lt;String&gt; text = env.socketTextStream(hostName, port);</span><br><span class="line"></span><br><span class="line">		DataStream&lt;Tuple2&lt;String, Integer&gt;&gt; counts =</span><br><span class="line">		text.flatMap(<span class="keyword">new</span> LineSplitter())</span><br><span class="line">				.keyBy(<span class="number">0</span>)</span><br><span class="line">				.sum(<span class="number">1</span>);</span><br><span class="line">		counts.print();</span><br><span class="line">		env.execute(<span class="string">"Java WordCount from SocketTextStream Example"</span>);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的<code>SocketTextStreamWordCount</code>是一个典型的Flink程序，他由一下及格部分构成：</p>
+<ul>
+<li>获得一个execution environment，</li>
+<li>加载/创建初始数据，</li>
+<li>指定此数据的转换，</li>
+<li>指定放置计算结果的位置，</li>
+<li>触发程序执行</li>
+</ul>
+<h2 id="DataSet-API"><a href="#DataSet-API" class="headerlink" title="DataSet API"></a>DataSet API</h2><p>分类：</p>
+<ul>
+<li>Source: 数据源创建初始数据集，例如来自文件或Java集合</li>
+<li>Transformation: 数据转换将一个或多个DataSet转换为新的DataSet</li>
+<li>Sink: 将计算结果存储或返回</li>
+</ul>
+<h3 id="DataSet-Sources"><a href="#DataSet-Sources" class="headerlink" title="DataSet Sources"></a>DataSet Sources</h3><h4 id="基于文件的"><a href="#基于文件的" class="headerlink" title="基于文件的"></a>基于文件的</h4><ul>
+<li><code>readTextFile(path)/ TextInputFormat</code>- 按行读取文件并将其作为字符串返回。</li>
+<li><code>readTextFileWithValue(path)/ TextValueInputFormat</code>- 按行读取文件并将它们作为StringValues返回。StringValues是可变字符串。</li>
+<li><code>readCsvFile(path)/ CsvInputFormat</code>- 解析逗号（或其他字符）分隔字段的文件。返回元组或POJO的DataSet。支持基本java类型及其Value对应作为字段类型。</li>
+<li><code>readFileOfPrimitives(path, Class)/ PrimitiveInputFormat</code>- 解析新行（或其他字符序列）分隔的原始数据类型（如String或）的文件Integer。</li>
+<li><code>readFileOfPrimitives(path, delimiter, Class)/ PrimitiveInputFormat</code>- 解析新行（或其他字符序列）分隔的原始数据类型的文件，例如String或Integer使用给定的分隔符。</li>
+<li><code>readSequenceFile(Key, Value, path)/ SequenceFileInputFormat</code>- 创建一个JobConf并从类型为SequenceFileInputFormat，Key class和Value类的指定路径中读取文件，并将它们作为Tuple2 &lt;Key，Value&gt;返回。</li>
+</ul>
+<h4 id="基于集合"><a href="#基于集合" class="headerlink" title="基于集合"></a>基于集合</h4><ul>
+<li><code>fromCollection(Collection)</code> - 从Java Java.util.Collection创建数据集。集合中的所有数据元必须属于同一类型。</li>
+<li><code>fromCollection(Iterator, Class)</code> - 从迭代器创建数据集。该类指定迭代器返回的数据元的数据类型。</li>
+<li><code>fromElements(T ...)</code> - 根据给定的对象序列创建数据集。所有对象必须属于同一类型。</li>
+<li><code>fromParallelCollection(SplittableIterator, Class)</code>- 并行地从迭代器创建数据集。该类指定迭代器返回的数据元的数据类型。</li>
+<li><code>generateSequence(from, to)</code> - 并行生成给定间隔中的数字序列。</li>
+</ul>
+<h4 id="通用方法"><a href="#通用方法" class="headerlink" title="通用方法"></a>通用方法</h4><ul>
+<li><code>readFile(inputFormat, path)/ FileInputFormat</code>- 接受文件输入格式。</li>
+<li><code>createInput(inputFormat)/ InputFormat</code>- 接受通用输入格式。</li>
+</ul>
+<h4 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 从本地文件系统读</span></span><br><span class="line">DataSet&lt;String&gt; localLines = env.readTextFile(<span class="string">"file:///path/to/my/textfile"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取HDFS文件</span></span><br><span class="line">DataSet&lt;String&gt; hdfsLines = env.readTextFile(<span class="string">"hdfs://nnHost:nnPort/path/to/my/textfile"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取CSV文件</span></span><br><span class="line">DataSet&lt;Tuple3&lt;Integer, String, Double&gt;&gt; csvInput = env.readCsvFile(<span class="string">"hdfs:///the/CSV/file"</span>).types(Integer.class, String.class, Double.class);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取CSV文件中的部分，字段选择1代表选择，0代表弃用</span></span><br><span class="line">DataSet&lt;Tuple2&lt;String, Double&gt;&gt; csvInput = env.readCsvFile(<span class="string">"hdfs:///the/CSV/file"</span>).includeFields(<span class="string">"10010"</span>).types(String.class, Double.class);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取CSV映射为一个java类</span></span><br><span class="line">DataSet&lt;Person&gt;&gt; csvInput = env.readCsvFile(<span class="string">"hdfs:///the/CSV/file"</span>).pojoType(Person.class, <span class="string">"name"</span>, <span class="string">"age"</span>, <span class="string">"zipcode"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取一个指定位置序列化后的文件</span></span><br><span class="line">DataSet&lt;Tuple2&lt;IntWritable, Text&gt;&gt; tuples =</span><br><span class="line"> env.readSequenceFile(IntWritable.class, Text.class, <span class="string">"hdfs://nnHost:nnPort/path/to/file"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 从输入字符创建</span></span><br><span class="line">DataSet&lt;String&gt; value = env.fromElements(<span class="string">"Foo"</span>, <span class="string">"bar"</span>, <span class="string">"foobar"</span>, <span class="string">"fubar"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建一个数字序列</span></span><br><span class="line">DataSet&lt;Long&gt; numbers = env.generateSequence(<span class="number">1</span>, <span class="number">10000000</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 从关系型数据库读取</span></span><br><span class="line">DataSet&lt;Tuple2&lt;String, Integer&gt; dbData =</span><br><span class="line">env.createInput(JDBCInputFormat.buildJDBCInputFormat()                    .setDrivername(<span class="string">"org.apache.derby.jdbc.EmbeddedDriver"</span>)                   .setDBUrl(<span class="string">"jdbc:derby:memory:persons"</span>)</span><br><span class="line">.setQuery(<span class="string">"select name, age from persons"</span>)</span><br><span class="line">.setRowTypeInfo(<span class="keyword">new</span> RowTypeInfo(BasicTypeInfo.STRING_TYPE_INFO, BasicTypeInfo.INT_TYPE_INFO))</span><br><span class="line">.finish());</span><br></pre></td></tr></table></figure>
+
+<h3 id="DataSet-Transformation"><a href="#DataSet-Transformation" class="headerlink" title="DataSet Transformation"></a>DataSet Transformation</h3><blockquote>
+<p>详细可以参考官网:<a href="https://flink.sojb.cn/dev/batch/dataset_transformations.html#filter" target="_blank" rel="noopener">https://flink.sojb.cn/dev/batch/dataset_transformations.html#filter</a></p>
+</blockquote>
+<ul>
+<li>Map    </li>
+</ul>
+<p>采用一个数据元并生成一个数据元。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">data.map(<span class="keyword">new</span> MapFunction&lt;String, Integer&gt;() &#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> Integer <span class="title">map</span><span class="params">(String value)</span> </span>&#123; <span class="keyword">return</span> Integer.parseInt(value); &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>FlatMap    </li>
+</ul>
+<p>采用一个数据元并生成零个，一个或多个数据元。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">data.flatMap(<span class="keyword">new</span> FlatMapFunction&lt;String, String&gt;() &#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">flatMap</span><span class="params">(String value, Collector&lt;String&gt; out)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (String s : value.split(<span class="string">" "</span>)) &#123;</span><br><span class="line">      out.collect(s);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>MapPartition</li>
+</ul>
+<p>在单个函数调用中转换并行分区。该函数将分区作为Iterable流来获取，并且可以生成任意数量的结果值。每个分区中的数据元数量取决于并行度和先前的 算子操作。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">data.mapPartition(<span class="keyword">new</span> MapPartitionFunction&lt;String, Long&gt;() &#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">mapPartition</span><span class="params">(Iterable&lt;String&gt; values, Collector&lt;Long&gt; out)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">long</span> c = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (String s : values) &#123;</span><br><span class="line">      c++;</span><br><span class="line">    &#125;</span><br><span class="line">    out.collect(c);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Filter</li>
+</ul>
+<p>计算每个数据元的布尔函数，并保存函数返回true的数据元。<br>重要信息：系统假定该函数不会修改应用谓词的数据元。违反此假设可能会导致错误的结果。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">data.filter(<span class="keyword">new</span> FilterFunction&lt;Integer&gt;() &#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">filter</span><span class="params">(Integer value)</span> </span>&#123; <span class="keyword">return</span> value &gt; <span class="number">1000</span>; &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Reduce    </li>
+</ul>
+<p>通过将两个数据元重复组合成一个数据元，将一组数据元组合成一个数据元。Reduce可以应用于完整数据集或分组数据集。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">data.reduce(<span class="keyword">new</span> ReduceFunction&lt;Integer&gt; &#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> Integer <span class="title">reduce</span><span class="params">(Integer a, Integer b)</span> </span>&#123; <span class="keyword">return</span> a + b; &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>如果将reduce应用于分组数据集，则可以通过提供CombineHint 来指定运行时执行reduce的组合阶段的方式 setCombineHint。在大多数情况下，基于散列的策略应该更快，特别是如果不同键的数量与输入数据元的数量相比较小（例如1/10）。</p>
+<ul>
+<li>ReduceGroup    </li>
+</ul>
+<p>将一组数据元组合成一个或多个数据元。ReduceGroup可以应用于完整数据集或分组数据集。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">data.reduceGroup(<span class="keyword">new</span> GroupReduceFunction&lt;Integer, Integer&gt; &#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">reduce</span><span class="params">(Iterable&lt;Integer&gt; values, Collector&lt;Integer&gt; out)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> prefixSum = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (Integer i : values) &#123;</span><br><span class="line">      prefixSum += i;</span><br><span class="line">      out.collect(prefixSum);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Aggregate    </li>
+</ul>
+<p>将一组值聚合为单个值。聚合函数可以被认为是内置的reduce函数。聚合可以应用于完整数据集或分组数据集。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Dataset&lt;Tuple3&lt;Integer, String, Double&gt;&gt; input = <span class="comment">// [...]</span></span><br><span class="line">DataSet&lt;Tuple3&lt;Integer, String, Double&gt;&gt; output = input.aggregate(SUM, <span class="number">0</span>).and(MIN, <span class="number">2</span>);</span><br></pre></td></tr></table></figure>
+
+<p>您还可以使用简写语法进行最小，最大和总和聚合。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Dataset&lt;Tuple3&lt;Integer, String, Double&gt;&gt; input = <span class="comment">// [...]</span></span><br><span class="line">DataSet&lt;Tuple3&lt;Integer, String, Double&gt;&gt; output = input.sum(<span class="number">0</span>).andMin(<span class="number">2</span>);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Distinct    </li>
+</ul>
+<p>返回数据集的不同数据元。它相对于数据元的所有字段或字段子集从输入DataSet中删除重复条目。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">data.distinct();</span><br></pre></td></tr></table></figure>
+
+<p>使用reduce函数实现Distinct。您可以通过提供CombineHint 来指定运行时执行reduce的组合阶段的方式 setCombineHint。在大多数情况下，基于散列的策略应该更快，特别是如果不同键的数量与输入数据元的数量相比较小（例如1/10）。</p>
+<ul>
+<li>Join    </li>
+</ul>
+<p>通过创建在其键上相等的所有数据元对来连接两个数据集。可选地使用JoinFunction将数据元对转换为单个数据元，或使用FlatJoinFunction将数据元对转换为任意多个（包括无）数据元。请参阅键部分以了解如何定义连接键。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">result = input1.join(input2)</span><br><span class="line">               .where(<span class="number">0</span>)       <span class="comment">// key of the first input (tuple field 0)</span></span><br><span class="line">               .equalTo(<span class="number">1</span>);    <span class="comment">// key of the second input (tuple field 1)</span></span><br></pre></td></tr></table></figure>
+
+<p>您可以通过Join Hints指定运行时执行连接的方式。提示描述了通过分区或广播进行连接，以及它是使用基于排序还是基于散列的算法。<br>如果未指定提示，系统将尝试估算输入大小，并根据这些估计选择最佳策略。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// This executes a join by broadcasting the first data set</span></span><br><span class="line"><span class="comment">// using a hash table for the broadcast data</span></span><br><span class="line">result = input1.join(input2, JoinHint.BROADCAST_HASH_FIRST)</span><br><span class="line">               .where(<span class="number">0</span>).equalTo(<span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+
+<p>请注意，连接转换仅适用于等连接。其他连接类型需要使用OuterJoin或CoGroup表示。</p>
+<ul>
+<li>OuterJoin    </li>
+</ul>
+<p>在两个数据集上执行左，右或全外连接。外连接类似于常规（内部）连接，并创建在其键上相等的所有数据元对。此外，如果在另一侧没有找到匹配的Keys，则保存“外部”侧（左侧，右侧或两者都满）的记录。匹配数据元对（或一个数据元和null另一个输入的值）被赋予JoinFunction以将数据元对转换为单个数据元，或者转换为FlatJoinFunction以将数据元对转换为任意多个（包括无）数据元。请参阅键部分以了解如何定义连接键。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">input1.leftOuterJoin(input2) <span class="comment">// rightOuterJoin or fullOuterJoin for right or full outer joins</span></span><br><span class="line">      .where(<span class="number">0</span>)              <span class="comment">// key of the first input (tuple field 0)</span></span><br><span class="line">      .equalTo(<span class="number">1</span>)            <span class="comment">// key of the second input (tuple field 1)</span></span><br><span class="line">      .with(<span class="keyword">new</span> JoinFunction&lt;String, String, String&gt;() &#123;</span><br><span class="line">          <span class="function"><span class="keyword">public</span> String <span class="title">join</span><span class="params">(String v1, String v2)</span> </span>&#123;</span><br><span class="line">             <span class="comment">// <span class="doctag">NOTE:</span></span></span><br><span class="line">             <span class="comment">// - v2 might be null for leftOuterJoin</span></span><br><span class="line">             <span class="comment">// - v1 might be null for rightOuterJoin</span></span><br><span class="line">             <span class="comment">// - v1 OR v2 might be null for fullOuterJoin</span></span><br><span class="line">          &#125;</span><br><span class="line">      &#125;);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>CoGroup    </li>
+</ul>
+<p>reduce 算子操作的二维变体。将一个或多个字段上的每个输入分组，然后关联组。每对组调用转换函数。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">data1.coGroup(data2)</span><br><span class="line">     .where(<span class="number">0</span>)</span><br><span class="line">     .equalTo(<span class="number">1</span>)</span><br><span class="line">     .with(<span class="keyword">new</span> CoGroupFunction&lt;String, String, String&gt;() &#123;</span><br><span class="line">         <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">coGroup</span><span class="params">(Iterable&lt;String&gt; in1, Iterable&lt;String&gt; in2, Collector&lt;String&gt; out)</span> </span>&#123;</span><br><span class="line">           out.collect(...);</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Cross    </li>
+</ul>
+<p>构建两个输入的笛卡尔积（交叉乘积），创建所有数据元对。可选择使用CrossFunction将数据元对转换为单个数据元</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">DataSet&lt;Integer&gt; data1 = <span class="comment">// [...]</span></span><br><span class="line">DataSet&lt;String&gt; data2 = <span class="comment">// [...]</span></span><br><span class="line">DataSet&lt;Tuple2&lt;Integer, String&gt;&gt; result = data1.cross(data2);</span><br></pre></td></tr></table></figure>
+
+<p>注：交叉是一个潜在的非常计算密集型 算子操作它甚至可以挑战大的计算集群！建议使用crossWithTiny（）和crossWithHuge（）来提示系统的DataSet大小。</p>
+<ul>
+<li>Union    </li>
+</ul>
+<p>生成两个数据集的并集。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">DataSet&lt;String&gt; data1 = <span class="comment">// [...]</span></span><br><span class="line">DataSet&lt;String&gt; data2 = <span class="comment">// [...]</span></span><br><span class="line">DataSet&lt;String&gt; result = data1.union(data2);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Rebalance    </li>
+</ul>
+<p>均匀地Rebalance 数据集的并行分区以消除数据偏差。只有类似Map的转换可能会遵循Rebalance 转换。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">DataSet&lt;String&gt; in = <span class="comment">// [...]</span></span><br><span class="line">DataSet&lt;String&gt; result = in.rebalance()</span><br><span class="line">                           .map(<span class="keyword">new</span> Mapper());</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Hash-Partition</li>
+</ul>
+<p>散列分区给定键上的数据集。键可以指定为位置键，表达键和键选择器函数。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">DataSet&lt;Tuple2&lt;String,Integer&gt;&gt; in = <span class="comment">// [...]</span></span><br><span class="line">DataSet&lt;Integer&gt; result = in.partitionByHash(<span class="number">0</span>)</span><br><span class="line">                            .mapPartition(<span class="keyword">new</span> PartitionMapper());</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Range-Partition</li>
+</ul>
+<p>Range-Partition给定键上的数据集。键可以指定为位置键，表达键和键选择器函数。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">DataSet&lt;Tuple2&lt;String,Integer&gt;&gt; in = <span class="comment">// [...]</span></span><br><span class="line">DataSet&lt;Integer&gt; result = in.partitionByRange(<span class="number">0</span>)</span><br><span class="line">                            .mapPartition(<span class="keyword">new</span> PartitionMapper());</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Custom Partitioning</li>
+</ul>
+<p>手动指定数据分区。<br>注意：此方法仅适用于单个字段键。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DataSet&lt;Tuple2&lt;String,Integer&gt;&gt; in = <span class="comment">// [...]</span></span><br><span class="line">DataSet&lt;Integer&gt; result = in.partitionCustom(Partitioner&lt;K&gt; partitioner, key)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Sort Partition    </li>
+</ul>
+<p>本地按指定顺序对指定字段上的数据集的所有分区进行排序。可以将字段指定为元组位置或字段表达式。通过链接sortPartition（）调用来完成对多个字段的排序。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">DataSet&lt;Tuple2&lt;String,Integer&gt;&gt; in = <span class="comment">// [...]</span></span><br><span class="line">DataSet&lt;Integer&gt; result = in.sortPartition(<span class="number">1</span>, Order.ASCENDING)</span><br><span class="line">                            .mapPartition(<span class="keyword">new</span> PartitionMapper());</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>First-n    </li>
+</ul>
+<p>返回数据集的前n个（任意）数据元。First-n可以应用于常规数据集，分组数据集或分组排序数据集。分组键可以指定为键选择器函数或字段位置键。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">DataSet&lt;Tuple2&lt;String,Integer&gt;&gt; in = <span class="comment">// [...]</span></span><br><span class="line"><span class="comment">// regular data set</span></span><br><span class="line">DataSet&lt;Tuple2&lt;String,Integer&gt;&gt; result1 = in.first(<span class="number">3</span>);</span><br><span class="line"><span class="comment">// grouped data set</span></span><br><span class="line">DataSet&lt;Tuple2&lt;String,Integer&gt;&gt; result2 = in.groupBy(<span class="number">0</span>)                                     .first(<span class="number">3</span>);</span><br><span class="line"><span class="comment">// grouped-sorted data set</span></span><br><span class="line">DataSet&lt;Tuple2&lt;String,Integer&gt;&gt; result3 = in.groupBy(<span class="number">0</span>)                                     .sortGroup(<span class="number">1</span>, Order.ASCENDING)                     .first(<span class="number">3</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="DataSet-Sink"><a href="#DataSet-Sink" class="headerlink" title="DataSet Sink"></a>DataSet Sink</h3><p>数据接收器使用DataSet用于存储或返回。使用OutputFormat描述数据接收器算子操作 。Flink带有各种内置输出格式，这些格式封装在DataSet上的算子操作中：</p>
+<ul>
+<li>writeAsText()/ TextOutputFormat- 按字符串顺序写入数据元。通过调用每个数据元的toString（）方法获得字符串。</li>
+<li>writeAsFormattedText()/ TextOutputFormat- 按字符串顺序写数据元。通过为每个数据元调用用户定义的format（）方法来获取字符串。</li>
+<li>writeAsCsv(…)/ CsvOutputFormat- 将元组写为逗号分隔值文件。行和字段分隔符是可配置的。每个字段的值来自对象的toString（）方法。</li>
+<li>print()/ printToErr()/ print(String msg)/ printToErr(String msg)- 在标准输出/标准错误流上打印每个数据元的toString（）值。可选地，可以提供前缀（msg），其前缀为输出。这有助于区分不同的打印调用。如果并行度大于1，则输出也将与生成输出的任务的标识符一起添加。</li>
+<li>write()/ FileOutputFormat- 自定义文件输出的方法和基类。支持自定义对象到字节的转换。</li>
+<li>output()/ OutputFormat- 大多数通用输出方法，用于非基于文件的数据接收器（例如将结果存储在数据库中）。</li>
+</ul>
+<p>可以将DataSet输入到多个 算子操作。程序可以编写或打印数据集，同时对它们执行其他转换。</p>
+<p>示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// text data</span></span><br><span class="line">DataSet&lt;String&gt; textData = <span class="comment">// [...]</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// write DataSet to a file on the local file system</span></span><br><span class="line">textData.writeAsText(<span class="string">"file:///my/result/on/localFS"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// write DataSet to a file on a HDFS with a namenode running at nnHost:nnPort</span></span><br><span class="line">textData.writeAsText(<span class="string">"hdfs://nnHost:nnPort/my/result/on/localFS"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// write DataSet to a file and overwrite the file if it exists</span></span><br><span class="line">textData.writeAsText(<span class="string">"file:///my/result/on/localFS"</span>, WriteMode.OVERWRITE);</span><br><span class="line"></span><br><span class="line"><span class="comment">// tuples as lines with pipe as the separator "a|b|c"</span></span><br><span class="line">DataSet&lt;Tuple3&lt;String, Integer, Double&gt;&gt; values = <span class="comment">// [...]</span></span><br><span class="line">values.writeAsCsv(<span class="string">"file:///path/to/the/result/file"</span>, <span class="string">"\n"</span>, <span class="string">"|"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// this writes tuples in the text formatting "(a, b, c)", rather than as CSV lines</span></span><br><span class="line">values.writeAsText(<span class="string">"file:///path/to/the/result/file"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// this writes values as strings using a user-defined TextFormatter object</span></span><br><span class="line">values.writeAsFormattedText(<span class="string">"file:///path/to/the/result/file"</span>,</span><br><span class="line">    <span class="keyword">new</span> TextFormatter&lt;Tuple2&lt;Integer, Integer&gt;&gt;() &#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">format</span> <span class="params">(Tuple2&lt;Integer, Integer&gt; value)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> value.f1 + <span class="string">" - "</span> + value.f0;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
+
+<p>使用自定义输出格式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">DataSet&lt;Tuple3&lt;String, Integer, Double&gt;&gt; myResult = [...]</span><br><span class="line"></span><br><span class="line"><span class="comment">// write Tuple DataSet to a relational database</span></span><br><span class="line">myResult.output(</span><br><span class="line">    <span class="comment">// build and configure OutputFormat</span></span><br><span class="line">    JDBCOutputFormat.buildJDBCOutputFormat()</span><br><span class="line">                    .setDrivername(<span class="string">"org.apache.derby.jdbc.EmbeddedDriver"</span>)</span><br><span class="line">                    .setDBUrl(<span class="string">"jdbc:derby:memory:persons"</span>)</span><br><span class="line">                    .setQuery(<span class="string">"insert into persons (name, age, height) values (?,?,?)"</span>)</span><br><span class="line">                    .finish()</span><br><span class="line">    );</span><br></pre></td></tr></table></figure>
+
+<h2 id="序列化器"><a href="#序列化器" class="headerlink" title="序列化器"></a>序列化器</h2><ul>
+<li><p>Flink自带了针对诸如int，long，String等标准类型的序列化器</p>
+</li>
+<li><p>针对Flink无法实现序列化的数据类型，我们可以交给Avro和Kryo</p>
+</li>
+<li><p>使用方法：ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">使用avro序列化：env.getConfig().enableForceAvro();</span><br><span class="line">使用kryo序列化：env.getConfig().enableForceKryo();</span><br><span class="line">使用自定义序列化：env.getConfig().addDefaultKryoSerializer(Class&lt;?&gt; type, Class&lt;? extends Serializer&lt;?&gt;&gt; serializerClass)</span><br></pre></td></tr></table></figure>
+
+<h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h2><ul>
+<li><p>Java Tuple 和 Scala case class</p>
+</li>
+<li><p>Java POJOs：java实体类</p>
+</li>
+<li><p>Primitive Types<br>默认支持java和scala基本数据类型</p>
+</li>
+<li><p>General Class Types<br>默认支持大多数java和scala class</p>
+</li>
+<li><p>Hadoop Writables<br>支持hadoop中实现了org.apache.hadoop.Writable的数据类型</p>
+</li>
+<li><p>Special Types<br>例如scala中的Either Option 和Try</p>
+</li>
+</ul>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;">
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/大数据/" rel="tag"><i class="fa fa-tag"></i> 大数据</a>
+          
+            <a href="/tags/Flink/" rel="tag"><i class="fa fa-tag"></i> Flink</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/04/10/15.大数据/Flink/8-Flink 重启策略/" rel="next" title="Flink 重启策略">
+                <i class="fa fa-chevron-left"></i> Flink 重启策略
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/04/10/15.大数据/Flink/7-Flink DataStreamAPI/" rel="prev" title="Flink DataStreamAPI">
+                Flink DataStreamAPI <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="刘小恺(Kyle)">
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">261</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">68</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#编程结构"><span class="nav-text">编程结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DataSet-API"><span class="nav-text">DataSet API</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DataSet-Sources"><span class="nav-text">DataSet Sources</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#基于文件的"><span class="nav-text">基于文件的</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基于集合"><span class="nav-text">基于集合</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#通用方法"><span class="nav-text">通用方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代码示例"><span class="nav-text">代码示例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DataSet-Transformation"><span class="nav-text">DataSet Transformation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DataSet-Sink"><span class="nav-text">DataSet Sink</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#序列化器"><span class="nav-text">序列化器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据类型"><span class="nav-text">数据类型</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

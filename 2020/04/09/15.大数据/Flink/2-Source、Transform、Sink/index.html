@@ -1,0 +1,1917 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Data Source一、内置 Data SourceFlink Data Source 用于定义 Flink 程序的数据来源，Flink 官方提供了多种数据获取方法，用于帮助开发者简单快速地构建输入流，具体如下： 1.1 基于文件构建1. readTextFile(path)：按照 TextInputFormat 格式读取文本文件，并将其内容以字符串的形式返回。示例如下： 1env.readTe">
+<meta name="keywords" content="大数据,Flink">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Source、Transform、Sink">
+<meta property="og:url" content="http://blog.kyleliu.cn/2020/04/09/15.大数据/Flink/2-Source、Transform、Sink/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle) 的云笔记">
+<meta property="og:description" content="Data Source一、内置 Data SourceFlink Data Source 用于定义 Flink 程序的数据来源，Flink 官方提供了多种数据获取方法，用于帮助开发者简单快速地构建输入流，具体如下： 1.1 基于文件构建1. readTextFile(path)：按照 TextInputFormat 格式读取文本文件，并将其内容以字符串的形式返回。示例如下： 1env.readTe">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1586415778743.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1586416665872.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1586416679333.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1586420666492.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1586421679558.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1586421691428.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1586421708524.png">
+<meta property="og:updated_time" content="2020-04-09T08:43:41.532Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Source、Transform、Sink">
+<meta name="twitter:description" content="Data Source一、内置 Data SourceFlink Data Source 用于定义 Flink 程序的数据来源，Flink 官方提供了多种数据获取方法，用于帮助开发者简单快速地构建输入流，具体如下： 1.1 基于文件构建1. readTextFile(path)：按照 TextInputFormat 格式读取文本文件，并将其内容以字符串的形式返回。示例如下： 1env.readTe">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/img/1586415778743.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2020/04/09/15.大数据/Flink/2-Source、Transform、Sink/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Source、Transform、Sink | 刘小恺(Kyle) 的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle) 的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/04/09/15.大数据/Flink/2-Source、Transform、Sink/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle) 的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Source、Transform、Sink
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-04-09 11:00:00" itemprop="dateCreated datePublished" datetime="2020-04-09T11:00:00+08:00">2020-04-09</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/大数据/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/大数据/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/04/09/15.大数据/Flink/2-Source、Transform、Sink/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/04/09/15.大数据/Flink/2-Source、Transform、Sink/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Data-Source"><a href="#Data-Source" class="headerlink" title="Data Source"></a>Data Source</h1><h2 id="一、内置-Data-Source"><a href="#一、内置-Data-Source" class="headerlink" title="一、内置 Data Source"></a>一、内置 Data Source</h2><p>Flink Data Source 用于定义 Flink 程序的数据来源，Flink 官方提供了多种数据获取方法，用于帮助开发者简单快速地构建输入流，具体如下：</p>
+<h3 id="1-1-基于文件构建"><a href="#1-1-基于文件构建" class="headerlink" title="1.1 基于文件构建"></a>1.1 基于文件构建</h3><p><strong>1. readTextFile(path)</strong>：按照 TextInputFormat 格式读取文本文件，并将其内容以字符串的形式返回。示例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">env.readTextFile(filePath).print();</span><br></pre></td></tr></table></figure>
+
+<p><strong>2. readFile(fileInputFormat, path)</strong> ：按照指定格式读取文件。</p>
+<p><strong>3. readFile(inputFormat, filePath, watchType, interval, typeInformation)</strong>：按照指定格式周期性的读取文件。其中各个参数的含义如下：</p>
+<ul>
+<li><strong>inputFormat</strong>：数据流的输入格式。</li>
+<li><strong>filePath</strong>：文件路径，可以是本地文件系统上的路径，也可以是 HDFS 上的文件路径。</li>
+<li><strong>watchType</strong>：读取方式，它有两个可选值，分别是 <code>FileProcessingMode.PROCESS_ONCE</code> 和 <code>FileProcessingMode.PROCESS_CONTINUOUSLY</code>：前者表示对指定路径上的数据只读取一次，然后退出；后者表示对路径进行定期地扫描和读取。需要注意的是如果 watchType 被设置为 <code>PROCESS_CONTINUOUSLY</code>，那么当文件被修改时，其所有的内容 (包含原有的内容和新增的内容) 都将被重新处理，因此这会打破 Flink 的 <em>exactly-once</em> 语义。</li>
+<li><strong>interval</strong>：定期扫描的时间间隔。</li>
+<li><strong>typeInformation</strong>：输入流中元素的类型。</li>
+</ul>
+<p>使用示例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> String filePath = <span class="string">"D:\\log4j.properties"</span>;</span><br><span class="line"><span class="keyword">final</span> StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">env.readFile(<span class="keyword">new</span> TextInputFormat(<span class="keyword">new</span> Path(filePath)),</span><br><span class="line">             filePath,</span><br><span class="line">             FileProcessingMode.PROCESS_ONCE,</span><br><span class="line">             <span class="number">1</span>,</span><br><span class="line">             BasicTypeInfo.STRING_TYPE_INFO).print();</span><br><span class="line">env.execute();</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-基于集合构建"><a href="#1-2-基于集合构建" class="headerlink" title="1.2 基于集合构建"></a>1.2 基于集合构建</h3><p><strong>1. fromCollection(Collection)</strong>：基于集合构建，集合中的所有元素必须是同一类型。示例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">env.fromCollection(Arrays.asList(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>)).print();</span><br></pre></td></tr></table></figure>
+
+<p><strong>2. fromElements(T …)</strong>： 基于元素构建，所有元素必须是同一类型。示例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">env.fromElements(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>).print();</span><br></pre></td></tr></table></figure>
+
+<p><strong>3. generateSequence(from, to)</strong>：基于给定的序列区间进行构建。示例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">env.generateSequence(<span class="number">0</span>,<span class="number">100</span>);</span><br></pre></td></tr></table></figure>
+
+<p><strong>4. fromCollection(Iterator, Class)</strong>：基于迭代器进行构建。第一个参数用于定义迭代器，第二个参数用于定义输出元素的类型。使用示例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">env.fromCollection(<span class="keyword">new</span> CustomIterator(), BasicTypeInfo.INT_TYPE_INFO).print();</span><br></pre></td></tr></table></figure>
+
+<p>其中 CustomIterator 为自定义的迭代器，这里以产生 1 到 100 区间内的数据为例，源码如下。需要注意的是自定义迭代器除了要实现 Iterator 接口外，还必须要实现序列化接口 Serializable ，否则会抛出序列化失败的异常：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.Serializable;</span><br><span class="line"><span class="keyword">import</span> java.util.Iterator;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomIterator</span> <span class="keyword">implements</span> <span class="title">Iterator</span>&lt;<span class="title">Integer</span>&gt;, <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Integer i = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">hasNext</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> i &lt; <span class="number">100</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">next</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        i++;</span><br><span class="line">        <span class="keyword">return</span> i;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>5. fromParallelCollection(SplittableIterator, Class)</strong>：方法接收两个参数，第二个参数用于定义输出元素的类型，第一个参数 SplittableIterator 是迭代器的抽象基类，它用于将原始迭代器的值拆分到多个不相交的迭代器中。</p>
+<h3 id="1-3-基于-Socket-构建"><a href="#1-3-基于-Socket-构建" class="headerlink" title="1.3  基于 Socket 构建"></a>1.3  基于 Socket 构建</h3><p>Flink 提供了 socketTextStream 方法用于构建基于 Socket 的数据流，socketTextStream 方法有以下四个主要参数：</p>
+<ul>
+<li><strong>hostname</strong>：主机名；</li>
+<li><strong>port</strong>：端口号，设置为 0 时，表示端口号自动分配；</li>
+<li><strong>delimiter</strong>：用于分隔每条记录的分隔符；</li>
+<li><strong>maxRetry</strong>：当 Socket 临时关闭时，程序的最大重试间隔，单位为秒。设置为 0 时表示不进行重试；设置为负值则表示一直重试。示例如下：</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">env.socketTextStream("192.168.0.229", 9999, "\n", 3).print();</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、自定义-Data-Source"><a href="#二、自定义-Data-Source" class="headerlink" title="二、自定义 Data Source"></a>二、自定义 Data Source</h2><h3 id="2-1-SourceFunction"><a href="#2-1-SourceFunction" class="headerlink" title="2.1 SourceFunction"></a>2.1 SourceFunction</h3><p>除了内置的数据源外，用户还可以使用 <code>addSource</code> 方法来添加自定义的数据源。自定义的数据源必须要实现 SourceFunction 接口，这里以产生 [0 , 1000) 区间内的数据为例，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line"></span><br><span class="line">env.addSource(<span class="keyword">new</span> SourceFunction&lt;Long&gt;() &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">long</span> count = <span class="number">0L</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">boolean</span> isRunning = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">(SourceContext&lt;Long&gt; ctx)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (isRunning &amp;&amp; count &lt; <span class="number">1000</span>) &#123;</span><br><span class="line">            <span class="comment">// 通过collect将输入发送出去 </span></span><br><span class="line">            ctx.collect(count);</span><br><span class="line">            count++;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">cancel</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        isRunning = <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;).print();</span><br><span class="line">env.execute();</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-ParallelSourceFunction-和-RichParallelSourceFunction"><a href="#2-2-ParallelSourceFunction-和-RichParallelSourceFunction" class="headerlink" title="2.2 ParallelSourceFunction 和 RichParallelSourceFunction"></a>2.2 ParallelSourceFunction 和 RichParallelSourceFunction</h3><p>上面通过 SourceFunction 实现的数据源是不具有并行度的，即不支持在得到的 DataStream 上调用 <code>setParallelism(n)</code> 方法，此时会抛出如下的异常：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Exception in thread "main" java.lang.IllegalArgumentException: Source: 1 is not a parallel source</span><br></pre></td></tr></table></figure>
+
+<p>如果你想要实现具有并行度的输入流，则需要实现 ParallelSourceFunction 或 RichParallelSourceFunction 接口，其与 SourceFunction 的关系如下图： </p>
+<p><img src="/img/1586415778743.png" alt="1586415778743"></p>
+<p>ParallelSourceFunction 直接继承自 ParallelSourceFunction，具有并行度的功能。RichParallelSourceFunction 则继承自 AbstractRichFunction，同时实现了 ParallelSourceFunction 接口，所以其除了具有并行度的功能外，还提供了额外的与生命周期相关的方法，如 open() ，closen() 。</p>
+<h2 id="三、Streaming-Connectors"><a href="#三、Streaming-Connectors" class="headerlink" title="三、Streaming Connectors"></a>三、Streaming Connectors</h2><h3 id="3-1-内置连接器"><a href="#3-1-内置连接器" class="headerlink" title="3.1 内置连接器"></a>3.1 内置连接器</h3><p>除了自定义数据源外， Flink 还内置了多种连接器，用于满足大多数的数据收集场景。当前内置连接器的支持情况如下：</p>
+<ul>
+<li>Apache Kafka (支持 source 和 sink)</li>
+<li>Apache Cassandra (sink)</li>
+<li>Amazon Kinesis Streams (source/sink)</li>
+<li>Elasticsearch (sink)</li>
+<li>Hadoop FileSystem (sink)</li>
+<li>RabbitMQ (source/sink)</li>
+<li>Apache NiFi (source/sink)</li>
+<li>Twitter Streaming API (source)</li>
+<li>Google PubSub (source/sink)</li>
+</ul>
+<p>除了上述的连接器外，你还可以通过 Apache Bahir 的连接器扩展 Flink。Apache Bahir 旨在为分布式数据分析系统 (如 Spark，Flink) 等提供功能上的扩展，当前其支持的与 Flink 相关的连接器如下：</p>
+<ul>
+<li>Apache ActiveMQ (source/sink)</li>
+<li>Apache Flume (sink)</li>
+<li>Redis (sink)</li>
+<li>Akka (sink)</li>
+<li>Netty (source)</li>
+</ul>
+<p>随着 Flink 的不断发展，可以预见到其会支持越来越多类型的连接器，关于连接器的后续发展情况，可以查看其官方文档：<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.9/dev/connectors/index.html" target="_blank" rel="noopener">Streaming Connectors</a> 。在所有 DataSource 连接器中，使用的广泛的就是 Kafka，所以这里我们以其为例，来介绍 Connectors 的整合步骤。</p>
+<h3 id="3-2-整合-Kakfa"><a href="#3-2-整合-Kakfa" class="headerlink" title="3.2 整合 Kakfa"></a>3.2 整合 Kakfa</h3><h4 id="1-导入依赖"><a href="#1-导入依赖" class="headerlink" title="1. 导入依赖"></a>1. 导入依赖</h4><p>整合 Kafka 时，一定要注意所使用的 Kafka 的版本，不同版本间所需的 Maven 依赖和开发时所调用的类均不相同，具体如下：</p>
+<table>
+<thead>
+<tr>
+<th align="left">Maven 依赖</th>
+<th align="left">Flink 版本</th>
+<th align="left">Consumer and Producer 类的名称</th>
+<th align="left">Kafka 版本</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">flink-connector-kafka-0.8_2.11</td>
+<td align="left">1.0.0 +</td>
+<td align="left">FlinkKafkaConsumer08 <br>FlinkKafkaProducer08</td>
+<td align="left">0.8.x</td>
+</tr>
+<tr>
+<td align="left">flink-connector-kafka-0.9_2.11</td>
+<td align="left">1.0.0 +</td>
+<td align="left">FlinkKafkaConsumer09<br> FlinkKafkaProducer09</td>
+<td align="left">0.9.x</td>
+</tr>
+<tr>
+<td align="left">flink-connector-kafka-0.10_2.11</td>
+<td align="left">1.2.0 +</td>
+<td align="left">FlinkKafkaConsumer010 <br>FlinkKafkaProducer010</td>
+<td align="left">0.10.x</td>
+</tr>
+<tr>
+<td align="left">flink-connector-kafka-0.11_2.11</td>
+<td align="left">1.4.0 +</td>
+<td align="left">FlinkKafkaConsumer011 <br>FlinkKafkaProducer011</td>
+<td align="left">0.11.x</td>
+</tr>
+<tr>
+<td align="left">flink-connector-kafka_2.11</td>
+<td align="left">1.7.0 +</td>
+<td align="left">FlinkKafkaConsumer <br>FlinkKafkaProducer</td>
+<td align="left">&gt;= 1.0.0</td>
+</tr>
+</tbody></table>
+<p>这里我使用的 Kafka 版本为 kafka_2.12-2.2.0，添加的依赖如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.flink<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>flink-connector-kafka_2.11<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.9.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-代码开发"><a href="#2-代码开发" class="headerlink" title="2. 代码开发"></a>2. 代码开发</h4><p>这里以最简单的场景为例，接收 Kafka 上的数据并打印，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">Properties properties = <span class="keyword">new</span> Properties();</span><br><span class="line"><span class="comment">// 指定Kafka的连接位置</span></span><br><span class="line">properties.setProperty(<span class="string">"bootstrap.servers"</span>, <span class="string">"hadoop001:9092"</span>);</span><br><span class="line"><span class="comment">// 指定监听的主题，并定义Kafka字节消息到Flink对象之间的转换规则</span></span><br><span class="line">DataStream&lt;String&gt; stream = env</span><br><span class="line">    .addSource(<span class="keyword">new</span> FlinkKafkaConsumer&lt;&gt;(<span class="string">"flink-stream-in-topic"</span>, <span class="keyword">new</span> SimpleStringSchema(), properties));</span><br><span class="line">stream.print();</span><br><span class="line">env.execute(<span class="string">"Flink Streaming"</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3-整合测试"><a href="#3-3-整合测试" class="headerlink" title="3.3 整合测试"></a>3.3 整合测试</h3><h4 id="1-启动-Kakfa"><a href="#1-启动-Kakfa" class="headerlink" title="1. 启动 Kakfa"></a>1. 启动 Kakfa</h4><p>Kafka 的运行依赖于 zookeeper，需要预先启动，可以启动 Kafka 内置的 zookeeper，也可以启动自己安装的：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> zookeeper启动命令</span><br><span class="line">bin/zkServer.sh start</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 内置zookeeper启动命令</span><br><span class="line">bin/zookeeper-server-start.sh config/zookeeper.properties</span><br></pre></td></tr></table></figure>
+
+<p>启动单节点 kafka 用于测试：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> bin/kafka-server-start.sh config/server.properties</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-创建-Topic"><a href="#2-创建-Topic" class="headerlink" title="2. 创建 Topic"></a>2. 创建 Topic</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 创建用于测试主题</span><br><span class="line">bin/kafka-topics.sh --create \</span><br><span class="line">                    --bootstrap-server hadoop001:9092 \</span><br><span class="line">                    --replication-factor 1 \</span><br><span class="line">                    --partitions 1  \</span><br><span class="line">                    --topic flink-stream-in-topic</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 查看所有主题</span><br><span class="line"> bin/kafka-topics.sh --list --bootstrap-server hadoop001:9092</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-启动-Producer"><a href="#3-启动-Producer" class="headerlink" title="3. 启动 Producer"></a>3. 启动 Producer</h4><p>这里 启动一个 Kafka 生产者，用于发送测试数据：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-console-producer.sh --broker-list hadoop001:9092 --topic flink-stream-in-topic</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-测试结果"><a href="#4-测试结果" class="headerlink" title="4. 测试结果"></a>4. 测试结果</h4><p>在 Producer 上输入任意测试数据，之后观察程序控制台的输出：</p>
+<p><img src="/img/1586416665872.png" alt="1586416665872"></p>
+<p>程序控制台的输出如下：</p>
+<p><img src="/img/1586416679333.png" alt="1586416679333"></p>
+<p>可以看到已经成功接收并打印出相关的数据。</p>
+<h1 id="Transform"><a href="#Transform" class="headerlink" title="Transform"></a>Transform</h1><h2 id="一、Transformations-分类"><a href="#一、Transformations-分类" class="headerlink" title="一、Transformations 分类"></a>一、Transformations 分类</h2><p>Flink 的 Transformations 操作主要用于将一个和多个 DataStream 按需转换成新的 DataStream。它主要分为以下三类：</p>
+<ul>
+<li><strong>DataStream Transformations</strong>：进行数据流相关转换操作；</li>
+<li><strong>Physical partitioning</strong>：物理分区。Flink 提供的底层 API ，允许用户定义数据的分区规则；</li>
+<li><strong>Task chaining and resource groups</strong>：任务链和资源组。允许用户进行任务链和资源组的细粒度的控制。</li>
+</ul>
+<p>以下分别对其主要 API 进行介绍：</p>
+<h2 id="二、DataStream-Transformations"><a href="#二、DataStream-Transformations" class="headerlink" title="二、DataStream Transformations"></a>二、DataStream Transformations</h2><h3 id="2-1-Map-DataStream-→-DataStream"><a href="#2-1-Map-DataStream-→-DataStream" class="headerlink" title="2.1 Map [DataStream → DataStream]"></a>2.1 Map [DataStream → DataStream]</h3><p>对一个 DataStream 中的每个元素都执行特定的转换操作：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">DataStream&lt;Integer&gt; integerDataStream = env.fromElements(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);</span><br><span class="line">integerDataStream.map((MapFunction&lt;Integer, Object&gt;) value -&gt; value * <span class="number">2</span>).print();</span><br><span class="line"><span class="comment">// 输出 2,4,6,8,10</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-FlatMap-DataStream-→-DataStream"><a href="#2-2-FlatMap-DataStream-→-DataStream" class="headerlink" title="2.2 FlatMap [DataStream → DataStream]"></a>2.2 FlatMap [DataStream → DataStream]</h3><p>FlatMap 与 Map 类似，但是 FlatMap 中的一个输入元素可以被映射成一个或者多个输出元素，示例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">String string01 = <span class="string">"one one one two two"</span>;</span><br><span class="line">String string02 = <span class="string">"third third third four"</span>;</span><br><span class="line">DataStream&lt;String&gt; stringDataStream = env.fromElements(string01, string02);</span><br><span class="line">stringDataStream.flatMap(<span class="keyword">new</span> FlatMapFunction&lt;String, String&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">flatMap</span><span class="params">(String value, Collector&lt;String&gt; out)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (String s : value.split(<span class="string">" "</span>)) &#123;</span><br><span class="line">            out.collect(s);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).print();</span><br><span class="line"><span class="comment">// 输出每一个独立的单词，为节省排版，这里去掉换行，后文亦同</span></span><br><span class="line">one one one two two third third third four</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-Filter-DataStream-→-DataStream"><a href="#2-3-Filter-DataStream-→-DataStream" class="headerlink" title="2.3 Filter [DataStream → DataStream]"></a>2.3 Filter [DataStream → DataStream]</h3><p>用于过滤符合条件的数据：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">env.fromElements(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>).filter(x -&gt; x &gt; <span class="number">3</span>).print();</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-4-KeyBy-和-Reduce"><a href="#2-4-KeyBy-和-Reduce" class="headerlink" title="2.4 KeyBy 和 Reduce"></a>2.4 KeyBy 和 Reduce</h3><ul>
+<li><strong>KeyBy [DataStream → KeyedStream]</strong> ：用于将相同 Key 值的数据分到相同的分区中；</li>
+<li><strong>Reduce [KeyedStream → DataStream]</strong> ：用于对数据执行归约计算。</li>
+</ul>
+<p>如下例子将数据按照 key 值分区后，滚动进行求和计算：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">DataStream&lt;Tuple2&lt;String, Integer&gt;&gt; tuple2DataStream = env.fromElements(<span class="keyword">new</span> Tuple2&lt;&gt;(<span class="string">"a"</span>, <span class="number">1</span>),</span><br><span class="line">                                                                        <span class="keyword">new</span> Tuple2&lt;&gt;(<span class="string">"a"</span>, <span class="number">2</span>), </span><br><span class="line">                                                                        <span class="keyword">new</span> Tuple2&lt;&gt;(<span class="string">"b"</span>, <span class="number">3</span>), </span><br><span class="line">                                                                        <span class="keyword">new</span> Tuple2&lt;&gt;(<span class="string">"b"</span>, <span class="number">5</span>));</span><br><span class="line">KeyedStream&lt;Tuple2&lt;String, Integer&gt;, Tuple&gt; keyedStream = tuple2DataStream.keyBy(<span class="number">0</span>);</span><br><span class="line">keyedStream.reduce((ReduceFunction&lt;Tuple2&lt;String, Integer&gt;&gt;) (value1, value2) -&gt;</span><br><span class="line">                   <span class="keyword">new</span> Tuple2&lt;&gt;(value1.f0, value1.f1 + value2.f1)).print();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 持续进行求和计算，输出：</span></span><br><span class="line">(a,<span class="number">1</span>)</span><br><span class="line">(a,<span class="number">3</span>)</span><br><span class="line">(b,<span class="number">3</span>)</span><br><span class="line">(b,<span class="number">8</span>)</span><br></pre></td></tr></table></figure>
+
+<p>KeyBy 操作存在以下两个限制：</p>
+<ul>
+<li>KeyBy 操作用于用户自定义的 POJOs 类型时，该自定义类型必须重写 hashCode 方法；</li>
+<li>KeyBy 操作不能用于数组类型。</li>
+</ul>
+<h3 id="2-5-Aggregations-KeyedStream-→-DataStream"><a href="#2-5-Aggregations-KeyedStream-→-DataStream" class="headerlink" title="2.5 Aggregations [KeyedStream → DataStream]"></a>2.5 Aggregations [KeyedStream → DataStream]</h3><p>Aggregations 是官方提供的聚合算子，封装了常用的聚合操作，如上利用 Reduce 进行求和的操作也可以利用 Aggregations 中的 sum 算子重写为下面的形式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tuple2DataStream.keyBy(<span class="number">0</span>).sum(<span class="number">1</span>).print();</span><br></pre></td></tr></table></figure>
+
+<p>除了 sum 外，Flink 还提供了 min , max , minBy，maxBy 等常用聚合算子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 滚动计算指定key的最小值，可以通过index或者fieldName来指定key</span></span><br><span class="line">keyedStream.min(<span class="number">0</span>);</span><br><span class="line">keyedStream.min(<span class="string">"key"</span>);</span><br><span class="line"><span class="comment">// 滚动计算指定key的最大值</span></span><br><span class="line">keyedStream.max(<span class="number">0</span>);</span><br><span class="line">keyedStream.max(<span class="string">"key"</span>);</span><br><span class="line"><span class="comment">// 滚动计算指定key的最小值，并返回其对应的元素</span></span><br><span class="line">keyedStream.minBy(<span class="number">0</span>);</span><br><span class="line">keyedStream.minBy(<span class="string">"key"</span>);</span><br><span class="line"><span class="comment">// 滚动计算指定key的最大值，并返回其对应的元素</span></span><br><span class="line">keyedStream.maxBy(<span class="number">0</span>);</span><br><span class="line">keyedStream.maxBy(<span class="string">"key"</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-6-Union-DataStream-→-DataStream"><a href="#2-6-Union-DataStream-→-DataStream" class="headerlink" title="2.6 Union [DataStream* → DataStream]"></a>2.6 Union [DataStream* → DataStream]</h3><p>用于连接两个或者多个元素类型相同的 DataStream 。当然一个 DataStream 也可以与其本生进行连接，此时该 DataStream 中的每个元素都会被获取两次：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">DataStreamSource&lt;Tuple2&lt;String, Integer&gt;&gt; streamSource01 = env.fromElements(new Tuple2&lt;&gt;("a", 1), </span><br><span class="line">                                                                            new Tuple2&lt;&gt;("a", 2));</span><br><span class="line">DataStreamSource&lt;Tuple2&lt;String, Integer&gt;&gt; streamSource02 = env.fromElements(new Tuple2&lt;&gt;("b", 1), </span><br><span class="line">                                                                            new Tuple2&lt;&gt;("b", 2));</span><br><span class="line">streamSource01.union(streamSource02);</span><br><span class="line">streamSource01.union(streamSource01,streamSource02);</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-7-Connect-DataStream-DataStream-→-ConnectedStreams"><a href="#2-7-Connect-DataStream-DataStream-→-ConnectedStreams" class="headerlink" title="2.7 Connect [DataStream,DataStream → ConnectedStreams]"></a>2.7 Connect [DataStream,DataStream → ConnectedStreams]</h3><p>Connect 操作用于连接两个或者多个类型不同的 DataStream ，其返回的类型是 ConnectedStreams ，此时被连接的多个 DataStreams 可以共享彼此之间的数据状态。但是需要注意的是由于不同 DataStream 之间的数据类型是不同的，如果想要进行后续的计算操作，还需要通过 CoMap 或 CoFlatMap 将 ConnectedStreams  转换回 DataStream：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">DataStreamSource&lt;Tuple2&lt;String, Integer&gt;&gt; streamSource01 = env.fromElements(<span class="keyword">new</span> Tuple2&lt;&gt;(<span class="string">"a"</span>, <span class="number">3</span>), </span><br><span class="line">                                                                            <span class="keyword">new</span> Tuple2&lt;&gt;(<span class="string">"b"</span>, <span class="number">5</span>));</span><br><span class="line">DataStreamSource&lt;Integer&gt; streamSource02 = env.fromElements(<span class="number">2</span>, <span class="number">3</span>, <span class="number">9</span>);</span><br><span class="line"><span class="comment">// 使用connect进行连接</span></span><br><span class="line">ConnectedStreams&lt;Tuple2&lt;String, Integer&gt;, Integer&gt; connect = streamSource01.connect(streamSource02);</span><br><span class="line">connect.map(<span class="keyword">new</span> CoMapFunction&lt;Tuple2&lt;String, Integer&gt;, Integer, Integer&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">map1</span><span class="params">(Tuple2&lt;String, Integer&gt; value)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> value.f1;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">map2</span><span class="params">(Integer value)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> value;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).map(x -&gt; x * <span class="number">100</span>).print();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 输出：</span></span><br><span class="line"><span class="number">300</span> <span class="number">500</span> <span class="number">200</span> <span class="number">900</span> <span class="number">300</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-8-Split-和-Select"><a href="#2-8-Split-和-Select" class="headerlink" title="2.8 Split 和 Select"></a>2.8 Split 和 Select</h3><ul>
+<li><strong>Split [DataStream → SplitStream]</strong>：用于将一个 DataStream 按照指定规则进行拆分为多个 DataStream，需要注意的是这里进行的是逻辑拆分，即 Split 只是将数据贴上不同的类型标签，但最终返回的仍然只是一个 SplitStream；</li>
+<li><strong>Select [SplitStream → DataStream]</strong>：想要从逻辑拆分的 SplitStream 中获取真实的不同类型的 DataStream，需要使用 Select 算子，示例如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">DataStreamSource&lt;Integer&gt; streamSource = env.fromElements(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>);</span><br><span class="line"><span class="comment">// 标记</span></span><br><span class="line">SplitStream&lt;Integer&gt; split = streamSource.split(<span class="keyword">new</span> OutputSelector&lt;Integer&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Iterable&lt;String&gt; <span class="title">select</span><span class="params">(Integer value)</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; output = <span class="keyword">new</span> ArrayList&lt;String&gt;();</span><br><span class="line">        output.add(value % <span class="number">2</span> == <span class="number">0</span> ? <span class="string">"even"</span> : <span class="string">"odd"</span>);</span><br><span class="line">        <span class="keyword">return</span> output;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 获取偶数数据集</span></span><br><span class="line">split.select(<span class="string">"even"</span>).print();</span><br><span class="line"><span class="comment">// 输出 2,4,6,8</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-9-project-DataStream-→-DataStream"><a href="#2-9-project-DataStream-→-DataStream" class="headerlink" title="2.9 project [DataStream → DataStream]"></a>2.9 project [DataStream → DataStream]</h3><p>project 主要用于获取 tuples 中的指定字段集，示例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">DataStreamSource&lt;Tuple3&lt;String, Integer, String&gt;&gt; streamSource = env.fromElements(</span><br><span class="line">                                                                         <span class="keyword">new</span> Tuple3&lt;&gt;(<span class="string">"li"</span>, <span class="number">22</span>, <span class="string">"2018-09-23"</span>),</span><br><span class="line">                                                                         <span class="keyword">new</span> Tuple3&lt;&gt;(<span class="string">"ming"</span>, <span class="number">33</span>, <span class="string">"2020-09-23"</span>));</span><br><span class="line">streamSource.project(<span class="number">0</span>,<span class="number">2</span>).print();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 输出</span></span><br><span class="line">(li,<span class="number">2018</span>-<span class="number">09</span>-<span class="number">23</span>)</span><br><span class="line">(ming,<span class="number">2020</span>-<span class="number">09</span>-<span class="number">23</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="三、物理分区"><a href="#三、物理分区" class="headerlink" title="三、物理分区"></a>三、物理分区</h2><p>物理分区 (Physical partitioning) 是 Flink 提供的底层的 API，允许用户采用内置的分区规则或者自定义的分区规则来对数据进行分区，从而避免数据在某些分区上过于倾斜，常用的分区规则如下：</p>
+<h3 id="3-1-Random-partitioning-DataStream-→-DataStream"><a href="#3-1-Random-partitioning-DataStream-→-DataStream" class="headerlink" title="3.1 Random partitioning [DataStream → DataStream]"></a>3.1 Random partitioning [DataStream → DataStream]</h3><p>随机分区 (Random partitioning) 用于随机的将数据分布到所有下游分区中，通过 shuffle 方法来进行实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dataStream.shuffle();</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-Rebalancing-DataStream-→-DataStream"><a href="#3-2-Rebalancing-DataStream-→-DataStream" class="headerlink" title="3.2 Rebalancing [DataStream → DataStream]"></a>3.2 Rebalancing [DataStream → DataStream]</h3><p>Rebalancing 采用轮询的方式将数据进行分区，其适合于存在数据倾斜的场景下，通过 rebalance 方法进行实现：  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dataStream.rebalance();</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3-Rescaling-DataStream-→-DataStream"><a href="#3-3-Rescaling-DataStream-→-DataStream" class="headerlink" title="3.3 Rescaling [DataStream → DataStream]"></a>3.3 Rescaling [DataStream → DataStream]</h3><p>当采用 Rebalancing 进行分区平衡时，其实现的是全局性的负载均衡，数据会通过网络传输到其他节点上并完成分区数据的均衡。 而 Rescaling 则是低配版本的 rebalance，它不需要额外的网络开销，它只会对上下游的算子之间进行重新均衡，通过 rescale 方法进行实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dataStream.rescale();</span><br></pre></td></tr></table></figure>
+
+<p>ReScale 这个单词具有重新缩放的意义，其对应的操作也是如此，具体如下：如果上游 operation 并行度为 2，而下游的 operation 并行度为 6，则其中 1 个上游的 operation 会将元素分发到 3 个下游 operation，另 1 个上游 operation 则会将元素分发到另外 3 个下游 operation。反之亦然，如果上游的 operation 并行度为 6，而下游 operation 并行度为 2，则其中 3 个上游 operation 会将元素分发到 1 个下游 operation，另 3 个上游 operation 会将元素分发到另外 1 个下游operation：</p>
+<p><img src="/img/1586420666492.png" alt="1586420666492"></p>
+<h3 id="3-4-Broadcasting-DataStream-→-DataStream"><a href="#3-4-Broadcasting-DataStream-→-DataStream" class="headerlink" title="3.4 Broadcasting [DataStream → DataStream]"></a>3.4 Broadcasting [DataStream → DataStream]</h3><p>将数据分发到所有分区上。通常用于小数据集与大数据集进行关联的情况下，此时可以将小数据集广播到所有分区上，避免频繁的跨分区关联，通过 broadcast 方法进行实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dataStream.broadcast();</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-5-Custom-partitioning-DataStream-→-DataStream"><a href="#3-5-Custom-partitioning-DataStream-→-DataStream" class="headerlink" title="3.5 Custom partitioning [DataStream → DataStream]"></a>3.5 Custom partitioning [DataStream → DataStream]</h3><p>Flink 运行用户采用自定义的分区规则来实现分区，此时需要通过实现 Partitioner 接口来自定义分区规则，并指定对应的分区键，示例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"> DataStreamSource&lt;Tuple2&lt;String, Integer&gt;&gt; streamSource = env.fromElements(<span class="keyword">new</span> Tuple2&lt;&gt;(<span class="string">"Hadoop"</span>, <span class="number">1</span>),</span><br><span class="line">                <span class="keyword">new</span> Tuple2&lt;&gt;(<span class="string">"Spark"</span>, <span class="number">1</span>),</span><br><span class="line">                <span class="keyword">new</span> Tuple2&lt;&gt;(<span class="string">"Flink-streaming"</span>, <span class="number">2</span>),</span><br><span class="line">                <span class="keyword">new</span> Tuple2&lt;&gt;(<span class="string">"Flink-batch"</span>, <span class="number">4</span>),</span><br><span class="line">                <span class="keyword">new</span> Tuple2&lt;&gt;(<span class="string">"Storm"</span>, <span class="number">4</span>),</span><br><span class="line">                <span class="keyword">new</span> Tuple2&lt;&gt;(<span class="string">"HBase"</span>, <span class="number">3</span>));</span><br><span class="line">streamSource.partitionCustom(<span class="keyword">new</span> Partitioner&lt;String&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">partition</span><span class="params">(String key, <span class="keyword">int</span> numPartitions)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 将第一个字段包含flink的Tuple2分配到同一个分区</span></span><br><span class="line">        <span class="keyword">return</span> key.toLowerCase().contains(<span class="string">"flink"</span>) ? <span class="number">0</span> : <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;, <span class="number">0</span>).print();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 输出如下：</span></span><br><span class="line"><span class="number">1</span>&gt; (Flink-streaming,<span class="number">2</span>)</span><br><span class="line"><span class="number">1</span>&gt; (Flink-batch,<span class="number">4</span>)</span><br><span class="line"><span class="number">2</span>&gt; (Hadoop,<span class="number">1</span>)</span><br><span class="line"><span class="number">2</span>&gt; (Spark,<span class="number">1</span>)</span><br><span class="line"><span class="number">2</span>&gt; (Storm,<span class="number">4</span>)</span><br><span class="line"><span class="number">2</span>&gt; (HBase,<span class="number">3</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、任务链和资源组"><a href="#四、任务链和资源组" class="headerlink" title="四、任务链和资源组"></a>四、任务链和资源组</h2><p>任务链和资源组 ( Task chaining and resource groups ) 也是 Flink 提供的底层 API，用于控制任务链和资源分配。默认情况下，如果操作允许 (例如相邻的两次 map 操作) ，则 Flink 会尝试将它们在同一个线程内进行，从而可以获取更好的性能。但是 Flink 也允许用户自己来控制这些行为，这就是任务链和资源组 API：</p>
+<h3 id="4-1-startNewChain"><a href="#4-1-startNewChain" class="headerlink" title="4.1 startNewChain"></a>4.1 startNewChain</h3><p>startNewChain 用于基于当前 operation 开启一个新的任务链。如下所示，基于第一个 map 开启一个新的任务链，此时前一个 map 和 后一个 map 将处于同一个新的任务链中，但它们与 filter 操作则分别处于不同的任务链中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">someStream.filter(...).map(...).startNewChain().map(...);</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-2-disableChaining"><a href="#4-2-disableChaining" class="headerlink" title="4.2 disableChaining"></a>4.2 disableChaining</h3><p> disableChaining 操作用于禁止将其他操作与当前操作放置于同一个任务链中，示例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">someStream.map(...).disableChaining();</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-3-slotSharingGroup"><a href="#4-3-slotSharingGroup" class="headerlink" title="4.3 slotSharingGroup"></a>4.3 slotSharingGroup</h3><p>slot 是任务管理器  (TaskManager) 所拥有资源的固定子集，每个操作 (operation) 的子任务 (sub task) 都需要获取 slot 来执行计算，但每个操作所需要资源的大小都是不相同的，为了更好地利用资源，Flink 允许不同操作的子任务被部署到同一 slot 中。slotSharingGroup 用于设置操作的 slot 共享组 (slot sharing group) ，Flink 会将具有相同 slot 共享组的操作放到同一个 slot 中 。示例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">someStream.filter(...).slotSharingGroup(<span class="string">"slotSharingGroupName"</span>);</span><br></pre></td></tr></table></figure>
+
+<h1 id="Sink"><a href="#Sink" class="headerlink" title="Sink"></a>Sink</h1><h2 id="一、Data-Sinks"><a href="#一、Data-Sinks" class="headerlink" title="一、Data Sinks"></a>一、Data Sinks</h2><p>在使用 Flink 进行数据处理时，数据经 Data Source 流入，然后通过系列 Transformations 的转化，最终可以通过 Sink 将计算结果进行输出，Flink Data Sinks 就是用于定义数据流最终的输出位置。Flink 提供了几个较为简单的 Sink API 用于日常的开发，具体如下：</p>
+<h3 id="1-1-writeAsText"><a href="#1-1-writeAsText" class="headerlink" title="1.1 writeAsText"></a>1.1 writeAsText</h3><p><code>writeAsText</code> 用于将计算结果以文本的方式并行地写入到指定文件夹下，除了路径参数是必选外，该方法还可以通过指定第二个参数来定义输出模式，它有以下两个可选值：</p>
+<ul>
+<li><strong>WriteMode.NO_OVERWRITE</strong>：当指定路径上不存在任何文件时，才执行写出操作；</li>
+<li><strong>WriteMode.OVERWRITE</strong>：不论指定路径上是否存在文件，都执行写出操作；如果原来已有文件，则进行覆盖。</li>
+</ul>
+<p>使用示例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">streamSource.writeAsText(<span class="string">"D:\\out"</span>, FileSystem.WriteMode.OVERWRITE);</span><br></pre></td></tr></table></figure>
+
+<p>以上写出是以并行的方式写出到多个文件，如果想要将输出结果全部写出到一个文件，需要设置其并行度为 1：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">streamSource.writeAsText(<span class="string">"D:\\out"</span>, FileSystem.WriteMode.OVERWRITE).setParallelism(<span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-writeAsCsv"><a href="#1-2-writeAsCsv" class="headerlink" title="1.2 writeAsCsv"></a>1.2 writeAsCsv</h3><p><code>writeAsCsv</code> 用于将计算结果以 CSV 的文件格式写出到指定目录，除了路径参数是必选外，该方法还支持传入输出模式，行分隔符，和字段分隔符三个额外的参数，其方法定义如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">writeAsCsv(String path, WriteMode writeMode, String rowDelimiter, String fieldDelimiter)</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-3-print-printToErr"><a href="#1-3-print-printToErr" class="headerlink" title="1.3 print / printToErr"></a>1.3 print / printToErr</h3><p><code>print / printToErr</code> 是测试当中最常用的方式，用于将计算结果以标准输出流或错误输出流的方式打印到控制台上。</p>
+<h3 id="1-4-writeUsingOutputFormat"><a href="#1-4-writeUsingOutputFormat" class="headerlink" title="1.4 writeUsingOutputFormat"></a>1.4 writeUsingOutputFormat</h3><p>采用自定义的输出格式将计算结果写出，上面介绍的 <code>writeAsText</code> 和 <code>writeAsCsv</code> 其底层调用的都是该方法，源码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> DataStreamSink&lt;T&gt; <span class="title">writeAsText</span><span class="params">(String path, WriteMode writeMode)</span> </span>&#123;</span><br><span class="line">    TextOutputFormat&lt;T&gt; tof = <span class="keyword">new</span> TextOutputFormat&lt;&gt;(<span class="keyword">new</span> Path(path));</span><br><span class="line">    tof.setWriteMode(writeMode);</span><br><span class="line">    <span class="keyword">return</span> writeUsingOutputFormat(tof);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-5-writeToSocket"><a href="#1-5-writeToSocket" class="headerlink" title="1.5 writeToSocket"></a>1.5 writeToSocket</h3><p><code>writeToSocket</code> 用于将计算结果以指定的格式写出到 Socket 中，使用示例如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">streamSource.writeToSocket("192.168.0.226", 9999, new SimpleStringSchema());</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、Streaming-Connectors"><a href="#二、Streaming-Connectors" class="headerlink" title="二、Streaming Connectors"></a>二、Streaming Connectors</h2><p>除了上述 API 外，Flink 中还内置了系列的 Connectors 连接器，用于将计算结果输入到常用的存储系统或者消息中间件中，具体如下：</p>
+<ul>
+<li>Apache Kafka (支持 source 和 sink)</li>
+<li>Apache Cassandra (sink)</li>
+<li>Amazon Kinesis Streams (source/sink)</li>
+<li>Elasticsearch (sink)</li>
+<li>Hadoop FileSystem (sink)</li>
+<li>RabbitMQ (source/sink)</li>
+<li>Apache NiFi (source/sink)</li>
+<li>Google PubSub (source/sink)</li>
+</ul>
+<p>除了内置的连接器外，你还可以通过 Apache Bahir 的连接器扩展 Flink。Apache Bahir 旨在为分布式数据分析系统 (如 Spark，Flink) 等提供功能上的扩展，当前其支持的与 Flink Sink 相关的连接器如下：</p>
+<ul>
+<li>Apache ActiveMQ (source/sink)</li>
+<li>Apache Flume (sink)</li>
+<li>Redis (sink)</li>
+<li>Akka (sink)</li>
+</ul>
+<p>这里接着在 Data Sources 章节介绍的整合 Kafka Source 的基础上，将 Kafka Sink 也一并进行整合，具体步骤如下。</p>
+<h2 id="三、整合-Kafka-Sink"><a href="#三、整合-Kafka-Sink" class="headerlink" title="三、整合 Kafka Sink"></a>三、整合 Kafka Sink</h2><h3 id="3-1-addSink"><a href="#3-1-addSink" class="headerlink" title="3.1 addSink"></a>3.1 addSink</h3><p>Flink 提供了 addSink 方法用来调用自定义的 Sink 或者第三方的连接器，想要将计算结果写出到 Kafka，需要使用该方法来调用 Kafka 的生产者 FlinkKafkaProducer，具体代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 1.指定Kafka的相关配置属性</span></span><br><span class="line">Properties properties = <span class="keyword">new</span> Properties();</span><br><span class="line">properties.setProperty(<span class="string">"bootstrap.servers"</span>, <span class="string">"192.168.200.0:9092"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2.接收Kafka上的数据</span></span><br><span class="line">DataStream&lt;String&gt; stream = env</span><br><span class="line">    .addSource(<span class="keyword">new</span> FlinkKafkaConsumer&lt;&gt;(<span class="string">"flink-stream-in-topic"</span>, <span class="keyword">new</span> SimpleStringSchema(), properties));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3.定义计算结果到 Kafka ProducerRecord 的转换</span></span><br><span class="line">KafkaSerializationSchema&lt;String&gt; kafkaSerializationSchema = <span class="keyword">new</span> KafkaSerializationSchema&lt;String&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> ProducerRecord&lt;<span class="keyword">byte</span>[], <span class="keyword">byte</span>[]&gt; serialize(String element, <span class="meta">@Nullable</span> Long timestamp) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ProducerRecord&lt;&gt;(<span class="string">"flink-stream-out-topic"</span>, element.getBytes());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 4. 定义Flink Kafka生产者</span></span><br><span class="line">FlinkKafkaProducer&lt;String&gt; kafkaProducer = <span class="keyword">new</span> FlinkKafkaProducer&lt;&gt;(<span class="string">"flink-stream-out-topic"</span>,</span><br><span class="line">                                                                    kafkaSerializationSchema,</span><br><span class="line">                                                                    properties,</span><br><span class="line">                                               FlinkKafkaProducer.Semantic.AT_LEAST_ONCE, <span class="number">5</span>);</span><br><span class="line"><span class="comment">// 5. 将接收到输入元素*2后写出到Kafka</span></span><br><span class="line">stream.map((MapFunction&lt;String, String&gt;) value -&gt; value + value).addSink(kafkaProducer);</span><br><span class="line">env.execute(<span class="string">"Flink Streaming"</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-创建输出主题"><a href="#3-2-创建输出主题" class="headerlink" title="3.2 创建输出主题"></a>3.2 创建输出主题</h3><p>创建用于输出测试的主题：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-topics.sh --create \</span><br><span class="line">                    --bootstrap-server hadoop001:9092 \</span><br><span class="line">                    --replication-factor 1 \</span><br><span class="line">                    --partitions 1  \</span><br><span class="line">                    --topic flink-stream-out-topic</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> 查看所有主题</span><br><span class="line"> bin/kafka-topics.sh --list --bootstrap-server hadoop001:9092</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3-启动消费者"><a href="#3-3-启动消费者" class="headerlink" title="3.3 启动消费者"></a>3.3 启动消费者</h3><p>启动一个 Kafka 消费者，用于查看 Flink 程序的输出情况：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-console-consumer.sh --bootstrap-server hadoop001:<span class="number">9092</span> --topic flink-stream-out-topic</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-4-测试结果"><a href="#3-4-测试结果" class="headerlink" title="3.4 测试结果"></a>3.4 测试结果</h3><p>在 Kafka 生产者上发送消息到 Flink 程序，观察 Flink 程序转换后的输出情况，具体如下：</p>
+<p><img src="/img/1586421679558.png" alt="1586421679558"></p>
+<p>可以看到 Kafka 生成者发出的数据已经被 Flink 程序正常接收到，并经过转换后又输出到 Kafka 对应的 Topic 上。</p>
+<h2 id="四、自定义-Sink"><a href="#四、自定义-Sink" class="headerlink" title="四、自定义 Sink"></a>四、自定义 Sink</h2><p>除了使用内置的第三方连接器外，Flink 还支持使用自定义的 Sink 来满足多样化的输出需求。想要实现自定义的 Sink ，需要直接或者间接实现 SinkFunction 接口。通常情况下，我们都是实现其抽象类 RichSinkFunction，相比于 SinkFunction ，其提供了更多的与生命周期相关的方法。两者间的关系如下：</p>
+<p> <img src="/img/1586421691428.png" alt="1586421691428"></p>
+<p>这里我们以自定义一个 FlinkToMySQLSink 为例，将计算结果写出到 MySQL 数据库中，具体步骤如下：</p>
+<h3 id="4-1-导入依赖"><a href="#4-1-导入依赖" class="headerlink" title="4.1 导入依赖"></a>4.1 导入依赖</h3><p>首先需要导入 MySQL 相关的依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>mysql<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>mysql-connector-java<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>8.0.16<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-2-自定义-Sink"><a href="#4-2-自定义-Sink" class="headerlink" title="4.2 自定义 Sink"></a>4.2 自定义 Sink</h3><p>继承自 RichSinkFunction，实现自定义的 Sink ：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FlinkToMySQLSink</span> <span class="keyword">extends</span> <span class="title">RichSinkFunction</span>&lt;<span class="title">Employee</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> PreparedStatement stmt;</span><br><span class="line">    <span class="keyword">private</span> Connection conn;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">open</span><span class="params">(Configuration parameters)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        Class.forName(<span class="string">"com.mysql.cj.jdbc.Driver"</span>);</span><br><span class="line">        conn = DriverManager.getConnection(<span class="string">"jdbc:mysql://192.168.0.229:3306/employees"</span> +</span><br><span class="line">                                           <span class="string">"?characterEncoding=UTF-8&amp;serverTimezone=UTC&amp;useSSL=false"</span>, </span><br><span class="line">                                           <span class="string">"root"</span>, </span><br><span class="line">                                           <span class="string">"123456"</span>);</span><br><span class="line">        String sql = <span class="string">"insert into emp(name, age, birthday) values(?, ?, ?)"</span>;</span><br><span class="line">        stmt = conn.prepareStatement(sql);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">invoke</span><span class="params">(Employee value, Context context)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        stmt.setString(<span class="number">1</span>, value.getName());</span><br><span class="line">        stmt.setInt(<span class="number">2</span>, value.getAge());</span><br><span class="line">        stmt.setDate(<span class="number">3</span>, value.getBirthday());</span><br><span class="line">        stmt.executeUpdate();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">close</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.close();</span><br><span class="line">        <span class="keyword">if</span> (stmt != <span class="keyword">null</span>) &#123;</span><br><span class="line">            stmt.close();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (conn != <span class="keyword">null</span>) &#123;</span><br><span class="line">            conn.close();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-3-使用自定义-Sink"><a href="#4-3-使用自定义-Sink" class="headerlink" title="4.3 使用自定义 Sink"></a>4.3 使用自定义 Sink</h3><p>想要使用自定义的 Sink，同样是需要调用 addSink 方法，具体如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line">Date date = <span class="keyword">new</span> Date(System.currentTimeMillis());</span><br><span class="line">DataStreamSource&lt;Employee&gt; streamSource = env.fromElements(</span><br><span class="line">    <span class="keyword">new</span> Employee(<span class="string">"hei"</span>, <span class="number">10</span>, date),</span><br><span class="line">    <span class="keyword">new</span> Employee(<span class="string">"bai"</span>, <span class="number">20</span>, date),</span><br><span class="line">    <span class="keyword">new</span> Employee(<span class="string">"ying"</span>, <span class="number">30</span>, date));</span><br><span class="line">streamSource.addSink(<span class="keyword">new</span> FlinkToMySQLSink());</span><br><span class="line">env.execute();</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-4-测试结果"><a href="#4-4-测试结果" class="headerlink" title="4.4 测试结果"></a>4.4 测试结果</h3><p>启动程序，观察数据库写入情况：</p>
+<p><img src="/img/1586421708524.png" alt="1586421708524"></p>
+<p>数据库成功写入，代表自定义 Sink 整合成功。</p>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;">
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/大数据/" rel="tag"><i class="fa fa-tag"></i> 大数据</a>
+          
+            <a href="/tags/Flink/" rel="tag"><i class="fa fa-tag"></i> Flink</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/03/31/15.大数据/Spark/1.Spark 介绍/" rel="next" title="Spark介绍">
+                <i class="fa fa-chevron-left"></i> Spark介绍
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/04/09/15.大数据/Flink/16-Flink(Source-KafkaSink-Mysql)/" rel="prev" title="Flink(Source-KafkaSink-Mysql)">
+                Flink(Source-KafkaSink-Mysql) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="刘小恺(Kyle)">
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">Python 、Machine learning 、Docker k8s  crawler 、Golang 、Web</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">261</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">68</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">74</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Data-Source"><span class="nav-text">Data Source</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、内置-Data-Source"><span class="nav-text">一、内置 Data Source</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-基于文件构建"><span class="nav-text">1.1 基于文件构建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-基于集合构建"><span class="nav-text">1.2 基于集合构建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-基于-Socket-构建"><span class="nav-text">1.3  基于 Socket 构建</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、自定义-Data-Source"><span class="nav-text">二、自定义 Data Source</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-SourceFunction"><span class="nav-text">2.1 SourceFunction</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-ParallelSourceFunction-和-RichParallelSourceFunction"><span class="nav-text">2.2 ParallelSourceFunction 和 RichParallelSourceFunction</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、Streaming-Connectors"><span class="nav-text">三、Streaming Connectors</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-内置连接器"><span class="nav-text">3.1 内置连接器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-整合-Kakfa"><span class="nav-text">3.2 整合 Kakfa</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-导入依赖"><span class="nav-text">1. 导入依赖</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-代码开发"><span class="nav-text">2. 代码开发</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-整合测试"><span class="nav-text">3.3 整合测试</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-启动-Kakfa"><span class="nav-text">1. 启动 Kakfa</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-创建-Topic"><span class="nav-text">2. 创建 Topic</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-启动-Producer"><span class="nav-text">3. 启动 Producer</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-测试结果"><span class="nav-text">4. 测试结果</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Transform"><span class="nav-text">Transform</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、Transformations-分类"><span class="nav-text">一、Transformations 分类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、DataStream-Transformations"><span class="nav-text">二、DataStream Transformations</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-Map-DataStream-→-DataStream"><span class="nav-text">2.1 Map [DataStream → DataStream]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-FlatMap-DataStream-→-DataStream"><span class="nav-text">2.2 FlatMap [DataStream → DataStream]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-Filter-DataStream-→-DataStream"><span class="nav-text">2.3 Filter [DataStream → DataStream]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-KeyBy-和-Reduce"><span class="nav-text">2.4 KeyBy 和 Reduce</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-Aggregations-KeyedStream-→-DataStream"><span class="nav-text">2.5 Aggregations [KeyedStream → DataStream]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-6-Union-DataStream-→-DataStream"><span class="nav-text">2.6 Union [DataStream* → DataStream]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-7-Connect-DataStream-DataStream-→-ConnectedStreams"><span class="nav-text">2.7 Connect [DataStream,DataStream → ConnectedStreams]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-8-Split-和-Select"><span class="nav-text">2.8 Split 和 Select</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-9-project-DataStream-→-DataStream"><span class="nav-text">2.9 project [DataStream → DataStream]</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、物理分区"><span class="nav-text">三、物理分区</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-Random-partitioning-DataStream-→-DataStream"><span class="nav-text">3.1 Random partitioning [DataStream → DataStream]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-Rebalancing-DataStream-→-DataStream"><span class="nav-text">3.2 Rebalancing [DataStream → DataStream]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-Rescaling-DataStream-→-DataStream"><span class="nav-text">3.3 Rescaling [DataStream → DataStream]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-Broadcasting-DataStream-→-DataStream"><span class="nav-text">3.4 Broadcasting [DataStream → DataStream]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-5-Custom-partitioning-DataStream-→-DataStream"><span class="nav-text">3.5 Custom partitioning [DataStream → DataStream]</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、任务链和资源组"><span class="nav-text">四、任务链和资源组</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-startNewChain"><span class="nav-text">4.1 startNewChain</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-disableChaining"><span class="nav-text">4.2 disableChaining</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-slotSharingGroup"><span class="nav-text">4.3 slotSharingGroup</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Sink"><span class="nav-text">Sink</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、Data-Sinks"><span class="nav-text">一、Data Sinks</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-writeAsText"><span class="nav-text">1.1 writeAsText</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-writeAsCsv"><span class="nav-text">1.2 writeAsCsv</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-print-printToErr"><span class="nav-text">1.3 print / printToErr</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-writeUsingOutputFormat"><span class="nav-text">1.4 writeUsingOutputFormat</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-5-writeToSocket"><span class="nav-text">1.5 writeToSocket</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、Streaming-Connectors"><span class="nav-text">二、Streaming Connectors</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、整合-Kafka-Sink"><span class="nav-text">三、整合 Kafka Sink</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-addSink"><span class="nav-text">3.1 addSink</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-创建输出主题"><span class="nav-text">3.2 创建输出主题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-启动消费者"><span class="nav-text">3.3 启动消费者</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-测试结果"><span class="nav-text">3.4 测试结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、自定义-Sink"><span class="nav-text">四、自定义 Sink</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-导入依赖"><span class="nav-text">4.1 导入依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-自定义-Sink"><span class="nav-text">4.2 自定义 Sink</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-使用自定义-Sink"><span class="nav-text">4.3 使用自定义 Sink</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-4-测试结果"><span class="nav-text">4.4 测试结果</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/reading_progress/reading_progress.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

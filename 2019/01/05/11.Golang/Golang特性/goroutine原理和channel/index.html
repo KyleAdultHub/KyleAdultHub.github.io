@@ -131,7 +131,7 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/1546663612721.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/1546663635363.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/1546663659450.png">
-<meta property="og:updated_time" content="2019-01-31T10:31:04.326Z">
+<meta property="og:updated_time" content="2020-04-14T09:02:41.570Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="goroutine原理以及channel使用">
 <meta name="twitter:description" content="一、goroutine作用goroutine的本质是协程，是实现并行计算的核心，和python的async编程类似，但是又不需要我们手动的去创建携程并通过实践循环来启动。goroutine异步执行函数，只需使用go关键字+函数名即可启动一个协程，函数则直接处于异步执行的状态。 1go func()//通过go关键字启动一个协程来运行函数  二、goroutine的原理携程概念介绍协程拥有自己的寄存">
@@ -520,7 +520,7 @@
 <h4 id="循环管道"><a href="#循环管道" class="headerlink" title="循环管道"></a>循环管道</h4><p><strong>需要注意</strong></p>
 <ul>
 <li>使用range循环管道，如果管道未关闭会引发deadlock错误。</li>
-<li>如果采用for range 循环已经关闭的管道，当管道没有数据时候，读取的数据会是管道的默认值，并且循环不会退出。</li>
+<li>如果采用for range 循环已经关闭的管道，只能遍历有默认值的管道， 当管道没有数据时候，读取的数据会是管道的默认值，并且循环不会退出。</li>
 </ul>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">"fmt"</span></span><br><span class="line">    <span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    mychannel := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>,<span class="number">10</span>)</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>;i &lt; <span class="number">10</span>;i++&#123;</span><br><span class="line">        mychannel &lt;- i</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">close</span>(mychannel)  <span class="comment">//关闭管道</span></span><br><span class="line">    fmt.Println(<span class="string">"data lenght: "</span>,<span class="built_in">len</span>(mychannel))</span><br><span class="line">    <span class="keyword">for</span>  v := <span class="keyword">range</span> mychannel &#123;  <span class="comment">//循环管道</span></span><br><span class="line">        fmt.Println(v)</span><br><span class="line">    &#125;</span><br><span class="line">    fmt.Printf(<span class="string">"data lenght:  %d"</span>,<span class="built_in">len</span>(mychannel))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 

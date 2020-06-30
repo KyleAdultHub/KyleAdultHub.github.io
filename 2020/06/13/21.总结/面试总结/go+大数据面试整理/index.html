@@ -166,7 +166,7 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/1587988654365.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/1587991593319.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/1578902472291.png">
-<meta property="og:updated_time" content="2020-06-13T08:50:34.557Z">
+<meta property="og:updated_time" content="2020-06-29T08:53:40.742Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="go + 大数据面试整理">
 <meta name="twitter:description" content="Golang1. golang中常量是怎么实现的从汇编中看是对字符串常量加了一个标号，同时设置为SRODATA，也就是只读，对数字常量直接在代码中作为立即数使用了 2. golang的make和new的区别是什么 new有点像c++里面的new,用来初始化各种type，然后返回其指针。 只不过由于没有构造函数的存在，所以全部用零值来填充，比较特殊的是slice,map,channel， 它们的零值">
@@ -1353,6 +1353,18 @@
 <p>6、key_len 顾名思义就是索引长度字段。表示mysql使用的索引的长度</p>
 <p>7、ref 这个字段一般是指一些常量用于选择过滤</p>
 <p>8、rows  预估结果集的条数，可能不一定完全准确</p>
+<p>9、extra   包含额外的信息。</p>
+<p>​    a:   using filesort:       说明mysql无法利用索引进行排序，只能利用排序算法进行排序，会消耗额外的位置</p>
+<p>​        explain select * from emp order by sal;</p>
+<p>​    b:   using temporary:    建立临时表来保存中间结果，查询完成之后把临时表删除</p>
+<p>​        explain select ename,count(*) from emp where deptno = 10 group by ename;</p>
+<p>​    c:   using index:     这个表示当前的查询时覆盖索引的，直接从索引中读取数据，而不用访问数据表。如果同时出现using where 表名索引被用来执行索引键值的查找，如果没有，表面索引被用来读取数据，而不是真的查找</p>
+<p>​        explain select deptno,count(*) from emp group by deptno limit 10;</p>
+<p>​    d:   using where:       使用where进行条件过滤</p>
+<p>​        explain select * from t_user where id = 1;</p>
+<p>​    e:   using join buffer:      使用连接缓存</p>
+<p>​    f:    impossible where：where语句的结果总是false</p>
+<p>​        explain select * from emp where empno = 7469;</p>
 <h3 id="Mysql-联合索引"><a href="#Mysql-联合索引" class="headerlink" title="Mysql 联合索引"></a>Mysql 联合索引</h3><h4 id="联合索引的最左前缀"><a href="#联合索引的最左前缀" class="headerlink" title="联合索引的最左前缀"></a>联合索引的最左前缀</h4><p>MySQL的user表中，对a,b,c三个字段建立联合索引，那么查询时使用其中的2个作为查询条件，是否还会走索引？</p>
 <p>根据查询字段的位置不同来决定，如查询a,     a,b    a,b,c    a,c   都可以走索引的，其他条件的查询不能走索引。</p>
 <p>组合索引 有“最左前缀”原则。就是只从最左面的开始组合，并不是所有只要含有这三列存在的字段的查询都会用到该组合索引。</p>

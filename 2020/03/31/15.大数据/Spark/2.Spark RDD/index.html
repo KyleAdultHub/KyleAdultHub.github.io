@@ -146,7 +146,7 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/1586768527736.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/1586768569212.png">
 <meta property="article:published_time" content="2020-03-31T08:00:00.000Z">
-<meta property="article:modified_time" content="2020-06-13T08:51:30.000Z">
+<meta property="article:modified_time" content="2020-08-07T03:43:38.746Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="大数据">
 <meta name="twitter:card" content="summary">
@@ -748,7 +748,7 @@
 <p>本文主要将详细分析checkpoint在以上两种场景的读写过程。</p>
 <h4 id="checkpoint的使用方法"><a href="#checkpoint的使用方法" class="headerlink" title="checkpoint的使用方法"></a>checkpoint的使用方法</h4><p>使用checkpoint对RDD做快照大体如下：</p>
 <blockquote>
-<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt; sc.setCheckpointDir(checkpointDir.toString)</span><br><span class="line">&gt; <span class="keyword">val</span> rdd = sc.makeRDD(<span class="number">1</span> to <span class="number">20</span>, numSlices = <span class="number">1</span>)</span><br><span class="line">&gt; rdd.checkpoint()</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sc.setCheckpointDir(checkpointDir.toString)</span><br><span class="line"><span class="keyword">val</span> rdd = sc.makeRDD(<span class="number">1</span> to <span class="number">20</span>, numSlices = <span class="number">1</span>)</span><br><span class="line">rdd.checkpoint()</span><br></pre></td></tr></table></figure>
 </blockquote>
 <p>首先，设置checkpoint的目录（一般是hdfs目录），这个目录用来将RDD相关的数据（包括每个partition实际数据，以及partitioner（如果有的话））。然后在RDD上调用checkpoint的方法即可。</p>
 <h4 id="checkpoint写流程"><a href="#checkpoint写流程" class="headerlink" title="checkpoint写流程"></a>checkpoint写流程</h4><p>可以看到checkpoint使用非常简单，设置checkpoint目录，然后调用RDD的checkpoint方法。针对checkpoint的写入流程，主要有以下四个问题：</p>
@@ -762,7 +762,7 @@
 <p>A3：在写完checkpoint数据到hdfs以后，将会调用rdd的markCheckpoined方法，主要斩断该rdd的对上游的依赖，以及将paritions置空等操作。</p>
 <p>A4：通过A1，A2可以知道，在RDD计算完毕后，会再次通过RunJob将每个partition数据保存到HDFS。这样RDD将会计算两次，所以为了避免此类情况，最好将RDD进行cache。即1.1中rdd的推荐使用方法如下：</p>
 <blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt; sc.setCheckpointDir(checkpointDir.toString)</span><br><span class="line">&gt; val rdd = sc.makeRDD(1 to 20, numSlices = 1)</span><br><span class="line">&gt; rdd.cache()</span><br><span class="line">&gt; rdd.checkpoint()</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sc.setCheckpointDir(checkpointDir.toString)</span><br><span class="line">val rdd &#x3D; sc.makeRDD(1 to 20, numSlices &#x3D; 1)</span><br><span class="line">rdd.cache()</span><br><span class="line">rdd.checkpoint()</span><br></pre></td></tr></table></figure>
 </blockquote>
 <h4 id="checkpoint-读流程"><a href="#checkpoint-读流程" class="headerlink" title="checkpoint 读流程"></a>checkpoint 读流程</h4><p>在做完checkpoint后，获取原来RDD的依赖以及partitions数据都将从CheckpointRDD中获取。也就是说获取原来rdd中每个partition数据以及partitioner等对象，都将转移到CheckPointRDD中。</p>
 <p>在CheckPointRDD的一个具体实现ReliableRDDCheckpintRDD中的compute方法中可以看到，将会从hdfs的checkpoint目录中恢复之前写入的partition数据。而partitioner对象（如果有）也会从之前写入hdfs的paritioner对象恢复。</p>
@@ -803,7 +803,7 @@
 </li>
 <li><p>对DataFrame进行处理</p>
 <p>personDF.show</p>
-<p><img src="/../img/1588066486223.png" alt="1588066486223"></p>
+<p><img src="/img/1588066486223.png" alt="1588066486223"></p>
 </li>
 </ol>
 <h3 id="Dataframe-常用操作"><a href="#Dataframe-常用操作" class="headerlink" title="Dataframe 常用操作"></a>Dataframe 常用操作</h3><p><strong>查看Dataframe 中内容</strong></p>
@@ -838,7 +838,7 @@
 <p>Window Operations有点类似于Storm中的State，可以设置窗口的大小和滑动窗口的间隔来动态的获取当前Steaming的允许状态</p>
 </li>
 </ol>
-<p><img src="/../img/1588069052538.png" alt="1588069052538"></p>
+<p><img src="/img/1588069052538.png" alt="1588069052538"></p>
 <h3 id="Output-Operations-on-DStreams"><a href="#Output-Operations-on-DStreams" class="headerlink" title="Output Operations on DStreams"></a>Output Operations on DStreams</h3><p>Output Operations可以将DStream的数据输出到外部的数据库或文件系统，当某个Output Operations原语被调用时（与RDD的Action相同），streaming程序才会开始真正的计算过程。</p>
 <table>
 <thead>
@@ -1113,7 +1113,7 @@
                 
                   <a href="/archives/%20%7C%7C%20archive">
                 
-                    <span class="site-state-item-count">269</span>
+                    <span class="site-state-item-count">279</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>

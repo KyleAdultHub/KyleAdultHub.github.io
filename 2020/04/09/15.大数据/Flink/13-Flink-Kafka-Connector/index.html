@@ -502,14 +502,14 @@
 <h2 id="搭建Kafka单机环境"><a href="#搭建Kafka单机环境" class="headerlink" title="搭建Kafka单机环境"></a>搭建Kafka单机环境</h2><p>我本地安装了一个kafka_2.11-2.1.0版本的kafka</p>
 <p><img src="/img/1586599934210.png" alt="1586599934210"></p>
 <p>启动Zookeeper和kafka server:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">启动zk：nohup bin/zookeeper-server-start.sh config/zookeeper.properties  &amp;</span><br><span class="line"></span><br><span class="line">启动server: nohup bin/kafka-server-start.sh config/server.properties &amp;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">启动zk：nohup bin&#x2F;zookeeper-server-start.sh config&#x2F;zookeeper.properties  &amp;</span><br><span class="line"></span><br><span class="line">启动server: nohup bin&#x2F;kafka-server-start.sh config&#x2F;server.properties &amp;</span><br></pre></td></tr></table></figure>
 
 <p>创建一个topic:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin&#x2F;kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test</span><br></pre></td></tr></table></figure>
 
 <p><img src="/img/1586599956034.png" alt="1586599956034"></p>
 <h2 id="Kafka作为Flink-Sink"><a href="#Kafka作为Flink-Sink" class="headerlink" title="Kafka作为Flink Sink"></a>Kafka作为Flink Sink</h2><p>首先pom依赖：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">            &lt;groupId&gt;org.apache.flink&lt;/groupId&gt;</span><br><span class="line">            &lt;artifactId&gt;flink-connector-kafka_2.11&lt;/artifactId&gt;</span><br><span class="line">            &lt;version&gt;1.7.0&lt;/version&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">            &lt;groupId&gt;org.apache.flink&lt;&#x2F;groupId&gt;</span><br><span class="line">            &lt;artifactId&gt;flink-connector-kafka_2.11&lt;&#x2F;artifactId&gt;</span><br><span class="line">            &lt;version&gt;1.7.0&lt;&#x2F;version&gt;</span><br><span class="line">&lt;&#x2F;dependency&gt;</span><br></pre></td></tr></table></figure>
 
 <p>向kafka写入数据：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">KafkaProducer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception</span>&#123;</span><br><span class="line"></span><br><span class="line">        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();</span><br><span class="line"></span><br><span class="line">        DataStreamSource&lt;String&gt; text = env.addSource(<span class="keyword">new</span> MyNoParalleSource()).setParallelism(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        Properties properties = <span class="keyword">new</span> Properties();</span><br><span class="line">        properties.setProperty(<span class="string">"bootstrap.servers"</span>, <span class="string">"localhost:9092"</span>);</span><br><span class="line">        <span class="comment">//new FlinkKafkaProducer("topn",new KeyedSerializationSchemaWrapper(new SimpleStringSchema()),properties,FlinkKafkaProducer.Semantic.EXACTLY_ONCE);</span></span><br><span class="line">	    FlinkKafkaProducer&lt;String&gt; producer = <span class="keyword">new</span> FlinkKafkaProducer(<span class="string">"test"</span>,<span class="keyword">new</span> SimpleStringSchema(),properties);</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">        //event-timestamp事件的发生时间</span></span><br><span class="line"><span class="comment">        producer.setWriteTimestampToKafka(true);</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">        text.addSink(producer);</span><br><span class="line">        env.execute();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;<span class="comment">//</span></span><br></pre></td></tr></table></figure>
@@ -599,8 +599,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/14-Flink%20SQL/" rel="next" title="Flink SQL">
-                <i class="fa fa-chevron-left"></i> Flink SQL
+              <a href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/16-Flink(Source-KafkaSink-Mysql)/" rel="next" title="Flink(Source-KafkaSink-Mysql)">
+                <i class="fa fa-chevron-left"></i> Flink(Source-KafkaSink-Mysql)
               </a>
             
           </div>
@@ -609,8 +609,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/1-Flink%E4%BB%8B%E7%BB%8D/" rel="prev" title="Flink 介绍">
-                Flink 介绍 <i class="fa fa-chevron-right"></i>
+              <a href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/15-Flink-Redis-Sink/" rel="prev" title="Flink-Redis-Sink">
+                Flink-Redis-Sink <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>

@@ -573,13 +573,13 @@
 <h4 id="令牌的使用"><a href="#令牌的使用" class="headerlink" title="令牌的使用"></a>令牌的使用</h4><p>A 网站拿到令牌以后，就可以向 B 网站的 API 请求数据了。</p>
 <p>此时，每个发到 API 的请求，都必须带有令牌。具体做法是在请求的头信息，加上一个<code>Authorization</code>字段，令牌就放在这个字段里面。</p>
 <blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt; curl -H <span class="string">"Authorization: Bearer ACCESS_TOKEN"</span> \</span><br><span class="line">&gt; <span class="string">"https://api.b.com"</span></span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -H <span class="string">"Authorization: Bearer ACCESS_TOKEN"</span> \</span><br><span class="line"><span class="string">"https://api.b.com"</span></span><br></pre></td></tr></table></figure>
 </blockquote>
 <p>上面命令中，<code>ACCESS_TOKEN</code>就是拿到的令牌。</p>
 <h4 id="更新令牌"><a href="#更新令牌" class="headerlink" title="更新令牌"></a>更新令牌</h4><p>令牌的有效期到了，如果让用户重新走一遍上面的流程，再申请一个新的令牌，很可能体验不好，而且也没有必要。OAuth 2.0 允许用户自动更新令牌。</p>
 <p>具体方法是，B 网站颁发令牌的时候，一次性颁发两个令牌，一个用于获取数据，另一个用于获取新的令牌（refresh token 字段）。令牌到期前，用户使用 refresh token 发一个请求，去更新令牌。</p>
 <blockquote>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&gt; https:<span class="comment">//b.com/oauth/token?</span></span><br><span class="line">&gt;   grant_type=refresh_token&amp;</span><br><span class="line">&gt;   client_id=CLIENT_ID&amp;</span><br><span class="line">&gt;   client_secret=CLIENT_SECRET&amp;</span><br><span class="line">&gt;   refresh_token=REFRESH_TOKEN</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">https:<span class="comment">//b.com/oauth/token?</span></span><br><span class="line">  grant_type=refresh_token&amp;</span><br><span class="line">  client_id=CLIENT_ID&amp;</span><br><span class="line">  client_secret=CLIENT_SECRET&amp;</span><br><span class="line">  refresh_token=REFRESH_TOKEN</span><br></pre></td></tr></table></figure>
 </blockquote>
 <p>上面 URL 中，<code>grant_type</code>参数为<code>refresh_token</code>表示要求更新令牌，<code>client_id</code>参数和<code>client_secret</code>参数用于确认身份，<code>refresh_token</code>参数就是用于更新令牌的令牌。</p>
 <h2 id="第三方授权例子"><a href="#第三方授权例子" class="headerlink" title="第三方授权例子"></a>第三方授权例子</h2><h4 id="一、场景举例"><a href="#一、场景举例" class="headerlink" title="一、场景举例"></a>一、场景举例</h4><p>举例来说，A 网站允许使用B网站账号登录，背后就是下面的流程。</p>
@@ -606,7 +606,7 @@
 <li><strong>User Authorization Request</strong></li>
 </ol>
 <p>首先，客户端构造了一个用于请求<code>authorization code</code>的URL并引导<code>User-agent</code>跳转访问。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">https://authorization-server.com/auth</span><br><span class="line"> ?response_type=code</span><br><span class="line"> &amp;client_id=29352915982374239857</span><br><span class="line"> &amp;redirect_uri=https%3A%2F%2Fexample-client.com%2Fcallback</span><br><span class="line"> &amp;scope=create+delete</span><br><span class="line"> &amp;state=xcoiv98y2kd22vusuye3kch</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">https:&#x2F;&#x2F;authorization-server.com&#x2F;auth</span><br><span class="line"> ?response_type&#x3D;code</span><br><span class="line"> &amp;client_id&#x3D;29352915982374239857</span><br><span class="line"> &amp;redirect_uri&#x3D;https%3A%2F%2Fexample-client.com%2Fcallback</span><br><span class="line"> &amp;scope&#x3D;create+delete</span><br><span class="line"> &amp;state&#x3D;xcoiv98y2kd22vusuye3kch</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>response_type=code<br>此参数和参数值用于提示授权服务器当前客户端正在进行<code>Authorization Code</code>授权流程。</li>
@@ -624,7 +624,7 @@
 <li><strong>Authorization Code Grant</strong></li>
 </ol>
 <p>如果用户确认授权，授权服务器将重定向<code>User-agent</code>至之前客户端提供的指向客户端的<code>redirect_uri</code>地址，并附带<code>code</code>和<code>state</code>参数（由之前客户端提供），于是客户端便能直接读取到<code>authorization code</code>值。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">https://example-client.com/redirect</span><br><span class="line"> ?code=g0ZGZmNjVmOWIjNTk2NTk4ZTYyZGI3</span><br><span class="line"> &amp;state=xcoiv98y2kd22vusuye3kch</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">https:&#x2F;&#x2F;example-client.com&#x2F;redirect</span><br><span class="line"> ?code&#x3D;g0ZGZmNjVmOWIjNTk2NTk4ZTYyZGI3</span><br><span class="line"> &amp;state&#x3D;xcoiv98y2kd22vusuye3kch</span><br></pre></td></tr></table></figure>
 
 <p><code>state</code>值将与客户端在请求中最初设置的值相同。客户端将检查重定向中的状态值是否与最初设置的状态值相匹配。这可以防止CSRF和其他相关攻击。</p>
 <p><code>code</code>是授权服务器生成的<code>authorization code</code>值。<code>code</code>相对较短，通常持续1到10分钟，具体取决于授权服务器设置。</p>

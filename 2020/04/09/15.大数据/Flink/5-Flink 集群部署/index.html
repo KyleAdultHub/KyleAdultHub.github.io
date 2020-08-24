@@ -584,7 +584,7 @@
 <p>使用run 命令向yarn集群提交一个job。客户端可以确定jobmanager的地址。当然，你也可以通过-m参数指定jobmanager。jobmanager的地址在yarn控制台上可以看到。</p>
 <p>值得注意的是：</p>
 <p>上面的YARN session是在Hadoop YARN环境下启动一个Flink cluster集群，里面的资源是可以共享给其他的Flink作业。我们还可以在YARN上启动一个Flink作业。这里我们还是使用./bin/flink，但是不需要事先启动YARN session：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">./bin/flink run -m yarn-cluster -yn 2 ./examples/batch/WordCount.jar      \</span><br><span class="line">          --input hdfs://user/hadoop/input.txt                            \</span><br><span class="line">          --output hdfs://user/hadoop/output.txt</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">.&#x2F;bin&#x2F;flink run -m yarn-cluster -yn 2 .&#x2F;examples&#x2F;batch&#x2F;WordCount.jar      \</span><br><span class="line">          --input hdfs:&#x2F;&#x2F;user&#x2F;hadoop&#x2F;input.txt                            \</span><br><span class="line">          --output hdfs:&#x2F;&#x2F;user&#x2F;hadoop&#x2F;output.txt</span><br></pre></td></tr></table></figure>
 
 <p>上面的命令同样会启动一个类似于YARN session启动的页面。其中的-yn是指TaskManager的个数，必须要指定。</p>
 <h4 id="后台运行-yarn-session"><a href="#后台运行-yarn-session" class="headerlink" title="后台运行 yarn session"></a>后台运行 yarn session</h4><p>如果你不希望flink yarn client一直运行，也可以启动一个后台运行的yarn session。使用这个参数：-d 或者 –detached<br>在这种情况下，flink yarn client将会只提交任务到集群然后关闭自己。注意：在这种情况下，无法使用flink停止yarn session。<br>必须使用yarn工具来停止yarn session</p>
@@ -625,25 +625,25 @@
 <ul>
 <li>ZooKeeper root （推荐）： ZooKeeper 根节点，在该节点下放置所有集群节点。</li>
 </ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">high-availability.zookeeper.path.root: /flink</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">high-availability.zookeeper.path.root: &#x2F;flink</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>ZooKeeper cluster-id（推荐）： ZooKeeper的cluster-id节点，在该节点下放置集群的所有相关数据。</li>
 </ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">high-availability.cluster-id: /default_ns # important: customize per cluster</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">high-availability.cluster-id: &#x2F;default_ns # important: customize per cluster</span><br></pre></td></tr></table></figure>
 
 <p><strong>重要：</strong> 在运行 YARN 或其他群集管理器中运行时，不要手动设置此值。在这些情况下，将根据应用程序 ID 自动生成 cluster-id。 手动设置 cluster-id 会覆盖 YARN 中的自动生成的 ID。反过来，使用 -z CLI 选项指定 cluster-id 会覆盖手动配置。如果在裸机上运行多个 Flink HA 集群，则必须为每个集群手动配置单独的 cluster-id。</p>
 <ul>
 <li>存储目录（必需）： JobManager 元数据保存在文件系统 storageDir 中，在 ZooKeeper 中仅保存了指向此状态的指针。</li>
 </ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">high-availability.storageDir: hdfs://xxx/flink/recovery</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">high-availability.storageDir: hdfs:&#x2F;&#x2F;xxx&#x2F;flink&#x2F;recovery</span><br></pre></td></tr></table></figure>
 
 <p>该storageDir 中保存了 JobManager 恢复状态所需的所有元数据。<br>配置 master 文件和 ZooKeeper quorum 之后，您可以使用提供的集群启动脚本。它们将启动 HA 群集。请注意，启动 Flink HA 集群前，必须启动 Zookeeper 集群，并确保为要启动的每个 HA 群集配置单独的 ZooKeeper 根路径。</p>
 <p><strong>示例：具有2个 JobManager 的 Standalone 集群</strong></p>
 <ol>
 <li>在conf/flink-conf.yaml 中配置高可用模式和 ZooKeeper quorum：</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">high-availability: zookeeper</span><br><span class="line">high-availability.zookeeper.quorum: localhost:2181</span><br><span class="line">high-availability.zookeeper.path.root: /flink</span><br><span class="line">high-availability.cluster-id: /cluster_one</span><br><span class="line">high-availability.storageDir:    hdfs://xx/flink/recovery</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">high-availability: zookeeper</span><br><span class="line">high-availability.zookeeper.quorum: localhost:2181</span><br><span class="line">high-availability.zookeeper.path.root: &#x2F;flink</span><br><span class="line">high-availability.cluster-id: &#x2F;cluster_one</span><br><span class="line">high-availability.storageDir:    hdfs:&#x2F;&#x2F;xx&#x2F;flink&#x2F;recovery</span><br></pre></td></tr></table></figure>
 
 <ol>
 <li>在 conf/master 中配置 master:</li>
@@ -653,26 +653,26 @@
 <ol>
 <li>在 conf/zoo.cfg 中配置 ZooKeeper 服务（目前，每台机器只能运行一个 ZooKeeper 进程）</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">server.0=localhost:2888:3888</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">server.0&#x3D;localhost:2888:3888</span><br></pre></td></tr></table></figure>
 
 <ol>
 <li>启动 ZooKeeper quorum：</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ bin/start-zookeeper-quorum.sh</span><br><span class="line">Starting zookeeper daemon on host localhost.</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ bin&#x2F;start-zookeeper-quorum.sh</span><br><span class="line">Starting zookeeper daemon on host localhost.</span><br></pre></td></tr></table></figure>
 
 <ol>
 <li>启动 Flink HA 集群：</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ bin/start-cluster.sh</span><br><span class="line">Starting HA cluster with 2 masters and 1 peers     in ZooKeeper quorum.</span><br><span class="line">Starting jobmanager daemon on host localhost.</span><br><span class="line">Starting jobmanager daemon on host localhost.</span><br><span class="line">Starting taskmanager daemon on host localhost.</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ bin&#x2F;start-cluster.sh</span><br><span class="line">Starting HA cluster with 2 masters and 1 peers     in ZooKeeper quorum.</span><br><span class="line">Starting jobmanager daemon on host localhost.</span><br><span class="line">Starting jobmanager daemon on host localhost.</span><br><span class="line">Starting taskmanager daemon on host localhost.</span><br></pre></td></tr></table></figure>
 
 <ol>
 <li>停止 Zookeeper quorum 和集群：</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ bin/stop-cluster.sh</span><br><span class="line">Stopping taskmanager daemon (pid: 7647) on localhost.</span><br><span class="line">Stopping jobmanager daemon (pid: 7495) on host localhost.</span><br><span class="line">Stopping jobmanager daemon (pid: 7349) on host localhost.</span><br><span class="line">$ bin/stop-zookeeper-quorum.sh</span><br><span class="line">Stopping zookeeper daemon (pid: 7101) on host localhost.</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ bin&#x2F;stop-cluster.sh</span><br><span class="line">Stopping taskmanager daemon (pid: 7647) on localhost.</span><br><span class="line">Stopping jobmanager daemon (pid: 7495) on host localhost.</span><br><span class="line">Stopping jobmanager daemon (pid: 7349) on host localhost.</span><br><span class="line">$ bin&#x2F;stop-zookeeper-quorum.sh</span><br><span class="line">Stopping zookeeper daemon (pid: 7101) on host localhost.</span><br></pre></td></tr></table></figure>
 
 <h2 id="六、YARN-集群的高可用性"><a href="#六、YARN-集群的高可用性" class="headerlink" title="六、YARN 集群的高可用性"></a>六、YARN 集群的高可用性</h2><p>在运行高可用性 YARN 集群时，我们不会运行多个 JobManager (ApplicationMaster) 实例，而只运行一个，该JobManager实例失败时，YARN会将其重新启动。Yarn的具体行为取决于您使用的 YARN 版本。</p>
 <h3 id="配置-1"><a href="#配置-1" class="headerlink" title="配置"></a>配置</h3><p>Application Master最大重试次数（yarn-site.xml）<br>在YARN 配置文件 yarn-site.xml 中，需要配置 application master 的最大重试次数：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;property&gt;</span><br><span class="line">  &lt;name&gt;yarn.resourcemanager.am.max-attempts&lt;/name&gt;</span><br><span class="line">  &lt;value&gt;4&lt;/value&gt;</span><br><span class="line">  &lt;description&gt;</span><br><span class="line">    The maximum number of application master execution attempts.</span><br><span class="line">  &lt;/description&gt;</span><br><span class="line">&lt;/property&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;property&gt;</span><br><span class="line">  &lt;name&gt;yarn.resourcemanager.am.max-attempts&lt;&#x2F;name&gt;</span><br><span class="line">  &lt;value&gt;4&lt;&#x2F;value&gt;</span><br><span class="line">  &lt;description&gt;</span><br><span class="line">    The maximum number of application master execution attempts.</span><br><span class="line">  &lt;&#x2F;description&gt;</span><br><span class="line">&lt;&#x2F;property&gt;</span><br></pre></td></tr></table></figure>
 
 <p>当前 YARN 版本的默认值是2(表示允许单个JobManager失败两次)。</p>
 <p>Application Attempts（flink-conf.yaml）：<br>除了HA配置(参考上文)之外，您还必须配置最大重试次数 conf/flink-conf.yaml:</p>
@@ -680,29 +680,29 @@
 
 <p>这意味着在如果程序启动失败，YARN会再重试9次（9 次重试 + 1次启动）。如果 YARN 操作需要，如果启动10次作业还失败，yarn才会将该任务的状态置为失败。如果抢占，节点硬件故障或重启，NodeManager 重新同步等操作需要，YARN继续尝试启动应用。 这些重启不计入 yarn.application-attempts 个数中。重要的是要注意 yarn.resourcemanager.am.max-attempts 为yarn中程序重启上限。因此， Flink 中设置的程序尝试次数不能超过 YARN 的集群设置。</p>
 <h3 id="示例：高可用的YARN-Session"><a href="#示例：高可用的YARN-Session" class="headerlink" title="示例：高可用的YARN Session"></a>示例：高可用的YARN Session</h3><p>1.配置 HA 模式和 ZooKeeper 集群在 conf/flink-conf.yaml 中：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">high-availability: zookeeper</span><br><span class="line">high-availability.zookeeper.quorum: localhost:2181</span><br><span class="line">high-availability.storageDir: hdfs:///flink/recovery</span><br><span class="line">high-availability.zookeeper.path.root: /flink</span><br><span class="line">yarn.application-attempts: 10</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">high-availability: zookeeper</span><br><span class="line">high-availability.zookeeper.quorum: localhost:2181</span><br><span class="line">high-availability.storageDir: hdfs:&#x2F;&#x2F;&#x2F;flink&#x2F;recovery</span><br><span class="line">high-availability.zookeeper.path.root: &#x2F;flink</span><br><span class="line">yarn.application-attempts: 10</span><br></pre></td></tr></table></figure>
 
 <ol>
 <li>配置 ZooKeeper 服务在 conf/zoo.cfg 中(目前每台机器只能运行一个 ZooKeeper 进程)：</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">server.0=localhost:2888:3888</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">server.0&#x3D;localhost:2888:3888</span><br></pre></td></tr></table></figure>
 
 <ol>
 <li>启动 ZooKeeper 集群：</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ bin/start-zookeeper-quorum.sh</span><br><span class="line">Starting zookeeper daemon on host localhost.</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ bin&#x2F;start-zookeeper-quorum.sh</span><br><span class="line">Starting zookeeper daemon on host localhost.</span><br></pre></td></tr></table></figure>
 
 <ol>
 <li>启动 HA 集群：</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ bin / yarn-session.sh -n 2</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ bin &#x2F; yarn-session.sh -n 2</span><br></pre></td></tr></table></figure>
 
 <h3 id="配置-Zookeeper-安全性"><a href="#配置-Zookeeper-安全性" class="headerlink" title="配置 Zookeeper 安全性"></a>配置 Zookeeper 安全性</h3><p>如果 ZooKeeper 使用 Kerberos 以安全模式运行，flink-conf.yaml 根据需要覆盖以下配置：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">zookeeper.sasl.service-name: zookeeper </span><br><span class="line"># 默认设置是 “zookeeper” 。如果 ZooKeeper 集群配置了</span><br><span class="line"># 不同的服务名称，那么可以在这里提供。</span><br><span class="line"></span><br><span class="line">zookeeper.sasl.login-context-name: Client  </span><br><span class="line"># 默认设置是 “Client”。该值配置需要匹配</span><br><span class="line"># &quot;security.kerberos.login.contexts&quot;中的其中一个值。</span><br></pre></td></tr></table></figure>
 
 <p>有关 Kerberos 安全性的 Flink 配置的更多信息，请参阅 此处。您还可以在 此处 找到关于 Flink 内部如何设置基于 kerberos 的安全性的详细信息。</p>
 <h3 id="Bootstrap-ZooKeeper"><a href="#Bootstrap-ZooKeeper" class="headerlink" title="Bootstrap ZooKeeper"></a>Bootstrap ZooKeeper</h3><p>如果您没有正在运行的ZooKeeper，则可以使用Flink程序附带的脚本。<br>这是一个 ZooKeeper 配置模板 conf/zoo.cfg。您可以为主机配置为使用 server.X 条目运行 ZooKeeper，其中 X 是每个服务器的唯一IP:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">server.X=addressX:peerPort:leaderPort</span><br><span class="line">[...]</span><br><span class="line">server.Y=addressY:peerPort:leaderPort</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">server.X&#x3D;addressX:peerPort:leaderPort</span><br><span class="line">[...]</span><br><span class="line">server.Y&#x3D;addressY:peerPort:leaderPort</span><br></pre></td></tr></table></figure>
 
 <p>该脚本 bin/start-zookeeper-quorum.sh 将在每个配置的主机上启动 ZooKeeper 服务器。 Flink wrapper 会启动 ZooKeeper 服务，该 wraper 从 conf/zoo.cfg 中读取配置，并设置一些必需的配置项。在生产设置中，建议您使用自己安装的 ZooKeeper。</p>
 

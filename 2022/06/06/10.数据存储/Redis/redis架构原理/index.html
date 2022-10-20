@@ -1,0 +1,1970 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Redis 的三种工作模式介绍1. 主从模式 主数据库可以执行读写功能，而从数据库只能执行读功能。 主数据库数据发生变化，会自动同步到从数据库。 主数据库为 master，从数据库为 slave，一个master可以有多个slave，一个slave只能有一个master slave挂了，重新启动会从master同步数据， master挂了，服务器只能进行读功能，不能执行写功能，直到master重新">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis 架构原理">
+<meta property="og:url" content="http://blog.kyleliu.cn/2022/06/06/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Redis/redis%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle)的云笔记">
+<meta property="og:description" content="Redis 的三种工作模式介绍1. 主从模式 主数据库可以执行读写功能，而从数据库只能执行读功能。 主数据库数据发生变化，会自动同步到从数据库。 主数据库为 master，从数据库为 slave，一个master可以有多个slave，一个slave只能有一个master slave挂了，重新启动会从master同步数据， master挂了，服务器只能进行读功能，不能执行写功能，直到master重新">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220607191010777.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220607191159560.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220607191547923.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220607192640931.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220607192702918.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220607192712645.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220608105455866.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220608112400731.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220608112925942.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220608113121888.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220608113352006.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220608113424727.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220608114506846.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220608114831070.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220608114920411.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220608115106315.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220608120011769.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220608123435366.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220608123716895.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220608134348677.png">
+<meta property="article:published_time" content="2022-06-05T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-07-20T03:11:01.363Z">
+<meta property="article:author" content="刘小恺(Kyle)">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/img/image-20220607191010777.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2022/06/06/10.数据存储/Redis/redis架构原理/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Redis 架构原理 | 刘小恺(Kyle)的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle)的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2022/06/06/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Redis/redis%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Redis 架构原理
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2022-06-06 00:00:00" itemprop="dateCreated datePublished" datetime="2022-06-06T00:00:00+08:00">2022-06-06</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/" itemprop="url" rel="index"><span itemprop="name">数据存储</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Redis/" itemprop="url" rel="index"><span itemprop="name">Redis</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/06/06/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Redis/redis%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2022/06/06/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Redis/redis%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="Redis-的三种工作模式介绍"><a href="#Redis-的三种工作模式介绍" class="headerlink" title="Redis 的三种工作模式介绍"></a>Redis 的三种工作模式介绍</h2><h3 id="1-主从模式"><a href="#1-主从模式" class="headerlink" title="1. 主从模式"></a>1. 主从模式</h3><ul>
+<li>主数据库可以执行读写功能，而从数据库只能执行读功能。</li>
+<li>主数据库数据发生变化，会自动同步到从数据库。</li>
+<li>主数据库为 master，从数据库为 slave，一个master可以有多个slave，一个slave只能有一个master</li>
+<li>slave挂了，重新启动会从master同步数据， master挂了，服务器只能进行读功能，不能执行写功能，直到master重新启动同步数据后，才能提供写服务。</li>
+</ul>
+<h3 id="2-哨兵模式"><a href="#2-哨兵模式" class="headerlink" title="2. 哨兵模式"></a>2. 哨兵模式</h3><ul>
+<li>可以解决主从模式的弊端：master挂掉之后不能提供写功能。</li>
+<li>哨兵模式是建立在主从模式的</li>
+<li>当master挂掉之后，会自动从slave中选一个作为master。<ul>
+<li>若master重新启动，master则会转化为现有的master下的一个slave</li>
+</ul>
+</li>
+<li>当slave切换时，会通过发布订阅方式，将slave所对应的master更改</li>
+<li>注意：<ul>
+<li>因为哨兵也是一个进程，所以也有挂掉的可能，需要配置多个哨兵互相监督。</li>
+<li>一个哨兵可以监督多个主从数据库。同样，一个主从数据库可以被多个哨兵监督。</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-Cluster模式"><a href="#3-Cluster模式" class="headerlink" title="3. Cluster模式"></a>3. Cluster模式</h3><ul>
+<li>在 <code>Redis 3.0</code> 之前，使用 <strong>哨兵</strong>（<code>sentinel</code>）机制来监控各个节点之间的状态。<code>Redis Cluster</code> 是 <code>Redis</code> 的 <strong>分布式解决方案</strong>，在 <code>3.0</code> 版本正式推出，有效地解决了 <code>Redis</code> 在 <strong>分布式</strong> 方面的需求。当遇到 <strong>单机内存</strong>、<strong>并发</strong>、<strong>流量</strong> 等瓶颈时，可以采用 <code>Cluster</code> 架构方案达到 <strong>负载均衡</strong> 的目的。</li>
+<li>redis cluster是Redis的分布式解决方案，在3.0版本推出后有效地解决了redis分布式方面的需求，自动将数据进行分片，每个master上放一部分数据提供内置的高可用支持，部分master不可用时，还是可以继续工作的</li>
+<li>支撑N个redis master node，每个master node都可以挂载多个slave node</li>
+<li>高可用，因为每个master都有salve节点，那么如果mater挂掉，redis cluster这套机制，就会自动将某个slave切换成master</li>
+</ul>
+<h2 id="Redis-主从数据同步过程"><a href="#Redis-主从数据同步过程" class="headerlink" title="Redis 主从数据同步过程"></a>Redis 主从数据同步过程</h2><h3 id="主从复制的方式"><a href="#主从复制的方式" class="headerlink" title="主从复制的方式"></a>主从复制的方式</h3><p>从节点复制主节点的数据后，就相当于给主从节点备份了，所谓的有备无患就是这个意思。那么主从复制的原理是怎么样的？</p>
+<p>其实主要就是三种复制方式：持续复制、全量复制、部分复制。</p>
+<h4 id="持续复制"><a href="#持续复制" class="headerlink" title="持续复制"></a>持续复制</h4><p>当有客户端的写命令请求到主节点后，主节点会做两件事：命令传播和将写命令写入到复制积压缓冲区。</p>
+<p>原理图如下：<br><img src="/img/image-20220607191010777.png" alt="image-20220607191010777" style="zoom: 67%;" /></p>
+<ul>
+<li>命令传播：将写命令持续发送给所有从服务器，保持主从数据一致。这个就可以理解为持续复制了。</li>
+<li>复制积压缓冲区：其实就是一个有界队列，保存着最近传播的写命令，而队列里面的每个字节都有一个偏移量标识。复制积压缓冲区的作用和原理在部分复制的时候再细讲。</li>
+</ul>
+<h4 id="全量复制"><a href="#全量复制" class="headerlink" title="全量复制"></a>全量复制</h4><p>用于主从节点第一次复制的场景。这在我们的软件开发中也很常见，比如你要把第三方的用户数据同步到自己的系统中，一开始肯定是把存量用户一次性给复制过来，后续有新增或更新的用户就采用增量更新就可以了。</p>
+<p>当然全量复制的时候，数据量很大时，就会对主从节点和网络造成很大的开销，也就是常说的复制风暴，所以要避免不必要的全量复制，这个后面再讲怎么避免。</p>
+<p>我们先来看下全量复制的原理图，然后我再来详细解释每一步怎么做的。<br><img src="/img/image-20220607191159560.png" alt="image-20220607191159560"></p>
+<p><strong>总结全量复制的步骤</strong></p>
+<ol>
+<li><p>从节点给主节点发送命令；</p>
+</li>
+<li><p>主节点回复从节点，要开始全量复制了；</p>
+</li>
+<li><p>从节点保存主节点信息；</p>
+</li>
+<li><p>主节点开始生成 RDB 快照文件；</p>
+</li>
+<li><p>RDB 文件发给从节点，主节点发送 RDB 文件；</p>
+</li>
+<li><p>发送缓冲区数据给客户端；</p>
+</li>
+<li><p>从节点清空旧数据；</p>
+</li>
+<li><p>从节点加载 RDB 文件；</p>
+</li>
+<li><p>从节点执行 AOF 操作。</p>
+</li>
+</ol>
+<h4 id="部分复制"><a href="#部分复制" class="headerlink" title="部分复制"></a>部分复制</h4><p>这个可以理解为增量更新，比如和第三方系统对接时，如果第三方有数据更新，定期进行增量更新就可以了。</p>
+<p>而 Redis 主从的部分复制就是指当主从之间的网络故障等原因造成持续复制中断了，当从节点再次连上主节点后，主节点就补发数据给从节点，避免了全量复制的过高开销。补发数据的来源就是复制积压缓冲的数据。</p>
+<p>原理图如下所示：<br><img src="/img/image-20220607191547923.png" alt="image-20220607191547923" style="zoom:67%;" /></p>
+<p><strong>部分复制总共分为六步：</strong></p>
+<p>（1）当主节点之间失联后，如果时间超过了 repl-timeout 时间，主节点就认为从节点发生故障了，中断连接。</p>
+<p>（2）主节点其实一直都在把客户端写命令放入复制积压缓冲区，所以即使断连了，主节点还是会保留断连期间的命令，但因为队列是固定的，当写命令太多时，就会导致部分命令被覆盖了。</p>
+<p>（3）主从节点恢复连接。</p>
+<p>（4）从节点发送 psync 命令给主节点，带有 runId 和 offset 参数，runId 是上一次复制时保存的主节点的 runId值，offset 是从节点的复制偏移量。</p>
+<p>（5）主节点接收到从节点的命令后，先判断传过来的 runId 是否和自己匹配，如果不匹配，则进行全量复制；如果 runId 匹配，则响应 CONTINUE，告诉从节点，可以进行部分复制了。我要把复制积压缓冲区的数据发给你了哦，请准备好接收。</p>
+<p>（6）主节点根据子节点发送的偏移量，将复制积压缓冲区的数据发送给子节点。</p>
+<p>那复制积压缓冲区到底是怎么来根据偏移量来计算要发送哪些缓存数据的呢？我们接着往下看。</p>
+<h3 id="积压缓冲区"><a href="#积压缓冲区" class="headerlink" title="积压缓冲区"></a>积压缓冲区</h3><h4 id="复制积压缓冲区的特点："><a href="#复制积压缓冲区的特点：" class="headerlink" title="复制积压缓冲区的特点："></a>复制积压缓冲区的特点：</h4><p>固定长度的队列。</p>
+<p>最近传播的写命令，默认为 1 MB 大小，可调节大小。</p>
+<p>队列中的每个字节都有对应的复制偏移量进行标识。如下图所示，每一个字节对应一个偏移量。</p>
+<img src="/img/image-20220607192640931.png" alt="image-20220607192640931" style="zoom:67%;" />
+
+<h4 id="复制积压缓冲区索引"><a href="#复制积压缓冲区索引" class="headerlink" title="复制积压缓冲区索引"></a>复制积压缓冲区索引</h4><p>从节点重新连上主节点后，会发送 psync 命令，携带着偏移量 offset。比如 offset = 125，然后主节点拿着这个 125 去复制积压缓冲区找，125 正好在里面，然后就会执行部分复制的操作，将 125 以后的缓冲数据发送给从节点。</p>
+<img src="/img/image-20220607192702918.png" alt="image-20220607192702918" style="zoom:67%;" />
+
+<h4 id="偏移量在复制积压缓冲区的作用"><a href="#偏移量在复制积压缓冲区的作用" class="headerlink" title="偏移量在复制积压缓冲区的作用"></a>偏移量在复制积压缓冲区的作用</h4><p>如果 offset =10，主节点拿着这个 10 去复制积压缓冲区找，发现队列中最早的 offset 是 100，所以 100 之前的字节都被覆盖了，那么子节点就不能通过复制积压缓冲区拿到完整数据，所以只能通过全量复制的方式来同步。这个时候主节点就会发送一个 +FULLRESYNC的命令给子节点，告诉子节点，兄弟，你来得太晚了，只能使用全量同步的方式了。</p>
+<img src="/img/image-20220607192712645.png" alt="image-20220607192712645" style="zoom:67%;" />
+
+<h2 id="Redis-Cluster-模式"><a href="#Redis-Cluster-模式" class="headerlink" title="Redis Cluster 模式"></a>Redis Cluster 模式</h2><h3 id="Redis-Cluster-集群介绍"><a href="#Redis-Cluster-集群介绍" class="headerlink" title="Redis  Cluster 集群介绍"></a>Redis  Cluster 集群介绍</h3><h4 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h4><p>在高并发的系统中当我们需要从海量数据中快速找到所需符合要求的数据， 我们可以按照某种规则对海量的数据进行划分，将其分散存储在多个redis服务节点中，从而通过实现数据分片来降低redis服务加点的压力。</p>
+<p><strong>架构图</strong></p>
+<img src="/img/image-20220608105455866.png" alt="image-20220608105455866" style="zoom:67%;" />
+
+<p>在这个图中， 每一个蓝色的圈都代表着一个redis的服务器节点。他们任何两个节点之间都是相互连通的。客户端可以与任何一个节点相连接，然后就可以访问集群中的任何一个节点， 对其进行存取和其他操作</p>
+<h4 id="二、redis集群的特点"><a href="#二、redis集群的特点" class="headerlink" title="二、redis集群的特点"></a>二、redis集群的特点</h4><p><strong>cluster模式的优点</strong></p>
+<ol>
+<li>将数据自动切分到多个节点的能力</li>
+<li>当集群中的一部分节点失效或者无法进行通讯时，仍然可以继续处理命令请求的能力，拥有自动故障转移的能力。</li>
+</ol>
+<h3 id="节点间内部通讯机制"><a href="#节点间内部通讯机制" class="headerlink" title="节点间内部通讯机制"></a>节点间内部通讯机制</h3><h4 id="基础通讯原理"><a href="#基础通讯原理" class="headerlink" title="基础通讯原理"></a>基础通讯原理</h4><p> 在分布式存储中需要提供维护节点元数据信息的机制，所谓元数据是指：节点负责哪些数据，是否出现故障等状态信息，Redis 集群采用  Gossip（流言）协议，Gossip 协议工作原理就是节点彼此不断通信交换信息，一段时间后所有的节点都会知道集群完整的信息，这种方式类似流言传播</p>
+<ol>
+<li>集群中的每个节点都会单独开辟一个 TCP 通道，用于节点之间彼此通信，通信端口号在基础端口上加10000。</li>
+<li>每个节点在固定周期内通过特定的规则选择介个节点发送ping消息。</li>
+<li>接收到ping消息的节点用pong消息做为响应。</li>
+</ol>
+<p>集群中每个节点通过一定规则挑选要通信的节点，每个节点可能知道全部节点，也可能仅知道部分节点，只要这些节点彼此可以正常通信，最终它们会达到一致的状态。当节点出故障、新节点加入、主从角色变化、槽信息变更等事件发生时，通过不断的 ping/pong 消息通信，经过一段时间后所有的节点都会知道整个集群全部节点的最新状态，从而达到集群状态同步的目的。</p>
+<h4 id="gossip协议"><a href="#gossip协议" class="headerlink" title="gossip协议"></a>gossip协议</h4><p>gossip协议包含多种消息，包括ping，pong，meet，fail，等等</p>
+<p>meet: 某个节点发送meet给新加入的节点，让新节点加入集群中，然后新节点就会开始与其他节点进行通信</p>
+<p>redis-trib.rb add-node</p>
+<p>其实内部就是发送了一个gossip meet消息，给新加入的节点，通知那个节点去加入我们的集群</p>
+<p>ping: 每个节点都会频繁给其他节点发送ping，其中包含自己的状态还有自己维护的集群元数据，互相通过ping交换元数据</p>
+<p>每个节点每秒都会频繁发送ping给其他的集群，ping，频繁的互相之间交换数据，互相进行元数据的更新</p>
+<p>pong: 返回ping和meet，包含自己的状态和其他信息，也可以用于信息广播和更新</p>
+<p>fail: 某个节点判断另一个节点fail之后，就发送fail给其他节点，通知其他节点，指定的节点宕机了</p>
+<h4 id="ping消息深入"><a href="#ping消息深入" class="headerlink" title="ping消息深入"></a>ping消息深入</h4><p>ping很频繁，而且要携带一些元数据，所以可能会加重网络负担</p>
+<p>每个节点每秒会执行10次ping，每次会选择5个最久没有通信的其他节点</p>
+<p>当然如果发现某个节点通信延时达到了cluster_node_timeout / 2，那么立即发送ping，避免数据交换延时过长，落后的时间太长了</p>
+<p>比如说，两个节点之间都10分钟没有交换数据了，那么整个集群处于严重的元数据不一致的情况，就会有问题</p>
+<p>所以cluster_node_timeout可以调节，如果调节比较大，那么会降低发送的频率</p>
+<p>每次ping，一个是带上自己节点的信息，还有就是带上1/10其他节点的信息，发送出去，进行数据交换</p>
+<p>至少包含3个其他节点的信息，最多包含总节点-2个其他节点的信息</p>
+<h4 id="基于重定向的客户端"><a href="#基于重定向的客户端" class="headerlink" title="基于重定向的客户端"></a>基于重定向的客户端</h4><p>（1）请求重定向</p>
+<p>客户端可能会挑选任意一个redis实例去发送命令，每个redis实例接收到命令，都会计算key对应的hash slot</p>
+<p>如果在本地就在本地处理，否则返回moved给客户端，让客户端进行重定向</p>
+<p>cluster keyslot mykey，可以查看一个key对应的hash slot是什么</p>
+<p>用redis-cli的时候，可以加入-c参数，支持自动的请求重定向，redis-cli接收到moved之后，会自动重定向到对应的节点执行命令</p>
+<p>（2）计算hash slot</p>
+<p>计算hash slot的算法，就是根据key计算CRC16值，然后对16384取模，拿到对应的hash slot</p>
+<p>用hash tag可以手动指定key对应的slot，同一个hash tag下的key，都会在一个hash slot中，比如set mykey1:{100}和set mykey2:{100}</p>
+<p>（3）hash slot查找</p>
+<p>节点间通过gossip协议进行数据交换，就知道每个hash slot在哪个节点上</p>
+<h4 id="smart-jedis"><a href="#smart-jedis" class="headerlink" title="smart jedis"></a>smart jedis</h4><p>（1）什么是smart jedis</p>
+<p>基于重定向的客户端，很消耗网络IO，因为大部分情况下，可能都会出现一次请求重定向，才能找到正确的节点</p>
+<p>所以大部分的客户端，比如java redis客户端，就是jedis，都是smart的</p>
+<p>本地维护一份hashslot -&gt; node的映射表，缓存，大部分情况下，直接走本地缓存就可以找到hashslot -&gt; node，不需要通过节点进行moved重定向</p>
+<p>（2）JedisCluster的工作原理</p>
+<p>在JedisCluster初始化的时候，就会随机选择一个node，初始化hashslot -&gt; node映射表，同时为每个节点创建一个JedisPool连接池</p>
+<p>每次基于JedisCluster执行操作，首先JedisCluster都会在本地计算key的hashslot，然后在本地映射表找到对应的节点</p>
+<p>如果那个node正好还是持有那个hashslot，那么就ok; 如果说进行了reshard这样的操作，可能hashslot已经不在那个node上了，就会返回moved</p>
+<p>如果JedisCluter API发现对应的节点返回moved，那么利用该节点的元数据，更新本地的hashslot -&gt; node映射表缓存</p>
+<p>重复上面几个步骤，直到找到对应的节点，如果重试超过5次，那么就报错，JedisClusterMaxRedirectionException</p>
+<p>jedis老版本，可能会出现在集群某个节点故障还没完成自动切换恢复时，频繁更新hash slot，频繁ping节点检查活跃，导致大量网络IO开销</p>
+<p>jedis最新版本，对于这些过度的hash slot更新和ping，都进行了优化，避免了类似问题</p>
+<p>（3）hashslot迁移和ask重定向</p>
+<p>如果hash slot正在迁移，那么会返回ask重定向给jedis</p>
+<p>jedis接收到ask重定向之后，会重新定位到目标节点去执行，但是因为ask发生在hash slot迁移过程中，所以JedisCluster API收到ask是不会更新hashslot本地缓存</p>
+<p>已经可以确定说，hashslot已经迁移完了，moved是会更新本地hashslot-&gt;node映射表缓存的</p>
+<h3 id="Redis-Cluster-集群伸缩"><a href="#Redis-Cluster-集群伸缩" class="headerlink" title="Redis Cluster 集群伸缩"></a>Redis Cluster 集群伸缩</h3><p> Redis 集群提供了灵活的节点扩容和收缩方案。在不影响集群对外服务的情况下，可以为集群添加节点进行扩容也可以下线部分节点进行缩容。</p>
+<img src="/img/image-20220608112400731.png" alt="image-20220608112400731" style="zoom:67%;" />
+
+<h4 id="槽和数据与节点的对应关系"><a href="#槽和数据与节点的对应关系" class="headerlink" title="槽和数据与节点的对应关系"></a><strong>槽和数据与节点的对应关系</strong></h4><p>当主节点分别维护自己负责的槽和对应的数据，如果希望加入1个节点实现集群扩容时，需要通过相关命令把一部分槽和数据迁移给新节点</p>
+<img src="/img/image-20220608112925942.png" alt="image-20220608112925942" style="zoom:67%;" />
+
+<p>上面图里的每个节点把一部分槽和数据迁移到新的节点6385，每个节点负责的槽和数据相比之前变少了从而达到了集群扩容的目的，集群伸缩=槽和数据在节点之间的移动。</p>
+<h4 id="扩容操作"><a href="#扩容操作" class="headerlink" title="扩容操作"></a>扩容操作</h4><p>扩容是分布式存储最常见的需求，redis集群扩容操作可分为如下步骤：</p>
+<ol>
+<li>准备新节点</li>
+<li>接入集群</li>
+<li>迁移槽和数据</li>
+</ol>
+<blockquote>
+<p>加入集群后需要为新节点迁移槽和相关数据，槽在迁移过程中集群可以正常提供读写服务，迁移过程是集群扩容最核心的环节，下面详细讲解。</p>
+</blockquote>
+<ol>
+<li><p>槽是 Redis 集群管理数据的基本单位，首先需要为新节点制定槽的迁移计划，确定原有节点的哪些槽需要迁移到新节点。迁移计划需要确保每个节点负责相似数量的槽，从而保证各节点的数据均匀，比如之前是三个节点，现在是四个节点，把节点槽分布在四个节点上。</p>
+<img src="/img/image-20220608113121888.png" alt="image-20220608113121888" style="zoom:67%;" />
+</li>
+<li><p>槽迁移计划确定后开始逐个把槽内数据从源节点迁移到目标节点</p>
+</li>
+</ol>
+<img src="/img/image-20220608113352006.png" alt="image-20220608113352006" style="zoom:67%;" />
+
+<p><strong>数据迁移过程是逐个槽进行的</strong></p>
+<p>流程说明：</p>
+<p>1）对目标节点发送导入命令，让目标节点准备导入槽的数据。</p>
+<p>2）对源节点发送导出命令，让源节点准备迁出槽的数据。</p>
+<p>3）源节点循环执行迁移命令，将槽跟数据迁移到目标节点。</p>
+<img src="/img/image-20220608113424727.png" alt="image-20220608113424727" style="zoom:67%;" />
+
+<h3 id="集群master选举原理"><a href="#集群master选举原理" class="headerlink" title="集群master选举原理"></a>集群master选举原理</h3><p>当slave发现字的master变为fail状态时，便尝试进行failover，以期成为新的master。由于挂掉的master可能会有多个slave，从而存在多个slave竞争成为master节点的过程，其过程如下:</p>
+<ol>
+<li>slave发现自己的master变为fail</li>
+<li>将自己的记录的集群currentEpoch加1，并广播FAILOVER_AUTH_REQUEST信息</li>
+<li>其他节点收到该信息，只有master响应，判断请求者的合法性，并发送FAILOVER_AUTH_ACK,对每一个epoch只发送一次ack</li>
+<li>尝试failover的slave手机FAILOVER_AUTH_ACK</li>
+<li>超过半数后变成新的master</li>
+<li>广播pong通知其他集群节点。</li>
+</ol>
+<blockquote>
+<ul>
+<li>从节点并不是在主节点一进入FAIL状态就马上尝试发起选举，而是有一定的延迟，一定的延迟确保我们等待FAIL状态在集群中传播，slave如果立即尝试选举，其他的master或许尚未意识到FAIL状态，可能会拒绝投票</li>
+<li>SLAVE_RANK 表示此slave已经从master复制数据的总量rank。Rank越小代表已经复制的数据越新。这种方式下，持有最新数据的slave将会首先发起选举(理论上)。</li>
+</ul>
+</blockquote>
+<h3 id="Redis集群方案"><a href="#Redis集群方案" class="headerlink" title="Redis集群方案"></a>Redis集群方案</h3><p>Redis Cluster集群模式通常具有高可用、可扩展性、分布式、容错等特性。redis分布式方案一般有两种：</p>
+<h4 id="1-客户端分区方案"><a href="#1-客户端分区方案" class="headerlink" title="1. 客户端分区方案"></a>1. 客户端分区方案</h4><p><strong>客户端</strong> 就已经决定数据会被 <strong>存储</strong> 到哪个 <code>redis</code> 节点或者从哪个 <code>redis</code> 节点 <strong>读取数据</strong>。其主要思想是采用 <strong>哈希算法</strong> 将 <code>Redis</code> 数据的 <code>key</code> 进行散列，通过 <code>hash</code> 函数，特定的 <code>key</code>会 <strong>映射</strong> 到特定的 <code>Redis</code> 节点上。</p>
+<img src="/img/image-20220608114506846.png" alt="image-20220608114506846" style="zoom:67%;" />
+
+<p><strong>客户端分区方案</strong> 的代表为 <code>Redis Sharding</code>，<code>Redis Sharding</code> 是 <code>Redis Cluster</code> 出来之前，业界普遍使用的 <code>Redis</code> <strong>多实例集群</strong> 方法。<code>Java</code> 的 <code>Redis</code> 客户端驱动库 <code>Jedis</code>，支持 <code>Redis Sharding</code> 功能，即 <code>ShardedJedis</code> 以及 <strong>结合缓存池</strong> 的 <code>ShardedJedisPool</code>。</p>
+<p>优点: 不适用第三方中间件，分区逻辑可控，配置简单，节点之间无关联，容易线性扩展，灵活性强。</p>
+<p>缺点: 客户端无法动态增删服务节点，客户端需要自行维护分发逻辑，客户端之间无连接共享，会造成连接浪费。</p>
+<h4 id="2-代理分区方案"><a href="#2-代理分区方案" class="headerlink" title="2. 代理分区方案"></a>2. 代理分区方案</h4><p>客户端发送请求到一个代理组件，代理解析客户端的数，并将请求转发至正确的节点，最后将结果恢复给客户端。</p>
+<p>优点: 简化客户端的分布式逻辑， 客户端透明接入，切换成本低，代理的转发和存储分离。</p>
+<p>缺点: 多了一层代理等，加重了架构部署的复杂度和性能损耗。</p>
+<img src="/img/image-20220608114831070.png" alt="image-20220608114831070" style="zoom:67%;" />
+
+<p><strong>代理分区</strong> 主流实现的有方案有 <code>Twemproxy</code> 和 <code>Codis</code>。</p>
+<p><strong>代理分区组件介绍</strong></p>
+<p><strong>1.Twemproxy</strong></p>
+<p><code>Twemproxy</code> 也叫 <code>nutcraker</code>，是 <code>twitter</code> 开源的一个 <code>redis</code> 和 <code>memcache</code> 的 <strong>中间代理服务器</strong> 程序。<code>Twemproxy</code> 作为 <strong>代理</strong>，可接受来自多个程序的访问，按照 <strong>路由规则</strong>，转发给后台的各个 <code>Redis</code> 服务器，再原路返回。<code>Twemproxy</code> 存在 <strong>单点故障</strong> 问题，需要结合 <code>Lvs</code> 和 <code>Keepalived</code> 做 <strong>高可用方案</strong>。</p>
+<img src="/img/image-20220608114920411.png" alt="image-20220608114920411" style="zoom:67%;" />
+
+<ul>
+<li><strong>优点</strong>：应用范围广，稳定性较高，中间代理层 <strong>高可用</strong>。</li>
+<li><strong>缺点</strong>：无法平滑地 <strong>水平扩容/缩容</strong>，无 <strong>可视化管理界面</strong>，运维不友好，出现故障，不能 <strong>自动转移</strong>。</li>
+</ul>
+<p><strong>2. Codis</strong></p>
+<p><code>Codis</code> 是一个 <strong>分布式</strong> <code>Redis</code> 解决方案，对于上层应用来说，连接 <code>Codis-Proxy</code> 和直接连接 <strong>原生的</strong> <code>Redis-Server</code> 没有的区别。<code>Codis</code> 底层会 <strong>处理请求的转发</strong>，不停机的进行 <strong>数据迁移</strong> 等工作。<code>Codis</code> 采用了无状态的 <strong>代理层</strong>，对于 <strong>客户端</strong> 来说，一切都是透明的。</p>
+<p><img src="/img/image-20220608115106315.png" alt="image-20220608115106315"></p>
+<p>优点: 实现了上层和底层reids的高可用，数据分片和自动平衡，提供命令行接口和RESTful API，提供监控和管理界面，可以动态添加和删除redis节点</p>
+<p>缺点: 部署架构和配置复杂，不支持跨机房和多租户，不支持鉴权管理。</p>
+<h4 id="3-查询路由方案"><a href="#3-查询路由方案" class="headerlink" title="3.查询路由方案"></a>3.查询路由方案</h4><p><strong>客户端随机地</strong> 请求任意一个 <code>Redis</code> 实例，然后由 <code>Redis</code> 将请求 <strong>转发</strong> 给 <strong>正确</strong> 的 <code>Redis</code> 节点。<code>Redis Cluster</code> 实现了一种 <strong>混合形式</strong> 的 <strong>查询路由</strong>，但并不是 <strong>直接</strong> 将请求从一个 <code>Redis</code> 节点 <strong>转发</strong> 到另一个 <code>Redis</code> 节点，而是在 <strong>客户端</strong> 的帮助下直接 <strong>重定向</strong>（ <code>redirected</code>）到正确的 <code>Redis</code> 节点。</p>
+<img src="/img/image-20220608120011769.png" alt="image-20220608120011769" style="zoom:67%;" />
+
+<p>优点: 无中心节点，数据按槽存储分步在多个redis实例上，可以平滑的进行节点的扩容/缩容，支持高可用和自动故障转移，运维成本低。</p>
+<p>缺点: 严重依赖 <code>Redis-trib</code> 工具，缺乏 <strong>监控管理</strong>，需要依赖 <code>Smart Client</code> (<strong>维护连接</strong>，<strong>缓存路由表</strong>，<code>MultiOp</code> 和 <code>Pipeline</code> 支持)。<code>Failover</code> 节点的 <strong>检测过慢</strong>，不如 <strong>中心节点</strong> <code>ZooKeeper</code> 及时。<code>Gossip</code> 消息具有一定开销。无法根据统计区分 <strong>冷热数据</strong>。</p>
+<h3 id="数据分步"><a href="#数据分步" class="headerlink" title="数据分步"></a>数据分步</h3><h4 id="数据分步理论"><a href="#数据分步理论" class="headerlink" title="数据分步理论"></a>数据分步理论</h4><p>分布式数据库首先要解决把整个数据集按照分区规则映射到多个节点的问题，即把数据集划分到多个节点上， 没个几点负责整体数据的一个子集</p>
+<img src="/img/image-20220608123435366.png" alt="image-20220608123435366" style="zoom:67%;" />
+
+<p>数据分步通常有哈希分区和顺序分区两种方式，由于 <code>Redis Cluster</code> 采用 <strong>哈希分区规则</strong>，这里重点讨论 <strong>哈希分区</strong>。</p>
+<p>常见的 <strong>哈希分区</strong> 规则有几种，下面分别介绍：</p>
+<h4 id="节点取余分区"><a href="#节点取余分区" class="headerlink" title="节点取余分区"></a>节点取余分区</h4><p>使用特定的数据，如redis 的键或用户ID，再根据节点数量N使用公式: hash(key) % N 计算出哈希值，用来决定数据映射到哪一个节点上。</p>
+<img src="/img/image-20220608123716895.png" alt="image-20220608123716895" style="zoom:67%;" />
+
+<ul>
+<li><strong>优点</strong></li>
+</ul>
+<p>这种方式的突出优点是 <strong>简单性</strong>，常用于 <strong>数据库</strong> 的 <strong>分库分表规则</strong>。一般采用 <strong>预分区</strong> 的方式，提前根据 <strong>数据量</strong> 规划好 <strong>分区数</strong>，比如划分为 <code>512</code> 或 <code>1024</code> 张表，保证可支撑未来一段时间的 <strong>数据容量</strong>，再根据 <strong>负载情况</strong> 将 <strong>表</strong> 迁移到其他 <strong>数据库</strong> 中。扩容时通常采用 <strong>翻倍扩容</strong>，避免 <strong>数据映射</strong> 全部被 <strong>打乱</strong>，导致 <strong>全量迁移</strong> 的情况。</p>
+<ul>
+<li><strong>缺点</strong></li>
+</ul>
+<p>当 <strong>节点数量</strong> 变化时，如 <strong>扩容</strong> 或 <strong>收缩</strong> 节点，数据节点 <strong>映射关系</strong> 需要重新计算，会导致数据的 <strong>重新迁移</strong>。</p>
+<h4 id="一致性哈希分区"><a href="#一致性哈希分区" class="headerlink" title="一致性哈希分区"></a>一致性哈希分区</h4><p>一致性哈希可以很好的解决稳定性的问题，可以将所有的存储节点排列在首尾相接的hash环上，没个key在hash后会顺时针找到临近的存储节点存放。而当有节点加入或者退出时，仅影响改节点在hash环上顺时针相邻的后续节点。</p>
+<p>优点: 加入和删除节点只影响哈希还中顺时针方向的相邻节点，对其他节点无影响。</p>
+<p>缺点: 加减节点会造成哈希环中部分数据无法命中。当使用少量节点时，节点变化将大范围影响哈希环中数据映射，不适合少量数据节点的分布式方案。普通的一致性哈希分区在增减节点时需要增加一倍或减去一般节点才能保证数据的负载和均衡。</p>
+<h4 id="虚拟槽分区"><a href="#虚拟槽分区" class="headerlink" title="虚拟槽分区"></a>虚拟槽分区</h4><p><code>Redis Cluster</code> 采用 <strong>虚拟槽分区</strong>，所有的 <strong>键</strong> 根据 <strong>哈希函数</strong> 映射到 <code>0~16383</code> 整数槽内，计算公式：<code>slot = CRC16（key）&amp; 16383</code>。每个节点负责维护一部分槽以及槽所映射的 <strong>键值数据</strong>，如图所示：</p>
+<p><img src="/img/image-20220608134348677.png" alt="image-20220608134348677"></p>
+<p><strong>redis虚拟槽分区的特点</strong></p>
+<ul>
+<li>解耦数据和节点之间的关系， 简化了节点扩容和收缩的难度</li>
+<li><strong>节点自身</strong> 维护槽的 <strong>映射关系</strong>，不需要 <strong>客户端</strong> 或者 <strong>代理服务</strong> 维护 <strong>槽分区元数据</strong>。</li>
+<li>支持 <strong>节点</strong>、<strong>槽</strong>、<strong>键</strong> 之间的 <strong>映射查询</strong>，用于 <strong>数据路由</strong>、<strong>在线伸缩</strong> 等场景。</li>
+</ul>
+<p><strong>Redis 集群的功能限制</strong></p>
+<p><code>Redis</code> 集群相对 <strong>单机</strong> 在功能上存在一些限制，需要 <strong>开发人员</strong> 提前了解，在使用时做好规避。</p>
+<ul>
+<li><code>key</code><strong>批量操作</strong> 支持有限。</li>
+</ul>
+<p>类似 <code>mset</code>、<code>mget</code> 操作，目前只支持对具有相同 <code>slot</code> 值的 <code>key</code> 执行 <strong>批量操作</strong>。对于 <strong>映射为不同</strong> <code>slot</code> 值的 <code>key</code> 由于执行 <code>mget</code>、<code>mget</code> 等操作可能存在于多个节点上，因此不被支持。</p>
+<ul>
+<li><code>key</code><strong>事务操作</strong> 支持有限。</li>
+</ul>
+<p>只支持 <strong>多</strong> <code>key</code> 在 <strong>同一节点上</strong> 的 <strong>事务操作</strong>，当多个 <code>key</code> 分布在 <strong>不同</strong> 的节点上时 <strong>无法</strong> 使用事务功能。</p>
+<ul>
+<li><code>key</code> 作为 <strong>数据分区</strong> 的最小粒度</li>
+</ul>
+<p>不能将一个 <strong>大的键值</strong> 对象如 <code>hash</code>、<code>list</code> 等映射到 <strong>不同的节点</strong>。</p>
+<ul>
+<li>不支持 <strong>多数据库空间</strong></li>
+</ul>
+<p><strong>单机</strong> 下的 <code>Redis</code> 可以支持 <code>16</code> 个数据库（<code>db0 ~ db15</code>），<strong>集群模式</strong> 下只能使用 <strong>一个</strong> 数据库空间，即 <code>db0</code>。</p>
+<ul>
+<li><strong>复制结构</strong> 只支持一层</li>
+</ul>
+<p><strong>从节点</strong> 只能复制 <strong>主节点</strong>，不支持 <strong>嵌套树状复制</strong> 结构。</p>
+<blockquote>
+<p>这种结构很容易 <strong>添加</strong> 或者 <strong>删除</strong> 节点。如果 <strong>增加</strong> 一个节点 <code>6</code>，就需要从节点 <code>1 ~ 5</code> 获得部分 <strong>槽</strong> 分配到节点 <code>6</code> 上。如果想 <strong>移除</strong> 节点 <code>1</code>，需要将节点 <code>1</code> 中的 <strong>槽</strong> 移到节点 <code>2 ~ 5</code> 上，然后将 <strong>没有任何槽</strong> 的节点 <code>1</code> 从集群中 <strong>移除</strong> 即可。</p>
+<p>由于从一个节点将 <strong>哈希槽</strong> 移动到另一个节点并不会 <strong>停止服务</strong>，所以无论 <strong>添加删除</strong> 或者 <strong>改变</strong> 某个节点的 <strong>哈希槽的数量</strong> 都不会造成 <strong>集群不可用</strong> 的状态.                                     </p>
+</blockquote>
+<h3 id="Redus-Cluster-故障转移与恢复"><a href="#Redus-Cluster-故障转移与恢复" class="headerlink" title="Redus Cluster 故障转移与恢复"></a>Redus Cluster 故障转移与恢复</h3><p>Redis集群中的节点分为主节点（master）和从节点（slave），主节点主要负责处理槽，从节点则用于复制某个主节点数据，并在被复制的主节点下线时，代替主节点处理后续的命令请求。</p>
+<p><strong>针对节点下线有两种状态：</strong></p>
+<ol>
+<li><p>主观下线：当节点A想节点B发送了一条PING消息时，节点B没有在规定的时间内（设置的cluster-node-timeout参数）返回PONG消息，那么节点A会将节点B标记为主观下线状态。</p>
+<p>这里的主观下线只是节点A主观的认为节点B下线了，有可能是因为节点A和节点B之间的网络断了，但是其他节点依然可以和节点B通讯，所以主观下线并不一定是节点B真的就下线了。</p>
+</li>
+<li><p>客观下线：由于节点A与集群内的其他节点仍然保持通讯，因此节点B的下线消息也通过Gossip协议传遍了集群内的其他节点。</p>
+<p>当集群内半数以上的节点都认为节点B主观下线了，那么节点B就会被认为客观下线了，同时将节点B标记为客观下线的节点会向集群中发送一条FAIL消息，所有收到这条消息的节点会立即将节点B标记为客观下线。</p>
+</li>
+</ol>
+<p><strong>如果一个节点被认为客观下线了，那么就需要从它的从节点当中选出一个节点来代替它成为主节点。选举过程如下：</strong></p>
+<ol>
+<li>当从节点发现自己正在复制的主节点被标记为客观下线时，从节点会向集群中发送一条CLUSTERMSG_TYPE_FAILOVER_AUTH_REQUEST消息，要求所有收到这条消息的具有投票权的主节点向这个从节点投票</li>
+<li>如果一个主节点具有投票权，并且未投票给其他从节点，那么这个主节点会向要求投票的从节点返回一条CLUSTERMSG_TYPE_FAILOVER_AUTH_ACK消息，表示这个主节点支持该从节点成为新的主节点</li>
+<li>每个从节点都会接收返回的CLUSTERMSG_TYPE_FAILOVER_AUTH_ACK消息，并会进行统计自己得到了多少主节点的支持</li>
+<li>每个具有投票权的主节点只能投一次票，当一个从节点获得了一半以上的主节点的支持票时，那么这个节点就会成为新的主节点，</li>
+<li>如果没有任何一个从节点获取大于半数的投票，那么将进行新的选举，直到选出新的主节点为止。</li>
+<li>新的主节点产生后，它会撤销所有对已下线的主节点的槽指派，并将这些槽指派给自己。</li>
+<li>新的主节点会向集群中广播一条PONG消息，让集群中的其他节点直到这个从节点已经成为了新的主节点，并且接管了原先主节点的所有槽。</li>
+<li>新的主节点负责接收和自己处理的槽相关的指令，至此故障转移结束。</li>
+</ol>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Redis/" rel="tag"><i class="fa fa-tag"></i> Redis</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/02/23/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/Elasticsearch%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8%E5%8E%9F%E7%90%86/" rel="next" title="Elasticsearch分布式存储原理">
+                <i class="fa fa-chevron-left"></i> Elasticsearch分布式存储原理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/07/19/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Tidb/tidb%E7%B4%A2%E5%BC%95%E7%BB%93%E6%9E%84/" rel="prev" title="tidb索引结构">
+                tidb索引结构 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%20%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">301</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">81</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-的三种工作模式介绍"><span class="nav-text">Redis 的三种工作模式介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-主从模式"><span class="nav-text">1. 主从模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-哨兵模式"><span class="nav-text">2. 哨兵模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Cluster模式"><span class="nav-text">3. Cluster模式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-主从数据同步过程"><span class="nav-text">Redis 主从数据同步过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#主从复制的方式"><span class="nav-text">主从复制的方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#持续复制"><span class="nav-text">持续复制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#全量复制"><span class="nav-text">全量复制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#部分复制"><span class="nav-text">部分复制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#积压缓冲区"><span class="nav-text">积压缓冲区</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#复制积压缓冲区的特点："><span class="nav-text">复制积压缓冲区的特点：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#复制积压缓冲区索引"><span class="nav-text">复制积压缓冲区索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#偏移量在复制积压缓冲区的作用"><span class="nav-text">偏移量在复制积压缓冲区的作用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-Cluster-模式"><span class="nav-text">Redis Cluster 模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-Cluster-集群介绍"><span class="nav-text">Redis  Cluster 集群介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#一、概述"><span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#二、redis集群的特点"><span class="nav-text">二、redis集群的特点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#节点间内部通讯机制"><span class="nav-text">节点间内部通讯机制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#基础通讯原理"><span class="nav-text">基础通讯原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#gossip协议"><span class="nav-text">gossip协议</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ping消息深入"><span class="nav-text">ping消息深入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基于重定向的客户端"><span class="nav-text">基于重定向的客户端</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#smart-jedis"><span class="nav-text">smart jedis</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-Cluster-集群伸缩"><span class="nav-text">Redis Cluster 集群伸缩</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#槽和数据与节点的对应关系"><span class="nav-text">槽和数据与节点的对应关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#扩容操作"><span class="nav-text">扩容操作</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#集群master选举原理"><span class="nav-text">集群master选举原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis集群方案"><span class="nav-text">Redis集群方案</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-客户端分区方案"><span class="nav-text">1. 客户端分区方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-代理分区方案"><span class="nav-text">2. 代理分区方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-查询路由方案"><span class="nav-text">3.查询路由方案</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据分步"><span class="nav-text">数据分步</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#数据分步理论"><span class="nav-text">数据分步理论</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#节点取余分区"><span class="nav-text">节点取余分区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#一致性哈希分区"><span class="nav-text">一致性哈希分区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#虚拟槽分区"><span class="nav-text">虚拟槽分区</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redus-Cluster-故障转移与恢复"><span class="nav-text">Redus Cluster 故障转移与恢复</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

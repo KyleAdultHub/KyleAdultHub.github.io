@@ -1,0 +1,1825 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="1. Error vs Exception1.1 Error本质Error本质上是一个接口 123type error interface&amp;#123;    Error() string&amp;#125; 经常使用errors.New()来返回一个error对象 例如标准库中的error定义, 通过bufio 前缀带上上下文信息 123456var ( ErrInvalidUnreadByte &#x3D; er">
+<meta property="og:type" content="article">
+<meta property="og:title" content="golang error 实践">
+<meta property="og:url" content="http://blog.kyleliu.cn/2022/08/16/11.Golang/Golang%E7%89%B9%E6%80%A7/golang%20error%20%E5%AE%9E%E8%B7%B5/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle)的云笔记">
+<meta property="og:description" content="1. Error vs Exception1.1 Error本质Error本质上是一个接口 123type error interface&amp;#123;    Error() string&amp;#125; 经常使用errors.New()来返回一个error对象 例如标准库中的error定义, 通过bufio 前缀带上上下文信息 123456var ( ErrInvalidUnreadByte &#x3D; er">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-08-16T01:36:00.000Z">
+<meta property="article:modified_time" content="2022-10-20T05:30:05.109Z">
+<meta property="article:author" content="刘小恺(Kyle)">
+<meta property="article:tag" content="Golang">
+<meta name="twitter:card" content="summary">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2022/08/16/11.Golang/Golang特性/golang error 实践/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>golang error 实践 | 刘小恺(Kyle)的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle)的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2022/08/16/11.Golang/Golang%E7%89%B9%E6%80%A7/golang%20error%20%E5%AE%9E%E8%B7%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">golang error 实践
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2022-08-16 09:36:00" itemprop="dateCreated datePublished" datetime="2022-08-16T09:36:00+08:00">2022-08-16</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Golang/" itemprop="url" rel="index"><span itemprop="name">Golang</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Golang/Golang%E7%89%B9%E6%80%A7/" itemprop="url" rel="index"><span itemprop="name">Golang特性</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/08/16/11.Golang/Golang%E7%89%B9%E6%80%A7/golang%20error%20%E5%AE%9E%E8%B7%B5/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2022/08/16/11.Golang/Golang%E7%89%B9%E6%80%A7/golang%20error%20%E5%AE%9E%E8%B7%B5/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="1-Error-vs-Exception"><a href="#1-Error-vs-Exception" class="headerlink" title="1. Error vs Exception"></a>1. Error vs Exception</h2><h3 id="1-1-Error本质"><a href="#1-1-Error本质" class="headerlink" title="1.1 Error本质"></a>1.1 Error本质</h3><p>Error本质上是一个接口</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> error <span class="keyword">interface</span>&#123;</span><br><span class="line">    Error() <span class="keyword">string</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>经常使用errors.New()来返回一个error对象</p>
+<p>例如标准库中的error定义, 通过bufio 前缀带上上下文信息</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> (</span><br><span class="line"> ErrInvalidUnreadByte = errors.New(<span class="string">"bufio: invalid use of UnreadByte"</span>)</span><br><span class="line"> ErrInvalidUnreadRune = errors.New(<span class="string">"bufio: invalid use of UnreadRune"</span>)</span><br><span class="line"> ErrBufferFull        = errors.New(<span class="string">"bufio: buffer full"</span>)</span><br><span class="line"> ErrNegativeCount     = errors.New(<span class="string">"bufio: negative count"</span>)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>errors.New()是返回的error对象的指针</p>
+<p>为了防止在error比较时，因为error内部内容定义相同导致两个不同类型的error误判相等</p>
+<h3 id="1-2-Error和Exception的区别"><a href="#1-2-Error和Exception的区别" class="headerlink" title="1.2 Error和Exception的区别"></a>1.2 Error和Exception的区别</h3><p>各语言演进：</p>
+<ul>
+<li>C: 一般传入指针，通过返回的int值判断成功还是失败</li>
+<li>C++: 无法知道抛出的什么异常，是否抛出异常（只能通过文档）</li>
+<li>JAVA: 需要抛出异常则方法的所有者必须声明，调用者也必须处理。处理方式、轻重程度都由调用者区分。</li>
+<li>GO: 不引入exception，采用多参数返回，一般最后一个返回值都是error</li>
+<li>error or panic: 如果你写过java你会觉得go中的panic处理很像java中的抛exception, 那我们到底是使用error还是panic?</li>
+</ul>
+<p>在 Go 中 panic 会导致程序直接退出，是一个致命的错误，如果使用 panic recover 进行处理的话，会存在很多问题 </p>
+<ol>
+<li>性能问题，频繁 panic recover 性能不好 </li>
+<li>容易导致程序异常退出，只要有一个地方没有处理到就会导致程序进程整个退出 </li>
+<li>不可控，一旦 panic 就将处理逻辑移交给了外部，我们并不能预设外部包一定会进行处理 什么时候使用 panic 呢？ 对于真正意外的情况，那些表示不可恢复的程序错误，例如索引越界、不可恢复的环境问题、栈溢出，我们才使用 panic</li>
+</ol>
+<h3 id="1-3-使用error代替exception的好处："><a href="#1-3-使用error代替exception的好处：" class="headerlink" title="1.3 使用error代替exception的好处："></a>1.3 使用error代替exception的好处：</h3><ul>
+<li>简单</li>
+<li>考虑失败不是成功</li>
+<li>没有隐藏的控制流</li>
+<li>error are value</li>
+</ul>
+<h2 id="2-Error-Type-🌟"><a href="#2-Error-Type-🌟" class="headerlink" title="2. Error Type 🌟"></a>2. Error Type 🌟</h2><h3 id="2-1-Sentinel-Error-预定义错误"><a href="#2-1-Sentinel-Error-预定义错误" class="headerlink" title="2.1 Sentinel Error(预定义错误)"></a>2.1 Sentinel Error(预定义错误)</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ErrInvalidUnreadByte = errors.New(<span class="string">"bufio: invalid use of UnreadByte"</span>)</span><br></pre></td></tr></table></figure>
+
+<p>预定义的错误，缺点：</p>
+<ul>
+<li>不灵活，调用方使用==去比较错误值是否相等；一旦出现fmt.Errorf这种携带上下文信息的error，会破坏相等性检查</li>
+<li>成为你的公共api;比如io.reader,io.copy这类函数都需要去判断错误类型是否是io.eof,但这并不是一个错误。</li>
+<li>创建了两个包之间的依赖</li>
+</ul>
+<h3 id="2-2-Error-Types"><a href="#2-2-Error-Types" class="headerlink" title="2.2 Error Types"></a>2.2 Error Types</h3><p>Error types 是实现了 error 接口的自定义类型。例如 MyError 类型记录了文件和行号以展示发生了什么:<br>os包下的error类型：<a href="https://golang.org/src/os/error.go" target="_blank" rel="noopener">https://golang.org/src/os/error.go</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// PathError records an error and the operation and file path that caused it.</span></span><br><span class="line"><span class="keyword">type</span> PathError <span class="keyword">struct</span> &#123;</span><br><span class="line"> Op   <span class="keyword">string</span></span><br><span class="line"> Path <span class="keyword">string</span></span><br><span class="line"> Err  error</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *PathError)</span> <span class="title">Error</span><span class="params">()</span> <span class="title">string</span></span> &#123; <span class="keyword">return</span> e.Op + <span class="string">" "</span> + e.Path + <span class="string">": "</span> + e.Err.Error() &#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *PathError)</span> <span class="title">Unwrap</span><span class="params">()</span> <span class="title">error</span></span> &#123; <span class="keyword">return</span> e.Err &#125;</span><br></pre></td></tr></table></figure>
+<p>Error types 优点：</p>
+<ul>
+<li>携带更多的上下文</li>
+</ul>
+<p>Error types 缺点：</p>
+<ul>
+<li>调用者要使用类型断言和类型 switch，就要让自定义的 error 变为 public。这种模型会导致和调用者产生强耦合，从而导致 API 变得脆弱。</li>
+<li>共享 error values 许多相同的问题。<h3 id="2-3-Opaque-Error"><a href="#2-3-Opaque-Error" class="headerlink" title="2.3 Opaque Error"></a>2.3 Opaque Error</h3>当开始使用 errors.Cause(err, sql.ErrNoRows) 或 xerrors.Is(err, sql.ErrNoRows) 时， 就意味着 sql.ErrNoRows 作为实现细节被暴露给外界了， 它成了API的一部分。</li>
+</ul>
+<p>如果只是利用库代码进行业务开发， 包装后作判断的作法可以被理解和接受的。</p>
+<p>而对于API的定义者来说， 这个问题就变得需要格外重视，我们需要不透明的错误处理。它的优势在于：减少代码之间耦合，调用者只需关心成功还是失败，无需关心错误内部</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 只需返回错误而不假设其内容</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">fn</span><span class="params">()</span><span class="title">error</span></span>&#123;</span><br><span class="line">  x, err := bar.Foo()</span><br><span class="line">  <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> err</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// to do something</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>说白了就是不通过err来判断各种情况，作为调用者只关心是成功还是失败（err是否为nil）</p>
+<blockquote>
+<p>Assert errors for behaviour, not type</p>
+</blockquote>
+<p>在少数情况下，只有这种二分的处理方法是不够（只有成功、失败两种状态）。</p>
+<p>比如net包中的操作：<a href="https://golang.org/src/net/net.go" target="_blank" rel="noopener">https://golang.org/src/net/net.go</a></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// An Error represents a network error.</span></span><br><span class="line"><span class="keyword">type</span> Error <span class="keyword">interface</span> &#123;</span><br><span class="line"> error</span><br><span class="line"> Timeout() <span class="keyword">bool</span>   <span class="comment">// Is the error a timeout?</span></span><br><span class="line"> Temporary() <span class="keyword">bool</span> <span class="comment">// Is the error temporary?</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> nerr, ok := err.(net.Error); ok &amp;&amp; nerr.Temporary() &#123;</span><br><span class="line">   <span class="comment">// to do something</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> temporary <span class="keyword">interface</span> &#123;</span><br><span class="line">  Temporary() <span class="keyword">bool</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 在不导入包的情况下可以直接使用err相关行为</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">IsTemporary</span><span class="params">(err error)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">  te, ok := err.(temporary)</span><br><span class="line">  <span class="keyword">return</span> ok &amp;&amp; te.Temporary()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以将任何错误传递给 IsTemporary 以确定错误是否可以重试。</p>
+<p>如果错误没有实现 temporary 接口; 也就是说，它没有 Temporary 方法，那么错误不是临时的。</p>
+<p>如果错误确实实现了 Temporary，那么如果 true 返回true ，调用者可以重试该操作。</p>
+<p>这里的关键是，此逻辑可以在不导入定义错误的包，或者直接知道任何关于 err的基础类型的情况下实现 - 我们只是对它的行为感兴趣。</p>
+<p>我建议， 尽量避免Sentinel Error、error types，去使用Opaque Error，至少在库文件、公共api中.</p>
+<h2 id="3-Handing-Error-Gracefully-🌟"><a href="#3-Handing-Error-Gracefully-🌟" class="headerlink" title="3. Handing Error Gracefully 🌟"></a>3. Handing Error Gracefully 🌟</h2><h3 id="3-1-Try-to-eliminate-errors-handle"><a href="#3-1-Try-to-eliminate-errors-handle" class="headerlink" title="3.1 Try to eliminate errors handle"></a>3.1 Try to eliminate errors handle</h3><p>1）在不破坏程序正确性和可读性的前提下，尽量减少error处理</p>
+<p>例一</p>
+<ul>
+<li>Bad<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">AuthRequest</span><span class="params">()</span> <span class="title">error</span></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> err:= auth();err!=<span class="literal">nil</span>&#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>Good<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">AuthRequest</span><span class="params">(r, *Request)</span> <span class="title">error</span></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> auth(r.User)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+例二</li>
+</ul>
+<p>我们的代码里经常会有大量的if error != nil {…}这样的代码，在一些特殊的场景是可以优化的</p>
+<p>我们先看一个令人崩溃的代码。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">parse</span><span class="params">(r io.Reader)</span> <span class="params">(*Point, error)</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> p Point</span><br><span class="line">    <span class="keyword">if</span> err := binary.Read(r, binary.BigEndian, &amp;p.Longitude); err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> err := binary.Read(r, binary.BigEndian, &amp;p.Latitude); err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> err := binary.Read(r, binary.BigEndian, &amp;p.Distance); err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> err := binary.Read(r, binary.BigEndian, &amp;p.ElevationGain); err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> err := binary.Read(r, binary.BigEndian, &amp;p.ElevationLoss); err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们可以看到这段代码其实主要是在调用binary.Read()方法，我们可以参考bufio.Scanner的操作</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">scanner := bufio.NewScanner(input)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> scanner.Scan() &#123;</span><br><span class="line">    token := scanner.Text()</span><br><span class="line">    <span class="comment">// process token</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> err := scanner.Err(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">    <span class="comment">// process the error</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>错误会保存到Scanner中，只进行最后一次的判断。应用这个思路，优化代码如下</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Reader <span class="keyword">struct</span> &#123;</span><br><span class="line">    r   io.Reader</span><br><span class="line">    err error</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *Reader)</span> <span class="title">read</span><span class="params">(data <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> r.err == <span class="literal">nil</span> &#123;</span><br><span class="line">        r.err = binary.Read(r.r, binary.BigEndian, data)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">parse</span><span class="params">(input io.Reader)</span> <span class="params">(*Point, error)</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> p Point</span><br><span class="line">    r := Reader&#123;r: input&#125;</span><br><span class="line"></span><br><span class="line">    r.read(&amp;p.Longitude)</span><br><span class="line">    r.read(&amp;p.Latitude)</span><br><span class="line">    r.read(&amp;p.Distance)</span><br><span class="line">    r.read(&amp;p.ElevationGain)</span><br><span class="line">    r.read(&amp;p.ElevationLoss)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> r.err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, r.err</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> &amp;p, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但是这种优化场景局限，只能运用到同一个业务对象的不断操作，对多种业务对象多种功能还是得老老实实写if err != nil</p>
+<h3 id="3-2-Annotating-errors"><a href="#3-2-Annotating-errors" class="headerlink" title="3.2 Annotating errors"></a>3.2 Annotating errors</h3><p>除了直接将错误返回，我们还常常会给错误携带更多的上下文信息再返回，因为足够的信息才能让我们快速的解决出现的问题。 下文会把给error添加上下文的操作叫做error注释</p>
+<p>目前error注释的方式如下：</p>
+<ul>
+<li>fmt.Errorf获得一个格式化的error，可以携带格外的错误信息</li>
+<li>自定义error，通过实现 Error() 方法</li>
+<li>打包错误，通过 pkg/errors”.Wrap</li>
+</ul>
+<p>如何选择适合的error注释方式？ 需考虑如下一点：</p>
+<ol>
+<li>是否需要被调用者捕获、处理<ul>
+<li>无需被调用者捕获、处理；使用 fmt.Errorf<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Open</span><span class="params">(filePath <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    _, err := createfile(filePath)</span><br><span class="line">    <span class="keyword">return</span> fmt.Errorf(“createfile: %s“, err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>​    需要被客户端捕获、处理<br>​    使用fmt.Errorf，会破坏相等性检查，导致只能通过错误信息字符串来比较错误是否相等，十分不可靠； 我们可以自定义错误类型，携带上下文的同时，给调用者提供可靠的判断方式；但是，自定义错误相当繁琐，我们可以使用pkg/errors这个包简化操作。 如下：<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// file package</span></span><br><span class="line"><span class="keyword">var</span> FileNotExsist = “file path not exsist: %s“</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Open</span><span class="params">(filePath <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">  _, err := createfile(filePath)</span><br><span class="line">  <span class="keyword">return</span> errors.warp(err, <span class="string">"createfile fail: "</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+这里简单介绍一下这个包github.com/pkg/errors，使用它去打包下游信息几乎已经是一个golang中的标准做法了。</li>
+</ul>
+<p>它的使用非常简单，如果我们要新生成一个错误，可以使用New函数,生成的错误，自带调用堆栈信息。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// fundamental is an error that has a message and a stack, but no caller.</span></span><br><span class="line"><span class="keyword">type</span> fundamental <span class="keyword">struct</span> &#123;</span><br><span class="line">	msg <span class="keyword">string</span></span><br><span class="line"> 	*stack</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(message <span class="keyword">string</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line"> 	<span class="keyword">return</span> &amp;fundamental&#123;</span><br><span class="line">  	msg:   message,</span><br><span class="line">  	stack: callers(),</span><br><span class="line"> 	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里的fundamental对象也是实现了 golang 内建 interface error的 Error 方法.</p>
+<p>如果有一个现成的error，我们需要对他进行再次包装处理，这时候有三个函数可以选择。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//只附加新的信息, 一般用于在业务代码中替换 fmt.Errorf()</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithMessage</span><span class="params">(err error, message <span class="keyword">string</span>)</span> <span class="title">error</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">//只附加调用堆栈信息,一般用于包装对第三方代码（标准库或第三方库）的调用。</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithStack</span><span class="params">(err error)</span> <span class="title">error</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">//同时附加堆栈和信息,一般用于包装对第三方代码（标准库或第三方库）的调用。</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Wrap</span><span class="params">(err error, message <span class="keyword">string</span>)</span> <span class="title">error</span></span></span><br></pre></td></tr></table></figure>
+<p>其实上面的包装，很类似于Java的异常包装，被包装的error，就是这个错误的根本原因。所以这个错误处理库为我们提供了Cause函数让我们可以获得最原始的 error 对象。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Cause</span><span class="params">(err error)</span> <span class="title">error</span></span> &#123;</span><br><span class="line"> 	<span class="keyword">type</span> causer <span class="keyword">interface</span> &#123;</span><br><span class="line">  	Cause() error</span><br><span class="line"> 	&#125;</span><br><span class="line"></span><br><span class="line"> 	<span class="keyword">for</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">  	cause, ok := err.(causer)</span><br><span class="line">  	<span class="keyword">if</span> !ok &#123;</span><br><span class="line">   		<span class="keyword">break</span></span><br><span class="line">  	&#125;</span><br><span class="line">  	err = cause.Cause()</span><br><span class="line"> 	&#125;</span><br><span class="line"> 	<span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用for循环一直找到最根本（最底层）的那个error。</p>
+<p>以上的错误我们都包装好了，也收集好了，那么怎么把他们里面存储的堆栈、错误原因等这些信息打印出来呢？其实，这个错误处理库的错误类型，都实现了Formatter接口，我们可以通过fmt.Printf函数输出对应的错误信息。</p>
+<ul>
+<li>%s,%v //功能一样，输出错误信息，不包含堆栈</li>
+<li>%q //输出的错误信息带引号，不包含堆栈</li>
+<li>%+v //输出错误信息和堆栈</li>
+</ul>
+<p>⚠️ 不要多次包装错误，堆栈信息会重复。</p>
+<p>如果多次使用 WithStack(err)，会将 stack 打印多遍，err 信息可能非常长。 可以人肉去 check 下层有没有使用 WithStack(err)，如果下层用了上层就不用。但这样会增加心智负担，容易出错。 我们可以在调用是使用一个 wrap 函数，判断一下是否已经执行 WithStack(err)。 但是 github.com/pkg/errors 自定义的 error 类型 withStack 是私有类型，如何去判断是否已经执行 WithStack(err) 呢？ 好在 StackTrace 不是私有类型，所以我们可以使用 interface 的一个小技巧，自己定义一个 interface，如果拥有 StackTrace() 方法则不再执行 WithStack(err)。 像这样：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> stackTracer <span class="keyword">interface</span> &#123;</span><br><span class="line">    StackTrace() errors2.StackTrace</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// once</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithStack</span><span class="params">(err error)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    _, ok := err.(stackTracer)</span><br><span class="line">    <span class="keyword">if</span> ok &#123;</span><br><span class="line">        <span class="keyword">return</span> err</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> errors2.WithStack(err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="3-3-Only-handle-errors-once"><a href="#3-3-Only-handle-errors-once" class="headerlink" title="3.3 Only handle errors once"></a>3.3 Only handle errors once</h3><blockquote>
+<p>Handling an error means inspecting the error value, and making a decision.</p>
+</blockquote>
+<p>我引用dave.cheney的这句话，意思是 “处理错误意味着你已经检查了错误并做出了决定”.</p>
+<p>如果你做出的决定少于一个，那么就是你没有检查错误、忽略了错误，如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Write</span><span class="params">(w io.Writer, buf []<span class="keyword">byte</span>)</span></span> &#123;</span><br><span class="line">        w.Write(buf)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>w.Write(buf)的error被丢弃了</p>
+<p>如果针对一个问题做出的决定多于一个，也是有问题的，如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Write</span><span class="params">(w io.Writer, buf []<span class="keyword">byte</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">        _, err := w.Write(buf)</span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">                <span class="comment">// annotated error goes to log file</span></span><br><span class="line">                log.Println(<span class="string">"unable to write:"</span>, err)</span><br><span class="line"></span><br><span class="line">                <span class="comment">// unannotated error returned to caller</span></span><br><span class="line">                <span class="keyword">return</span> err</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在上面的例子中 我们既记录错误日志，又错误返回给调用者，返回的错误可能会被层层记录，一直到最上层。</p>
+<p>最后我们会得到一堆重复的日志信息，但在最上层却只能拿到一个最原始的错误。</p>
+<p>我们可以根据不同需求去选择error注释（具体选择方式查看[3.2](3.2 Annotating errors)），返回给调用者</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Write</span><span class="params">(w io.Write, buf []<span class="keyword">byte</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">        _, err := w.Write(buf)</span><br><span class="line">        <span class="keyword">return</span> errors.Wrap(err, <span class="string">"write failed"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="4-Golang1-13-error"><a href="#4-Golang1-13-error" class="headerlink" title="4. Golang1.13 error"></a>4. Golang1.13 error</h2><p>结合社区反馈，Go 团队完成了在 Go 2 中简化错误处理的提案。 Go核心团队成员 Russ Cox 在xerrors中部分实现了提案中的内容。它用与 github.com/pkg/errors相似的思路解决同一问题， 引入了一个新的 fmt 格式化动词: %w，使用 Is 进行判断。：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">   <span class="string">"database/sql"</span></span><br><span class="line">   <span class="string">"fmt"</span></span><br><span class="line"></span><br><span class="line">   <span class="string">"golang.org/x/xerrors"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">bar</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">   <span class="keyword">if</span> err := foo(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> xerrors.Errorf(<span class="string">"bar failed: %w"</span>, foo())</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">foo</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">   <span class="keyword">return</span> xerrors.Errorf(<span class="string">"foo failed: %w"</span>, sql.ErrNoRows)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">   err := bar()</span><br><span class="line">   <span class="keyword">if</span> xerrors.Is(err, sql.ErrNoRows) &#123;</span><br><span class="line">      fmt.Printf(<span class="string">"data not found, %v\n"</span>, err)</span><br><span class="line">      fmt.Printf(<span class="string">"%+v\n"</span>, err)</span><br><span class="line">      <span class="keyword">return</span></span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="comment">// unknown error</span></span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/* Outputs:data not found, bar failed: foo failed: sql: no rows in result set</span></span><br><span class="line"><span class="comment">bar failed:</span></span><br><span class="line"><span class="comment">    main.bar</span></span><br><span class="line"><span class="comment">        /usr/four/main.go:12</span></span><br><span class="line"><span class="comment">  - foo failed:</span></span><br><span class="line"><span class="comment">    main.foo</span></span><br><span class="line"><span class="comment">        /usr/four/main.go:18</span></span><br><span class="line"><span class="comment">  - sql: no rows in result set</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+<p>与 github.com/pkg/errors 相比，它有几点不足：</p>
+<ul>
+<li>使用 : %w 代替了 Wrap 看似简化， 但失去了编译期检查。 如果没有冒号，或 : %w 不位于于格式化字符串的结尾，或冒号与百分号之间没有空格，包装将失效且不报错</li>
+<li>更严重的是， 调用 xerrors.Errorf 之前需要对参数进行nil判断。 这实际完全没有简化开发者的工作</li>
+</ul>
+<p>到了 Go 1.13 ，xerrors 的部分功能被整合进了标准库。 它继承了 xerrors的全部缺点， 并额外贡献了一项:不支持调用栈信息输出. 根据官方的说法， 此功能没有明确时间表。因此其实用性远低于 github.com/pkg/errors</p>
+<p>因此目前没有使用它的必要</p>
+<h2 id="5-总结"><a href="#5-总结" class="headerlink" title="5. 总结"></a>5. 总结</h2><p>最后，我来帮你梳理一下本文的重点，也就是目前需要掌握的</p>
+<h3 id="panic"><a href="#panic" class="headerlink" title="panic"></a>panic</h3><ul>
+<li>在程序启动的时候，如果有强依赖的服务出现故障时 panic 退出</li>
+<li>在程序启动的时候，如果发现有配置明显不符合要求， 可以 panic 退出（防御编程）</li>
+<li>其他情况下只要不是不可恢复的程序错误，都不应该直接 panic 应该返回 error</li>
+<li>在程序入口处，例如 gin 中间件需要使用 recover 预防 panic 程序退出</li>
+<li>在程序中我们应该避免使用野生的 goroutine</li>
+<li>如果是在请求中需要执行异步任务，应该使用异步 worker ，消息通知的方式进行处理，避免请求量大时大量goroutine 创建</li>
+<li>如果需要使用 goroutine 时，应该使用同一的 Go 函数进行创建，这个函数中会进行 recover ，避免因为野生goroutine panic 导致主进程退出<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Go</span><span class="params">(f <span class="keyword">func</span>()</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span>&#123;</span><br><span class="line">            <span class="keyword">if</span> err := <span class="built_in">recover</span>(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">                log.Printf(<span class="string">"panic: %+v"</span>, err)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;()</span><br><span class="line"></span><br><span class="line">        f()</span><br><span class="line">    &#125;()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="error"><a href="#error" class="headerlink" title="error"></a>error</h3></li>
+</ul>
+<ol>
+<li>我们在应用程序中使用 github.com/pkg/errors 处理应用错误，注意在公共库当中，我们一般不使用这个</li>
+<li>error 应该是函数的最后一个返回值，当 error 不为 nil 时，函数的其他返回值是不可用的状态，不应该对其他返回值做任何期待</li>
+<li>错误处理的时候应该先判断错误， if err != nil 出现错误及时返回，使代码是一条流畅的直线，避免过多的嵌套</li>
+<li>在应用程序中出现错误时，使用 errors.New 或者 errors.Errorf 返回错误<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(u *usecese)</span> <span class="title">usecase1</span><span class="params">()</span> <span class="title">error</span></span> &#123; </span><br><span class="line">	money := u.repo.getMoney(uid) </span><br><span class="line">	<span class="keyword">if</span> money &lt; <span class="number">10</span> &#123; </span><br><span class="line">    err := errors.Errorf(<span class="string">"用户余额不足, uid: %d, money: %d"</span>, uid, money) </span><br><span class="line">    <span class="keyword">return</span> err</span><br><span class="line">  &#125; </span><br><span class="line">		<span class="comment">// 其他逻辑 </span></span><br><span class="line">		<span class="keyword">return</span> <span class="literal">nil</span> </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>如果是调用应用程序的其他函数出现错误，请直接返回，如果需要携带信息，请使用 errors.WithMessage<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(u *usecese)</span> <span class="title">usecase2</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    name, err := u.repo.getUserName(uid)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> errors.WithMessage(err, <span class="string">"其他附加信息"</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 其他逻辑</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>如果是调用其他库（标准库、企业公共库、开源第三方库等）获取到错误时，请使用 errors.Wrap 添加堆栈信息</li>
+<li>切记，不要每个地方都是用 errors.Wrap 只需要在错误第一次出现时进行 errors.Wrap 即可</li>
+<li>根据场景进行判断是否需要将其他库的原始错误吞掉，例如可以把 repository 层的数据库相关错误吞掉，返回业务错误码，避免后续我们分割微服务或者更换 ORM 库时需要去修改上层代码</li>
+<li>注意我们在基础库，被大量引入的第三方库编写时一般不使用 errors.Wrap 避免堆栈信息重复</li>
+<li>禁止每个出错的地方都打日志，只需要在进程的最开始的地方使用 %+v 进行统一打印，例如 http/rpc 服务的中间件</li>
+<li>错误判断使用 errors.Is 进行比较<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    err := A()</span><br><span class="line">    <span class="keyword">if</span> errors.Is(err, io.EOF)&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 其他逻辑</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>错误类型判断，使用 errors.As 进行赋值<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">    err := A()</span><br><span class="line">    <span class="keyword">if</span> errA := <span class="built_in">new</span>(errorA) &amp;&amp; errors.As(err, &amp;errA)&#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 其他逻辑</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>如何判定错误的信息是否足够，想一想当你的代码出现问题需要排查的时候你的错误信息是否可以帮助你快速的定位问题，例如我们在请求中一般会输出参数信息，用于辅助判断错误</li>
+<li>对于业务错误，推荐在一个统一的地方创建一个错误字典，错误字典里面应该包含错误的code，并且在日志中作为独立字段打印，方便做业务告警的判断，错误必须有清晰的错误文档</li>
+<li>不需要返回，被忽略的错误必须输出日志信息</li>
+<li>只应该被处理一次，输出错误日志也算处理,一旦确定函数/方法将处理错误，错误就不再是错误。如果函数/方法仍然需要发出返回，则它不能返回错误值。它应该只返回零(比如降级处理中，你返回了降级数据，然后需要 return nil)。</li>
+<li>对同一个类型的错误，采用相同的模式，例如参数错误，不要有的返回 404 有的返回 200</li>
+<li>处理错误的时候，需要处理已分配的资源，使用 defer 进行清理，例如文件句柄</li>
+<li>尽量避免Sentinel Error、error types，去使用Opaque Error，至少在库文件、公共api中.</li>
+</ol>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Golang/" rel="tag"><i class="fa fa-tag"></i> Golang</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/07/19/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Tidb/tidb%E6%9E%B6%E6%9E%84%E4%BB%8B%E7%BB%8D/" rel="next" title="tidb存储架构介绍">
+                <i class="fa fa-chevron-left"></i> tidb存储架构介绍
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/09/17/17.%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/discovery/discovery%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0/" rel="prev" title="discovery服务发现">
+                discovery服务发现 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%20%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">301</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">81</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Error-vs-Exception"><span class="nav-text">1. Error vs Exception</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-Error本质"><span class="nav-text">1.1 Error本质</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-Error和Exception的区别"><span class="nav-text">1.2 Error和Exception的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-使用error代替exception的好处："><span class="nav-text">1.3 使用error代替exception的好处：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Error-Type-🌟"><span class="nav-text">2. Error Type 🌟</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-Sentinel-Error-预定义错误"><span class="nav-text">2.1 Sentinel Error(预定义错误)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-Error-Types"><span class="nav-text">2.2 Error Types</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-Opaque-Error"><span class="nav-text">2.3 Opaque Error</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Handing-Error-Gracefully-🌟"><span class="nav-text">3. Handing Error Gracefully 🌟</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-Try-to-eliminate-errors-handle"><span class="nav-text">3.1 Try to eliminate errors handle</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-Annotating-errors"><span class="nav-text">3.2 Annotating errors</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-Only-handle-errors-once"><span class="nav-text">3.3 Only handle errors once</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-Golang1-13-error"><span class="nav-text">4. Golang1.13 error</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-总结"><span class="nav-text">5. 总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#panic"><span class="nav-text">panic</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#error"><span class="nav-text">error</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

@@ -345,7 +345,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/3-Flink%20%E7%AA%97%E5%8F%A3/">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/09/18/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Kafka/Kafka%20%E5%B9%82%E7%AD%89%E6%80%A7%E5%AE%9E%E7%8E%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="刘小恺(Kyle)">
@@ -364,8 +364,8 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/3-Flink%20%E7%AA%97%E5%8F%A3/" itemprop="url">
-                  Flink 窗口
+                <a class="post-title-link" href="/2020/09/18/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Kafka/Kafka%20%E5%B9%82%E7%AD%89%E6%80%A7%E5%AE%9E%E7%8E%B0/" itemprop="url">
+                  Kafka 幂等性实现
                 </a>
               
             
@@ -391,7 +391,7 @@
                 
               
 
-              <time title="创建时间：2020-04-09 16:00:00" itemprop="dateCreated datePublished" datetime="2020-04-09T16:00:00+08:00">2020-04-09</time>
+              <time title="创建时间：2020-09-18 11:00:00" itemprop="dateCreated datePublished" datetime="2020-09-18T11:00:00+08:00">2020-09-18</time>
             
 
             
@@ -416,7 +416,7 @@
                   ，
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/Kafka/" itemprop="url" rel="index"><span itemprop="name">Kafka</span></a></span>
 
                 
                 
@@ -431,8 +431,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/3-Flink%20%E7%AA%97%E5%8F%A3/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/3-Flink%20%E7%AA%97%E5%8F%A3/" itemprop="commentCount"></span>
+                <a href="/2020/09/18/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Kafka/Kafka%20%E5%B9%82%E7%AD%89%E6%80%A7%E5%AE%9E%E7%8E%B0/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/09/18/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Kafka/Kafka%20%E5%B9%82%E7%AD%89%E6%80%A7%E5%AE%9E%E7%8E%B0/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -462,13 +462,21 @@
       
         
           
-          一、窗口概念在大多数场景下，我们需要统计的数据流都是无界的，因此我们无法等待整个数据流终止后才进行统计。通常情况下，我们只需要对某个时间范围或者数量范围内的数据进行统计分析：如每隔五分钟统计一次过去一小时内所有商品的点击量；或者每发生1000次点击后，都去统计一下每个商品点击率的占比。在 Flink 中，我们使用窗口 (Window) 来实现这类功能。按照统计维度的不同，Flink 中的窗口可以分为 时间窗口 (Time Windows) 和 计数窗口 (Count Windows) 。
-二、窗口类型
-flink支持两种划分窗口的方式(time和count) 如果根据时间划分窗口，那么它就是一个time-window，如果根据数据数
+          Producer 的事物和幂等性简介简述Apache Kafka 从 0.11.0开始， 支持了事物特性
+其对应着三种层面的含义:
+
+幂等性的支持
+事务性的支持
+Kafka Streams 的 exactly once 的实现
+
+Producer 的幂等性Producer 的幂等性指的是当发送同一条消息时，数据在 Server 端只会被持久化一次，数据不丟不重，但是这里的幂等性是有条件的：
+
+只能保证 Producer 在单个会话内不丟不重，如果 Producer 出现意外挂掉再重启是无法保证的（幂等性情况下，是无法获取之前的状态信息，因此是无法做到跨会话级别的不丢不重）;
+幂等性不能跨多个 Topic-Partition，只能保证
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/3-Flink%20%E7%AA%97%E5%8F%A3/" rel="contents">
+            <a class="btn" href="/2020/09/18/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Kafka/Kafka%20%E5%B9%82%E7%AD%89%E6%80%A7%E5%AE%9E%E7%8E%B0/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -524,7 +532,7 @@ flink支持两种划分窗口的方式(time和count) 如果根据时间划分窗
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/15-Flink-Redis-Sink/">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/HBase/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="刘小恺(Kyle)">
@@ -543,8 +551,8 @@ flink支持两种划分窗口的方式(time和count) 如果根据时间划分窗
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/15-Flink-Redis-Sink/" itemprop="url">
-                  Flink-Redis-Sink
+                <a class="post-title-link" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/HBase/" itemprop="url">
+                  HBase 面试题整理
                 </a>
               
             
@@ -570,7 +578,7 @@ flink支持两种划分窗口的方式(time和count) 如果根据时间划分窗
                 
               
 
-              <time title="创建时间：2020-04-09 11:00:00" itemprop="dateCreated datePublished" datetime="2020-04-09T11:00:00+08:00">2020-04-09</time>
+              <time title="创建时间：2020-06-13 11:00:00" itemprop="dateCreated datePublished" datetime="2020-06-13T11:00:00+08:00">2020-06-13</time>
             
 
             
@@ -588,14 +596,14 @@ flink支持两种划分窗口的方式(time和count) 如果根据时间划分窗
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">总结</span></a></span>
 
                 
                 
                   ，
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">面试总结</span></a></span>
 
                 
                 
@@ -610,8 +618,8 @@ flink支持两种划分窗口的方式(time和count) 如果根据时间划分窗
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/15-Flink-Redis-Sink/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/15-Flink-Redis-Sink/" itemprop="commentCount"></span>
+                <a href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/HBase/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/HBase/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -641,13 +649,15 @@ flink支持两种划分窗口的方式(time和count) 如果根据时间划分窗
       
         
           
-          简介流式计算中，我们经常有一些场景是消费Kafka数据，进行处理，然后存储到其他的数据库或者缓存或者重新发送回其他的消息队列中。本文讲述一个简单的Redis作为Sink的案例。
-关于Redis SinkFlink提供了封装好的写入Redis的包给我们用，首先我们要新增一个依赖：
-12345&lt;dependency&gt;    &lt;groupId&gt;org.apache.flink&lt;/groupId&gt;    &lt;artifactId&gt;flink-connector-redis_2.10&lt;/artifactId&gt;    &lt;version&gt;1.1.5&lt;/version&gt
+          HBase 原理
+存储原理
+HBase中的每张表都通过行键按照一定的范围被分割成多个子表（HRegion），默认一个HRegion超过256M就要被分割成两个，由HRegionServer管理，管理哪些HRegion由HMaster分配。
+
+HRegionServer存取一个子表时，会创建一个HRegion对象，表的Region信息存在.meta表中，该表信息可通过Zookeeper进行追踪。然后对表的每个列族(Column Family)创建一个Store实例，每个Store都会有0个或多个StoreFile与之对应，每个StoreFile都会对应一个HFile， HFile就是实际的存储文件。因此，一个HRegion有多少个列族
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/15-Flink-Redis-Sink/" rel="contents">
+            <a class="btn" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/HBase/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -703,7 +713,7 @@ flink支持两种划分窗口的方式(time和count) 如果根据时间划分窗
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/1-Flink%E4%BB%8B%E7%BB%8D/">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Flink/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="刘小恺(Kyle)">
@@ -722,8 +732,8 @@ flink支持两种划分窗口的方式(time和count) 如果根据时间划分窗
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/1-Flink%E4%BB%8B%E7%BB%8D/" itemprop="url">
-                  Flink 介绍
+                <a class="post-title-link" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Flink/" itemprop="url">
+                  Flink面试题整理
                 </a>
               
             
@@ -749,7 +759,7 @@ flink支持两种划分窗口的方式(time和count) 如果根据时间划分窗
                 
               
 
-              <time title="创建时间：2020-04-09 11:00:00" itemprop="dateCreated datePublished" datetime="2020-04-09T11:00:00+08:00">2020-04-09</time>
+              <time title="创建时间：2020-06-13 11:00:00" itemprop="dateCreated datePublished" datetime="2020-06-13T11:00:00+08:00">2020-06-13</time>
             
 
             
@@ -767,14 +777,14 @@ flink支持两种划分窗口的方式(time和count) 如果根据时间划分窗
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">总结</span></a></span>
 
                 
                 
                   ，
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">面试总结</span></a></span>
 
                 
                 
@@ -789,8 +799,8 @@ flink支持两种划分窗口的方式(time和count) 如果根据时间划分窗
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/1-Flink%E4%BB%8B%E7%BB%8D/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/1-Flink%E4%BB%8B%E7%BB%8D/" itemprop="commentCount"></span>
+                <a href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Flink/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Flink/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -820,11 +830,16 @@ flink支持两种划分窗口的方式(time和count) 如果根据时间划分窗
       
         
           
-          一、Flink 简介Apache Flink 诞生于柏林工业大学的一个研究性项目，原名 StratoSphere 。2014 年，由 StratoSphere 项目孵化出 Flink，并于同年捐赠 Apache，之后成为 Apache 的顶级项目。2019 年 1 年，阿里巴巴收购了 Flink 的母公司 Data Artisans，并宣布开源内部的 Blink，Blink 是阿里巴巴基于 Flink 优化后的版本，增加了大量的新功能，并在性能和稳定性上进行了各种优化，经历过阿里内部多种复杂业务的挑战和检验。同时阿里巴巴也表示会逐步将这些新功能和特性 Merge 回社区版本的 Flink 中，因此 Flink 成为目前最为火热的大数
+          Flink架构Flink 分层SQL &amp; Table API
+SQL &amp; Table API 同时适用于批处理和流处理，这意味着你可以对有界数据流和无界数据流以相同的语义进行查询，并产生相同的结果。除了基本查询外， 它还支持自定义的标量函数，聚合函数以及表值函数，可以满足多样化的查询需求。 
+DataStream &amp; DataSet API
+DataStream &amp;  DataSet API 是 Flink 数据处理的核心 API，支持使用 Java 语言或 Scala 语言进行调用，提供了数据读取，数据转换和数据输出等一系列常用操作的封装。
+Stateful Stream Processing
+St
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/1-Flink%E4%BB%8B%E7%BB%8D/" rel="contents">
+            <a class="btn" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Flink/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -880,7 +895,7 @@ flink支持两种划分窗口的方式(time和count) 如果根据时间划分窗
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/14-Flink%20SQL/">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/HDFS/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="刘小恺(Kyle)">
@@ -899,8 +914,8 @@ flink支持两种划分窗口的方式(time和count) 如果根据时间划分窗
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/14-Flink%20SQL/" itemprop="url">
-                  Flink SQL
+                <a class="post-title-link" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/HDFS/" itemprop="url">
+                  HDFS 面试题整理
                 </a>
               
             
@@ -926,7 +941,7 @@ flink支持两种划分窗口的方式(time和count) 如果根据时间划分窗
                 
               
 
-              <time title="创建时间：2020-04-09 11:00:00" itemprop="dateCreated datePublished" datetime="2020-04-09T11:00:00+08:00">2020-04-09</time>
+              <time title="创建时间：2020-06-13 11:00:00" itemprop="dateCreated datePublished" datetime="2020-06-13T11:00:00+08:00">2020-06-13</time>
             
 
             
@@ -944,14 +959,14 @@ flink支持两种划分窗口的方式(time和count) 如果根据时间划分窗
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">总结</span></a></span>
 
                 
                 
                   ，
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">面试总结</span></a></span>
 
                 
                 
@@ -966,8 +981,8 @@ flink支持两种划分窗口的方式(time和count) 如果根据时间划分窗
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/14-Flink%20SQL/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/14-Flink%20SQL/" itemprop="commentCount"></span>
+                <a href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/HDFS/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/HDFS/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -997,12 +1012,22 @@ flink支持两种划分窗口的方式(time和count) 如果根据时间划分窗
       
         
           
-          简介Apache Flink具有两个关系API - 表API和SQL - 用于统一流和批处理。Table API是Scala和Java的语言集成查询API，允许以非常直观的方式组合来自关系运算符的查询，Table API和SQL接口彼此紧密集成，以及Flink的DataStream和DataSet API。您可以轻松地在基于API构建的所有API和库之间切换。例如，您可以使用CEP库从DataStream中提取模式，然后使用Table API分析模式，或者可以在预处理上运行Gelly图算法之前使用SQL查询扫描，过滤和聚合批处理表数据。
-Flink SQL的编程模型创建一个TableEnvironmentTableEnvironme
+          HDFS原理HDFS 工作机制介绍
+HDFS集群分为两大角色：NameNode、DataNode  (Secondary Namenode)
+NameNode负责管理整个文件系统的元数据
+DataNode 负责管理用户的文件数据块
+文件会按照固定的大小（blocksize）切成若干块后分布式存储在若干台datanode上
+每一个文件块可以有多个副本，并存放在不同的datanode上
+Datanode会定期向Namenode汇报自身所保存的文件block信息，而namenode则会负责保持文件的副本数量
+HDFS的内部工作机制对客户端保持透明，客户端请求访问HDFS都是通过向namenode申请来进行
+
+HDFS 写数据流程
+
+客户端
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/14-Flink%20SQL/" rel="contents">
+            <a class="btn" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/HDFS/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1058,7 +1083,7 @@ Flink SQL的编程模型创建一个TableEnvironmentTableEnvironme
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/16-Flink(Source-KafkaSink-Mysql)/">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Hive/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="刘小恺(Kyle)">
@@ -1077,8 +1102,8 @@ Flink SQL的编程模型创建一个TableEnvironmentTableEnvironme
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/16-Flink(Source-KafkaSink-Mysql)/" itemprop="url">
-                  Flink(Source-KafkaSink-Mysql)
+                <a class="post-title-link" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Hive/" itemprop="url">
+                  Hive 面试题整理
                 </a>
               
             
@@ -1104,7 +1129,7 @@ Flink SQL的编程模型创建一个TableEnvironmentTableEnvironme
                 
               
 
-              <time title="创建时间：2020-04-09 11:00:00" itemprop="dateCreated datePublished" datetime="2020-04-09T11:00:00+08:00">2020-04-09</time>
+              <time title="创建时间：2020-06-13 11:00:00" itemprop="dateCreated datePublished" datetime="2020-06-13T11:00:00+08:00">2020-06-13</time>
             
 
             
@@ -1122,14 +1147,14 @@ Flink SQL的编程模型创建一个TableEnvironmentTableEnvironme
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">总结</span></a></span>
 
                 
                 
                   ，
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">面试总结</span></a></span>
 
                 
                 
@@ -1144,8 +1169,8 @@ Flink SQL的编程模型创建一个TableEnvironmentTableEnvironme
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/16-Flink(Source-KafkaSink-Mysql)/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/16-Flink(Source-KafkaSink-Mysql)/" itemprop="commentCount"></span>
+                <a href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Hive/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Hive/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1175,18 +1200,27 @@ Flink SQL的编程模型创建一个TableEnvironmentTableEnvironme
       
         
           
-          本文介绍消费Kafka的消息实时写入Mysql
+          Hive架构Hive 的数据模型
+db：在hdfs中表现为${hive.metastore.warehouse.dir}目录下一个文件夹
 
-maven新增依赖：
+table：在hdfs中表现所属db目录下一个文件夹
 
-12345&lt;dependency&gt;    &lt;groupId&gt;mysql&lt;/groupId&gt;    &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;    &lt;version&gt;5.1.39&lt;/version&gt;&lt;/dependency&gt;
+external table：外部表, 与table类似，不过其数据存放位置可以在任意指定路径
 
-2.重写RichSinkFunction,实现一个Mysql Sink
-123456789101112131415161718192021222324252627public class Mys
+普通表: 删除表后, hdfs上的文件都删了
+External外部表: 删除后, hdfs上的文件没有删除, 只是把文件删除了
+
+
+partition：在hdfs中表现为table目录下的子目录
+
+bucket：桶, 在hdfs中表现为同一个表目录下根据hash散列之后的多个文件, 会根据不同的文件把数据放到不同的文件中 
+
+
+Hive 架构图
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/16-Flink(Source-KafkaSink-Mysql)/" rel="contents">
+            <a class="btn" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Hive/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1242,7 +1276,7 @@ maven新增依赖：
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/13-Flink-Kafka-Connector/">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Kafka/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="刘小恺(Kyle)">
@@ -1261,8 +1295,8 @@ maven新增依赖：
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/13-Flink-Kafka-Connector/" itemprop="url">
-                  Flink-Kafka-Connector
+                <a class="post-title-link" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Kafka/" itemprop="url">
+                  Kafka 面试题整理
                 </a>
               
             
@@ -1288,7 +1322,7 @@ maven新增依赖：
                 
               
 
-              <time title="创建时间：2020-04-09 11:00:00" itemprop="dateCreated datePublished" datetime="2020-04-09T11:00:00+08:00">2020-04-09</time>
+              <time title="创建时间：2020-06-13 11:00:00" itemprop="dateCreated datePublished" datetime="2020-06-13T11:00:00+08:00">2020-06-13</time>
             
 
             
@@ -1306,14 +1340,14 @@ maven新增依赖：
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">总结</span></a></span>
 
                 
                 
                   ，
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">面试总结</span></a></span>
 
                 
                 
@@ -1328,8 +1362,8 @@ maven新增依赖：
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/13-Flink-Kafka-Connector/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/13-Flink-Kafka-Connector/" itemprop="commentCount"></span>
+                <a href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Kafka/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Kafka/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1359,14 +1393,15 @@ maven新增依赖：
       
         
           
-          简介Flink-kafka-connector用来做什么？
-Kafka中的partition机制和Flink的并行度机制结合，实现数据恢复Kafka可以作为Flink的source和sink任务失败，通过设置kafka的offset来恢复应用
-kafka简单介绍关于kafka，我们会有专题文章介绍，这里简单介绍几个必须知道的概念。
-1.生产者（Producer）​    顾名思义，生产者就是生产消息的组件，它的主要工作就是源源不断地生产出消息，然后发送给消息队列。生产者可以向消息队列发送各种类型的消息，如狭义的字符串消息，也可以发送二进制消息。生产者是消息队列的数据源，只有通过生产者持续不断地向消息队列发送消息，消息队列才能不断处理
+          Kafka架构Kafka 整体结构介绍
+Producer ：消息生产者，就是向kafka broker发消息的客户端。
+Consumer ：消息消费者，向kafka broker取消息的客户端
+Topic ：咋们可以理解为一个队列。
+Consumer Group （CG）：这是kafka用来实现一个topic消息的广播（发给所有的consumer）和单播（发给任意一个consumer）的手段。一个topic可以有多个CG。topic的消息会复制（不是真的复制，是概念上的）到所有的CG，但每个partion只会把消息发给该CG中的一个consumer。如果需要实现广播，只要每个consumer有一个独立的CG就可以了。要实现单播只要所
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/13-Flink-Kafka-Connector/" rel="contents">
+            <a class="btn" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Kafka/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1422,7 +1457,7 @@ kafka简单介绍关于kafka，我们会有专题文章介绍，这里简单介�
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/2-Source%E3%80%81Transform%E3%80%81Sink/">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/mongodb/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="刘小恺(Kyle)">
@@ -1441,8 +1476,8 @@ kafka简单介绍关于kafka，我们会有专题文章介绍，这里简单介�
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/2-Source%E3%80%81Transform%E3%80%81Sink/" itemprop="url">
-                  Source、Transform、Sink
+                <a class="post-title-link" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/mongodb/" itemprop="url">
+                  mongodb 面试题整理
                 </a>
               
             
@@ -1468,7 +1503,7 @@ kafka简单介绍关于kafka，我们会有专题文章介绍，这里简单介�
                 
               
 
-              <time title="创建时间：2020-04-09 11:00:00" itemprop="dateCreated datePublished" datetime="2020-04-09T11:00:00+08:00">2020-04-09</time>
+              <time title="创建时间：2020-06-13 11:00:00" itemprop="dateCreated datePublished" datetime="2020-06-13T11:00:00+08:00">2020-06-13</time>
             
 
             
@@ -1486,14 +1521,14 @@ kafka简单介绍关于kafka，我们会有专题文章介绍，这里简单介�
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">总结</span></a></span>
 
                 
                 
                   ，
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">面试总结</span></a></span>
 
                 
                 
@@ -1508,8 +1543,8 @@ kafka简单介绍关于kafka，我们会有专题文章介绍，这里简单介�
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/2-Source%E3%80%81Transform%E3%80%81Sink/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/2-Source%E3%80%81Transform%E3%80%81Sink/" itemprop="commentCount"></span>
+                <a href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/mongodb/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/mongodb/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1539,16 +1574,16 @@ kafka简单介绍关于kafka，我们会有专题文章介绍，这里简单介�
       
         
           
-          Data Source一、内置 Data SourceFlink Data Source 用于定义 Flink 程序的数据来源，Flink 官方提供了多种数据获取方法，用于帮助开发者简单快速地构建输入流，具体如下：
-1.1 基于文件构建1. readTextFile(path)：按照 TextInputFormat 格式读取文本文件，并将其内容以字符串的形式返回。示例如下：
-1env.readTextFile(filePath).print();
-
-2. readFile(fileInputFormat, path) ：按照指定格式读取文件。
-3. readFile(inputFormat, filePath, watchType,
+          Mongo基础mongodb是什么？MongoDB 是由 C++语言编写的，是一个基于分布式文件存储的开源数据库系统。 再高负载的情况下，添加更多的节点，可以保证服务器性能。 MongoDB 旨在给 WEB 应用提供可扩展的高性能数据存储解决方案。 
+MongoDB 将数据存储为一个文档，数据结构由键值(key=&gt;value)对组成。 MongoDB 文档类似于 JSON 对象。字段值可以包含其他文档，数组及文档数组。
+mongodb有哪些特点？
+MongoDB 是一个面向文档存储的数据库，操作起来比较简单和容易。
+可以在 MongoDB 记录中设置任何属性的索引
+以通过本地或者网络创建数据镜像，这使得 MongoDB 有更强
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2020/04/09/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/2-Source%E3%80%81Transform%E3%80%81Sink/" rel="contents">
+            <a class="btn" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/mongodb/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1604,7 +1639,7 @@ kafka简单介绍关于kafka，我们会有专题文章介绍，这里简单介�
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/03/31/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Spark/1.Spark%20%E4%BB%8B%E7%BB%8D/">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Golang/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="刘小恺(Kyle)">
@@ -1623,8 +1658,8 @@ kafka简单介绍关于kafka，我们会有专题文章介绍，这里简单介�
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/03/31/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Spark/1.Spark%20%E4%BB%8B%E7%BB%8D/" itemprop="url">
-                  Spark介绍
+                <a class="post-title-link" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Golang/" itemprop="url">
+                  Golang 面试题整理
                 </a>
               
             
@@ -1650,7 +1685,7 @@ kafka简单介绍关于kafka，我们会有专题文章介绍，这里简单介�
                 
               
 
-              <time title="创建时间：2020-03-31 16:00:00" itemprop="dateCreated datePublished" datetime="2020-03-31T16:00:00+08:00">2020-03-31</time>
+              <time title="创建时间：2020-06-13 11:00:00" itemprop="dateCreated datePublished" datetime="2020-06-13T11:00:00+08:00">2020-06-13</time>
             
 
             
@@ -1668,14 +1703,14 @@ kafka简单介绍关于kafka，我们会有专题文章介绍，这里简单介�
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">总结</span></a></span>
 
                 
                 
                   ，
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/Spark/" itemprop="url" rel="index"><span itemprop="name">Spark</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">面试总结</span></a></span>
 
                 
                 
@@ -1690,8 +1725,8 @@ kafka简单介绍关于kafka，我们会有专题文章介绍，这里简单介�
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/03/31/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Spark/1.Spark%20%E4%BB%8B%E7%BB%8D/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/03/31/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Spark/1.Spark%20%E4%BB%8B%E7%BB%8D/" itemprop="commentCount"></span>
+                <a href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Golang/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Golang/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1721,18 +1756,19 @@ kafka简单介绍关于kafka，我们会有专题文章介绍，这里简单介�
       
         
           
-          Spark介绍什么是Spark
-Spark是一种快速、通用、可扩展的大数据分析引擎，2009年诞生于加州大学伯克利分校AMPLab，2010年开源，2013年6月成为Apache孵化项目，2014年2月成为Apache顶级项目。
+          Golang 基础golang中常量是怎么实现的从汇编中看是对字符串常量加了一个标号，同时设置为SRODATA，也就是只读，对数字常量直接在代码中作为立即数使用了
+协程，线程，进程的区别。
+进程
 
-Spark基于内存计算，提高了在大数据环境下数据处理的实时性，同时保证了高容错性和高可伸缩性，允许用户将Spark部署在大量廉价硬件之上，形成集群。
+进程是具有一定独立功能的程序关于某个数据集合上的一次运行活动,进程是系统进行资源分配和调度的一个独立单位。每个进程都有自己的独立内存空间，不同进程通过进程间通信来通信。由于进程比较重量，占据独立的内存，所以上下文进程间的切换开销（栈、寄存器、虚拟内存、文件句柄等）比较大，但相对比较稳定安全。
 
+线程
 
-Spark 的特点
-中间结果输出：基于MapReduce的计算引擎通常会将中间结果输出到磁盘上，进行存储和容错。出于任务管道承接的考虑，当一些查询翻译到MapReduce任务时，往往会产生多个Stage，而这些串联的Stage又依赖于底层文件系统（如HD
+线程是进程的一个实体,是CPU调度和分派的基本单位,它是比进程更小的能独立运行的基本单位.线程自己基本上不拥有系统资源,只拥有一点在运行中
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2020/03/31/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Spark/1.Spark%20%E4%BB%8B%E7%BB%8D/" rel="contents">
+            <a class="btn" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Golang/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1788,7 +1824,7 @@ Spark 的特点
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/03/31/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Spark/3.Spark%20SQL/">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Mysql/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="刘小恺(Kyle)">
@@ -1807,8 +1843,8 @@ Spark 的特点
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/03/31/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Spark/3.Spark%20SQL/" itemprop="url">
-                  Spark SQL
+                <a class="post-title-link" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Mysql/" itemprop="url">
+                  Mysql 面试题整理
                 </a>
               
             
@@ -1834,7 +1870,7 @@ Spark 的特点
                 
               
 
-              <time title="创建时间：2020-03-31 16:00:00" itemprop="dateCreated datePublished" datetime="2020-03-31T16:00:00+08:00">2020-03-31</time>
+              <time title="创建时间：2020-06-13 11:00:00" itemprop="dateCreated datePublished" datetime="2020-06-13T11:00:00+08:00">2020-06-13</time>
             
 
             
@@ -1852,14 +1888,14 @@ Spark 的特点
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">总结</span></a></span>
 
                 
                 
                   ，
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/Spark/" itemprop="url" rel="index"><span itemprop="name">Spark</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">面试总结</span></a></span>
 
                 
                 
@@ -1874,8 +1910,8 @@ Spark 的特点
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/03/31/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Spark/3.Spark%20SQL/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/03/31/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Spark/3.Spark%20SQL/" itemprop="commentCount"></span>
+                <a href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Mysql/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Mysql/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1905,19 +1941,23 @@ Spark 的特点
       
         
           
-          Spark  SQL 介绍什么是Spark SQLSpark SQL是Spark用来处理结构化数据的一个模块，它提供了一个编程抽象叫做DataFrame并且作为分布式SQL查询引擎的作用。
-Spark的作用我们已经学习了Hive，它是将Hive SQL转换成MapReduce然后提交到集群上执行，大大简化了编写MapReduce的程序的复杂性，由于MapReduce这种计算模型执行效率比较慢。所有Spark SQL的应运而生，它是将Spark SQL转换成RDD，然后提交到集群执行，执行效率非常快！
-Spark SQL 的特点
-易整合
-统一的数据访问方式
-兼容Hive
-标准的数据连接
+          Mysql索引Mysql 索引分类
+B+ 树索引（包括普通索引、唯一索引、主键索引）
+哈希索引
+全文索引
+R-TREE 索引（空间索引，主要用于地理空间数据类型，很少使用）。
 
-Dataframe介绍什么是Dataframe
+Mysql 传统意义上的索引为B+ 树索引，B+ 树索引的本质就是B+ 树在数据库中的实现，由于B+ 树的高扇出性，数据库中的B+ 树的高一般为2-4层，因此查找某一键值的行记录只需2-4次IO，大概0.02~0.04秒。
+
+（扇出性：是指该模块直接调用的下级模块的个数。扇出大表示模块的复杂度高，需要控制和协调过多的下级模块
+
+聚集索引和辅助索引
+聚集索引：
+是根据每张表的主键建造的一棵B+ 树，叶子节点中存放的是整张表的行记录。一张表只能有一个聚集索引。因
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2020/03/31/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Spark/3.Spark%20SQL/" rel="contents">
+            <a class="btn" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Mysql/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1973,7 +2013,7 @@ Dataframe介绍什么是Dataframe
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/03/31/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Spark/4.Spark%20Streaming/">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Spark/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="刘小恺(Kyle)">
@@ -1992,8 +2032,8 @@ Dataframe介绍什么是Dataframe
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/03/31/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Spark/4.Spark%20Streaming/" itemprop="url">
-                  Spark Streaming
+                <a class="post-title-link" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Spark/" itemprop="url">
+                  Spark 面试题整理
                 </a>
               
             
@@ -2019,7 +2059,7 @@ Dataframe介绍什么是Dataframe
                 
               
 
-              <time title="创建时间：2020-03-31 16:00:00" itemprop="dateCreated datePublished" datetime="2020-03-31T16:00:00+08:00">2020-03-31</time>
+              <time title="创建时间：2020-06-13 11:00:00" itemprop="dateCreated datePublished" datetime="2020-06-13T11:00:00+08:00">2020-06-13</time>
             
 
             
@@ -2037,14 +2077,14 @@ Dataframe介绍什么是Dataframe
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">总结</span></a></span>
 
                 
                 
                   ，
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/Spark/" itemprop="url" rel="index"><span itemprop="name">Spark</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">面试总结</span></a></span>
 
                 
                 
@@ -2059,8 +2099,8 @@ Dataframe介绍什么是Dataframe
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/03/31/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Spark/4.Spark%20Streaming/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/03/31/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Spark/4.Spark%20Streaming/" itemprop="commentCount"></span>
+                <a href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Spark/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Spark/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -2090,13 +2130,20 @@ Dataframe介绍什么是Dataframe
       
         
           
-          Spark Streaming介绍什么是Spark StreamingSpark Streaming类似于Apache Storm，用于流式数据的处理。根据其官方文档介绍，Spark Streaming有高吞吐量和容错能力强等特点。Spark Streaming支持的数据输入源很多，例如：Kafka、Flume、Twitter、ZeroMQ和简单的TCP套接字等等。数据输入后可以用Spark的高度抽象原语如：map、reduce、join、window等进行运算。而结果也能保存在很多地方，如HDFS，数据库等。另外Spark Streaming也能和MLlib（机器学习）以及Graphx完美融合。
+          Spark 原理Spark 任务提交任务提交的主要四个阶段DAG的生成 =&gt; stage切分 =&gt; task的生成 =&gt; 任务提交
 
-为什么使用Spark Strea
+
+构建DAG用户提交的job将首先被转换成一系列RDD并通过RDD之间的依赖关系构建DAG,然后将DAG提交到调度系统；
+DAGScheduler将DAG切分stage（切分依据是shuffle）,将stage中生成的task以taskset的形式发送给TaskScheduler
+Scheduler 调度task（根据资源情况将task调度到Executors）
+Executors接收task，然后将task交给线程池执行。
+
+任务提交详细步骤
+spark集群启动后，Worker向M
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2020/03/31/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Spark/4.Spark%20Streaming/" rel="contents">
+            <a class="btn" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/Spark/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2141,7 +2188,7 @@ Dataframe介绍什么是Dataframe
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/2/">&lt;上一页&gt;</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/4/">&lt;下一页&gt;</a>
+    <a class="extend prev" rel="prev" href="/page/2/">&lt;上一页&gt;</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/31/">31</a><a class="extend next" rel="next" href="/page/4/">&lt;下一页&gt;</a>
   </nav>
 
 
@@ -2188,7 +2235,7 @@ Dataframe介绍什么是Dataframe
                 
                   <a href="/archives/%20%7C%7C%20archive">
                 
-                    <span class="site-state-item-count">279</span>
+                    <span class="site-state-item-count">301</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -2343,7 +2390,27 @@ Dataframe介绍什么是Dataframe
                     
                       
                     
-                    <span class="site-state-item-count">71</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">81</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -2506,7 +2573,29 @@ Dataframe介绍什么是Dataframe
                     
                       
                     
-                    <span class="site-state-item-count">75</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -2567,7 +2656,7 @@ Dataframe介绍什么是Dataframe
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>

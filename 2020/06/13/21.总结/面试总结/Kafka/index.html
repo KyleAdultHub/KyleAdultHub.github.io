@@ -127,7 +127,7 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/1592037918624.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/1592037926311.png">
 <meta property="article:published_time" content="2020-06-13T03:00:00.000Z">
-<meta property="article:modified_time" content="2020-08-07T03:48:31.981Z">
+<meta property="article:modified_time" content="2022-08-29T10:05:15.834Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="面试">
 <meta name="twitter:card" content="summary">
@@ -497,9 +497,14 @@
 </ul>
 <h3 id="Kafka-使用zookeeper-的作用"><a href="#Kafka-使用zookeeper-的作用" class="headerlink" title="Kafka 使用zookeeper 的作用"></a>Kafka 使用zookeeper 的作用</h3><ul>
 <li>Zookeeper主要用于在集群中不同节点之间进行通信</li>
-<li>在Kafka中，它被用于提交偏移量，因此如果节点在任何情况下都失败了，它都可以从之前提交的偏移量中获取</li>
+<li>controller的选举：controller负责集群节点的上下线监控,时刻关注leader是否down机，负责leader的选举，为ISR队列选举备胎</li>
+<li>offset的存储（kafka0.9之前）</li>
+<li>保存broker节点信息</li>
 <li>除此之外，它还执行其他活动，如: leader检测、分布式同步、配置管理、识别新节点何时离开或连接、集群、节点实时状态等等。</li>
 </ul>
+<blockquote>
+<p>0.9之前的数据保存在zk集群中，一定程度上增加了zk集群负担<br>0.9版本及之后默认将consumer offset保存在Kafka的一个内置topic(__consumer_offsets)中。</p>
+</blockquote>
 <h3 id="Kafka-判断一个节点是否还活着有那两个条件？"><a href="#Kafka-判断一个节点是否还活着有那两个条件？" class="headerlink" title="Kafka 判断一个节点是否还活着有那两个条件？"></a>Kafka 判断一个节点是否还活着有那两个条件？</h3><p>（1）节点必须可以维护和 ZooKeeper 的连接，Zookeeper 通过心跳机制检查每个节点的连接</p>
 <p>（2）如果节点是个 follower,他必须能及时的同步 leader 的写操作，延时不能太久</p>
 <h2 id="Kafka分区"><a href="#Kafka分区" class="headerlink" title="Kafka分区"></a>Kafka分区</h2><h3 id="Kafka生产者分区机制"><a href="#Kafka生产者分区机制" class="headerlink" title="Kafka生产者分区机制"></a>Kafka生产者分区机制</h3><p><strong>轮询策略</strong></p>
@@ -513,29 +518,55 @@
 <p>为了帮助 producer 做到这点，所有的 Kafka 节点都可以及时的告知:哪些节点是活动的，目标topic 目标分区的 leader 在哪。这样 producer 就可以直接将消息发送到目的地了</p>
 <h2 id="Kafka-消费者"><a href="#Kafka-消费者" class="headerlink" title="Kafka 消费者"></a>Kafka 消费者</h2><h3 id="Kafa-consumer-是否可以消费指定分区消息？"><a href="#Kafa-consumer-是否可以消费指定分区消息？" class="headerlink" title="Kafa consumer 是否可以消费指定分区消息？"></a>Kafa consumer 是否可以消费指定分区消息？</h3><p>Kafa consumer 消费消息时，向 broker 发出”fetch”请求去消费特定分区的消息，consumer指定消息在日志中的偏移量（offset），就可以消费从这个位置开始的消息，customer 拥有了 offset 的控制权，可以向后回滚去重新消费之前的消息，这是很有意义的</p>
 <h3 id="Kafka-消息是采用-Pull-模式，还是-Push-模式？"><a href="#Kafka-消息是采用-Pull-模式，还是-Push-模式？" class="headerlink" title="Kafka 消息是采用 Pull 模式，还是 Push 模式？"></a>Kafka 消息是采用 Pull 模式，还是 Push 模式？</h3><p>Kafka 最初考虑的问题是，customer 应该从 brokes 拉取消息还是 brokers 将消息推送到consumer，也就是 pull 还 push。在这方面，Kafka 遵循了一种大部分消息系统共同的传统的设计：producer 将消息推送到 broker，consumer 从 broker 拉取消息</p>
-<h2 id="Kafka-一致性"><a href="#Kafka-一致性" class="headerlink" title="Kafka 一致性"></a>Kafka 一致性</h2><h3 id="kafka-怎么确保数据不丢失-ack-机制"><a href="#kafka-怎么确保数据不丢失-ack-机制" class="headerlink" title="kafka 怎么确保数据不丢失, ack 机制"></a>kafka 怎么确保数据不丢失, ack 机制</h3><p>设置发送数据是否需要服务端的反馈,有三个值0,1,-1</p>
+<h2 id="Kafka-一致性"><a href="#Kafka-一致性" class="headerlink" title="Kafka 一致性"></a>Kafka 一致性</h2><h3 id="ISR解释"><a href="#ISR解释" class="headerlink" title="ISR解释"></a>ISR解释</h3><h4 id="Isr列表的维护"><a href="#Isr列表的维护" class="headerlink" title="Isr列表的维护"></a><strong>Isr列表的维护</strong></h4><p>Leader维护了一个动态的ISR列表（同步副本的作用），只需要这个列表的中的follower和leader同步；当ISR中的follower完成数据的同步之后，leader就会给生产者发送ack，如果follower长时间未向leader同步数据，则该follower将被剔除ISR(为了保证同步的效率)，这个时间阈值也是自定义的；同样leader故障后，就会从ISR中选举新的leader</p>
+<h4 id="怎么选择ISR的节点呢？"><a href="#怎么选择ISR的节点呢？" class="headerlink" title="怎么选择ISR的节点呢？"></a><strong>怎么选择ISR的节点呢？</strong></h4><p>首先通信的时间要快，要和leader要可以很快的完成通信，这个时间默认是10s</p>
+<p>然后就看leader数据差距，消息条数默认是10000条（后面版本被移除）</p>
+<p>为什么移除：因为kafka发送消息是批量发送的，所以会一瞬间leader接受完成，但是follower还没有拉取，所以会频繁的踢出加入ISR，这个数据会保存到zk和内存中，所以会频繁的更新zk和内存。</p>
+<p>但是对于某些不太重要的数据，对数据的可靠性要求不是很高，能够容忍数据的少量丢失，所以没必要等ISR中的follower全部接受成功</p>
+<h3 id="HW和LEO解释"><a href="#HW和LEO解释" class="headerlink" title="HW和LEO解释"></a>HW和LEO解释</h3><p>这里介绍的数据一致性主要是说不论是老的 Leader 还是新选举的 Leader，Consumer 都能读到一样的数据。那么 Kafka 是如何实现的呢？</p>
+<p><img src="/img/1594010991499.png" alt="1594010991499"></p>
+<p>假设分区的副本为3，其中副本0是 Leader，副本1和副本2是 follower，并且在 ISR 列表里面。虽然副本0已经写入了 Message4，但是 Consumer 只能读取到 Message2。因为所有的 ISR 都同步了 Message2，只有 High Water Mark 以上的消息才支持 Consumer 读取，而 High Water Mark 取决于 ISR 列表里面偏移量最小的分区，对应于上图的副本2，这个很类似于木桶原理。</p>
+<p>这样做的原因是还没有被足够多副本复制的消息被认为是“不安全”的，如果 Leader 发生崩溃，另一个副本成为新 Leader，那么这些消息很可能丢失了。如果我们允许消费者读取这些消息，可能就会破坏一致性。试想，一个消费者从当前 Leader（副本0） 读取并处理了 Message4，这个时候 Leader 挂掉了，选举了副本1为新的 Leader，这时候另一个消费者再去从新的 Leader 读取消息，发现这个消息其实并不存在，这就导致了数据不一致性问题。</p>
+<p>当然，引入了 High Water Mark 机制，会导致 Broker 间的消息复制因为某些原因变慢，那么消息到达消费者的时间也会随之变长（因为我们会先等待消息复制完毕）。延迟时间可以通过参数 <code>replica.lag.time.max.ms</code> 参数配置，它指定了副本在复制消息时可被允许的最大延迟时间。</p>
+<blockquote>
+<p> 总结:</p>
+<p>LEO（log end offset，每个副本中最大的offset）,HW(high watermark，所有副本最小的offset)。对于消费者来说不能消费HW之后的数据。</p>
+</blockquote>
+<h3 id="Broker故障后ISR的处理"><a href="#Broker故障后ISR的处理" class="headerlink" title="Broker故障后ISR的处理"></a>Broker故障后ISR的处理</h3><ol>
+<li>follower故障<br>follower发生故障后会被临时踢出ISR，待该follower恢复后，follower会读取本地磁盘记录的上次的HW，并将log文件高于HW的部分截取掉，从HW开始向leader进行同步。等该follower的LEO大于等于该Partition的HW，即follower追上leader之后，就可以重新加入ISR了。</li>
+<li>leader故障<br>leader发生故障之后，会从ISR中选出一个新的leader，之后，为保证多个副本之间的数据一致性，其余的follower会先将各自的log文件高于HW的部分截掉，然后从新的leader同步数据。</li>
+</ol>
+<h3 id="Kafka-的ISR中有follower落后，怎么处理？"><a href="#Kafka-的ISR中有follower落后，怎么处理？" class="headerlink" title="Kafka 的ISR中有follower落后，怎么处理？"></a>Kafka 的ISR中有follower落后，怎么处理？</h3><p>leader收到数据，所有follower都开始同步数据，但有一个follower，因为某种故障，迟迟不能与leader进行同步，那leader就要一直等下去，直到它完成同步，才能发送ack。这个问题怎么解决呢？<br>Leader维护了一个动态的in-sync replica set (ISR)，意为和leader保持同步的follower集合。当ISR中的follower完成数据的同步之后，leader就会给follower发送ack。如果follower长时间未向leader同步数据，则该follower将被踢出ISR，该时间阈值由replica.lag.time.max.ms参数（默认10秒）设定。Leader发生故障之后，就会从ISR中选举新的leader。</p>
+<h3 id="kafka-Broker-数据一致性"><a href="#kafka-Broker-数据一致性" class="headerlink" title="kafka  Broker 数据一致性"></a>kafka  Broker 数据一致性</h3><h5 id="什么情况下broker会数据不一致"><a href="#什么情况下broker会数据不一致" class="headerlink" title="什么情况下broker会数据不一致"></a>什么情况下broker会数据不一致</h5><ol>
+<li>未设置ack=-1， leader和follower未完成同步，leader挂掉， 数据未来得及同步造成数据丢失</li>
+<li>数据存储在page cache中， 还未来得及刷盘，这时宕机(极端情况)</li>
+<li>生产者没有开启幂等的话， 会造成数据重复的情况</li>
+</ol>
+<h5 id="怎么实现broker数据一致性"><a href="#怎么实现broker数据一致性" class="headerlink" title="怎么实现broker数据一致性"></a>怎么实现broker数据一致性</h5><ol>
+<li><p>首先由于leo、hw的机制会保证消费者消费的数据的一致性</p>
+</li>
+<li><p>设置ack=all， 加上isr队列会保证isr中的broker都完成了同步</p>
 <ul>
 <li>0: producer不会等待broker发送ack </li>
 <li>1: 当leader接收到消息之后发送ack </li>
 <li>-1: 当所有的follower都同步消息成功后发送ack</li>
 </ul>
-<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">request.required.acks</span>=<span class="number">0</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="Kafka如何保证消费数据的一致性？"><a href="#Kafka如何保证消费数据的一致性？" class="headerlink" title="Kafka如何保证消费数据的一致性？"></a>Kafka如何保证消费数据的一致性？</h3><p>LEO：指每个follower的最大的offset</p>
-<p>HW（高水位）：指消费者能见到的最大的offset，ISR队列中最小的LEO，也就是说消费者只能看到1~6的数据，后面的数据看不到，也消费不了 </p>
-<p>避免leader挂掉后，比如当前消费者消费8这条数据后，leader挂 了，此时比如f2成为leader，f2根本就没有9这条数据，那么消费者就会报错，所以设计了HW这个参数，只暴露最少的数据给消费者，避免上面的问题</p>
-<h3 id="kafka-怎么确保producer数据不丢失-ack-机制"><a href="#kafka-怎么确保producer数据不丢失-ack-机制" class="headerlink" title="kafka 怎么确保producer数据不丢失, ack 机制"></a>kafka 怎么确保producer数据不丢失, ack 机制</h3><p>request.required.acks 有三个值 0 1 -1</p>
-<p>0:生产者不会等待 broker 的 ack，这个延迟最低但是存储的保证最弱当 server 挂掉的时候</p>
-<p>就会丢数据</p>
-<p>1：服务端会等待 ack 值 leader 副本确认接收到消息后发送 ack 但是如果 leader 挂掉后他</p>
-<p>不确保是否复制完成新 leader 也会导致数据丢失</p>
-<p>-1：同样在 1 的基础上 服务端会等所有的 follower 的副本受到数据后才会受到 leader 发出</p>
-<p>的 ack，这样数据不会丢失</p>
-<h3 id="KAFKA-确保数据一致性的详细解释-ISR"><a href="#KAFKA-确保数据一致性的详细解释-ISR" class="headerlink" title="KAFKA 确保数据一致性的详细解释 ISR"></a>KAFKA 确保数据一致性的详细解释 ISR</h3><p>这里介绍的数据一致性主要是说不论是老的 Leader 还是新选举的 Leader，Consumer 都能读到一样的数据。那么 Kafka 是如何实现的呢？</p>
-<p><img src="/img/1594010991499.png" alt="1594010991499"></p>
-<p>假设分区的副本为3，其中副本0是 Leader，副本1和副本2是 follower，并且在 ISR 列表里面。虽然副本0已经写入了 Message4，但是 Consumer 只能读取到 Message2。因为所有的 ISR 都同步了 Message2，只有 High Water Mark 以上的消息才支持 Consumer 读取，而 High Water Mark 取决于 ISR 列表里面偏移量最小的分区，对应于上图的副本2，这个很类似于木桶原理。</p>
-<p>这样做的原因是还没有被足够多副本复制的消息被认为是“不安全”的，如果 Leader 发生崩溃，另一个副本成为新 Leader，那么这些消息很可能丢失了。如果我们允许消费者读取这些消息，可能就会破坏一致性。试想，一个消费者从当前 Leader（副本0） 读取并处理了 Message4，这个时候 Leader 挂掉了，选举了副本1为新的 Leader，这时候另一个消费者再去从新的 Leader 读取消息，发现这个消息其实并不存在，这就导致了数据不一致性问题。</p>
-<p>当然，引入了 High Water Mark 机制，会导致 Broker 间的消息复制因为某些原因变慢，那么消息到达消费者的时间也会随之变长（因为我们会先等待消息复制完毕）。延迟时间可以通过参数 <code>replica.lag.time.max.ms</code> 参数配置，它指定了副本在复制消息时可被允许的最大延迟时间。</p>
+</li>
+<li><p>如果需要保证数据不重复，可以开启幂等功能</p>
+</li>
+</ol>
+<h3 id="怎么实现broker的数据一致性"><a href="#怎么实现broker的数据一致性" class="headerlink" title="怎么实现broker的数据一致性"></a>怎么实现broker的数据一致性</h3><h5 id="什么情况下broker会数据不一致-1"><a href="#什么情况下broker会数据不一致-1" class="headerlink" title="什么情况下broker会数据不一致"></a>什么情况下broker会数据不一致</h5><ol>
+<li>broker未采用同步发送的方式，使用默认异步发送</li>
+<li>异步发送未设置ack=-1，未等待broker端isr全部同步</li>
+<li>在发送的queue中的消息还没有完全发送， 这时发生了宕机(极端情况)</li>
+<li>没有对超过重试次数的消息进行处理</li>
+<li>没有开启幂等，在数据重试的情况下会产生数据重复的情况</li>
+</ol>
+<h5 id="怎么保证kafka的数据一致"><a href="#怎么保证kafka的数据一致" class="headerlink" title="怎么保证kafka的数据一致"></a>怎么保证kafka的数据一致</h5><ol>
+<li>设置ack=all + 同步发送，可以基本保证数据一致性，但是不推荐</li>
+<li>设置ack=all + 异步发送 + 对超过重试次数的请求进行记录 or 重试 (在生产者宕机的极端情况，会丢失数据)</li>
+<li>保证数据不重复只有开启幂等一种方法了</li>
+</ol>
 <h2 id="Kafka-文件系统"><a href="#Kafka-文件系统" class="headerlink" title="Kafka 文件系统"></a>Kafka 文件系统</h2><h3 id="Kafka-零复制技术"><a href="#Kafka-零复制技术" class="headerlink" title="Kafka 零复制技术"></a>Kafka 零复制技术</h3><p>正常情况下，先把数据读到内核空间，在从内核空间把数据读到用户空间，然后在调操作系统的io接口写到内核空间，最终在写到硬盘中</p>
 <p>Kafka是这样做的，直接在内核空间流转io流，所以kafka的性能非常高</p>
 <p>kafka利用了Linux的sendFile技术（NIO），省去了进程切换和一次数据拷贝，让性能变得更好。</p>
@@ -585,6 +616,17 @@
 <p><strong>2.通过segment file 查找 message</strong></p>
 <p>当offset=368776时，依次定位到00000000000000368769.index的元数据物理位置和00000000000000368769.log的物理偏移地址</p>
 <p>然后再通过00000000000000368769.log顺序查找直到offset=368776为止。</p>
+<h3 id="生产者常用配置"><a href="#生产者常用配置" class="headerlink" title="生产者常用配置"></a>生产者常用配置</h3><p>bootstrap.servers=host:port1,host2:port2</p>
+<p>key.serializer 和 value.serializer一般不建议自己实现,采用默认string实现即可</p>
+<p>retries=3  若能接受数据丢失可配置为0</p>
+<p>max.in.flight.requests.per.connection=1 越大则性能越高,但发生消息重试会打破消息有序性 </p>
+<p>acks=all  等待所有isr副本确认或配置1 仅leader确认即返回</p>
+<p>buffer.memory=33554432  默认32MB</p>
+<p>linger.ms=100  最慢0.1s会发送一个批次的消息</p>
+<p>batch.size=163840  160k,取默认值的10倍,增大该配置可降低发送频次</p>
+<p>compression.type=snappy  对消息做压缩,切记保持客户端和服务端版本及压缩格式一致 client.id=xxxx  标识生产者,可以为任意的一个字符串</p>
+<p>send.buffer.bytes=327680   320kb,默认128kb,适量调整即可</p>
+<p>receive.buffer.bytes=163840  160kb,默认32kb,适量调整即可</p>
 
       
     </div>
@@ -739,7 +781,7 @@
                 
                   <a href="/archives/%20%7C%7C%20archive">
                 
-                    <span class="site-state-item-count">279</span>
+                    <span class="site-state-item-count">301</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -894,7 +936,27 @@
                     
                       
                     
-                    <span class="site-state-item-count">71</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">81</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -1057,7 +1119,29 @@
                     
                       
                     
-                    <span class="site-state-item-count">75</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -1107,7 +1191,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka架构"><span class="nav-text">Kafka架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-整体结构介绍"><span class="nav-text">Kafka 整体结构介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Consumer-与topic-的关系"><span class="nav-text">Consumer 与topic 的关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kafka-相对传统技术的优势"><span class="nav-text">kafka 相对传统技术的优势</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-使用zookeeper-的作用"><span class="nav-text">Kafka 使用zookeeper 的作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-判断一个节点是否还活着有那两个条件？"><span class="nav-text">Kafka 判断一个节点是否还活着有那两个条件？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka分区"><span class="nav-text">Kafka分区</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka生产者分区机制"><span class="nav-text">Kafka生产者分区机制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka-生产者"><span class="nav-text">Kafka 生产者</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#producer-是否直接将数据发送到-broker-的-leader-主节点-？"><span class="nav-text">producer 是否直接将数据发送到 broker 的 leader(主节点)？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka-消费者"><span class="nav-text">Kafka 消费者</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafa-consumer-是否可以消费指定分区消息？"><span class="nav-text">Kafa consumer 是否可以消费指定分区消息？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-消息是采用-Pull-模式，还是-Push-模式？"><span class="nav-text">Kafka 消息是采用 Pull 模式，还是 Push 模式？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka-一致性"><span class="nav-text">Kafka 一致性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#kafka-怎么确保数据不丢失-ack-机制"><span class="nav-text">kafka 怎么确保数据不丢失, ack 机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka如何保证消费数据的一致性？"><span class="nav-text">Kafka如何保证消费数据的一致性？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kafka-怎么确保producer数据不丢失-ack-机制"><span class="nav-text">kafka 怎么确保producer数据不丢失, ack 机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#KAFKA-确保数据一致性的详细解释-ISR"><span class="nav-text">KAFKA 确保数据一致性的详细解释 ISR</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka-文件系统"><span class="nav-text">Kafka 文件系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-零复制技术"><span class="nav-text">Kafka 零复制技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-文件存储机制"><span class="nav-text">Kafka 文件存储机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-查找Message"><span class="nav-text">Kafka 查找Message</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka架构"><span class="nav-text">Kafka架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-整体结构介绍"><span class="nav-text">Kafka 整体结构介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Consumer-与topic-的关系"><span class="nav-text">Consumer 与topic 的关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kafka-相对传统技术的优势"><span class="nav-text">kafka 相对传统技术的优势</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-使用zookeeper-的作用"><span class="nav-text">Kafka 使用zookeeper 的作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-判断一个节点是否还活着有那两个条件？"><span class="nav-text">Kafka 判断一个节点是否还活着有那两个条件？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka分区"><span class="nav-text">Kafka分区</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka生产者分区机制"><span class="nav-text">Kafka生产者分区机制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka-生产者"><span class="nav-text">Kafka 生产者</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#producer-是否直接将数据发送到-broker-的-leader-主节点-？"><span class="nav-text">producer 是否直接将数据发送到 broker 的 leader(主节点)？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka-消费者"><span class="nav-text">Kafka 消费者</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafa-consumer-是否可以消费指定分区消息？"><span class="nav-text">Kafa consumer 是否可以消费指定分区消息？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-消息是采用-Pull-模式，还是-Push-模式？"><span class="nav-text">Kafka 消息是采用 Pull 模式，还是 Push 模式？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka-一致性"><span class="nav-text">Kafka 一致性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ISR解释"><span class="nav-text">ISR解释</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Isr列表的维护"><span class="nav-text">Isr列表的维护</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#怎么选择ISR的节点呢？"><span class="nav-text">怎么选择ISR的节点呢？</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HW和LEO解释"><span class="nav-text">HW和LEO解释</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Broker故障后ISR的处理"><span class="nav-text">Broker故障后ISR的处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-的ISR中有follower落后，怎么处理？"><span class="nav-text">Kafka 的ISR中有follower落后，怎么处理？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kafka-Broker-数据一致性"><span class="nav-text">kafka  Broker 数据一致性</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#什么情况下broker会数据不一致"><span class="nav-text">什么情况下broker会数据不一致</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#怎么实现broker数据一致性"><span class="nav-text">怎么实现broker数据一致性</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#怎么实现broker的数据一致性"><span class="nav-text">怎么实现broker的数据一致性</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#什么情况下broker会数据不一致-1"><span class="nav-text">什么情况下broker会数据不一致</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#怎么保证kafka的数据一致"><span class="nav-text">怎么保证kafka的数据一致</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka-文件系统"><span class="nav-text">Kafka 文件系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-零复制技术"><span class="nav-text">Kafka 零复制技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-文件存储机制"><span class="nav-text">Kafka 文件存储机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-查找Message"><span class="nav-text">Kafka 查找Message</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#生产者常用配置"><span class="nav-text">生产者常用配置</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -1134,7 +1218,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>

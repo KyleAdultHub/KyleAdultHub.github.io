@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="简单介绍下LuceneEs 与 Lucene说道es，我们首先就会想到什么？ 分词?  倒排索引?  搜索？ 大部分情况下我们都知道，项目中如果需要分词+倒排索引的场景就使用es就好了，那么倒排索引到底是什么？他有什么作用？它的原理？为什么选择倒排索引？它与传统数据库的区别？ 接下来为了更加深入的了解es的索引，简单分析下它的索引引擎-lucene。 为什么使用倒排索引倒排索引、倒排索引，既然是索">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Lucene索引原理">
+<meta property="og:url" content="http://blog.kyleliu.cn/2021/12/10/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/Lucene%E7%B4%A2%E5%BC%95%E5%8E%9F%E7%90%86/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle)的云笔记">
+<meta property="og:description" content="简单介绍下LuceneEs 与 Lucene说道es，我们首先就会想到什么？ 分词?  倒排索引?  搜索？ 大部分情况下我们都知道，项目中如果需要分词+倒排索引的场景就使用es就好了，那么倒排索引到底是什么？他有什么作用？它的原理？为什么选择倒排索引？它与传统数据库的区别？ 接下来为了更加深入的了解es的索引，简单分析下它的索引引擎-lucene。 为什么使用倒排索引倒排索引、倒排索引，既然是索">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211210151435594.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211210161502774.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211210161512093.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211210161554176.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211210161604461.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211210172937297.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211210173127175.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211210180532967.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211210180632128.png">
+<meta property="og:image" content="file:///Users/liukaijian/Coding/blog/source/img/image-20211210174448524.png?lastModify=1639378281">
+<meta property="og:image" content="file:///Users/liukaijian/Coding/blog/source/img/image-20211210175332365.png?lastModify=1639378281">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211213164250949.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211213164629753.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211222114227314.png">
+<meta property="article:published_time" content="2021-12-09T16:00:00.000Z">
+<meta property="article:modified_time" content="2021-12-22T03:58:05.456Z">
+<meta property="article:author" content="刘小恺(Kyle)">
+<meta property="article:tag" content="elasticsearch">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/img/image-20211210151435594.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2021/12/10/10.数据存储/Elasticsearch/Lucene索引原理/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Lucene索引原理 | 刘小恺(Kyle)的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle)的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2021/12/10/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/Lucene%E7%B4%A2%E5%BC%95%E5%8E%9F%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Lucene索引原理
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2021-12-10 00:00:00" itemprop="dateCreated datePublished" datetime="2021-12-10T00:00:00+08:00">2021-12-10</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/" itemprop="url" rel="index"><span itemprop="name">数据存储</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/" itemprop="url" rel="index"><span itemprop="name">Elasticsearch</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/12/10/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/Lucene%E7%B4%A2%E5%BC%95%E5%8E%9F%E7%90%86/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2021/12/10/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/Lucene%E7%B4%A2%E5%BC%95%E5%8E%9F%E7%90%86/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="简单介绍下Lucene"><a href="#简单介绍下Lucene" class="headerlink" title="简单介绍下Lucene"></a>简单介绍下Lucene</h2><h3 id="Es-与-Lucene"><a href="#Es-与-Lucene" class="headerlink" title="Es 与 Lucene"></a>Es 与 Lucene</h3><p>说道es，我们首先就会想到什么？ 分词?  倒排索引?  搜索？</p>
+<p>大部分情况下我们都知道，项目中如果需要分词+倒排索引的场景就使用es就好了，那么倒排索引到底是什么？他有什么作用？它的原理？为什么选择倒排索引？它与传统数据库的区别？</p>
+<p>接下来为了更加深入的了解es的索引，简单分析下它的索引引擎-lucene。</p>
+<h3 id="为什么使用倒排索引"><a href="#为什么使用倒排索引" class="headerlink" title="为什么使用倒排索引"></a>为什么使用倒排索引</h3><p>倒排索引、倒排索引，既然是索引。首先，其首要目的肯定是为了加快查询速度。</p>
+<p>对于每种数据库类产品都有自己要解决的问题，对应的就有自己的数据存储结构，而不同的使用场景和数据存储结构，需要用不同的索引，才能起到最大化加快查询的目的。</p>
+<p>对 Mysql 来说，是 B+ 树，对 Elasticsearch/Lucene 来说，是倒排索引。</p>
+<blockquote>
+<p>Elasticsearch 是建立在全文搜索引擎库 Lucene 基础上的搜索引擎，它隐藏了 Lucene 的复杂性，取而代之的提供一套简单一致的 RESTful API，不过掩盖不了它底层也是 Lucene 的事实。<br>Elasticsearch 的倒排索引，其实就是 Lucene 的倒排索引。</p>
+</blockquote>
+<h3 id="简单介绍下Lucene-1"><a href="#简单介绍下Lucene-1" class="headerlink" title="简单介绍下Lucene"></a>简单介绍下Lucene</h3><p>Lucene 是一个基于 Java 的全文信息检索工具包，elasticsearch就是使用lucene的索引和搜索能力。</p>
+<p>其是一个，开源的全文检索引擎工具包，但它不是一个完整的全文检索引擎，而是一个全文检索引擎的架构，提供了完整的查询引擎和索引引擎</p>
+<p><strong>Lucene的数据类型</strong></p>
+<p>Lucene中包含了四种基本数据类型，分别是：</p>
+<p>Index：索引，由很多的Document组成。<br>Document：由很多的Field组成，是Index和Search的最小单位。<br>Field：由很多的Term组成，包括Field Name和Field Value。<br>Term：由很多的字节组成。一般将Text类型的Field Value分词之后的每个最小单元叫做Term。</p>
+<h2 id="Lucene-的查询"><a href="#Lucene-的查询" class="headerlink" title="Lucene 的查询"></a>Lucene 的查询</h2><h3 id="Lucene查询流程"><a href="#Lucene查询流程" class="headerlink" title="Lucene查询流程"></a>Lucene查询流程</h3><p>在查询的过程中，需要一个DirectoryReader和QueryParser，其中:</p>
+<ul>
+<li>DirectoryReader负责读取写入的文本数据，并进行解析</li>
+<li>QueryParser主要用来解析你的查询语句，例如你想查 “A and B”，lucene内部会有机制解析出是term A和term B的交集查询。</li>
+</ul>
+<p>之后执行具体的Search过程。</p>
+<h3 id="Lucene-索引查询过程"><a href="#Lucene-索引查询过程" class="headerlink" title="Lucene 索引查询过程"></a>Lucene 索引查询过程</h3><h4 id="倒排链介绍"><a href="#倒排链介绍" class="headerlink" title="倒排链介绍"></a>倒排链介绍</h4><p>这里举一个网上的例子</p>
+<table>
+<thead>
+<tr>
+<th>docid</th>
+<th>name</th>
+<th>age</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Alice</td>
+<td>18</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Alice</td>
+<td>20</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Alice</td>
+<td>21</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Alan</td>
+<td>21</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Alan</td>
+<td>18</td>
+</tr>
+</tbody></table>
+<p>在lucene中为了查询name=XXX的这样一个条件，会建立基于name的倒排链。以上面的数据为例，倒排链如下：</p>
+<p><strong>姓名的倒排链数据</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Alice</th>
+<th>[1,2,3]</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Alan</td>
+<td>[4,5]</td>
+</tr>
+</tbody></table>
+<p><strong>年龄的倒排链数据如下:</strong></p>
+<table>
+<thead>
+<tr>
+<th>18</th>
+<th>[1,5]</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>20</td>
+<td>[2]</td>
+</tr>
+<tr>
+<td>21</td>
+<td>[3,4]</td>
+</tr>
+</tbody></table>
+<p>这里面建立倒排链的单位，例如 Alice、Alan、18、20 这些就是Lucene中的 <strong>term</strong>。</p>
+<p>所以倒排的本质就是基于term的反向列表，可以方便多维度的各种值的查询</p>
+<p>但是虽然我们有了term的倒排链，但是在查询中如何快速的拿到这个倒排链呢？</p>
+<h4 id="Lucene获取倒排链的方法"><a href="#Lucene获取倒排链的方法" class="headerlink" title="Lucene获取倒排链的方法"></a>Lucene获取倒排链的方法</h4><p>在lucene里面引入了 <strong>term dictionary</strong> 的概念，也就是term的字典。</p>
+<p>在term dictionary中寻找term的方法:</p>
+<ol>
+<li>term字典实现了对term进行排序，那么通过某种算法(例如二分法)就可以定为这个term所在的地址。这样的复杂度是logN</li>
+<li>在term很多，内存放不下的时候，效率还是需要进一步提升。可以用一个hashmap，当有一个term进入，hash继续查找倒排链。这里hashmap的方式可以看做是term dictionary的一个index。</li>
+<li>从lucene4开始，为了方便实现rangequery或者前缀，后缀等复杂的查询语句，lucene使用FST来存储term字典，下面就详细介绍下FST的存储结构。</li>
+</ol>
+<h4 id="FST介绍-有穷状态装换器"><a href="#FST介绍-有穷状态装换器" class="headerlink" title="FST介绍(有穷状态装换器)"></a>FST介绍(有穷状态装换器)</h4><p>我们对“cat”、 “deep”、 “do”、 “dog” 、“dogs”这5个单词进行插入构建FST（注：必须已排序,否则无法生成最小fst）</p>
+<p>1）插入“cat”</p>
+<p>   插入cat，每个字母形成一条边，其中t边指向终点。</p>
+<p><img src="/img/image-20211210151435594.png" alt="image-20211210151435594"></p>
+<p>2）插入“deep”</p>
+<p>  与前一个单词“cat”进行最大前缀匹配，发现没有匹配则直接插入，P边指向终点。</p>
+<img src="/img/image-20211210161502774.png" alt="image-20211210161502774" style="zoom: 67%;" />
+
+<p>3）插入“do”</p>
+<p>  与前一个单词“deep”进行最大前缀匹配，发现是d，则在d边后增加新边o，o边指向终点。</p>
+<img src="/img/image-20211210161512093.png" alt="image-20211210161512093" style="zoom:67%;" />
+
+<p>4）插入“dog”</p>
+<p>  与前一个单词“do”进行最大前缀匹配，发现是do，则在o边后增加新边g，g边指向终点。</p>
+<img src="/img/image-20211210161554176.png" alt="image-20211210161554176" style="zoom:67%;" />
+
+<p>5）插入“dogs”</p>
+<p>   与前一个单词“dog”进行最大前缀匹配，发现是dog，则在g后增加新边s，s边指向终点。</p>
+<img src="/img/image-20211210161604461.png" alt="image-20211210161604461" style="zoom:67%;" />
+
+<p>最终我们得到了如上一个有向无环图。利用该结构可以很方便的进行查询，如给定一个term “dog”，我们可以通过上述结构很方便的查询存不存在。</p>
+<p>在通过FST定位到倒排链后，有一件事情需要做，就是倒排链的合并。因为查询条件可能不止一个，例如之前的倒排联我们想找name=”alan” and age=”18”的列表。lucene是如何实现倒排链的合并呢。这里就需要看一下倒排链存储的数据结构</p>
+<p>FST详细介绍：<a href="https://blog.csdn.net/zx2011302580235/article/details/88594342" target="_blank" rel="noopener">https://blog.csdn.net/zx2011302580235/article/details/88594342</a></p>
+<blockquote>
+<p>FST压缩率一般在3倍~20倍之间，相对于TreeMap/HashMap的膨胀3倍，内存节省就有9倍到60倍！</p>
+</blockquote>
+<h4 id="Skip-List"><a href="#Skip-List" class="headerlink" title="Skip List"></a>Skip List</h4><p>为了在倒排链中，能够快速查找docid，lucene采用了SkipList这一数据结构。SkipList有以下几个特征：</p>
+<ol>
+<li>元素排序的，对应到我们的倒排链，lucene是按照docid进行排序，从小到大。</li>
+<li>跳跃有一个固定的间隔，这个是需要建立SkipList的时候指定好，例如下图以间隔是3</li>
+<li>SkipList的层次，这个是指整个SkipList有几层</li>
+</ol>
+<img src="/img/image-20211210172937297.png" alt="image-20211210172937297" style="zoom:50%;" />
+
+<p>有了这个SkipList以后比如我们要查找docid=12，原来可能需要一个个扫原始链表，1，2，3，5，7，8，10，12。有了SkipList以后先访问第一层看到是然后大于12，进入第0层走到3，8，发现15大于12，然后进入原链表的8继续向下经过10和12。</p>
+<h4 id="Lucene倒排结构"><a href="#Lucene倒排结构" class="headerlink" title="Lucene倒排结构"></a>Lucene倒排结构</h4><p>有了FST和SkipList的介绍以后，我们大体上可以画一个下面的图来说明lucene是如何实现整个倒排结构的：</p>
+<img src="/img/image-20211210173127175.png" alt="image-20211210173127175" style="zoom: 50%;" />
+
+<p>有了这张图，我们可以理解为什么基于lucene可以快速进行倒排链的查找和docid查找，下面就来看一下有了这些后如何进行倒排链合并返回最后的结果。</p>
+<h4 id="BKD-TREE-数值类型索引结构"><a href="#BKD-TREE-数值类型索引结构" class="headerlink" title="BKD-TREE(数值类型索引结构)"></a>BKD-TREE(数值类型索引结构)</h4><p>在lucene中如果想做范围查找，根据上面的FST模型可以看出来，需要遍历FST找到包含这个range的一个点然后进入对应的倒排链，然后进行求并集操作。但是如果是数值类型，比如是浮点数，那么潜在的term可能会非常多，这样查询起来效率会很低。</p>
+<p>所以为了支持高效的数值类或者多维度查询，lucene引入类BKDTree。</p>
+<p>BKDTree是基于KDTree，对数据进行按照维度划分建立一棵[二叉树]确保树两边节点数目平衡。在一维的场景下，KDTree就会退化成一个二叉搜索树，在二叉搜索树中如果我们想查找一个区间，O(logN)的复杂度就会访问到叶子结点得到对应的倒排链。如下图所示：</p>
+<img src="/img/image-20211210180532967.png" alt="image-20211210180532967" style="zoom:33%;" />
+
+<p>如果是[多维]，kdtree的建立流程会发生一些变化。</p>
+<p>比如我们以二维为例，建立过程如下：</p>
+<ol>
+<li>对每个维度的数据进行排序；</li>
+<li>确定切分维度，这里以维度数据差值作为依据，进行维度选取(维度数据极差越大，优先选取)。</li>
+<li>选择这个维度最中间的点，进行切分。</li>
+<li>递归进行步骤1，2，我们可以设置一个阈值，点的数目少于多少后就不再切分，直到所有的点都切分好停止。</li>
+</ol>
+<p><strong>下图是一个建立例子：</strong></p>
+<img src="/img/image-20211210180632128.png" alt="image-20211210180632128" style="zoom:50%;" />
+
+<blockquote>
+<p>BKD-TREE的建立过程参考： <a href="https://www.amazingkoala.com.cn/Lucene/gongjulei/2019/0422/52.html" target="_blank" rel="noopener">https://www.amazingkoala.com.cn/Lucene/gongjulei/2019/0422/52.html</a></p>
+</blockquote>
+<h3 id="倒排链合并过程"><a href="#倒排链合并过程" class="headerlink" title="倒排链合并过程"></a>倒排链合并过程</h3><h4 id="倒排链合并"><a href="#倒排链合并" class="headerlink" title="倒排链合并"></a>倒排链合并</h4><p>假如我们的查询条件是name = “Alice”，那么按照之前的介绍，首先在term字典中定位是否存在这个term，如果存在的话进入这个term的倒排链，并根据参数设定返回分页返回结果即可。</p>
+<p>假如我们有多个条件，例如我们需要按名字或者年龄单独查询，也需要进行组合 name = “Alice” and age = “18” / name = “Alice” or age = “18” 的查询，在lucene这多个倒排链是怎么合并呢？</p>
+<p><strong>与运算合并</strong> 布尔运算的与运算，要求所有的查询关键词（查询条件）共同命中候选文档，即候选文档同时出现了所有查询条件的关键词。</p>
+<p>假设有ABCD四个term需要进行与/或合并：</p>
+<p><strong>与运算合并</strong></p>
+<ol>
+<li>首先在倒排链中取出最短一条链命名为Lead1（图中C）。</li>
+<li>接着取出次短倒排链的命名Lead2，除此之外称为Others。</li>
+<li>然后遍历Lead1的每个DocId1的过程中，在Lead2中寻找大于等于文档id的一个docId2。假如docId2不等于docId1，继续便利Lead1，否则到others中校验判断是否存在，如果存在返回结果。</li>
+</ol>
+<img src="file:///Users/liukaijian/Coding/blog/source/img/image-20211210174448524.png?lastModify=1639378281" alt="image-20211210174448524" style="zoom:50%;" />
+
+<p>整个合并步骤我可以发现，如果某个链很短，会大幅减少比对次数，并且由于SkipList结构的存在，在某个倒排中定位某个docid的速度会比较快不需要一个个遍历。可以很快的返回最终的结果。从倒排的定位，查询，合并整个流程组成了lucene的查询过程，和传统数据库的索引相比，lucene合并过程中的优化减少了读取数据的IO，倒排合并的灵活性也解决了传统索引较难支持多条件查询的问题。</p>
+<p><strong>或运算合并</strong></p>
+<p>布尔运算的或运算，要求将每个查询条件的结果集进行并集运算。每个查询的结果集倒排链。</p>
+<ol>
+<li>初始化每个Lead的游标cur。</li>
+<li>每一轮获取每个Lead中对应游标位置的数值Leadn[cur]。</li>
+<li>返回最小Leadn[cur]数值，并根据最小值的出现次数计算命中率；</li>
+<li>对获取到最小值的Lead游标进行cur++，重复执行2、3，直到所有Lead遍历完成；</li>
+</ol>
+<img src="file:///Users/liukaijian/Coding/blog/source/img/image-20211210175332365.png?lastModify=1639378281" alt="image-20211210175332365" style="zoom: 50%;" /> 
+
+<p>每一轮都会得到一条存在当前DocID的倒排链数组，然后计算查询条件命中率，即拥有当前DocID的Postings占所有原子查询条件的比例。</p>
+<h4 id="组合条件各种场景下的合并"><a href="#组合条件各种场景下的合并" class="headerlink" title="组合条件各种场景下的合并"></a>组合条件各种场景下的合并</h4><p>了解了Lucene的数据结构和基本查询原理，我们知道：</p>
+<ol>
+<li>对单个词条进行查询，Lucene会读取该词条的倒排链，倒排链中是一个有序的docId列表。</li>
+<li>对字符串范围/前缀/通配符查询，Lucene会从FST中获取到符合条件的所有Term，然后就可以根据这些Term再查找倒排链，找到符合条件的doc。</li>
+<li>对数字类型进行范围查找，Lucene会通过BKD-Tree找到符合条件的docId集合，但这个集合中的docId并非有序的。</li>
+</ol>
+<p>现在的问题是，如果给一个组合查询条件，Lucene怎么对各个单条件的结果进行组合，得到最终结果。简化的问题就是如何求两个集合的交集和并集。</p>
+<ol>
+<li>对N个倒排链求交集</li>
+</ol>
+<p>上面Lucene原理分析的文章中讲过，N个倒排链求交集，可以采用skipList，有效的跳过无效的doc。</p>
+<ol start="2">
+<li>对N个倒排链求并集</li>
+</ol>
+<p>处理方式一：仍然保留多个有序列表，多个有序列表的队首构成一个优先队列(最小堆)，这样后续可以对整个并集进行iterator(堆顶的队首出堆，队列里下一个docID入堆)，也可以通过skipList的方式向后跳跃(各个子列表分别通过skipList跳)。这种方式适合倒排链数量比较少(N比较小)的场景。</p>
+<p>处理方式二：倒排链如果比较多(N比较大)，采用方式一就不够划算，这时候可以直接把结果合并成一个有序的docID数组。</p>
+<p>处理方式三：方式二中，直接保存原始的docID，如果docID非常多，很消耗内存，所以当doc数量超过一定值时(32位docID在BitSet中只需要一个bit，BitSet的大小取决于segments里的doc总数，所以可以根据doc总数和当前doc数估算是否BitSet更加划算)，会采用构造BitSet的方式，非常节约内存，而且BitSet可以非常高效的取交/并集。</p>
+<ol start="3">
+<li>BKD-Tree的结果怎么跟其他结果合并</li>
+</ol>
+<p>通过BKD-Tree查找到的docID是无序的，所以要么先转成有序的docID数组，或者构造BitSet，然后再与其他结果合并。</p>
+<h3 id="如何实现返回结果进行排序聚合"><a href="#如何实现返回结果进行排序聚合" class="headerlink" title="如何实现返回结果进行排序聚合"></a>如何实现返回结果进行排序聚合</h3><p>通过之前介绍可以看出lucene通过倒排的存储模型实现term的搜索，那对于有时候我们需要拿到另一个属性的值进行聚合，或者希望返回结果按照另一个属性进行排序。</p>
+<ul>
+<li>在lucene4之前需要把结果全部拿到再读取原文进行排序，这样效率较低，还比较占用内存，为了加速lucene实现了fieldcache，把读过的field放进内存中。这样可以减少重复的IO，但是也会带来新的问题，就是占用较多内存。</li>
+<li>新版本的lucene中引入了DocValues，DocValues是一个基于docid的列式存储。当我们拿到一系列的docid后，进行排序就可以使用这个列式存储，结合一个堆排序进行。当然额外的列式存储会占用额外的空间，lucene在建索引的时候可以自行选择是否需要DocValue存储和哪些字段需要存储。</li>
+</ul>
+<p>默认情况下，Lucene会按照Score排序，即算分后的分数值，如果指定了其他的Sort字段，就会按照指定的字段排序。那么，排序会非常影响性能吗？</p>
+<p>首先，排序并不会对所有命中的doc进行排序，而是构造一个堆，保证前(Offset+Size)个数的doc是有序的，所以排序的性能取决于(Size+Offset)和命中的文档数，另外就是读取docValues的开销。因为(Size+Offset)并不会太大，而且docValues的读取性能很高，所以排序并不会非常的影响性能。</p>
+<blockquote>
+<p>各种查询结构总结：</p>
+<ol>
+<li>FST：保存term字典，可以在FST上实现单Term、Term范围、Term前缀和通配符查询等。</li>
+<li>倒排链：保存了每个term对应的docId的列表，采用skipList的结构保存，用于快速跳跃。</li>
+<li>BKD-Tree：BKD-Tree是一种保存多维空间点的数据结构，用于数值类型(包括空间点)的快速查找。</li>
+<li>DocValues：基于docId的列式存储，由于列式存储的特点，可以有效提升排序聚合的性能。</li>
+</ol>
+</blockquote>
+<h2 id="倒排链的压缩与逻辑运算"><a href="#倒排链的压缩与逻辑运算" class="headerlink" title="倒排链的压缩与逻辑运算"></a>倒排链的压缩与逻辑运算</h2><p>原生的倒排链有两个痛点：</p>
+<ul>
+<li><strong>如何压缩以节省磁盘空间</strong></li>
+<li><strong>如何快速求交并集（intersections and unions）</strong></li>
+</ul>
+<h3 id="如何进行索引数据压缩"><a href="#如何进行索引数据压缩" class="headerlink" title="如何进行索引数据压缩"></a>如何进行索引数据压缩</h3><p>我们来简化下 Lucene 要面对的问题，假设有这样一个数组：</p>
+<p>[73, 300, 302, 332, 343, 372]</p>
+<p>如何把它进行尽可能的压缩？</p>
+<p>Lucene 里，数据是按 Segment 存储的，每个 Segment 最多存 65536 个文档 ID， 所以文档 ID 的范围，从 0 到 2^16-1，所以如果不进行任何处理，那么每个元素都会占用 2 bytes ，对应上面的数组，就是 6 * 2 = 12 bytes.</p>
+<p>怎么压缩呢？</p>
+<p><strong>压缩，就是尽可能降低每个数据占用的空间，同时又能让信息不失真，能够还原回来。</strong></p>
+<p><strong>Step 1：Delta-encode —— [增量编码]</strong></p>
+<p>我们只记录元素与元素之间的增量，于是数组变成了：</p>
+<p>[73, 227, 2, 30, 11, 29]</p>
+<p><strong>Step 2：Split into blocks —— 分割成块</strong></p>
+<p>Lucene里每个块是 256 个文档 ID，这样可以保证每个块，增量编码后，每个元素都不会超过 256（1 byte）.</p>
+<p>为了方便演示，我们假设每个块是 3 个文档 ID：</p>
+<p>[73, 227, 2], [30, 11, 29]</p>
+<p><strong>Step 3：Bit packing —— 按需分配空间</strong></p>
+<p>对于第一个块，[73, 227, 2]，最大元素是227，需要 8 bits，好，那我给你这个块的每个元素，都分配 8 bits的空间。</p>
+<p>但是对于第二个块，[30, 11, 29]，最大的元素才30，只需要 5 bits，那我就给你每个元素，只分配 5 bits 的空间，足矣。</p>
+<p>这一步，可以说是把吝啬发挥到极致，精打细算，按需分配。</p>
+<p>以上三个步骤，共同组成了一项[编码技术]，Frame Of Reference（FOR）：</p>
+<img src="/img/image-20211213164250949.png" alt="image-20211213164250949" style="zoom:33%;" />
+
+<h3 id="Roaring-bitmaps"><a href="#Roaring-bitmaps" class="headerlink" title="Roaring bitmaps"></a>Roaring bitmaps</h3><p>接着来聊聊 Posting List 的第二个痛点 —— 如何快速求交并集（intersections and unions）。</p>
+<p>在 Lucene 中查询，通常不只有一个查询条件，比如我们想搜索：</p>
+<ul>
+<li>含有“生存”相关词语的文档</li>
+<li>文档发布时间在最近一个月</li>
+<li>文档发布者是平台的特约作者</li>
+</ul>
+<p>这样就需要根据三个字段，去三棵倒排索引里去查，当然，磁盘里的数据，上一节提到过，用了 FOR 进行压缩，所以我们要把数据进行反向处理，即解压，才能还原成原始的文档 ID，然后把这三个文档 ID 数组在内存中做一个交集。</p>
+<blockquote>
+<p>即使没有多条件查询， Lucene 也需要频繁求并集，因为 Lucene 是分片存储的。</p>
+</blockquote>
+<p>同样，我们把 Lucene 遇到的问题，简化成一道算法题。</p>
+<p>假设有下面三个数组：</p>
+<p>[64, 300, 303, 343]</p>
+<p>[73, 300, 302, 303, 343, 372]</p>
+<p>[303, 311, 333, 343]</p>
+<p>求它们的交集。</p>
+<p><strong>Option 1: Integer 数组</strong></p>
+<p>直接用原始的文档 ID ，可能你会说，那就逐个数组遍历一遍吧，遍历完就知道交集是什么了。</p>
+<p>其实对于有序的数组，用跳表（skip table）可以更高效，这里就不展开了，因为不管是从性能，还是空间上考虑，Integer 数组都不靠谱，假设有100M 个文档 ID，每个文档 ID 占 2 bytes，那已经是 200 MB，而这些数据是要放到内存中进行处理的，把这么大量的数据，从磁盘解压后丢到内存，内存肯定撑不住。</p>
+<p><strong>Option 2: Bitmap</strong></p>
+<p>假设有这样一个数组：</p>
+<p>[3,6,7,10]</p>
+<p>那么我们可以这样来表示：</p>
+<p>[0,0,1,0,0,1,1,0,0,1]</p>
+<p>看出来了么，对，<strong>我们用 0 表示角标对应的数字不存在，用 1 表示存在。</strong></p>
+<p>这样带来了两个好处：</p>
+<ul>
+<li>节省空间：既然我们只需要0和1，那每个文档 ID 就只需要 1 bit，还是假设有 100M 个文档，那只需要 100M bits = 100M * 1/8 bytes = 12.5 MB，比之前用 Integer 数组 的 200 MB，优秀太多</li>
+<li>运算更快：0 和 1，天然就适合进行位运算，求交集，「与」一下，求并集，「或」一下，一切都回归到计算机的起点</li>
+</ul>
+<p><strong>Option 3: Roaring Bitmaps</strong></p>
+<p>细心的你可能发现了，bitmap 有个硬伤，就是不管你有多少个文档，你占用的空间都是一样的，之前说过，Lucene Posting List 的每个 Segement 最多放 65536 个文档ID，举一个极端的例子，有一个数组，里面只有两个文档 ID：</p>
+<p>[0, 65535]</p>
+<p>用 Bitmap，要怎么表示？</p>
+<p>[1,0,0,0,….(超级多个0),…,0,0,1]</p>
+<p>你需要 65536 个 bit，也就是 65536/8 = 8192 bytes，而用 Integer 数组，你只需要 2 * 2 bytes = 4 bytes</p>
+<p>呵呵，死板的 bitmap。可见在文档数量不多的时候，使用 Integer 数组更加节省内存。</p>
+<p>我们来算一下[临界值]，很简单，无论文档数量多少，bitmap都需要 8192 bytes，而 Integer 数组则和文档数量成线性相关，每个文档 ID 占 2 bytes，所以：</p>
+<p>8192 / 2 = 4096</p>
+<p>当文档数量少于 4096 时，用 Integer 数组，否则，用 bitmap.</p>
+<img src="/img/image-20211213164629753.png" alt="image-20211213164629753" style="zoom:33%;" />
+
+<blockquote>
+<p>这里补充一下 [Roaring bitmaps]) 和 之前讲的 Frame Of Reference 的关系。<br>Frame Of Reference 是压缩数据，减少磁盘占用空间，所以当我们从磁盘取数据时，也需要一个反向的过程，即解压，解压后才有我们上面看到的这样子的文档ID数组：[73, 300, 302, 303, 343, 372] ，接着我们需要对数据进行处理，求交集或者并集，这时候数据是需要放到内存进行处理的，我们有三个这样的数组，这些数组可能很大，而内存空间比磁盘还宝贵，于是需要更强有力的压缩算法，同时还要有利于快速的求交并集，于是有了Roaring Bitmaps 算法。<br>另外，Lucene 还会把从磁盘取出来的数据，通过 Roaring bitmaps 处理后，缓存到内存中，Lucene 称之为 [filter cache].</p>
+</blockquote>
+<h3 id="roaring-bitmap-数据结构"><a href="#roaring-bitmap-数据结构" class="headerlink" title="roaring bitmap 数据结构"></a>roaring bitmap 数据结构</h3><img src="/img/image-20211222114227314.png" alt="image-20211222114227314" style="zoom: 33%;" />
+
+<p>每个RoaringBitmap中都包含一个<code>RoaringArray</code>，名字叫<code>highLowContainer</code>。<code>highLowContainer</code>存储了<code>RoaringBitmap</code>中的全部数据。</p>
+<p>这个名字意味着，会将32位的整形（<code>int</code>）拆分成高16位和低16位两部分（两个<code>short</code>）来处理。</p>
+<p>RoaringArray的数据结构很简单，核心为以下三个成员：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">short</span>[] keys;</span><br><span class="line">Container[] values;</span><br><span class="line"><span class="keyword">int</span> size;</span><br></pre></td></tr></table></figure>
+
+<p>每个32位的整形，高16位会被作为key存储到short[] keys中，低16位则被看做value，存储到Container[] values中的某个Container中。keys和values通过下标一一对应。size则标示了当前包含的key-value pair的数量，即keys和values中有效数据的数量。</p>
+<p>keys数组永远保持有序，方便二分查找。</p>
+<h4 id="三种Container"><a href="#三种Container" class="headerlink" title="三种Container"></a>三种Container</h4><p>下面介绍到的是RoaringBitmap的核心，三种Container。</p>
+<p>通过上面的介绍我们知道，每个32位整形的高16位已经作为key存储在RoaringArray中了，那么Container只需要处理低16位的数据。</p>
+<p><strong>ArrayContainer</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_MAX_SIZE = <span class="number">4096</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">short</span>[] content;</span><br></pre></td></tr></table></figure>
+
+<p>结构很简单，只有一个short[] content，将16位value直接存储。</p>
+<p>short[] content始终保持有序，方便使用二分查找，且不会存储重复数值。</p>
+<p>因为这种Container存储数据没有任何压缩，因此只适合存储少量数据。</p>
+<p>ArrayContainer占用的空间大小与存储的数据量为线性关系，每个short为2字节，因此存储了N个数据的ArrayContainer占用空间大致为2N字节。存储一个数据占用2字节，存储4096个数据占用8kb。</p>
+<p>根据源码可以看出，常量DEFAULT_MAX_SIZE值为4096，当容量超过这个值的时候会将当前Container替换为BitmapContainer。</p>
+<p><strong>BitmapContainer</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="keyword">long</span>[] bitmap;</span><br></pre></td></tr></table></figure>
+
+
+<p>这种Container使用long[]存储位图数据。我们知道，每个Container处理16位整形的数据，也就是0~65535，因此根据位图的原理，需要65536个比特来存储数据，每个比特位用1来表示有，0来表示无。每个long有64位，因此需要1024个long来提供65536个比特。</p>
+<p>因此，每个BitmapContainer在构建时就会初始化长度为1024的long[]。这就意味着，不管一个BitmapContainer中只存储了1个数据还是存储了65536个数据，占用的空间都是同样的8kb。</p>
+<p><strong>RunContainer</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">short</span>[] valueslength;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> nbrruns = <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+
+<p>RunContainer中的Run指的是行程长度压缩算法(Run Length Encoding)，对连续数据有比较好的压缩效果。</p>
+<p>它的原理是，对于连续出现的数字，只记录初始数字和后续数量。即：</p>
+<p>对于数列11，它会压缩为11,0；<br>对于数列11,12,13,14,15，它会压缩为11,4；<br>对于数列11,12,13,14,15,21,22，它会压缩为11,4,21,1；<br>源码中的  short[] valueslength  中存储的就是压缩后的数据。</p>
+<p>这种压缩算法的性能和数据的连续性（紧凑性）关系极为密切，对于连续的100个short，它能从200字节压缩为4字节，但对于完全不连续的100个short，编码完之后反而会从200字节变为400字节。</p>
+<p>如果要分析RunContainer的容量，我们可以做下面两种极端的假设：</p>
+<p>最好情况，即只存在一个数据或只存在一串连续数字，那么只会存储2个short，占用4字节<br>最坏情况，0~65535的范围内填充所有的奇数位（或所有偶数位），需要存储65536个short，128kb</p>
+<h4 id="RoaringBitmap的优化策略"><a href="#RoaringBitmap的优化策略" class="headerlink" title="RoaringBitmap的优化策略"></a>RoaringBitmap的优化策略</h4><p><strong>创建时：</strong></p>
+<ul>
+<li>创建包含单个值的Container时，选用ArrayContainer</li>
+<li>创建包含一串连续值的Container时，比较ArrayContainer和RunContainer，选取空间占用较少的<br>转换：</li>
+</ul>
+<p><strong>针对ArrayContainer：</strong></p>
+<ul>
+<li>如果插入值后容量超过4096，则自动转换为BitmapContainer。因此正常使用的情况下不会出现容量超过4096的ArrayContainer。</li>
+<li>调用runOptimize()方法时，会比较和RunContainer的空间占用大小，选择是否转换为RunContainer。</li>
+</ul>
+<p><strong>针对BitmapContainer：</strong></p>
+<ul>
+<li>如果删除某值后容量低至4096，则会自动转换为ArrayContainer。因此正常使用的情况下不会出现容量小于4096的BitmapContainer。</li>
+<li>调用runOptimize()方法时，会比较和RunContainer的空间占用大小，选择是否转换为RunContainer。</li>
+</ul>
+<p><strong>针对RunContainer：</strong></p>
+<ul>
+<li>只有在调用runOptimize()方法才会发生转换，会分别和ArrayContainer、BitmapContainer比较空间占用大小，然后选择是否转换</li>
+</ul>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/elasticsearch/" rel="tag"><i class="fa fa-tag"></i> elasticsearch</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/12/08/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/Elasticsearch%E6%80%BB%E7%BB%93/" rel="next" title="10.数据存储/Elasticsearch/Elasticsearch总结">
+                <i class="fa fa-chevron-left"></i> 10.数据存储/Elasticsearch/Elasticsearch总结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/12/21/17.%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F%E6%9C%8D%E5%8A%A1%E7%9B%B8%E5%85%B3%E7%AE%97%E6%B3%95/%E9%99%90%E6%B5%81%E7%AD%96%E7%95%A5/" rel="prev" title="限流策略">
+                限流策略 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%20%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">301</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">81</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简单介绍下Lucene"><span class="nav-text">简单介绍下Lucene</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Es-与-Lucene"><span class="nav-text">Es 与 Lucene</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么使用倒排索引"><span class="nav-text">为什么使用倒排索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#简单介绍下Lucene-1"><span class="nav-text">简单介绍下Lucene</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lucene-的查询"><span class="nav-text">Lucene 的查询</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Lucene查询流程"><span class="nav-text">Lucene查询流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Lucene-索引查询过程"><span class="nav-text">Lucene 索引查询过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#倒排链介绍"><span class="nav-text">倒排链介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Lucene获取倒排链的方法"><span class="nav-text">Lucene获取倒排链的方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FST介绍-有穷状态装换器"><span class="nav-text">FST介绍(有穷状态装换器)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Skip-List"><span class="nav-text">Skip List</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Lucene倒排结构"><span class="nav-text">Lucene倒排结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#BKD-TREE-数值类型索引结构"><span class="nav-text">BKD-TREE(数值类型索引结构)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#倒排链合并过程"><span class="nav-text">倒排链合并过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#倒排链合并"><span class="nav-text">倒排链合并</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#组合条件各种场景下的合并"><span class="nav-text">组合条件各种场景下的合并</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何实现返回结果进行排序聚合"><span class="nav-text">如何实现返回结果进行排序聚合</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#倒排链的压缩与逻辑运算"><span class="nav-text">倒排链的压缩与逻辑运算</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#如何进行索引数据压缩"><span class="nav-text">如何进行索引数据压缩</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Roaring-bitmaps"><span class="nav-text">Roaring bitmaps</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#roaring-bitmap-数据结构"><span class="nav-text">roaring bitmap 数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#三种Container"><span class="nav-text">三种Container</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RoaringBitmap的优化策略"><span class="nav-text">RoaringBitmap的优化策略</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

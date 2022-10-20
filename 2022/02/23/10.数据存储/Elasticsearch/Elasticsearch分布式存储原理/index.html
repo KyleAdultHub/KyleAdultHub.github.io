@@ -1,0 +1,2092 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Es分布式原理ES分布式集群特点 一个集群拥有相同的cluster.name 配置的节点组成， 它们共同承担数据和负载的压力。 主节点负责管理集群的变更例如增加、删除索引，或者增加、删除节点等。 而主节点并不需要涉及到文档级别的变更和搜索等操作。 屏蔽了分布式系统的复杂性 集群内的扩容能力 垂直扩容和水平扩容 真正的扩容能力是来自于水平扩容–为集群添加更多的节点，并且将负载压力和稳定性分散到这些节">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Elasticsearch分布式存储原理">
+<meta property="og:url" content="http://blog.kyleliu.cn/2022/02/23/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/Elasticsearch%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8%E5%8E%9F%E7%90%86/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle)的云笔记">
+<meta property="og:description" content="Es分布式原理ES分布式集群特点 一个集群拥有相同的cluster.name 配置的节点组成， 它们共同承担数据和负载的压力。 主节点负责管理集群的变更例如增加、删除索引，或者增加、删除节点等。 而主节点并不需要涉及到文档级别的变更和搜索等操作。 屏蔽了分布式系统的复杂性 集群内的扩容能力 垂直扩容和水平扩容 真正的扩容能力是来自于水平扩容–为集群添加更多的节点，并且将负载压力和稳定性分散到这些节">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223142346702.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223114537351.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223114418540.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223114444850.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223114458465.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223114521834.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223140043517.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223140524303.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223141104012.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223145052221.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223151110135.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223151209705.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223152031494.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223145441661.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223145500494.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223145516894.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223153823350.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223161438056.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223161501064.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223165904782.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223165935798.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223172931852.png">
+<meta property="article:published_time" content="2022-02-22T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-02-24T03:41:46.703Z">
+<meta property="article:author" content="刘小恺(Kyle)">
+<meta property="article:tag" content="elasticsearch">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/img/image-20220223142346702.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2022/02/23/10.数据存储/Elasticsearch/Elasticsearch分布式存储原理/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Elasticsearch分布式存储原理 | 刘小恺(Kyle)的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle)的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2022/02/23/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/Elasticsearch%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8%E5%8E%9F%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Elasticsearch分布式存储原理
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2022-02-23 00:00:00" itemprop="dateCreated datePublished" datetime="2022-02-23T00:00:00+08:00">2022-02-23</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/" itemprop="url" rel="index"><span itemprop="name">数据存储</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/" itemprop="url" rel="index"><span itemprop="name">Elasticsearch</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/02/23/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/Elasticsearch%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8%E5%8E%9F%E7%90%86/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2022/02/23/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/Elasticsearch%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8%E5%8E%9F%E7%90%86/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="Es分布式原理"><a href="#Es分布式原理" class="headerlink" title="Es分布式原理"></a>Es分布式原理</h2><h3 id="ES分布式集群特点"><a href="#ES分布式集群特点" class="headerlink" title="ES分布式集群特点"></a>ES分布式集群特点</h3><ul>
+<li>一个集群拥有相同的cluster.name 配置的节点组成， 它们共同承担数据和负载的压力。</li>
+<li>主节点负责管理集群的变更例如增加、删除索引，或者增加、删除节点等。 而主节点并不需要涉及到文档级别的变更和搜索等操作。</li>
+<li>屏蔽了分布式系统的复杂性</li>
+<li>集群内的扩容能力<ul>
+<li>垂直扩容和水平扩容</li>
+<li>真正的扩容能力是来自于水平扩容–为集群添加更多的节点，并且将负载压力和稳定性分散到这些节点中</li>
+</ul>
+</li>
+</ul>
+<h3 id="Es分布式数据存储形式"><a href="#Es分布式数据存储形式" class="headerlink" title="Es分布式数据存储形式"></a>Es分布式数据存储形式</h3><img src="/img/image-20220223142346702.png" alt="image-20220223142346702" style="zoom:33%;" />
+
+<p>Elasticsearch 的数据是以shard的形式存储在每个es节点的。</p>
+<p>shard是Elasticsearch数据存储的最小单位，index的存储容量为所有shard的存储容量之和。Elasticsearch集群的存储容量则为所有index存储容量之和。</p>
+<p>一个shard就对应了一个lucene的library。对于一个shard，Elasticsearch增加了translog的功能，类似于HBase WAL，是数据写入过程中的中间数据，其余的数据都在lucene库中管理的。</p>
+<h3 id="ES分片Shard的特点"><a href="#ES分片Shard的特点" class="headerlink" title="ES分片Shard的特点"></a>ES分片Shard的特点</h3><ul>
+<li>Elasticsearch 是利用分片将数据分发到集群内各处</li>
+<li>分片是数据的容器，文档保存在分片内</li>
+<li>分片又被分配到集群内的各个节点里</li>
+<li>当集群规模变动，ES会自动在各个节点中迁移分片。使得数据任然均匀分布在集群中</li>
+<li>副分片是主分片的一个拷贝，作为硬件故障时的备份。并提供返回文档读操作</li>
+<li>在创建索引时，确定主分片数，但是副分片可以在后面进行更改</li>
+</ul>
+<p><strong>ES分片的健康</strong></p>
+<p><code>GET /_cluster/health</code></p>
+<p>返回值中的status 是我们关注的</p>
+<ul>
+<li>green 主副分片均正常</li>
+<li>yellow 主都正常，不是所有的副都正常</li>
+<li>red 所有主分片都不正常</li>
+</ul>
+<h3 id="如何路由一个文档到一个分片中"><a href="#如何路由一个文档到一个分片中" class="headerlink" title="如何路由一个文档到一个分片中"></a>如何路由一个文档到一个分片中</h3><ul>
+<li>当索引一个文档时，我们怎么知道这个文档在什么位置</li>
+<li>使用下面的这个路由选择公式</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shard = hash(routing) % number_of_primary_shards</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>shard: 哪个分片， 也就是分片id</li>
+<li>routing: 一个可变值，默认是文档的id</li>
+<li>hash: 一个哈希函数，对rounting字段进行哈希计算生成一个数字</li>
+<li>number_of_primary_shards: 主分片的数量，<strong>routing</strong>字段经过<strong>hash</strong>函数计算之后的值，将对 主分片的数量也就是 <strong>number_of_primary_shards</strong> 进行取与，之后得到的<strong>shard</strong>就是我们文档所在的分片的位置</li>
+</ul>
+<h3 id="分布式节点间的数据交互"><a href="#分布式节点间的数据交互" class="headerlink" title="分布式节点间的数据交互"></a>分布式节点间的数据交互</h3><h4 id="主分片和副分片如何交互"><a href="#主分片和副分片如何交互" class="headerlink" title="主分片和副分片如何交互"></a><strong>主分片和副分片如何交互</strong></h4><ul>
+<li>假设一个集群由三个节点组成。有一个索引，这个索引有<strong>两个主分片</strong>，每个<strong>主分片</strong>有两个<strong>副分片</strong>，相同的分片的副本不会放在同一个节点。</li>
+<li>请求发送到集群任意节点，每个节点都有能力处理请求。每个节点都知道集群中任一文档的位置，所以可以将请求转发到需求节点上。</li>
+</ul>
+<h4 id="各节点间如何交互"><a href="#各节点间如何交互" class="headerlink" title="各节点间如何交互"></a><strong>各节点间如何交互</strong></h4><h5 id="插入、删除单个文档的流程"><a href="#插入、删除单个文档的流程" class="headerlink" title="插入、删除单个文档的流程"></a>插入、删除单个文档的流程</h5><p>客户端选择一个 node 发送请求过去，这个 node 就是 coordinating node（协调节点）。</p>
+<p>实际的 node 上的 primary shard (主分片) 处理请求，然后将数据同步到 replica node(备份分片)。</p>
+<ul>
+<li><img src="/img/image-20220223114537351.png" alt="image-20220223114537351" style="zoom: 33%;" />
+
+<ol>
+<li>先向 node 1 来一个请求这个请求可能是发送新建，索引或者删除文档等。</li>
+<li>node 1 节点根据文档的_id 确定文档属于分片0， 请求被转发到node3 节点。</li>
+<li>node 3 在主分片执行了请求，如果主分片执行成功了，它将请求转发给node1 和node 2 节点。当所有的副分片都执行成功，node 3 向协调节点报告成功，并向客户端报告完成。</li>
+</ol>
+<blockquote>
+<ul>
+<li><p>consistency 参数的值可以设为 one （只要主分片状态 ok 就允许执行写操作）,all（必须要主分片和所有副本分片的状态没问题才允许执行<em>写</em>操作）, 或quorum 。默认值为 quorum , 即大多数的分片副本状态没问题就允许执行写操作</p>
+</li>
+<li><p>在执行一个写操作时，主分片都需要必须有一个规定数量的（quorum），也就是在大多数主副分片处于活跃状态。这样是防止在网络分区故障是执行写操作会导致数据不一致</p>
+<p>quorum = int( (primary + number_of_replicas) / 2 ) + 1</p>
+</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+<h5 id="取回一个文档"><a href="#取回一个文档" class="headerlink" title="取回一个文档"></a>取回一个文档</h5><p>查询，GET某一条数据，写入了某个document，这个document会自动给你分配一个全局唯一的id，doc id，同时也是根据doc id进行hash路由到对应的primary shard上面去。也可以手动指定doc id，比如用订单id，用户id。</p>
+<p>你可以通过doc id来查询，会根据doc id进行hash，判断出来当时把doc id分配到了哪个shard上面去，从那个shard去查询</p>
+<ul>
+<li><img src="/img/image-20220223114418540.png" alt="image-20220223114418540" style="zoom:33%;" />
+
+
+
+</li>
+</ul>
+<ol>
+<li><p>可以从主分片或者任意副本分片检索文档</p>
+</li>
+<li><p>节点使用节点文档_ID来确定文档属于分片0， 分片0 的副本分片存在于所有的三个节点上，在这种情况下，他将请求转发到node 2</p>
+</li>
+<li><p>node 2 将文档返回给node 1 ，然后将文档返回给客户端</p>
+<blockquote>
+<p>在每次处理读取请求时，协调结点在每次请求的时候都会轮训所有的副本片来达到负载均衡</p>
+</blockquote>
+</li>
+</ol>
+<h5 id="局部更新文档"><a href="#局部更新文档" class="headerlink" title="局部更新文档"></a>局部更新文档</h5><ul>
+<li><img src="/img/image-20220223114444850.png" alt="image-20220223114444850" style="zoom: 33%;" />
+
+
+
+</li>
+</ul>
+<ol>
+<li><p>客户端向node1 发送一个请求</p>
+</li>
+<li><p>它将请求转发到主分片这个文档所在的Node 3</p>
+</li>
+<li><p>node 3从主分片检索文档，修改_Source json ，并且尝试重新索引主分片的文档。如果文档被另一个进程修改，他会重复步骤3 直到超过<strong>retry_on_conflict</strong> 次后放弃</p>
+</li>
+<li><p>node 3 成功更新文档，它将新版本的文档并行转发到node 1 和node 2 的副本分片，重新建立索引。所有副本分片都返回成功，node 3 向协调节点也返回成功，协调节点向客户端返回成功</p>
+</li>
+<li><p>update 操作也支持 新建索引的时的那些参数 routing 、 replication 、 consistency 和 timeout</p>
+</li>
+</ol>
+<h5 id="多文档模式"><a href="#多文档模式" class="headerlink" title="多文档模式"></a>多文档模式</h5><ul>
+<li>mget 和 bulk API 的 模式类似于单文档模式。 协调节点知道每个文档的位置，将多个文档分解成每个文档的的多文档请求，并且将这些请求并行的转发到每个参与节点中 。</li>
+<li>使用 mget 取回多个文档</li>
+</ul>
+<p>​                                                    <img src="/img/image-20220223114458465.png" alt="image-20220223114458465" style="zoom:33%;" />             </p>
+<ol>
+<li>客户端向node 1 发送一个mget请求</li>
+<li>node 1 向每个分片构建多文档请求，并行的转发这些请求到托管在每个所需的主分片或者副分片的节点上一旦收到所有的回复，node 1 构建响应并将其返回给客户端</li>
+</ol>
+<h5 id="使用-bulk-修改多个文档"><a href="#使用-bulk-修改多个文档" class="headerlink" title="使用 bulk 修改多个文档"></a>使用 bulk 修改多个文档</h5><img src="/img/image-20220223114521834.png" alt="image-20220223114521834" style="zoom:33%;" />
+
+
+
+<ol>
+<li>一个bulk请求请求到node 1</li>
+<li>node 1 为每个节点创建一个批量请求，并将这些请求并行转发到每个包含主分片的节点</li>
+<li>主分片一个接一个按顺序执行每个操作。当每个操作成功时，主分片并行转发新文档（或删除）到副本分片，然后执行下一个操作。 一旦所有的副本分片报告所有操作成功，该节点将向协调节点报告成功，协调节点将这些响应收集整理并返回给客户端`</li>
+</ol>
+<h5 id="全文检索"><a href="#全文检索" class="headerlink" title="全文检索"></a>全文检索</h5><p>对于全文检索而言，文档可能分散在各个节点上</p>
+<p>可以分为搜索和取回两个阶段</p>
+<img src="/img/image-20220223140043517.png" alt="image-20220223140043517" style="zoom:33%;" />
+
+<p>查询阶段：</p>
+<ol>
+<li><p>客户端发送一个search(搜索)请求给Node3，Node3创建一个长度为from+size的空优先级队列；</p>
+</li>
+<li><p>Node3转发这个搜索请求到索引中每个副本的主分片或副本分片，每个分片执行本地查询并将结果存储到一个本地的from+size长度的有限队列里；</p>
+</li>
+<li><p>每个分片分回document的ID和有限队列里所有document的排序值给到协调节点Node3。Node3把这些值合并到自己的优先队列里产生全局排序结果；</p>
+<p>​                                                            <img src="/img/image-20220223140524303.png" alt="image-20220223140524303" style="zoom:33%;" />                *</p>
+</li>
+</ol>
+<p>取回阶段：</p>
+<ol>
+<li>协调节点先辨别哪些document需要取回，并且向相关分片发出get请求；</li>
+<li>每个分片加载document并且丰富他们，然后返回给协调节点；</li>
+<li>一旦所有的document都被取回，协调节点会将结果返回给客户端；</li>
+</ol>
+<h2 id="Es-数据存储原理"><a href="#Es-数据存储原理" class="headerlink" title="Es 数据存储原理"></a>Es 数据存储原理</h2><h3 id="LUCENE-数据的写入与更新"><a href="#LUCENE-数据的写入与更新" class="headerlink" title="LUCENE 数据的写入与更新"></a><strong>LUCENE 数据的写入与更新</strong></h3><h4 id="LUCENE-数据的写入"><a href="#LUCENE-数据的写入" class="headerlink" title="LUCENE 数据的写入"></a>LUCENE 数据的写入</h4><h5 id="数据写入流程"><a href="#数据写入流程" class="headerlink" title="数据写入流程"></a><strong>数据写入流程</strong></h5><img src="/img/image-20220223141104012.png" alt="image-20220223141104012" style="zoom:33%;" />
+
+<blockquote>
+<ul>
+<li>在 Elasticsearch 中， 每个字段的所有数据 都是 默认被索引的 。 即每个字段都有为了快速检索设置的专用倒排索引</li>
+<li>在 Elasticsearch 中，术语 <code>文档</code> 有着特定的含义。它是指最顶层或者根对象, 这个根对象被序列化成 JSON 并存储到 Elasticsearch 中，指定了唯一 ID。</li>
+</ul>
+</blockquote>
+<p>1：写入请求，分发节点。<br>2：数据写入同时写入内存和translog各一份，tanslog为保证数据不丢失，每 5 秒，或每次请求操作结束前，会强制刷新 translog 日志到磁盘上<br>3：确定数据给那个分片，refresh 刷新内存中数据到分片的segment，默认1秒刷新一次，为了提高吞吐量可以增大60s。参数refresh_interval<br>4：segment刷新到磁盘中完成持久化，保存成功清除translog，新版本es的 translog 不会在 segment 落盘就删，而是会保留，默认是512MB，保留12小时。每个分片。所以分片多的话 ，要考虑 translog 会带来的额外存储开销<br>5：segment过多会进行合并merge为大的segment，消耗大量的磁盘io和网络io</p>
+<h5 id="索引写入原理"><a href="#索引写入原理" class="headerlink" title="索引写入原理"></a>索引写入原理</h5><h6 id="索引基础结构-segment段"><a href="#索引基础结构-segment段" class="headerlink" title="索引基础结构-segment段"></a>索引基础结构-segment段</h6><p>倒排索引被写入磁盘后是不可变的，ES解决不变性和更新索引的方式是使用多个索引，利用新增的索引来反映修改，在查询时从旧的到新的依次查询，最后来一个结果合并。</p>
+<p>ES底层是基于Lucene，最核心的概念就是<strong>Segment(段)</strong>，每个段本身就是一个倒排索引。</p>
+<p>ES中的Index由多个段的集合和<strong>commit point(提交点)</strong>文件组成。</p>
+<p>提交点文件中有一个列表存放着所有已知的段，下面是一个带有1个提交点和3个段的Index示意图：</p>
+<img src="/img/image-20220223145052221.png" alt="image-20220223145052221" style="zoom:33%;" />
+
+<h6 id="索引写入步骤"><a href="#索引写入步骤" class="headerlink" title="索引写入步骤"></a>索引写入步骤</h6><p><strong>1、写入缓存</strong></p>
+<p>Doc会先被搜集到内存中的Buffer内，这个时候还无法被搜索到，如下图所示：</p>
+<img src="/img/image-20220223151110135.png" alt="image-20220223151110135" style="zoom:33%;" />
+
+<p><strong>2、缓存flush</strong></p>
+<img src="/img/image-20220223151209705.png" alt="image-20220223151209705" style="zoom:33%;" />
+
+<p>每隔一段时间，会将buffer提交，在flush磁盘后打开新段使得搜索可见，详细过程如下：</p>
+<ol>
+<li>创建一个新段，作为一个追加的倒排索引，写入到磁盘（文件系统缓存）</li>
+<li>将新的包含新段的Commit Point(提交点)写入磁盘（文件系统缓存）</li>
+<li>磁盘进行<code>fsync</code>，主要是将文件系统缓存中等待的写入操作全部物理写入到磁盘</li>
+<li>这个新的段被开启， 使得段内文档对搜索可见</li>
+<li>将内存中buffer清除，又可以把新的Doc写入buffer了</li>
+</ol>
+<p>通过这种方式，可以使得新文档从被索引到可被搜索间的时间间隔在数分钟，但是还不够快。因为磁盘需要<code>fsync</code>，这个就成为性能瓶颈。我们前面提到过Doc会先被从buffer刷入段写入文件系统缓存（很快），那么就自然想到在这个阶段就让文档对搜索可见，随后再被刷入磁盘（较慢）。</p>
+<p><strong>2.1、Refresh</strong></p>
+<p>Lucene支持对新段写入和打开，可以使文档在没有完全刷入硬盘的状态下就能对搜索可见，而且是一个开销较小的操作，可以频繁进行。</p>
+<p>下面是一个已经将Docs刷入段，但还没有完全提交的示意图：</p>
+<img src="/img/image-20220223152031494.png" alt="image-20220223152031494" style="zoom:33%;" />
+
+<p>我们可以看到，新段虽然还没有被完全提交，但是已经对搜索可见了。</p>
+<p>引入refresh操作的目的是提高ES的实时性，使添加文档尽可能快的被搜索到，同时又避免频繁fsync带来性能开销，依靠的就是文件系统缓存OS cache里缓存的文件可以被打开(open/reopen)和读取，而这个os cache实际是一块内存区域，而非磁盘，所以操作是很快的，这就是ES被称为近实时搜索的原因。</p>
+<p>refresh默认执行的间隔是1秒，可以使用<code>refreshAPI</code>进行手动操作，但一般不建议这么做。还可以通过合理设置<code>refresh_interval</code>在近实时搜索和索引速度间做权衡。</p>
+<p><strong>3、translog</strong></p>
+<p>index segment刷入到os cache后就可以打开供查询，这个操作是有潜在风险的，因为os cache中的数据有可能在意外的故障中丢失，而此时数据必备并未刷入到os disk，此时数据丢失将是不可逆的，这个时候就需要一种机制，可以将对es的操作记录下来，来确保当出现故障的时候，已经落地到磁盘的数据不会丢失，并在重启的时候可以从操作记录中将数据恢复过来。elasticsearch提供了translog来记录这些操作，结合os cached segments数据定时落盘来实现数据可靠性保证（flush）。</p>
+<p>文档被添加到buffer同时追加到translog：</p>
+<img src="/img/image-20220223145441661.png" alt="image-20220223145441661" style="zoom:33%;" />
+
+<p>进行<code>refresh</code>操作，清空buffer，文档可被搜索但尚未<code>flush</code>到磁盘。translog不会清空：</p>
+<img src="/img/image-20220223145500494.png" alt="image-20220223145500494" style="zoom:33%;" />
+
+<p>每隔一段时间（例如translog变得太大），index会被flush到磁盘，新的translog文件被创建，commit执行结束后，会发生以下事件：</p>
+<ul>
+<li>所有内存中的buffer会被写入新段</li>
+<li>buffer被清空</li>
+<li>一个提交点被写入磁盘</li>
+<li>文件系统缓存通过<code>fsync</code> flush</li>
+<li>之前的旧translog被删除</li>
+</ul>
+<p>下面示意图展示了这个状态：</p>
+<img src="/img/image-20220223145516894.png" alt="image-20220223145516894" style="zoom:33%;" />
+
+<blockquote>
+<p>translog记录的是已经<strong>在内存生成(segments)并存储到os cache但是还没写到磁盘的那些索引操作</strong>（注意，有一种解释说，添加到buffer中但是没有被存入segment中的数据没有被记录到translog中，这依赖于写translog的时机，不同版本可能有变化，不影响理解），此时这些新写入的数据可以被搜索到，但是当节点挂掉后这些未来得及落入磁盘的数据就会丢失，可以通过trangslog恢复。</p>
+<p>当然translog本身也是磁盘文件，频繁的写入磁盘会带来巨大的IO开销，因此对translog的追加写入操作的同样操作的是os cache，因此也需要定时落盘（fsync）。translog落盘的时间间隔直接决定了ES的可靠性，因为宕机可能导致这个时间间隔内所有的ES操作既没有生成segment磁盘文件，又没有记录到Translog磁盘文件中，导致这期间的所有操作都丢失且无法恢复。</p>
+<p>translog的fsync是ES在后台自动执行的，默认是每5秒钟主动进行一次translog fsync，或者当translog文件大小大于512MB主动进行一次fsync，对应的配置是<code>index.translog.flush_threshold_period</code> 和 <code>index.translog.flush_threshold_size</code>。</p>
+<p>当 Elasticsearch 启动的时候， 它会从磁盘中使用最后一个提交点去恢复已知的段，并且会重放 translog 中所有在最后一次提交后发生的变更操作。</p>
+<p>translog 也被用来提供实时 CRUD 。当你试着通过ID来RUD一个Doc，它会在从相关的段检索之前先检查 translog 中最新的变更。</p>
+<p>默认<code>translog</code>是每5秒或是每次请求完成后被<code>fsync</code>到磁盘（在主分片和副本分片都会）。也就是说，如果你发起一个index, delete, update, bulk请求写入translog并被fsync到主分片和副本分片的磁盘前不会反回200状态。</p>
+<p>这样会带来一些性能损失，可以通过设为异步fsync，但是必须接受由此带来的丢失少量数据的风险：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">PUT /my_index/_settings</span><br><span class="line">&#123;</span><br><span class="line">    "index.translog.durability": "async",</span><br><span class="line">    "index.translog.sync_interval": "5s"</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>flush</code>就是执行commit清空、干掉老translog的过程。默认每个分片30分钟或者是translog过于大的时候自动flush一次。可以通过flush API手动触发，但是只会在重启节点或关闭某个索引的时候这样做，因为这可以让未来ES恢复的速度更快(translog文件更小)。</p>
+<p>满足下列条件之一就会触发冲刷操作：</p>
+<ul>
+<li>内存缓冲区已满，相关参数： <code>indices.memory.index_buffer</code></li>
+<li>自上次冲刷后超过了一定的时间，相关参数：<code>index.translog.flush_threshold_period</code></li>
+<li>事物日志达到了一定的阔值，相关参数：<code>index.translog.flush_threshold_size</code></li>
+</ul>
+</blockquote>
+<h6 id="写入流程总结"><a href="#写入流程总结" class="headerlink" title="写入流程总结"></a><strong>写入流程总结</strong></h6><img src="/img/image-20220223153823350.png" alt="image-20220223153823350" style="zoom:33%;" />
+
+<p>整体流程：</p>
+<ol>
+<li>数据写入buffer缓冲和translog日志文件中。<br> 当你写一条数据document的时候，一方面写入到mem buffer缓冲中，一方面同时写入到translog日志文件中。</li>
+<li>buffer满了或者每隔1秒(可配)，refresh将mem buffer中的数据生成index segment文件并写入os cache，此时index segment可被打开以供search查询读取，这样文档就可以被搜索到了（注意，此时文档还没有写到磁盘上）；然后清空mem buffer供后续使用。可见，refresh实现的是文档从内存移到文件系统缓存的过程。</li>
+<li>重复上两个步骤，新的segment不断添加到os cache，mem buffer不断被清空，而translog的数据不断增加，随着时间的推移，translog文件会越来越大。</li>
+<li>当translog长度达到一定程度的时候，会触发flush操作，否则默认每隔30分钟也会定时flush，其主要过程：<br> 4.1. 执行refresh操作将mem buffer中的数据写入到新的segment并写入os cache，然后打开本segment以供search使用，最后再次清空mem buffer。<br> 4.2. 一个commit point被写入磁盘，这个commit point中标明所有的index segment。<br> 4.3. filesystem cache（os cache）中缓存的所有的index segment文件被fsync强制刷到磁盘os disk，当index segment被fsync强制刷到磁盘上以后，就会被打开，供查询使用。<br> 4.4. translog被清空和删除，创建一个新的translog。</li>
+</ol>
+<h6 id="Segment段合并"><a href="#Segment段合并" class="headerlink" title="Segment段合并"></a><strong>Segment段合并</strong></h6><p>通过每秒自动刷新创建新的段，用不了多久段的数量就爆炸了，每个段消费大量文件句柄，内存，cpu资源。更重要的是，每次搜索请求都需要依次检查每个段。段越多，查询越慢。</p>
+<p>ES通过后台合并段解决这个问题。ES利用段合并的时机来真正从文件系统删除那些version较老或者是被标记为删除的文档。被删除的文档（或者是version较老的）不会再被合并到新的更大的段中。</p>
+<p>可见，段合并主要有两个目的：</p>
+<ul>
+<li>第一个是将分段的总数量保持在受控的范围内（这用来保障查询的性能）。</li>
+<li>第二个是真正地删除文挡。</li>
+</ul>
+<p>ES对一个不断有数据写入的索引处理流程如下：</p>
+<ol>
+<li>索引过程中，refresh会不断创建新的段，并打开它们。</li>
+<li>合并过程会在后台选择一些小的段合并成大的段，这个过程不会中断索引和搜索。</li>
+</ol>
+<p>合并过程如图：</p>
+<img src="/img/image-20220223161438056.png" alt="image-20220223161438056" style="zoom:33%;" />
+
+<p>从上图可以看到，段合并之前，旧有的Commit和没Commit的小段皆可被搜索。</p>
+<p>段合并后的操作:</p>
+<ul>
+<li>新的段flush到硬盘</li>
+<li>编写一个包含新段的新提交点，并排除旧的较小段。</li>
+<li>新的段打开供搜索</li>
+<li>旧的段被删除</li>
+</ul>
+<p>合并完成后新的段可被搜索，旧的段被删除，如下图所示：</p>
+<img src="/img/image-20220223161501064.png" alt="image-20220223161501064" style="zoom:33%;" />
+
+<blockquote>
+<p><strong>注意</strong>：段合并过程虽然看起来很爽，但是大段的合并可能会占用大量的IO和CPU，如果不加以控制，可能会大大降低搜索性能。段合并的optimize API 不是非常特殊的情况下千万不要使用，默认策略已经足够好了。不恰当的使用可能会将你机器的资源全部耗尽在段合并上，导致无法搜索、无法响应。</p>
+</blockquote>
+<h4 id="LUCENE-数据删除"><a href="#LUCENE-数据删除" class="headerlink" title="LUCENE 数据删除"></a><strong>LUCENE 数据删除</strong></h4><p>删除一个ES文档不会立即从磁盘上移除，它只是被标记成已删除。因为段是不可变的，所以文档既不能从旧的段中移除，旧的段也不能更新以反映文档最新的版本。</p>
+<p>ES的做法是，每一个提交点包括一个<code>.del /.liv</code>文件（还包括新段），包含了段上已经被标记为删除状态的文档。所以，当一个文档被做删除操作，实际上只是在<code>.del / .liv</code>文件中将该文档标记为删除，依然会在查询时被匹配到，只不过在最终返回结果之前会被从结果中删除。ES将会在用户之后添加更多索引的时候，在后台进行要删除内容的清理。</p>
+<h4 id="LUCENE-数据更新"><a href="#LUCENE-数据更新" class="headerlink" title="LUCENE 数据更新"></a><strong>LUCENE 数据更新</strong></h4><p>文档的更新操作和删除是类似的：当一个文档被更新，旧版本的文档被标记为删除，新版本的文档在新的段中索引。<br> 该文档的不同版本都会匹配一个查询，但是较旧的版本会从结果中删除。</p>
+<h4 id="ES如何处理冲突-比如并发修改同一docId"><a href="#ES如何处理冲突-比如并发修改同一docId" class="headerlink" title="*ES如何处理冲突 ( 比如并发修改同一docId ) *"></a>*<em>ES如何处理冲突 ( 比如并发修改同一docId ) *</em></h4><ul>
+<li>使用乐观并发控制</li>
+<li>利用 _version 号来确保 应用中相互冲突的变更不会导致数据丢失</li>
+<li>通过外部系统使用版本控制</li>
+</ul>
+<blockquote>
+<p>详细介绍: <a href="https://blog.csdn.net/R_P_J/article/details/78388783" target="_blank" rel="noopener">https://blog.csdn.net/R_P_J/article/details/78388783</a></p>
+</blockquote>
+<h3 id="LUCENE-数据存储"><a href="#LUCENE-数据存储" class="headerlink" title="LUCENE 数据存储"></a>LUCENE 数据存储</h3><h4 id="LUCENE-内文件构成"><a href="#LUCENE-内文件构成" class="headerlink" title="LUCENE 内文件构成"></a><strong>LUCENE 内文件构成</strong></h4><p>elasticsearch底层是lucene存储架构<br>elasticsearch的数据保存在lucene文件中，es的elasticsearch.yml配置文件中配置数据保存路径。<br>lucene包的文件是由很多segment文件组成的，segments_xxx文件记录了lucene包下面的segment文件数量。每个segment会主要包含如下的文件。</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Extension</th>
+<th>Brief Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Segment Info</td>
+<td>.si</td>
+<td>segment的元数据文件</td>
+</tr>
+<tr>
+<td>Compound File</td>
+<td>.cfs, .cfe</td>
+<td>一个segment包含了如下表的各个文件，为减少打开文件的数量，在segment小的时候，segment的所有文件内容都保存在cfs文件中，cfe文件保存了lucene各文件在cfs文件的位置信息</td>
+</tr>
+<tr>
+<td>Fields</td>
+<td>.fnm</td>
+<td>保存了fields的相关信息</td>
+</tr>
+<tr>
+<td>Field Index</td>
+<td>.fdx</td>
+<td>正排存储文件的元数据信息</td>
+</tr>
+<tr>
+<td>Field Data</td>
+<td>.fdt</td>
+<td>存储了正排存储数据，写入的原文存储在这</td>
+</tr>
+<tr>
+<td>Term Dictionary</td>
+<td>.tim</td>
+<td>倒排索引的元数据信息</td>
+</tr>
+<tr>
+<td>Term Index</td>
+<td>.tip</td>
+<td>倒排索引文件，存储了所有的倒排索引数据</td>
+</tr>
+<tr>
+<td>Frequencies</td>
+<td>.doc</td>
+<td>保存了每个term的doc id列表和term在doc中的词频</td>
+</tr>
+<tr>
+<td>Positions</td>
+<td>.pos</td>
+<td>Stores position information about where a term occurs in the index 全文索引的字段，会有该文件，保存了term在doc中的位置</td>
+</tr>
+<tr>
+<td>Payloads</td>
+<td>.pay</td>
+<td>Stores additional per-position metadata information such as character offsets and user payloads 全文索引的字段，使用了一些像payloads的高级特性会有该文件，保存了term在doc中的一些高级特性</td>
+</tr>
+<tr>
+<td>Norms</td>
+<td>.nvd, .nvm</td>
+<td>文件保存索引字段加权数据</td>
+</tr>
+<tr>
+<td>Per-Document Values</td>
+<td>.dvd, .dvm</td>
+<td>lucene的docvalues文件，即数据的列式存储，用作聚合和排序</td>
+</tr>
+<tr>
+<td>Term Vector Data</td>
+<td>.tvx, .tvd, .tvf</td>
+<td>Stores offset into the document data file 保存索引字段的矢量信息，用在对term进行高亮，计算文本相关性中使用</td>
+</tr>
+<tr>
+<td>Live Documents</td>
+<td>.liv / .del</td>
+<td>记录了segment中删除的doc</td>
+</tr>
+</tbody></table>
+<h4 id="LUCENE数据元信息文件"><a href="#LUCENE数据元信息文件" class="headerlink" title="LUCENE数据元信息文件"></a><strong>LUCENE数据元信息文件</strong></h4><p>文件名为：segments_xxx</p>
+<p>该文件为lucene数据文件的元信息文件，记录所有segment的元数据信息。</p>
+<p>该文件主要记录了目前有多少segment，每个segment有一些基本信息，更新这些信息定位到每个segment的元信息文件。</p>
+<p>lucene元信息文件还支持记录userData，Elasticsearch可以在此记录translog的一些相关信息。</p>
+<h4 id="segment的元信息文件"><a href="#segment的元信息文件" class="headerlink" title="segment的元信息文件"></a><strong>segment的元信息文件</strong></h4><p>文件后缀：.si</p>
+<p>每个segment都有一个.si文件，记录了该segment的元信息。</p>
+<p>segment元信息文件中记录了segment的文档数量，segment对应的文件列表等信息。</p>
+<h4 id="fields信息文件"><a href="#fields信息文件" class="headerlink" title="fields信息文件"></a><strong>fields信息文件</strong></h4><p>文件后缀：.fnm</p>
+<p>该文件存储了fields的基本信息。</p>
+<p>fields信息中包括field的数量，field的类型，以及IndexOpetions，包括是否存储、是否索引，是否分词，是否需要列存等等。</p>
+<h4 id="数据存储文件"><a href="#数据存储文件" class="headerlink" title="数据存储文件"></a><strong>数据存储文件</strong></h4><p>文件后缀：.fdx, .fdt</p>
+<p>索引文件为.fdx，数据文件为.fdt，数据存储文件功能为根据自动的文档id，得到文档的内容，搜索引擎的术语习惯称之为正排数据，即doc_id -&gt; content，es的_source数据就存在这</p>
+<p>索引文件记录了快速定位文档数据的索引信息，数据文件记录了所有文档id的具体内容。</p>
+<p><strong>正排索引表是以文档的ID为关键字，表中记录文档中每个字段的值信息，主要场景是通过查询id来把整条文档拿出来，</strong>一般mysql关系型数据库是这种方式来查询的</p>
+<p>正排表结构如下图所示</p>
+<img src="/img/image-20220223165904782.png" alt="image-20220223165904782" style="zoom:33%;" />
+
+<p>这种组织方法在建立索引的时候结构比较简单，建立比较方便且易于维护，当对ID查询的时候检索效率会很高。</p>
+<h4 id="倒排索引文件"><a href="#倒排索引文件" class="headerlink" title="倒排索引文件"></a><strong>倒排索引文件</strong></h4><p>索引后缀：.tip,.tim</p>
+<p>倒排索引也包含索引文件和数据文件，.tip为索引文件，.tim为数据文件，索引文件包含了每个字段的索引元信息，数据文件有具体的索引内容。</p>
+<p>5.5.0版本的倒排索引实现为FST tree，FST tree的最大优势就是内存空间占用非常低</p>
+<p><strong>倒排索引表以字或词为关键字进行索引，表中关键字所对应的记录项记录了出现这个字或词的所有文档，</strong>每个字段记录该文档的ID和关键字在该文档中出现的位置情况。</p>
+<img src="/img/image-20220223165935798.png" alt="image-20220223165935798" style="zoom:33%;" />
+
+<p><strong>由于每个字或词对应的文档数量在动态变化，所以倒排表的建立和维护都较为复杂，</strong>但是一旦完成创建，在查询的时候由于可以一次得到查询关键字所对应的所有文档</p>
+<h4 id="列存文件（docvalues）"><a href="#列存文件（docvalues）" class="headerlink" title="列存文件（docvalues）"></a><strong>列存文件（docvalues）</strong></h4><p>文件后缀：.dvm, .dvd</p>
+<p>索引文件为.dvm，数据文件为.dvd。</p>
+<p>上面的倒排索引满足了关键字搜索的效率，但是对于从另外一个方向的相反操作并不高效，<strong>比如聚合（aggregations）、排序（Sorting）和字段的全值查询等时候需要其它的访问模式。</strong></p>
+<p>我们首先想到的是<strong>遍历正向索引来进行统计。</strong>但是这很慢而且难以扩展，随着词项和文档的数量增加，执行时间也会增加。</p>
+<p>为了能够解决上述问题，我们使用了Doc values通过转置两者间的关系来解决这个问题。</p>
+<p><strong>doc_values表如下：</strong></p>
+<img src="/img/image-20220223172931852.png" alt="image-20220223172931852" style="zoom:33%;" />
+
+<p>DocValues是在索引时与倒排索引同时生成的，并且是不可变的。与倒排一样，保存在lucene文件中（序列化到磁盘），此值默认是启动状态，如果没有必要使用可以设置 doc_values: false来禁用。</p>
+<p><strong>Doc values 是不支持 analyzed 字符串字段的</strong></p>
+<p>lucene实现的docvalues有如下类型：</p>
+<ul>
+<li>1、NONE 不开启docvalue时的状态</li>
+<li>2、NUMERIC 单个数值类型的docvalue主要包括（int，long，float，double）</li>
+<li>3、BINARY 二进制类型值对应不同的codes最大值可能超过32766字节，</li>
+<li>4、SORTED 有序增量字节存储，仅仅存储不同部分的值和偏移量指针，值必须小于等于32766字节</li>
+<li>5、SORTED_NUMERIC 存储数值类型的有序数组列表</li>
+<li>6、SORTED_SET 可以存储多值域的docvalue值，但返回时，仅仅只能返回多值域的第一个docvalue</li>
+<li>7、对应not_anaylized的string字段，使用的是SORTED_SET类型，number的类型是SORTED_NUMERIC类型</li>
+</ul>
+<p>其中SORTED_SET 的 SORTED_SINGLE_VALUED类型包括了两类数据 ： binary + numeric， binary是按ord排序的term的列表，numeric是doc到ord的映射。</p>
+<h4 id="Filddata-内存"><a href="#Filddata-内存" class="headerlink" title="Filddata (内存)"></a><strong>Filddata</strong> (内存)</h4><p><code>(非磁盘Field Data 文件，该结构为Fied Data 映射的内存结构)</code></p>
+<p>Doc values 是不支持 analyzed 字符串字段的，然而，这些字段仍然可以使用聚合和排序，是因为使用了fielddata 的数据结构。<strong>与 doc values 不同，fielddata 构建和管理 100% 在内存中，常驻于 JVM 内存堆。</strong></p>
+<p>Fielddata默认是不启用的，因为text字段比较长，一般只做关键字分词和搜索，很少拿它来进行全文匹配和聚合还有排序，因为大多数这种情况是无意义的，一旦启用将会把text都加载到内存中，那将带来很大的内存压力。</p>
+<p>Doc values 是不支持 analyzed 字符串字段的，然而，这些字段仍然可以使用聚合，是因为使用了fielddata 的数据结构。<strong>与 doc values 不同，fielddata 构建和管理 100% 在内存中，常驻于 JVM 内存堆。</strong></p>
+<p>Fielddata默认是不启用的，因为text字段比较长，一般只做关键字分词和搜索，很少拿它来进行全文匹配和聚合还有排序，因为大多数这种情况是无意义的，一旦启用将会把text都加载到内存中，那将带来很大的内存压力。</p>
+<p>Fielddata一些特性：</p>
+<blockquote>
+<ol>
+<li>Fielddata 是延迟加载的。如果你从来没有聚合一个分析字符串，就不会加载 fielddata 到内存中，是在查询时候构建的。</li>
+<li>fielddata 是基于字段加载的， 只有很活跃地使用字段才会增加fielddata 的负担。</li>
+<li>fielddata 会加载索引中（针对该特定字段的） 所有的文档，而不管查询是否命中。逻辑是这样：如果查询会访问文档 X、Y 和 Z，那很有可能会在下一个查询中访问其他文档。</li>
+<li>如果空间不足，使用最久未使用（LRU）算法移除fielddata。</li>
+</ol>
+</blockquote>
+<p>所以，fielddata应该在JVM中合理利用，否则会影响es性能。</p>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/elasticsearch/" rel="tag"><i class="fa fa-tag"></i> elasticsearch</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/01/04/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Mysql/Mysql%E6%95%B4%E7%90%86/" rel="next" title="Mysql整理">
+                <i class="fa fa-chevron-left"></i> Mysql整理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/06/06/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Redis/redis%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86/" rel="prev" title="Redis 架构原理">
+                Redis 架构原理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%20%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">301</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">81</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Es分布式原理"><span class="nav-text">Es分布式原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ES分布式集群特点"><span class="nav-text">ES分布式集群特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Es分布式数据存储形式"><span class="nav-text">Es分布式数据存储形式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES分片Shard的特点"><span class="nav-text">ES分片Shard的特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何路由一个文档到一个分片中"><span class="nav-text">如何路由一个文档到一个分片中</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分布式节点间的数据交互"><span class="nav-text">分布式节点间的数据交互</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#主分片和副分片如何交互"><span class="nav-text">主分片和副分片如何交互</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#各节点间如何交互"><span class="nav-text">各节点间如何交互</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#插入、删除单个文档的流程"><span class="nav-text">插入、删除单个文档的流程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#取回一个文档"><span class="nav-text">取回一个文档</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#局部更新文档"><span class="nav-text">局部更新文档</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#多文档模式"><span class="nav-text">多文档模式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#使用-bulk-修改多个文档"><span class="nav-text">使用 bulk 修改多个文档</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#全文检索"><span class="nav-text">全文检索</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Es-数据存储原理"><span class="nav-text">Es 数据存储原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LUCENE-数据的写入与更新"><span class="nav-text">LUCENE 数据的写入与更新</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-数据的写入"><span class="nav-text">LUCENE 数据的写入</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#数据写入流程"><span class="nav-text">数据写入流程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#索引写入原理"><span class="nav-text">索引写入原理</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#索引基础结构-segment段"><span class="nav-text">索引基础结构-segment段</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#索引写入步骤"><span class="nav-text">索引写入步骤</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#写入流程总结"><span class="nav-text">写入流程总结</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Segment段合并"><span class="nav-text">Segment段合并</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-数据删除"><span class="nav-text">LUCENE 数据删除</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-数据更新"><span class="nav-text">LUCENE 数据更新</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ES如何处理冲突-比如并发修改同一docId"><span class="nav-text">*ES如何处理冲突 ( 比如并发修改同一docId ) *</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LUCENE-数据存储"><span class="nav-text">LUCENE 数据存储</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-内文件构成"><span class="nav-text">LUCENE 内文件构成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE数据元信息文件"><span class="nav-text">LUCENE数据元信息文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#segment的元信息文件"><span class="nav-text">segment的元信息文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#fields信息文件"><span class="nav-text">fields信息文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数据存储文件"><span class="nav-text">数据存储文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#倒排索引文件"><span class="nav-text">倒排索引文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#列存文件（docvalues）"><span class="nav-text">列存文件（docvalues）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Filddata-内存"><span class="nav-text">Filddata (内存)</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

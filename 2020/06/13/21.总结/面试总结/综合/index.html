@@ -120,7 +120,7 @@
 <meta property="og:description" content="排序归并排序1234567891011121314151617181920212223242526272829303132def merge_sort(li):                # 当列表的长度为1时，不需要再拆分                if len(li) &#x3D;&#x3D; 1:                        return li                # 取一个">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2020-06-13T03:00:00.000Z">
-<meta property="article:modified_time" content="2020-08-07T03:20:20.290Z">
+<meta property="article:modified_time" content="2020-10-21T06:39:29.296Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="面试">
 <meta name="twitter:card" content="summary">
@@ -515,6 +515,42 @@
 <li><p>如果在某次提交（commit）之前，数据传输出现了失败，将会再次开始上一次Transcriptions，并将上次发送失败的数据重新传输。因为commit操作已经将Transcriptions写入了磁盘，那么在进程故障退出并恢复业务之后，仍然可以继续上次的Transcriptions。</p>
 </li>
 </ol>
+<h2 id="大数据汇总"><a href="#大数据汇总" class="headerlink" title="大数据汇总"></a>大数据汇总</h2><h3 id="如何解决数据倾斜"><a href="#如何解决数据倾斜" class="headerlink" title="如何解决数据倾斜"></a>如何解决数据倾斜</h3><p>解决数据倾斜的几个思路：</p>
+<ul>
+<li>业务上：避免热点key的设计或者打散热点key，例如可以把北京和上海分成地区，然后单独汇总。</li>
+<li>技术上：在热点出现时，需要调整方案避免直接进行聚合，可以借助框架本身的能力，例如进行mapside-join。</li>
+<li>参数上：无论是Hadoop、Spark还是Flink都提供了大量的参数可以调整。</li>
+</ul>
+<h6 id="Hadoop-Hive参数"><a href="#Hadoop-Hive参数" class="headerlink" title="Hadoop/Hive参数"></a>Hadoop/Hive参数</h6><ul>
+<li>mapside-join</li>
+<li>对于group by或distinct，设定 hive.groupby.skewindata=true</li>
+<li>合并小文件</li>
+<li>压缩文件</li>
+</ul>
+<h6 id="Spark-参数"><a href="#Spark-参数" class="headerlink" title="Spark 参数"></a>Spark 参数</h6><ul>
+<li>使用map join 代替reduce join</li>
+<li>提高shuffle并行度</li>
+</ul>
+<h6 id="Flink-参数"><a href="#Flink-参数" class="headerlink" title="Flink 参数"></a>Flink 参数</h6><ul>
+<li>MiniBatch设置</li>
+<li>并行度设置</li>
+</ul>
+<p>其他更多的是在业务上的key设计来避免。 如何处理数据倾斜是一个长期的过程，希望本文的一些思路能提供帮助。</p>
+<h3 id="Flume-怎么保证数据不丢"><a href="#Flume-怎么保证数据不丢" class="headerlink" title="Flume 怎么保证数据不丢"></a>Flume 怎么保证数据不丢</h3><p>flume有三种channel实现</p>
+<ul>
+<li>Memory Channel      event保存在Java Heap中。如果允许数据小量丢失，推荐使用。（宕机可能丢失数据）</li>
+<li>File Channel          event保存在本地文件中，可靠性高，但吞吐量低于Memory Channel</li>
+<li>JDBC Channel        event保存在关系数据中，一般不推荐使用</li>
+</ul>
+<p>通过file channel 将channel 持久化可以做到主句不丢，原理如下:</p>
+<ol>
+<li><p>Flume采用基于Transactions的方式保证数据传输的可靠性，当数据从一个Agent流向另外一个Agent时，两个Transactions已经开始生效。发送Agent的Sink首先从Channel取出一条消息，并且将该消息发送给另外一个Agent。如果接受消息的Agent成功地接受并处理消息，那么发送Agent将会提交Transactions，标识一次数据传输成功可靠地完成。</p>
+</li>
+<li><p>当接收Agent接受到发送Agent发送的消息时，开始一个新的Transactions，当该数据被成功处理（写入Channel中），那么接收Agent提交该Transactions，并向发送Agent发送成功响应。</p>
+</li>
+<li><p>如果在某次提交（commit）之前，数据传输出现了失败，将会再次开始上一次Transcriptions，并将上次发送失败的数据重新传输。因为commit操作已经将Transcriptions写入了磁盘，那么在进程故障退出并恢复业务之后，仍然可以继续上次的Transcriptions。</p>
+</li>
+</ol>
 
       
     </div>
@@ -580,8 +616,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2020/04/11/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Flink/10-Flink%20Time/" rel="next" title="Flink Time">
-                <i class="fa fa-chevron-left"></i> Flink Time
+              <a href="/2020/06/13/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Redis/reids%E9%97%AE%E9%A2%98%E6%95%B4%E7%90%86/" rel="next" title="Redis 面试题整理">
+                <i class="fa fa-chevron-left"></i> Redis 面试题整理
               </a>
             
           </div>
@@ -669,7 +705,7 @@
                 
                   <a href="/archives/%20%7C%7C%20archive">
                 
-                    <span class="site-state-item-count">279</span>
+                    <span class="site-state-item-count">301</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -824,7 +860,27 @@
                     
                       
                     
-                    <span class="site-state-item-count">71</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">81</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -987,7 +1043,29 @@
                     
                       
                     
-                    <span class="site-state-item-count">75</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -1037,7 +1115,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#排序"><span class="nav-text">排序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#归并排序"><span class="nav-text">归并排序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#快速排序"><span class="nav-text">快速排序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Docker"><span class="nav-text">Docker</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#docker-容器和虚拟机隔离级别的区别"><span class="nav-text">docker 容器和虚拟机隔离级别的区别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#缓存"><span class="nav-text">缓存</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#http缓存机制"><span class="nav-text">http缓存机制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#http缓存分类"><span class="nav-text">http缓存分类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#缓存相关术语"><span class="nav-text">缓存相关术语</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#浏览器缓存分类"><span class="nav-text">浏览器缓存分类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#浏览器使用缓存加载页面流程"><span class="nav-text">浏览器使用缓存加载页面流程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Zookeeper"><span class="nav-text">Zookeeper</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Zookeeper-如何保证数据-一致性的"><span class="nav-text">Zookeeper 如何保证数据 一致性的</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#大数据组件"><span class="nav-text">大数据组件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Flume-如何保证数据不丢失不重复"><span class="nav-text">Flume 如何保证数据不丢失不重复</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#排序"><span class="nav-text">排序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#归并排序"><span class="nav-text">归并排序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#快速排序"><span class="nav-text">快速排序</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Docker"><span class="nav-text">Docker</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#docker-容器和虚拟机隔离级别的区别"><span class="nav-text">docker 容器和虚拟机隔离级别的区别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#缓存"><span class="nav-text">缓存</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#http缓存机制"><span class="nav-text">http缓存机制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#http缓存分类"><span class="nav-text">http缓存分类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#缓存相关术语"><span class="nav-text">缓存相关术语</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#浏览器缓存分类"><span class="nav-text">浏览器缓存分类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#浏览器使用缓存加载页面流程"><span class="nav-text">浏览器使用缓存加载页面流程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Zookeeper"><span class="nav-text">Zookeeper</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Zookeeper-如何保证数据-一致性的"><span class="nav-text">Zookeeper 如何保证数据 一致性的</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#大数据组件"><span class="nav-text">大数据组件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Flume-如何保证数据不丢失不重复"><span class="nav-text">Flume 如何保证数据不丢失不重复</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#大数据汇总"><span class="nav-text">大数据汇总</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#如何解决数据倾斜"><span class="nav-text">如何解决数据倾斜</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#Hadoop-Hive参数"><span class="nav-text">Hadoop&#x2F;Hive参数</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Spark-参数"><span class="nav-text">Spark 参数</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Flink-参数"><span class="nav-text">Flink 参数</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Flume-怎么保证数据不丢"><span class="nav-text">Flume 怎么保证数据不丢</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -1064,7 +1142,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>

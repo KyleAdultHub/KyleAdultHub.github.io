@@ -126,7 +126,7 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20200807114425368.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20200807114358436.png">
 <meta property="article:published_time" content="2020-06-13T03:00:00.000Z">
-<meta property="article:modified_time" content="2020-08-11T07:49:06.727Z">
+<meta property="article:modified_time" content="2020-11-12T09:09:06.020Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="面试">
 <meta name="twitter:card" content="summary">
@@ -740,9 +740,23 @@
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- FIRST_VALUE      获得组内当前行往前的首个值</span></span><br><span class="line"><span class="comment">-- LAST_VALUE       获得组内当前行往前的最后一个值</span></span><br><span class="line"><span class="comment">-- FIRST_VALUE(DESC) 获得组内全局的最后一个值</span></span><br><span class="line"><span class="keyword">select</span></span><br><span class="line">   dp_id,</span><br><span class="line">   mt,</span><br><span class="line">   payment,</span><br><span class="line">   <span class="keyword">FIRST_VALUE</span>(payment) <span class="keyword">over</span>(<span class="keyword">partition</span> <span class="keyword">by</span> dp_id <span class="keyword">order</span> <span class="keyword">by</span> mt) payment_g_first,</span><br><span class="line">   <span class="keyword">LAST_VALUE</span>(payment) <span class="keyword">over</span>(<span class="keyword">partition</span> <span class="keyword">by</span> dp_id <span class="keyword">order</span> <span class="keyword">by</span> mt) payment_g_last,</span><br><span class="line">  <span class="keyword">FIRST_VALUE</span>(payment) <span class="keyword">over</span>(<span class="keyword">partition</span> <span class="keyword">by</span> dp_id <span class="keyword">order</span> <span class="keyword">by</span> mt <span class="keyword">desc</span>) payment_g_last_global</span><br><span class="line"><span class="keyword">from</span> test2</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> dp_id,mt;</span><br></pre></td></tr></table></figure>
 
 <p><img src="/img/image-20200807114358436.png" alt="image-20200807114358436"></p>
-<ul>
-<li></li>
-</ul>
+<h2 id="Hive-存储格式"><a href="#Hive-存储格式" class="headerlink" title="Hive 存储格式"></a>Hive 存储格式</h2><h3 id="TextFile、SequenceFile、RCfile-、ORCfile各有什么区别"><a href="#TextFile、SequenceFile、RCfile-、ORCfile各有什么区别" class="headerlink" title="TextFile、SequenceFile、RCfile 、ORCfile各有什么区别"></a>TextFile、SequenceFile、RCfile 、ORCfile各有什么区别</h3><p>1、TextFile</p>
+<p>默认格式，<strong>存储方式为行存储，数据不做压缩，磁盘开销大，数据解析开销大</strong>。可结合Gzip、Bzip2使用(系统自动检查，执行查询时自动解压)，但使用这种方式，压缩后的文件不支持split，Hive不会对数据进行切分，从而无法对数据进行并行操作。并且在反序列化过程中，必须逐个字符判断是不是分隔符和行结束符，因此反序列化开销会比SequenceFile高几十倍。</p>
+<p>2、SequenceFile</p>
+<p>SequenceFile是Hadoop API提供的一种二进制文件支持，<strong>存储方式为行存储，其具有使用方便、可分割、可压缩的特点</strong>。</p>
+<p>SequenceFile支持三种压缩选择：NONE，RECORD，BLOCK。Record压缩率低，一般建议使用BLOCK压缩。</p>
+<p>优势是文件和hadoop api中的MapFile是相互兼容的</p>
+<p>3、RCFile</p>
+<p>存储方式：<strong>数据按行分块，每块按列存储</strong>。<strong>结合了行存储和列存储的优点</strong>：</p>
+<p>首先，RCFile 保证同一行的数据位于同一节点，因此元组重构的开销很低；</p>
+<p>其次，像列存储一样，RCFile 能够利用列维度的数据压缩，并且能跳过不必要的列读取；</p>
+<p>4、ORCFile</p>
+<p>存储方式：数据按行分块 每块按照列存储。</p>
+<p>压缩快、快速列存取。</p>
+<p>效率比rcfile高，是rcfile的改良版本。</p>
+<p>总结：</p>
+<p><strong>相比TEXTFILE和SEQUENCEFILE，RCFILE由于列式存储方式，数据加载时性能消耗较大，但是具有较好的压缩比和查询响应</strong>。</p>
+<p><strong>数据仓库的特点是一次写入、多次读取，因此，整体来看，RCFILE相比其余两种格式具有较明显的优势</strong>。 </p>
 
       
     </div>
@@ -897,7 +911,7 @@
                 
                   <a href="/archives/%20%7C%7C%20archive">
                 
-                    <span class="site-state-item-count">279</span>
+                    <span class="site-state-item-count">301</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -1052,7 +1066,27 @@
                     
                       
                     
-                    <span class="site-state-item-count">71</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">81</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -1215,7 +1249,29 @@
                     
                       
                     
-                    <span class="site-state-item-count">75</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -1265,7 +1321,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive架构"><span class="nav-text">Hive架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-的数据模型"><span class="nav-text">Hive 的数据模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-架构图"><span class="nav-text">Hive 架构图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hive和传统数据库区别"><span class="nav-text">hive和传统数据库区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-SQl-语句执行过程"><span class="nav-text">Hive SQl 语句执行过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive基本操作"><span class="nav-text">Hive基本操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建表"><span class="nav-text">创建表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据查询"><span class="nav-text">数据查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-Join操作"><span class="nav-text">Hive Join操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive-表"><span class="nav-text">Hive 表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#hive-内部表和外部表区别"><span class="nav-text">hive 内部表和外部表区别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive分区"><span class="nav-text">Hive分区</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#hive-分区的了解"><span class="nav-text">hive 分区的了解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用hive分区的注意事项"><span class="nav-text">使用hive分区的注意事项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive-分桶"><span class="nav-text">Hive 分桶</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-分桶的理由"><span class="nav-text">Hive 分桶的理由</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive-锁机制"><span class="nav-text">Hive 锁机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#锁机制"><span class="nav-text">锁机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#调试锁"><span class="nav-text">调试锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关闭锁机制"><span class="nav-text">关闭锁机制</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#HIVE-SQL优化"><span class="nav-text">HIVE SQL优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#优化思路"><span class="nav-text">优化思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-SQL-优化手段"><span class="nav-text">Hive SQL 优化手段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-分析函数和窗口函数"><span class="nav-text">Hive 分析函数和窗口函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-分析函数：用于等级、百分点、n分片等"><span class="nav-text">1. 分析函数：用于等级、百分点、n分片等</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Ntile-是Hive很强大的一个分析函数。"><span class="nav-text">Ntile 是Hive很强大的一个分析函数。</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Rank，Dense-Rank-Row-Number"><span class="nav-text">Rank，Dense_Rank, Row_Number</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-窗口函数-Lag-Lead-First-value-Last-value"><span class="nav-text">2. 窗口函数 Lag, Lead, First_value,Last_value</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Lag-Lead"><span class="nav-text">Lag, Lead</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#FIRST-VALUE-LAST-VALUE"><span class="nav-text">FIRST_VALUE, LAST_VALUE</span></a></li></ol></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive架构"><span class="nav-text">Hive架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-的数据模型"><span class="nav-text">Hive 的数据模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-架构图"><span class="nav-text">Hive 架构图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hive和传统数据库区别"><span class="nav-text">hive和传统数据库区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-SQl-语句执行过程"><span class="nav-text">Hive SQl 语句执行过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive基本操作"><span class="nav-text">Hive基本操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建表"><span class="nav-text">创建表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据查询"><span class="nav-text">数据查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-Join操作"><span class="nav-text">Hive Join操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive-表"><span class="nav-text">Hive 表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#hive-内部表和外部表区别"><span class="nav-text">hive 内部表和外部表区别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive分区"><span class="nav-text">Hive分区</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#hive-分区的了解"><span class="nav-text">hive 分区的了解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用hive分区的注意事项"><span class="nav-text">使用hive分区的注意事项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive-分桶"><span class="nav-text">Hive 分桶</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-分桶的理由"><span class="nav-text">Hive 分桶的理由</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive-锁机制"><span class="nav-text">Hive 锁机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#锁机制"><span class="nav-text">锁机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#调试锁"><span class="nav-text">调试锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关闭锁机制"><span class="nav-text">关闭锁机制</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#HIVE-SQL优化"><span class="nav-text">HIVE SQL优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#优化思路"><span class="nav-text">优化思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-SQL-优化手段"><span class="nav-text">Hive SQL 优化手段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-分析函数和窗口函数"><span class="nav-text">Hive 分析函数和窗口函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-分析函数：用于等级、百分点、n分片等"><span class="nav-text">1. 分析函数：用于等级、百分点、n分片等</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Ntile-是Hive很强大的一个分析函数。"><span class="nav-text">Ntile 是Hive很强大的一个分析函数。</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Rank，Dense-Rank-Row-Number"><span class="nav-text">Rank，Dense_Rank, Row_Number</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-窗口函数-Lag-Lead-First-value-Last-value"><span class="nav-text">2. 窗口函数 Lag, Lead, First_value,Last_value</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Lag-Lead"><span class="nav-text">Lag, Lead</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#FIRST-VALUE-LAST-VALUE"><span class="nav-text">FIRST_VALUE, LAST_VALUE</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive-存储格式"><span class="nav-text">Hive 存储格式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TextFile、SequenceFile、RCfile-、ORCfile各有什么区别"><span class="nav-text">TextFile、SequenceFile、RCfile 、ORCfile各有什么区别</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -1292,7 +1348,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>

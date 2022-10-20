@@ -124,7 +124,7 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/1592038079311.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/1592038092276.png">
 <meta property="article:published_time" content="2020-06-13T03:00:00.000Z">
-<meta property="article:modified_time" content="2020-08-05T17:22:17.906Z">
+<meta property="article:modified_time" content="2020-11-13T07:44:07.035Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="面试">
 <meta name="twitter:card" content="summary">
@@ -662,6 +662,15 @@
 <p>InnoDB 给每个索引加了一个不存在的最大值 suprenum，这样才符合我们前面说的“都是前开后闭区间”</p>
 <p>间隙锁和 next-key lock 的引入，帮我们解决了幻读的问题，但同时也带来了一些“困扰”</p>
 <p>间隙锁的引入，可能会导致同样的语句锁住更大的范围，这其实是影响了并发度的</p>
+<h3 id="next-key-lock-加锁原则"><a href="#next-key-lock-加锁原则" class="headerlink" title="next-key lock 加锁原则"></a>next-key lock 加锁原则</h3><p>截止到现在的最新版本，即 5.x 系列 &lt;=5.7.24，8.0 系列 &lt;=8.0.13。</p>
+<p>隔离级别：可重复读。</p>
+<ul>
+<li>原则 1：加锁的基本单位是 next-key lock。希望你还记得，next-key lock 是前开后闭区间。</li>
+<li>原则 2：查找过程中访问到的对象才会加锁。</li>
+<li>优化 1：索引上的等值查询，给唯一索引加锁的时候，next-key lock 退化为行锁。</li>
+<li>优化 2：索引上的等值查询，向右遍历时且最后一个值不满足等值条件的时候，next-key lock 退化为间隙锁。</li>
+<li>一个 bug：唯一索引上的范围查询会访问到不满足条件的第一个值为止。</li>
+</ul>
 <h2 id="Mysql事务"><a href="#Mysql事务" class="headerlink" title="Mysql事务"></a>Mysql事务</h2><h3 id="什么是事务"><a href="#什么是事务" class="headerlink" title="什么是事务"></a>什么是事务</h3><p>事务就是一组原子性的操作，这些操作要么全部发生，要么全部不发生。事务把数据库从一种一致性状态转换成另一种一致性状态。</p>
 <h3 id="事物的特性"><a href="#事物的特性" class="headerlink" title="事物的特性"></a>事物的特性</h3><p>事务具有ACID 四种特性，即原子性(atomicity)，一致性(consistency)，隔离性(isolation)，持久性(durability)：</p>
 <ul>
@@ -944,7 +953,7 @@
                 
                   <a href="/archives/%20%7C%7C%20archive">
                 
-                    <span class="site-state-item-count">279</span>
+                    <span class="site-state-item-count">301</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -1099,7 +1108,27 @@
                     
                       
                     
-                    <span class="site-state-item-count">71</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">81</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -1262,7 +1291,29 @@
                     
                       
                     
-                    <span class="site-state-item-count">75</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -1312,7 +1363,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql索引"><span class="nav-text">Mysql索引</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Mysql-索引分类"><span class="nav-text">Mysql 索引分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#聚集索引和辅助索引"><span class="nav-text">聚集索引和辅助索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#联合索引和覆盖索引"><span class="nav-text">联合索引和覆盖索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mysql-联合索引"><span class="nav-text">Mysql 联合索引</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#联合索引的最左前缀"><span class="nav-text">联合索引的最左前缀</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#联合索引的存储方式"><span class="nav-text">联合索引的存储方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#范围查询对联合索引的影响"><span class="nav-text">范围查询对联合索引的影响</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在group-by-和-order-by-字段上使用联合索引"><span class="nav-text">在group by  和 order  by 字段上使用联合索引</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#主键和唯一索引区别"><span class="nav-text">主键和唯一索引区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#innodb什么时候会产生回表"><span class="nav-text">innodb什么时候会产生回表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#索引的优缺点"><span class="nav-text">索引的优缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-允许null-的字段设置索引哪些需要注意"><span class="nav-text">mysql 允许null 的字段设置索引哪些需要注意</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#B-树"><span class="nav-text">B 树</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#B树特征"><span class="nav-text">B树特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#B-树特征"><span class="nav-text">B+ 树特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#B-树的优势："><span class="nav-text">B+树的优势：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql-引擎"><span class="nav-text">Mysql 引擎</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#两种存储引擎区别"><span class="nav-text">两种存储引擎区别</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#InnoDB"><span class="nav-text">InnoDB:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MySIAM"><span class="nav-text">MySIAM:</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#引擎选择"><span class="nav-text">引擎选择</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql-锁"><span class="nav-text">Mysql 锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#锁的分类"><span class="nav-text">锁的分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#全局锁"><span class="nav-text">全局锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#表级锁"><span class="nav-text">表级锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#元数据锁"><span class="nav-text">元数据锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#行锁"><span class="nav-text">行锁</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#死锁"><span class="nav-text">死锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#死锁解决策略"><span class="nav-text">死锁解决策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#乐观锁-amp-悲观锁"><span class="nav-text">乐观锁&amp;悲观锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#悲观锁"><span class="nav-text">悲观锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#乐观锁"><span class="nav-text">乐观锁</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#间隙锁"><span class="nav-text">间隙锁</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql事务"><span class="nav-text">Mysql事务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是事务"><span class="nav-text">什么是事务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事物的特性"><span class="nav-text">事物的特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事物隔离级别"><span class="nav-text">事物隔离级别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事务的实现"><span class="nav-text">事务的实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undo-log-和-redo-log"><span class="nav-text">undo log 和 redo log</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MVCC工作原理？"><span class="nav-text">MVCC工作原理？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#快照生成过程"><span class="nav-text">快照生成过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MVCC-怎么实现隔离性"><span class="nav-text">MVCC 怎么实现隔离性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用事务应该注意的问题"><span class="nav-text">使用事务应该注意的问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql-主从同步过程"><span class="nav-text">Mysql 主从同步过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#在master机器上的操作"><span class="nav-text">在master机器上的操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在slave机器上的操作"><span class="nav-text">在slave机器上的操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#执行计划"><span class="nav-text">执行计划</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-exlain-各参数解释"><span class="nav-text">mysql  exlain 各参数解释</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他"><span class="nav-text">其他</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-datetime-和timestamp-的区别"><span class="nav-text">mysql datetime  和timestamp 的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一条SQL语句在MySQL中如何执行的？"><span class="nav-text">一条SQL语句在MySQL中如何执行的？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一张表，里面有ID自增主键，当insert了17条记录之后，删除了第15-16-17条记录，再把Mysql重启，再insert一条记录，这条记录的ID是18还是15-？"><span class="nav-text">一张表，里面有ID自增主键，当insert了17条记录之后，删除了第15,16,17条记录，再把Mysql重启，再insert一条记录，这条记录的ID是18还是15 ？</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql索引"><span class="nav-text">Mysql索引</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Mysql-索引分类"><span class="nav-text">Mysql 索引分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#聚集索引和辅助索引"><span class="nav-text">聚集索引和辅助索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#联合索引和覆盖索引"><span class="nav-text">联合索引和覆盖索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mysql-联合索引"><span class="nav-text">Mysql 联合索引</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#联合索引的最左前缀"><span class="nav-text">联合索引的最左前缀</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#联合索引的存储方式"><span class="nav-text">联合索引的存储方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#范围查询对联合索引的影响"><span class="nav-text">范围查询对联合索引的影响</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在group-by-和-order-by-字段上使用联合索引"><span class="nav-text">在group by  和 order  by 字段上使用联合索引</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#主键和唯一索引区别"><span class="nav-text">主键和唯一索引区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#innodb什么时候会产生回表"><span class="nav-text">innodb什么时候会产生回表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#索引的优缺点"><span class="nav-text">索引的优缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-允许null-的字段设置索引哪些需要注意"><span class="nav-text">mysql 允许null 的字段设置索引哪些需要注意</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#B-树"><span class="nav-text">B 树</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#B树特征"><span class="nav-text">B树特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#B-树特征"><span class="nav-text">B+ 树特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#B-树的优势："><span class="nav-text">B+树的优势：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql-引擎"><span class="nav-text">Mysql 引擎</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#两种存储引擎区别"><span class="nav-text">两种存储引擎区别</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#InnoDB"><span class="nav-text">InnoDB:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MySIAM"><span class="nav-text">MySIAM:</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#引擎选择"><span class="nav-text">引擎选择</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql-锁"><span class="nav-text">Mysql 锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#锁的分类"><span class="nav-text">锁的分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#全局锁"><span class="nav-text">全局锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#表级锁"><span class="nav-text">表级锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#元数据锁"><span class="nav-text">元数据锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#行锁"><span class="nav-text">行锁</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#死锁"><span class="nav-text">死锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#死锁解决策略"><span class="nav-text">死锁解决策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#乐观锁-amp-悲观锁"><span class="nav-text">乐观锁&amp;悲观锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#悲观锁"><span class="nav-text">悲观锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#乐观锁"><span class="nav-text">乐观锁</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#间隙锁"><span class="nav-text">间隙锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#next-key-lock-加锁原则"><span class="nav-text">next-key lock 加锁原则</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql事务"><span class="nav-text">Mysql事务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是事务"><span class="nav-text">什么是事务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事物的特性"><span class="nav-text">事物的特性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事物隔离级别"><span class="nav-text">事物隔离级别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事务的实现"><span class="nav-text">事务的实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undo-log-和-redo-log"><span class="nav-text">undo log 和 redo log</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MVCC工作原理？"><span class="nav-text">MVCC工作原理？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#快照生成过程"><span class="nav-text">快照生成过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MVCC-怎么实现隔离性"><span class="nav-text">MVCC 怎么实现隔离性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用事务应该注意的问题"><span class="nav-text">使用事务应该注意的问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql-主从同步过程"><span class="nav-text">Mysql 主从同步过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#在master机器上的操作"><span class="nav-text">在master机器上的操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在slave机器上的操作"><span class="nav-text">在slave机器上的操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#执行计划"><span class="nav-text">执行计划</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-exlain-各参数解释"><span class="nav-text">mysql  exlain 各参数解释</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他"><span class="nav-text">其他</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-datetime-和timestamp-的区别"><span class="nav-text">mysql datetime  和timestamp 的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一条SQL语句在MySQL中如何执行的？"><span class="nav-text">一条SQL语句在MySQL中如何执行的？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一张表，里面有ID自增主键，当insert了17条记录之后，删除了第15-16-17条记录，再把Mysql重启，再insert一条记录，这条记录的ID是18还是15-？"><span class="nav-text">一张表，里面有ID自增主键，当insert了17条记录之后，删除了第15,16,17条记录，再把Mysql重启，再insert一条记录，这条记录的ID是18还是15 ？</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -1339,7 +1390,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>

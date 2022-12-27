@@ -1,0 +1,2107 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="一、简单介绍ClickhouseClickHouse是一个面向联机分析处理(OLAP)的开源的面向列式存储的数据库管理系统，简称CK, 与Hadoop, Spark相比，ClickHouse很轻量级,由俄罗斯第一大搜索引擎Yandex于2016年6月发布, 开发语言为C++ 有以下特点:  开源: 开源的列存储数据库管理系统，支持线性扩展，简单方便，高可靠性， 速度快：比Vertica快5倍，比H">
+<meta property="og:type" content="article">
+<meta property="og:title" content="clickhouse">
+<meta property="og:url" content="http://blog.kyleliu.cn/2021/12/06/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.clickhouse/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle)的云笔记">
+<meta property="og:description" content="一、简单介绍ClickhouseClickHouse是一个面向联机分析处理(OLAP)的开源的面向列式存储的数据库管理系统，简称CK, 与Hadoop, Spark相比，ClickHouse很轻量级,由俄罗斯第一大搜索引擎Yandex于2016年6月发布, 开发语言为C++ 有以下特点:  开源: 开源的列存储数据库管理系统，支持线性扩展，简单方便，高可靠性， 速度快：比Vertica快5倍，比H">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20220216114710147.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211206161625920.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211206173356339.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211206173756079.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211206174922394.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211206175523942.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/68ed1543712c424cb591685605f31182.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/506119fbe6534457bdd5f0ed442484e1.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211206191156441.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211206191458085.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211206194743504.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211206192925321.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211206192943359.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211206193047308.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211207145729125.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211206194312129.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211206195825723.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211206194833687.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211207210103423.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211207210927990.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211207211418133.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211207175142024.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211207175304210.png">
+<meta property="article:published_time" content="2021-12-05T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-12-21T03:13:19.596Z">
+<meta property="article:author" content="刘小恺(Kyle)">
+<meta property="article:tag" content="Olap">
+<meta property="article:tag" content="clickhouse">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20220216114710147.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2021/12/06/21.总结/面试总结/1.clickhouse/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>clickhouse | 刘小恺(Kyle)的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle)的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2021/12/06/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.clickhouse/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">clickhouse
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2021-12-06 00:00:00" itemprop="dateCreated datePublished" datetime="2021-12-06T00:00:00+08:00">2021-12-06</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">总结</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">面试总结</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/12/06/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.clickhouse/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2021/12/06/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.clickhouse/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="一、简单介绍Clickhouse"><a href="#一、简单介绍Clickhouse" class="headerlink" title="一、简单介绍Clickhouse"></a>一、简单介绍Clickhouse</h2><p>ClickHouse是一个面向联机分析处理(OLAP)的开源的<strong>面向列式存储</strong>的数据库管理系统，简称CK, 与Hadoop, Spark相比，ClickHouse很轻量级,由俄罗斯第一大搜索引擎Yandex于2016年6月发布, 开发语言为C++</p>
+<p>有以下特点:</p>
+<ul>
+<li>开源: 开源的列存储数据库管理系统，支持线性扩展，简单方便，高可靠性，</li>
+<li>速度快：比Vertica快5倍，比Hive快279倍，比MySQL快800倍,其可处理的数据级别已达到10亿级别</li>
+<li>功能多：支持数据统计分析各种场景，支持类SQL查询，异地复制部署</li>
+</ul>
+<p><strong>集群架构</strong></p>
+<img src="../../../img/image-20220216114710147.png" alt="image-20220216114710147" style="zoom: 50%;" />
+
+<p>ClickHouse 采用典型的分组式的分布式架构，具体集群架构如上图所示：</p>
+<ul>
+<li>Shard： 集群内划分为多个分片或分组（Shard 0 … Shard N），通过 Shard 的线性扩展能力，支持海量数据的分布式存储计算。</li>
+<li>Node： 每个 Shard 内包含一定数量的节点（Node，即进程），同一 Shard 内的节点互为副本，保障数据可靠。ClickHouse 中副本数可按需建设，且逻辑上不同 Shard 内的副本数可不同。</li>
+<li>ZooKeeper Service： 集群所有节点对等，节点间通过 ZooKeeper 服务进行分布式协调。</li>
+</ul>
+<h2 id="二、clickhouse-表引擎"><a href="#二、clickhouse-表引擎" class="headerlink" title="二、clickhouse 表引擎"></a>二、clickhouse 表引擎</h2><h3 id="1-clickhouse-表引擎和合并树"><a href="#1-clickhouse-表引擎和合并树" class="headerlink" title="1. clickhouse 表引擎和合并树"></a>1. clickhouse 表引擎和合并树</h3><h4 id="clickhouse-表引擎"><a href="#clickhouse-表引擎" class="headerlink" title="clickhouse 表引擎"></a>clickhouse 表引擎</h4><ul>
+<li>多样化的表引擎<br>目前ClickHouse拥有<strong>合并树</strong>、<strong>外部存储</strong>、<strong>内存</strong>、<strong>文件</strong>、<strong>接口</strong>和其他6大类20多种表引擎，每一种表引擎都有着各自的特点。<br>表引擎是ClickHouse的一大特色，正是由表引擎决定了一张数据表的最终特性，数据以何种形式被存储以及数据如何被加载。</li>
+<li>表引擎中的核心-合并树<br>在ClickHouse众多的表引擎中，合并树是最为核心的部分，可以说使用ClickHouse就是在使用合并树。<br>只有合并树才支持主键索引、数据分区、数据副本、TTL等高级特性并拥有最强的性能。</li>
+</ul>
+<h4 id="合并树MergeTree"><a href="#合并树MergeTree" class="headerlink" title="合并树MergeTree"></a>合并树MergeTree</h4><p>在表引擎底层的实现方法中，在具体的实现逻辑部分，7种合并树表引擎共用一个主体，只有在触发合并动作时，才调用了各自独有的合并逻辑。</p>
+<p>从图中可以看到在具体的合并逻辑部分，不同类型的合并树引擎调用了各自的合并逻辑。虽然调用了不同的合并逻辑，但是不同类型的合并树合并逻辑，也都是建立最基础的合并树的MergingSortedBlockInputStream 上的。</p>
+<p>MergingSortedBlockInputStream 的主要作用，是按照ORDER BY的规则保持新分区数据的有序性。</p>
+<p>而其他6种变种合并树的合并逻辑，则是在有序的基础之上 “各有所长”，要么是将排序后相邻的重复数据消除、亦或是将它们累加汇总。</p>
+<img src="../../../img/image-20211206161625920.png" alt="image-20211206161625920" style="zoom:50%;" />
+
+<h4 id="Replicated-MergeTree"><a href="#Replicated-MergeTree" class="headerlink" title="Replicated MergeTree"></a>Replicated MergeTree</h4><p>图中的虚线框部分是MergeTree的能力边界，而ReplicatedMergeTree在它的基础之上增加了分布式协同的能力。</p>
+<p>借助ZooKeeper的消息日志广播，实现了副本实例之间的数据同步功能。</p>
+<img src="../../../img/image-20211206173356339.png" alt="image-20211206173356339"  />
+
+<h4 id="合并树优点"><a href="#合并树优点" class="headerlink" title="合并树优点"></a>合并树优点</h4><ol>
+<li>有序存储在压缩时能够获得更好的压缩比</li>
+<li>对于等值或区间过滤可以更快地确定数据范围</li>
+<li>可以在merge过程中实现特殊的合并逻辑</li>
+</ol>
+<h4 id="创建一个合并树表"><a href="#创建一个合并树表" class="headerlink" title="创建一个合并树表"></a>创建一个合并树表</h4><img src="../../../img/image-20211206173756079.png" alt="image-20211206173756079"  />
+
+<ul>
+<li>PARTITION BY【选填】：分区键，用于指定数据以何种标准进行分区。分区键可以是单个列字段、元组形式的多个列字段、列表达式。如果不声明分区键，则ClickHouse会生成一个名为all的分区。合理使用数据分区，可以有效减少查询时数据文件的扫描范围</li>
+<li>ORDER BY【必填】：排序键，用于指定在一个数据片段内，数据以何种标准排序。默认情况下主键（PRIMARY KEY）与排序键相同。排序键可以是单个列字段（例：ORDER BY CounterID）、元组形式的多个列字段（例：ORDER BY (CounterID,EventDate)）。当使用多个列字段排序时，以ORDER BY (CounterID,EventDate)为例，在单个数据片段内，数据首先以CounterID排序，相同CounterID的数据再按EventDate排序</li>
+<li>PRIMARY KEY【选填】：主键，生成一级索引，加速表查询。默认情况下，主键与排序键（ORDER BY）相同，所以通常使用ORDER BY代为指定主键。一般情况下，在单个数据片段内，数据与一级索引以相同的规则升序排序。与其他数据库不同，MergeTree主键允许存在重复数据</li>
+<li>SAMPLE BY【选填】：抽样表达式，用于声明数据以何种标准进行采样。抽样表达式需要配合SAMPLE子查询使用</li>
+<li>SETTINGS：index_granularity【选填】：索引粒度，默认值8192。也就是说，默认情况下每隔8192行数据才生成一条索引</li>
+<li>SETTINGS：index_granularity_bytes【选填】：在19.11版本之前，ClickHouse只支持固定大小的索引间隔（index_granularity）。在新版本中增加了自适应间隔大小的特性，即根据每一批次写入数据的体量大小，动态划分间隔大小。而数据的体量大小，由index_granularity_bytes参数控制，默认10M</li>
+<li>SETTINGS：enable_mixed_granularity_parts【选填】：设置是否开启自适应索引间隔的功能，默认开启</li>
+</ul>
+<h3 id="2-数据分区"><a href="#2-数据分区" class="headerlink" title="2. 数据分区"></a>2. 数据分区</h3><p>数据是以分区目录的形式进行组织存放的，每个分区独立分开存储。借助这种形式，在对MergeTree进行数据查询时，可以有效跳过无用的数据文件，只使用最小的分区目录子集。</p>
+<p>合并树数据分区的规则由分区ID决定，而具体到每个数据分区所对应的ID，则是由分区键的取值决定的。<br>分区键支持使用任何一个或一组字段表达式声明，其业务语义可以是年、月、日或者组织单位等任何一种规则。针对取值数据类型的不同，分区ID的生成逻辑目前拥有四种规则： <strong>不指定分区键、使用整型分区键、使用日期类型分区键、使用其他类型分区键</strong></p>
+<h4 id="分区表目录结构"><a href="#分区表目录结构" class="headerlink" title="分区表目录结构"></a><strong>分区表目录结构</strong></h4><p><img src="../../../img/image-20211206174922394.png" alt="image-20211206174922394"></p>
+<p>一张数据表的完整物理结构分为3个层级，依次是数据表目录、分区目录及各分区下具体的数据文件。</p>
+<ul>
+<li>partition：分区目录，相同分区的数据，最终会被合并到同一个分区目录，而不同分区的数据，不会被合并在一起。</li>
+<li>checksums.txt：校验文件</li>
+<li>columns.txt：列信息文件</li>
+<li>count.txt：计数文件</li>
+<li>[Column].bin：数据文件</li>
+<li>primary.idx：一级索引文件</li>
+<li>[Column].mrk：列字段标记文件</li>
+<li>[Column].mrk2：如果使用了自适应大小的索引间隔，则标记文件会以．mrk2命名。它的工作原理和作用与．mrk标记文件相同。</li>
+<li>partition.dat与minmax_[Column].idx : 分区键额外的索引文件。例如EventTime字段对应的原始数据为2019-05-01、2019-05-05，分区表达式为PARTITION BY toYYYYMM(EventTime)。partition.dat中保存的值将会是2019-05，而minmax索引中保存的值将会是2019-05-01，2019-05-05。_</li>
+<li><em>skp_idx_[Column].idx与skp_idx</em>[Column].mrk：如果在建表语句中声明了跳数索引，则会额外生成相应的跳数索引与标记文件，它们同样也使用二进制存储</li>
+</ul>
+<h4 id="分区目录命名规则"><a href="#分区目录命名规则" class="headerlink" title="分区目录命名规则"></a><strong>分区目录命名规则</strong></h4><p>进入数据表所在的磁盘目录后，会发现MergeTree分区目录的完整物理名称并不是只有ID而已，在ID之后还跟着一串奇怪的数字，例如201905_1_1_0。 </p>
+<ul>
+<li>PartitionID：分区ID</li>
+<li>MinBlockNum和MaxBlockNum：最小数据块编号与最大数据块编号。</li>
+<li>Level：合并的层级</li>
+</ul>
+<img src="../../../img/image-20211206175523942.png" alt="image-20211206175523942" style="zoom: 67%;" />
+
+<h4 id="分区目录合并过程"><a href="#分区目录合并过程" class="headerlink" title="分区目录合并过程"></a>分区目录合并过程</h4><p><img src="../../../img/68ed1543712c424cb591685605f31182.png" alt="68ed1543712c424cb591685605f31182"></p>
+<p><img src="../../../img/506119fbe6534457bdd5f0ed442484e1.png" alt="506119fbe6534457bdd5f0ed442484e1"></p>
+<h2 id="三、Clickhouse-的索引和数据存储"><a href="#三、Clickhouse-的索引和数据存储" class="headerlink" title="三、Clickhouse 的索引和数据存储"></a>三、Clickhouse 的索引和数据存储</h2><h3 id="1-Clickhouse-索引"><a href="#1-Clickhouse-索引" class="headerlink" title="1. Clickhouse 索引"></a>1. Clickhouse 索引</h3><h4 id="一级索引"><a href="#一级索引" class="headerlink" title="一级索引"></a>一级索引</h4><p>合并树的主键使用PRIMARY KEY定义，待主键定义之后，合并树会依据settings 中 （index_granularity）间隔参数，生成一级索引并保存至primary.idx文件内，索引数据按照PRIMARY KEY排序。PRIMARY KEY可通过ORDER BY指代主键。在此种情形下，PRIMARY KEY与ORDER BY定义相同，所以索引（primary.idx）和数据（.bin）会按照完全相同的规则排序。</p>
+<p><strong>primary.idx</strong>文件内的一级索引采用稀疏索引实现。</p>
+<h4 id="稀疏索引"><a href="#稀疏索引" class="headerlink" title="稀疏索引"></a>稀疏索引</h4><p>稀疏索引的优势是显而易见的，它仅需使用<strong>少量的索引标记就能够记录大量数据的区间位置信息</strong>，且数据量越大优势越为明显。以默认的索引粒度（8192）为例，MergeTree只需要12208行索引标记就能为1亿行数据记录提供索引。由于稀疏索引占用空间小，所以primary.idx内的索引数据常驻内存，取用速度自然极快。 </p>
+<img src="../../../img/image-20211206191156441.png" alt="image-20211206191156441" style="zoom:50%;" />
+
+<h4 id="索引数据生成规则"><a href="#索引数据生成规则" class="headerlink" title="索引数据生成规则"></a><strong>索引数据生成规则</strong></h4><p>由于是稀疏索引，所以MergeTree需要间隔设定的索引粒度才会生成一条索引记录，其索引值会依据声明的主键字段获取。</p>
+<p>如图所示表中使用CounterID作为主键，则每间隔8192行数据就会取一次CounterID的值作为索引值，索引数据最终会被写入primary.idx文件进行保存。</p>
+<p><strong>示例: 使用counterID作为主键</strong></p>
+<img src="../../../img/image-20211206191458085.png" alt="image-20211206191458085" style="zoom: 67%;" />
+
+<h4 id="数据标记"><a href="#数据标记" class="headerlink" title="数据标记"></a><strong>数据标记</strong></h4><p>如果把MergeTree比作一本书</p>
+<p>primary.idx一级索引好比这本书的一级章节目录</p>
+<p>.bin文件中的数据好比这本书中的文字</p>
+<p>那么数据标记(.mrk)会为一级章节目录和具体的文字之间建立关联，好比目录中的页码。</p>
+<p><img src="../../../img/image-20211206194743504.png" alt="image-20211206194743504"></p>
+<h4 id="索引查询标记过程"><a href="#索引查询标记过程" class="headerlink" title="索引查询标记过程"></a><strong>索引查询标记过程</strong></h4><p>假设现在有一份测试数据，共192行记录。其中，主键ID为String类型，ID的取值从A000开始，后面依次为A001、A002……直到A192为止。</p>
+<p>MergeTree的索引粒度index_granularity=3，根据索引的生成规则，primary.idx文件内的索引数据如下图所示：</p>
+<img src="../../../img/image-20211206192925321.png" alt="image-20211206192925321" style="zoom:67%;" />
+
+<p>根据索引数据，假设MergeTree会将此数据片段划分为192/3=64个小的MarkRange，两个相邻MarkRange相距的步长为1。其中，所有MarkRange（整个数据片段）的最大数值区间为[A000, +inf)，如下图所示：</p>
+<p><img src="../../../img/image-20211206192943359.png" alt="image-20211206192943359"></p>
+<p><strong>想要根据索引查询数据的过程大体如下：</strong></p>
+<p><strong>1、生成查询条件区间</strong></p>
+<p>首先，将查询条件转换为条件区间，例如下面的例子</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">WHERE ID = 'A003'</span><br><span class="line">['A003', 'A003']  </span><br><span class="line"></span><br><span class="line">WHERE ID &gt; 'A000'</span><br><span class="line">('A000', +inf)</span><br><span class="line"></span><br><span class="line">WHERE ID &lt; 'A188'</span><br><span class="line">(-inf, 'A188')</span><br><span class="line"></span><br><span class="line">WHERE ID LIKE 'A006%'</span><br><span class="line">['A006', 'A007')</span><br></pre></td></tr></table></figure>
+
+<p><strong>2、递归交集判断</strong></p>
+<p>以递归的形式，依次对MarkRange的数值区间与条件区间做交集判断。从最大区间[A000, +inf)开始。如果不存在交集，则直接通过剪枝算法优化此整段MarkRange。</p>
+<p>如果存在交集，且MarkRange步长大于8(end-start)，则将此区间进一步拆分成8个子区间（merge_tree_coarse_index_granularity指定，默认值为8），并重复此规则，继续做递归交集判断，如果存在交集，且MarkRange不可再分解（步长小于8），则记录MarkRange并返回</p>
+<p><strong>3、合并MarkRange区间</strong></p>
+<p>将最终匹配的MarkRange聚在一起，合并它们的范围</p>
+<p><img src="../../../img/image-20211206193047308.png" alt="image-20211206193047308"></p>
+<p>MergeTree通过递归的形式持续向下拆分区间，最终将MarkRange定位到最细的粒度</p>
+<p>以上图为例，当查询条件WHERE ID=’A003’的时候，最终只需要读取[A000, A003]和[A003, A006]两个区间的数据,它们对应MarkRange(start:0,end:2)范围</p>
+<h4 id="跳数索引"><a href="#跳数索引" class="headerlink" title="跳数索引"></a><strong>跳数索引</strong></h4><p>除了一级索引之外，MergeTree同样支持跳数索引。由数据的聚合信息构建而成。根据索引类型的不同，其聚合信息的内容也不同。跳数索引的目的与一级索引一样，也是帮助查询时减少数据扫描的范围。跳数索引在默认情况下是关闭的。需要设置allow_experimental_data_skipping_indices（该参数在新版本中已被取消）才能使用：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SET allow_experimental_data_skipping_indices = 1</span><br></pre></td></tr></table></figure>
+
+<p>与一级索引一样，如果在建表语句中声明了跳数索引，则会额外生成相应的索引与标记文件（<code>skp_idx_[Column].idx</code>与<code>skp_idx_[Column].mrk</code>）</p>
+<p><strong>granularity与index_granularity的关系</strong></p>
+<p>对于跳数索引而言，index_granularity定义了数据的粒度，而granularity定义了聚合信息汇总的粒度。granularity定义了一行跳数索引能够跳过多少个index_granularity区间的数据</p>
+<p>跳数索引的数据生成规则：首先，按照index_granularity粒度间隔将数据划分为n段，总共有[0, n-1]个区间（n=total_rows/index_granularity, 向上取整）。</p>
+<p>接着，根据索引定义时声明的表达式，从0区间开始，依次按index_granularity粒度从数据中获取聚合信息，每次向前移动1步，聚合信息逐步累加。最后，当移动granularity次区间时，则汇总并生成一行跳数索引数据</p>
+<p>以minmax索引为例，它的聚合信息是在一个index_granularity区间内数据的最小和最大极值。以下图为例，假设index_granularity=8192且granularity=3，则数据会按照index_granularity划分为n等份，MergeTree从第0段分区开始，依次获取聚合信息。当获取到第3个分区时（granularity=3），则汇总并会生成第一行minmax索引（前3段minmax极值汇总后取值为[1, 9]）</p>
+<img src="../../../img/image-20211207145729125.png" alt="image-20211207145729125" style="zoom: 25%;" />
+
+<h3 id="2-数据存储"><a href="#2-数据存储" class="headerlink" title="2. 数据存储"></a>2. 数据存储</h3><h4 id="数据存储方式"><a href="#数据存储方式" class="headerlink" title="数据存储方式"></a><strong>数据存储方式</strong></h4><p>在合并树中数据是按列存储的。</p>
+<p>而具体到每个列字段，数据也是独立存储的，每个列字段都拥有一个与之对应的 .bin数据文件。也正是这些 .bin文件，最终承载着数据的物理存储。数据文件以分区目录的形式被组织存放，所以在 .bin文件中只会保存当前分区片段内的这一部分数据。</p>
+<p>而对应到存储的具体实现方面，合并树也并不是一股脑地将数据直接写入 .bin文件，而是经过了一番精心设计：</p>
+<ol>
+<li>首先，数据是经过压缩的，默认使用LZ4算法；</li>
+<li>其次，数据会事先依照ORDER BY的声明排序；</li>
+<li>最后，数据是以压缩数据块的形式被组织写入.bin文件中的。</li>
+</ol>
+<h4 id="数据快文件头"><a href="#数据快文件头" class="headerlink" title="数据快文件头"></a><strong>数据快文件头</strong></h4><p><img src="../../../img/image-20211206194312129.png" alt="image-20211206194312129"></p>
+<p>一个压缩数据块由头信息和压缩数据两部分组成。</p>
+<p>头信息固定使用9位字节表示，具体由1个UInt8（1字节）整型和2个UInt32（4字节）整型组成，分别代表使用的压缩算法类型、压缩后的数据大小和压缩前的数据大小。</p>
+<h4 id="MergeTree-数据写入方式"><a href="#MergeTree-数据写入方式" class="headerlink" title="MergeTree 数据写入方式"></a><strong>MergeTree 数据写入方式</strong></h4><p>MergeTree在数据具体的写入过程中，会依照索引粒度（默认情况下，每次取8192行），按批次获取数据并进行处理。如果把一批数据的未压缩大小设为size，则整个写入过程遵循以下规则： </p>
+<ol>
+<li>单个批次数据 size&lt;64KB：如果单个批次数据小于64KB，则继续获取下一批数据，直至累积到size&lt;= 64KB时，生成下一个压缩数据块。 </li>
+<li>单个批次数据 64KB&lt;size &lt;=1MB：如果单个批次数据大小恰好在64KB与1MB之间，则直接生成下一个压缩数据块。 </li>
+<li>单个批次数据 size &gt;1MB：如果单个批次数据直接超过1MB，则首先按照1MB大小截断并生成下一个压缩数据块。剩余数据继续依照上述规则执行</li>
+</ol>
+<h3 id="3-Clickhouse-索引查询、写入过程"><a href="#3-Clickhouse-索引查询、写入过程" class="headerlink" title="3. Clickhouse 索引查询、写入过程"></a>3. Clickhouse 索引查询、写入过程</h3><h4 id="查询过程"><a href="#查询过程" class="headerlink" title="查询过程"></a>查询过程</h4><p>数据查询的本质，可以看作一个不断减小数据范围的过程。在最理想的情况下，MergeTree首先可以依次借助分区索引、一级索引和跳数索引，将数据扫描范围缩至最小。然后再借助数据标记，将需要解压与计算的数据范围缩至最小。</p>
+<img src="../../../img/image-20211206195825723.png" alt="image-20211206195825723" style="zoom: 67%;" />
+
+<h4 id="写入过程"><a href="#写入过程" class="headerlink" title="写入过程"></a>写入过程</h4><p>数据写入的第一步是生成分区目录，伴随着每一批数据的写入，都会生成一个新的分区目录。在后续的某一时刻，属于相同分区的目录会依照规则合并到一起；接着，按照索引粒度，会分别生成primary.idx一级索引、每一个列字段的．mrk数据标记文件和．bin压缩数据文件。</p>
+<img src="../../../img/image-20211206194833687.png" alt="image-20211206194833687" style="zoom: 50%;" />
+
+<h2 id="四、本地表与分布式表"><a href="#四、本地表与分布式表" class="headerlink" title="四、本地表与分布式表"></a>四、本地表与分布式表</h2><h3 id="1-CK-的几种表分类"><a href="#1-CK-的几种表分类" class="headerlink" title="1. CK 的几种表分类"></a>1. CK 的几种表分类</h3><ul>
+<li><p>本地表:</p>
+<p>实际存储数据的表</p>
+</li>
+<li><p>分布式表 Distrubute Table</p>
+<p>一个逻辑上的表, 可以理解为数据库中的视图, 一般查询都查询分布式表. 分布式表引擎会将我们的查询请求路由本地表进行查询, 然后进行汇总最终返回给用户</p>
+</li>
+</ul>
+<h3 id="2-表分片与副本"><a href="#2-表分片与副本" class="headerlink" title="2. 表分片与副本"></a>2. 表分片与副本</h3><ul>
+<li><p>ClickHouse依靠ReplicatedMergeTree引擎族与ZooKeeper实现了复制表机制, 成为其高可用的基础.</p>
+</li>
+<li><p>ClickHouse像ElasticSearch一样具有数据分片(shard)的概念, 这也是分布式存储的特点之一, 即通过并行读写提高效率. ClickHouse依靠Distributed引擎实现了分布式表机制, 在所有分片（本地表）上建立视图进行分布式查询.</p>
+</li>
+</ul>
+<img src="../../../img/image-20211207210103423.png" alt="image-20211207210103423" style="zoom: 33%;" />
+
+<h3 id="3-如和创建副本表"><a href="#3-如和创建副本表" class="headerlink" title="3. 如和创建副本表"></a>3. 如和创建副本表</h3><h4 id="如何创建Replicated-Table"><a href="#如何创建Replicated-Table" class="headerlink" title="如何创建Replicated Table"></a>如何创建Replicated Table</h4><p>不同于HDFS的副本机制(基于集群实现), Clickhouse的副本机制是基于表实现的. 用户在创建每张表的时候, 可以决定该表是否高可用.</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="keyword">IF</span> <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> &#123;local_table&#125; </span><br><span class="line">(&#123;<span class="keyword">columns</span>&#125;) </span><br><span class="line"><span class="keyword">ENGINE</span> = ReplicatedMergeTree(<span class="string">'/clickhouse/tables/#_tenant_id_#/#__appname__#/#_at_date_#/&#123;shard&#125;/hits'</span>, <span class="string">'&#123;replica&#125;'</span>)</span><br><span class="line"><span class="keyword">partition</span> <span class="keyword">by</span> toString(_at_date_) </span><br><span class="line"><span class="keyword">sample</span> <span class="keyword">by</span> intHash64(toInt64(toDateTime(_at_timestamp_)))</span><br><span class="line"><span class="keyword">order</span> <span class="keyword">by</span> (_at_date_, _at_timestamp_, intHash64(toInt64(toDateTime(_at_timestamp_))))</span><br></pre></td></tr></table></figure>
+
+<p>支持副本表的引擎都是ReplicatedMergeTree引擎族, 具体可以查看官网: <a href="https://clickhouse.tech/docs/en/engines/table-engines/mergetree-family/replication/#table_engines-replication" target="_blank" rel="noopener">Data Replication</a></p>
+<p>ReplicatedMergeTree引擎族接收两个参数:</p>
+<ul>
+<li>ZK中该表相关数据的存储路径, ClickHouse官方建议规范化, 例如: <code>/clickhouse/tables/{shard}/[database_name]/[table_name]</code>.</li>
+<li>副本名称, 一般用<code>{replica}</code>即可.</li>
+</ul>
+<p>ReplicatedMergeTree引擎族非常依赖于zookeeper, 它在zookeeper中存储了大量的数据:</p>
+<blockquote>
+<p>表结构信息、元数据、操作日志、副本状态、数据块校验值、数据part merge过程中的选主信息…</p>
+</blockquote>
+<p>同时, zookeeper又在复制表急之下扮演了三种角色:</p>
+<blockquote>
+<p>元数据存储、日志框架、分布式协调服务</p>
+</blockquote>
+<p>可以说当使用了<code>ReplicatedMergeTree</code>时, zookeeper压力特别重, 一定要保证zookeeper集群的高可用和资源.</p>
+<h4 id="副本表数据同步的流程"><a href="#副本表数据同步的流程" class="headerlink" title="副本表数据同步的流程"></a>副本表数据同步的流程</h4><img src="../../../img/image-20211207210927990.png" alt="image-20211207210927990" style="zoom: 33%;" />
+
+<ol>
+<li>写入到一个节点</li>
+<li>通过<code>interserver HTTP port</code>端口同步到其他实例上</li>
+<li>更新zookeeper集群记录的信息</li>
+</ol>
+<h3 id="4-分布式表与分布式引擎"><a href="#4-分布式表与分布式引擎" class="headerlink" title="4. 分布式表与分布式引擎"></a>4. 分布式表与分布式引擎</h3><p>ClickHouse分布式表的本质并不是一张表, 而是一些本地物理表(分片)的分布式视图,本身并不存储数据. 分布式表建表的引擎为<code>Distributed</code>.</p>
+<h4 id="创建分布式表"><a href="#创建分布式表" class="headerlink" title="创建分布式表"></a>创建分布式表</h4><ul>
+<li>使用on cluster语句在集群的某台机器上执行以下代码，即可在每台机器上创建本地表和分布式表，其中⼀张本地表对应着⼀个数据分⽚，分布式表通常以本地表加“_all”命名。它与本地表形成⼀对多的映射关系，之后可以通过分布式表代理操作多张本地表。</li>
+<li>这里有个要注意的点，就是分布式表的表结构尽量和本地表的结构一致。<br>如果不一致，在建表时不会报错，但在查询或者插入时可能会抛出异常。</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="keyword">IF</span> <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> &#123;distributed_table&#125; </span><br><span class="line"><span class="keyword">as</span> &#123;local_table&#125; </span><br><span class="line"><span class="keyword">ENGINE</span> = <span class="keyword">Distributed</span>(&#123;cluster&#125;, <span class="string">'&#123;local_database&#125;'</span>, <span class="string">'&#123;local_table&#125;'</span>, <span class="keyword">rand</span>())</span><br></pre></td></tr></table></figure>
+
+<p>Distributed引擎需要以下几个参数：</p>
+<ul>
+<li>集群标识符</li>
+<li>本地表所在的数据库名称</li>
+<li>本地表名称</li>
+<li>分片键(sharding key) - 可选<br>该键与config.xml中配置的分片权重(weight)一同决定写入分布式表时的路由, 即数据最终落到哪个物理表上. 它可以是表中一列的原始数据(如<code>site_id</code>), 也可以是函数调用的结果, 如上面的SQL语句采用了随机值<code>rand()</code>. 注意该键要尽量保证数据均匀分布, 另外一个常用的操作是采用区分度较高的列的哈希值, 如<code>intHash64(user_id)</code>.</li>
+</ul>
+<h4 id="数据查询的流程"><a href="#数据查询的流程" class="headerlink" title="数据查询的流程"></a>数据查询的流程</h4><img src="../../../img/image-20211207211418133.png" alt="image-20211207211418133" style="zoom:33%;" />
+
+<ol>
+<li>各个实例之间会交换自己持有的分片的表数据</li>
+<li>汇总到同一个实例上返回给用户</li>
+</ol>
+<h3 id="5-大量数据插入最好不要使用分布式表"><a href="#5-大量数据插入最好不要使用分布式表" class="headerlink" title="5. 大量数据插入最好不要使用分布式表"></a>5. 大量数据插入最好不要使用分布式表</h3><ol>
+<li>分布式表接收到数据后会将数据拆分成多个parts, 并转发数据到其它服务器, 会引起服务器间网络流量增加、服务器merge的工作量增加, 导致写入速度变慢, 并且增加了Too many parts的可能性.</li>
+<li>数据的一致性问题, 先在分布式表所在的机器进行落盘, 然后异步的发送到本地表所在机器进行存储，中间没有一致性的校验, 而且在分布式表所在机器时如果机器出现down机, 会存在数据丢失风险.</li>
+<li>数据写入默认是异步的，短时间内可能造成不一致.</li>
+<li>对zookeeper的压力比较大.</li>
+</ol>
+<h2 id="五、Ck-Bitmap和物化视图"><a href="#五、Ck-Bitmap和物化视图" class="headerlink" title="五、Ck Bitmap和物化视图"></a>五、Ck Bitmap和物化视图</h2><h3 id="1-Bitmap-与宽表"><a href="#1-Bitmap-与宽表" class="headerlink" title="1. Bitmap 与宽表"></a>1. Bitmap 与宽表</h3><h4 id="bitmap-VS-大宽表"><a href="#bitmap-VS-大宽表" class="headerlink" title="bitmap VS 大宽表"></a>bitmap VS 大宽表</h4><p><strong>1. 宽表</strong></p>
+<p>明细数据，各个标签作为独立的一列</p>
+<p><strong>优点</strong>：</p>
+<ul>
+<li>支持明细数据查询</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li>数据量过大，数据行数过多，复杂查询条件下会导致查询效率极低；</li>
+<li>需要支持动态schema，增减标签需要更改表结构，增加或减少数据列；</li>
+<li>占用较多存储资源</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th><strong>mid</strong></th>
+<th><strong>性别</strong></th>
+<th><strong>会员类型</strong></th>
+<th><strong>…</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>738291</strong></td>
+<td>M</td>
+<td>年费</td>
+<td>…</td>
+</tr>
+<tr>
+<td><strong>874013</strong></td>
+<td>F</td>
+<td>非会员</td>
+<td>…</td>
+</tr>
+<tr>
+<td><strong>858021</strong></td>
+<td>F</td>
+<td>月费</td>
+<td>…</td>
+</tr>
+<tr>
+<td><strong>…</strong></td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+</tbody></table>
+<p><strong>2. Bitmap 结构</strong></p>
+<p>将字段的不同值作为标签，每个标签对应的用户mid数组(bitmap)作为value</p>
+<p><strong>优点</strong></p>
+<ul>
+<li>数据行数减小，查询效率提高</li>
+<li>支持动态调整schema，不需要调整表结构</li>
+<li>占用存储资源大大减少</li>
+</ul>
+<p><strong>缺点</strong></p>
+<ul>
+<li>数据明细查询不支持</li>
+<li>标签的值需要尽量枚举，不支持连续型标签</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th><strong>tag</strong></th>
+<th><strong>buvids</strong></th>
+<th><strong>log_date</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>24</strong></td>
+<td>[1,3,5]</td>
+<td>2020-01-01</td>
+</tr>
+<tr>
+<td><strong>…</strong></td>
+<td>…</td>
+<td>….</td>
+</tr>
+</tbody></table>
+<h4 id="Clickhouse中的bitmap"><a href="#Clickhouse中的bitmap" class="headerlink" title="Clickhouse中的bitmap"></a>Clickhouse中的bitmap</h4><p>bitmap在clickhouse中是一种AggregateFunction的数据类型，其构造方法有两种：</p>
+<ol>
+<li>通过聚合函数groupBitmap来构造</li>
+<li>通过bitmapBiuld函数对整形数组进行转换得到</li>
+</ol>
+<p><strong>bimap和array类型的转换方式如下</strong></p>
+<ul>
+<li><p><code>bitmapBuild</code>：将array转换为bitmap</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> bitmapBuild([<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>]) <span class="keyword">as</span> res, toTypeName(res);</span><br></pre></td></tr></table></figure>
+
+<p><img src="../../../img/image-20211207175142024.png" alt="image-20211207175142024"></p>
+</li>
+<li><p><code>bitmapToArray</code>：将bitmap转为array</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> bitmapToArray(bitmapBuild([<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>])) <span class="keyword">as</span> res, toTypeName(res);</span><br></pre></td></tr></table></figure>
+
+<p><img src="../../../img/image-20211207175304210.png" alt="image-20211207175304210"></p>
+</li>
+</ul>
+<h3 id="2-物化视图"><a href="#2-物化视图" class="headerlink" title="2. 物化视图"></a>2. 物化视图</h3><h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><p><strong>物化视图与普通视图的区别</strong></p>
+<p>　　普通视图不保存数据，保存的仅仅是查询语句，查询的时候还是从原表读取数据，可以将普通视图理解为是个子查询。物化视图则是把查询的结果根据相应的引擎存入到了磁盘或内存中，对数据重新进行了组织，你可以理解物化视图是完全的一张新表。</p>
+<p><strong>优缺点</strong></p>
+<p>　　优点：查询速度快，要是把物化视图这些规则全部写好，它比原数据查询快了很多，总的行数少了，因为都预计算好了。</p>
+<p>　　缺点：它的本质是一个流式数据的使用场景，是累加式的技术，所以对历史数据需要做去重、去核这样的分析，在物化视图里面是不太好用的。在某些场景的使用也是有限的。而且如果一张表加了好多物化视图，在写这张表的时候，就会消耗很多机器的资源，比如数据带宽占满、存储一下子增加了很多。</p>
+<p><strong>基本语法</strong></p>
+<p>　也是 create 语法，会创建一个隐藏的目标表来保存视图数据。也可以 TO 表名，保存到一张显式的表。没有加 TO 表名，表名默认就是  .inner.物化视图名</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> [<span class="keyword">MATERIALIZED</span>] <span class="keyword">VIEW</span> [<span class="keyword">IF</span> <span class="keyword">NOT</span> <span class="keyword">EXISTS</span>] [db.]table_name [<span class="keyword">TO</span>[db.]<span class="keyword">name</span>] </span><br><span class="line">[<span class="keyword">ENGINE</span> = <span class="keyword">engine</span>] [POPULATE] <span class="keyword">AS</span> <span class="keyword">SELECT</span> ...</span><br></pre></td></tr></table></figure>
+
+<p><strong>创建物化视图的限制</strong></p>
+<p>　　1.必须指定物化视图的 engine 用于数据存储</p>
+<p>　　2.TO [db].[table]语法的时候，不得使用 POPULATE。</p>
+<p>　　3.查询语句(select）可以包含下面的子句： DISTINCT, GROUP BY, ORDER BY, LIMIT…</p>
+<p>　　4.物化视图的 alter 操作有些限制，操作起来不大方便。</p>
+<p>　　5.若物化视图的定义使用了 TO [db.]name 子语句，则可以将目标表的视图 卸载DETACH 再装载 ATTACH</p>
+<p><strong>物化视图的数据更新策略也</strong></p>
+<ol>
+<li><p>物化视图创建好之后，若源表被写入新数据则物化视图也会同步更新</p>
+</li>
+<li><p>POPULATE 关键字决定了物化视图的更新策略：</p>
+<ul>
+<li>若有 POPULATE 则在创建视图的过程会将源表已经存在的数据一并导入，类似于create table … as</li>
+<li>若无 POPULATE 则物化视图在创建之后没有数据，只会同步创建表之后写入源表的数据</li>
+<li>clickhouse 官方并不推荐使用 POPULATE，因为在创建物化视图的过程中同时写入的数据不能被插入物化视图。</li>
+</ul>
+</li>
+<li><p>物化视图不支持同步删除，若源表的数据不存在（删除了）则物化视图的数据仍然保留</p>
+</li>
+<li><p>物化视图是一种特殊的数据表，可以用 show tables 查看</p>
+</li>
+</ol>
+<h3 id="3-Clickhouse-集成roaringBitmap"><a href="#3-Clickhouse-集成roaringBitmap" class="headerlink" title="3. Clickhouse 集成roaringBitmap"></a>3. Clickhouse 集成roaringBitmap</h3><p>BitMap字段类型，该类型扩展自AggregateFunction类型，表示groupBitmap聚合函数的中间状态(位图对象)，字段类型定义:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AggregateFunction(groupBitmap, Uint(8|16|32:64))</span><br></pre></td></tr></table></figure>
+
+<p>该类型可以通过groupBitmapStae获取，示例：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> labelname,labelvalue groupBitmapState(<span class="keyword">id</span>) <span class="keyword">As</span> uv <span class="keyword">from</span> label_table <span class="keyword">group</span> <span class="keyword">by</span> labelname, labelvalue</span><br></pre></td></tr></table></figure>
+
+<p>注:</p>
+<ul>
+<li>groupBitmap(expr)： 从无符号整数列进行位图或聚合计算，返回 <code>UInt64</code> 类型的基数，说白了就是根据位图统计不重复元素个数；</li>
+<li>groupBitmapAnd / groupBitmapOr： 计算位图的 AND/OR的聚合结果，返回 <code>UInt64</code> 类型的基数；</li>
+<li>groupBitmapState：从无符号整数列进行位图或聚合计算，返回位图对象；</li>
+<li>groupBitmapAndState / groupBitmapOrState: 计算位图的 AND/OR的聚合结果，返位图对象；</li>
+</ul>
+<h3 id="4-Bitmap标签表实例"><a href="#4-Bitmap标签表实例" class="headerlink" title="4. Bitmap标签表实例"></a>4. Bitmap标签表实例</h3><h4 id="创建原始表"><a href="#创建原始表" class="headerlink" title="创建原始表"></a><strong>创建原始表</strong></h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="keyword">IF</span> <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> tbl_tag_src <span class="keyword">ON</span> CLUSTER default_cluster(</span><br><span class="line">    tagname <span class="keyword">String</span>,   <span class="comment">--标签名称</span></span><br><span class="line">    tagvalue <span class="keyword">String</span>,  <span class="comment">--标签值</span></span><br><span class="line">    userid UInt64 </span><br><span class="line">)<span class="keyword">ENGINE</span> = ReplicatedMergeTree(<span class="string">'/clickhouse/default/tables/&#123;shard&#125;/tbl_tag_src '</span>,<span class="string">'&#123;replica&#125;'</span>)</span><br><span class="line"><span class="keyword">PARTITION</span> <span class="keyword">BY</span> tagname</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> tagvalue;</span><br></pre></td></tr></table></figure>
+
+<h4 id="创建分布式表-1"><a href="#创建分布式表-1" class="headerlink" title="创建分布式表"></a>创建分布式表</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="keyword">IF</span> <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> default.tbl_tag_src_all <span class="keyword">ON</span> CLUSTER default_cluster </span><br><span class="line"><span class="keyword">AS</span> tbl_tag_src </span><br><span class="line"><span class="keyword">ENGINE</span> = <span class="keyword">Distributed</span>(default_cluster, <span class="keyword">default</span>, tbl_tag_src, <span class="keyword">rand</span>());</span><br></pre></td></tr></table></figure>
+
+<h4 id="建立标签位图表"><a href="#建立标签位图表" class="headerlink" title="建立标签位图表"></a><strong>建立标签位图表</strong></h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="keyword">IF</span> <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> tbl_tag_bitmap <span class="keyword">ON</span> CLUSTER default_cluster</span><br><span class="line">(</span><br><span class="line">    tagname <span class="keyword">String</span>,   <span class="comment">--标签名称</span></span><br><span class="line">    tagvalue <span class="keyword">String</span>,  <span class="comment">--标签值</span></span><br><span class="line">    tagbitmap AggregateFunction(groupBitmap, UInt64)  <span class="comment">--userid集合</span></span><br><span class="line">)</span><br><span class="line"><span class="keyword">ENGINE</span> = ReplicatedAggregatingMergeTree(<span class="string">'/clickhouse/default/tables/&#123;shard&#125;/tbl_tag_bitmap '</span>,<span class="string">'&#123;replica&#125;'</span>)</span><br><span class="line"><span class="keyword">PARTITION</span> <span class="keyword">BY</span> tagname</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> (tagname, tagvalue)</span><br><span class="line"><span class="keyword">SETTINGS</span> index_granularity = <span class="number">128</span>;</span><br></pre></td></tr></table></figure>
+
+<h4 id="创建位图分布式表-这里最好可以使用物化视图代替"><a href="#创建位图分布式表-这里最好可以使用物化视图代替" class="headerlink" title="创建位图分布式表(这里最好可以使用物化视图代替)"></a><strong>创建位图分布式表(这里最好可以使用物化视图代替)</strong></h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="keyword">IF</span> <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> default.tbl_tag_bitmap_all <span class="keyword">ON</span> CLUSTER default_cluster</span><br><span class="line">(</span><br><span class="line">    tagname <span class="keyword">String</span>,   <span class="comment">--标签名称</span></span><br><span class="line">    tagvalue <span class="keyword">String</span>,  <span class="comment">--标签值</span></span><br><span class="line">    tagbitmap AggregateFunction(groupBitmap, UInt64 )  <span class="comment">--userid集合</span></span><br><span class="line">)</span><br><span class="line"><span class="keyword">ENGINE</span> = <span class="keyword">Distributed</span>(default_cluster, <span class="keyword">default</span>, tbl_tag_bitmap, <span class="keyword">rand</span>());</span><br></pre></td></tr></table></figure>
+
+<h4 id="将标签原始表的数据到位图表"><a href="#将标签原始表的数据到位图表" class="headerlink" title="将标签原始表的数据到位图表"></a><strong>将标签原始表的数据到位图表</strong></h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 导入数据, 将同一个标签的所有userid使用groupBitmapState函数合并成一个bitmap</span></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> tbl_tag_bitmap_all</span><br><span class="line"><span class="keyword">SELECT</span> tagname,tagvalue,groupBitmapState(userid)</span><br><span class="line"><span class="keyword">FROM</span> tbl_tag_src_all</span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> tagname,tagvalue;</span><br></pre></td></tr></table></figure>
+
+<h4 id="标签查询"><a href="#标签查询" class="headerlink" title="标签查询"></a>标签查询</h4><p><strong>查询持有贵金属产品，并且性别是男的userid列表</strong>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">WITH</span></span><br><span class="line">    (</span><br><span class="line">        <span class="keyword">SELECT</span> tagbitmap <span class="keyword">FROM</span> tbl_tag_bitmap_all <span class="keyword">WHERE</span> tagname = <span class="string">'持有产品'</span> <span class="keyword">AND</span> tagvalue = <span class="string">'贵金属'</span> <span class="keyword">LIMIT</span> <span class="number">1</span></span><br><span class="line">    ) <span class="keyword">AS</span> bitmap1,</span><br><span class="line">    (</span><br><span class="line">        <span class="keyword">SELECT</span> tagbitmap <span class="keyword">FROM</span> tbl_tag_bitmap_all <span class="keyword">WHERE</span> tagname = <span class="string">'性别'</span> <span class="keyword">AND</span> tagvalue = <span class="string">'男'</span> <span class="keyword">LIMIT</span> <span class="number">1</span></span><br><span class="line">    ) <span class="keyword">AS</span> bitmap2</span><br><span class="line"><span class="keyword">SELECT</span> bitmapToArray(bitmapAnd(bitmap1, bitmap2)) <span class="keyword">AS</span> res</span><br></pre></td></tr></table></figure>
+
+<p><strong>分别统计持有保险的客户中，男性和女性的总人数：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">---- 查询持有保险的客户中，男性人数：</span></span><br><span class="line"><span class="keyword">WITH</span></span><br><span class="line">    (</span><br><span class="line">        <span class="keyword">SELECT</span> tagbitmap <span class="keyword">FROM</span> tbl_tag_bitmap_all <span class="keyword">WHERE</span> tagname = <span class="string">'持有产品'</span> <span class="keyword">AND</span> tagvalue = <span class="string">'保险'</span> <span class="keyword">LIMIT</span> <span class="number">1</span></span><br><span class="line">    ) <span class="keyword">AS</span> bitmap1,</span><br><span class="line">    (</span><br><span class="line">        <span class="keyword">SELECT</span> tagbitmap <span class="keyword">FROM</span> tbl_tag_bitmap_all <span class="keyword">WHERE</span> tagname = <span class="string">'性别'</span> <span class="keyword">AND</span> tagvalue = <span class="string">'男'</span> <span class="keyword">LIMIT</span> <span class="number">1</span></span><br><span class="line">    ) <span class="keyword">AS</span> bitmap2</span><br><span class="line"><span class="keyword">SELECT</span> bitmapCardinality(bitmapAnd(bitmap1, bitmap2)) <span class="keyword">AS</span> res</span><br><span class="line"></span><br><span class="line"><span class="comment">---- 查询持有保险的客户中，女性人数：</span></span><br><span class="line"><span class="keyword">WITH</span></span><br><span class="line">    (</span><br><span class="line">        <span class="keyword">SELECT</span> tagbitmap <span class="keyword">FROM</span> tbl_tag_bitmap_all <span class="keyword">WHERE</span> tagname = <span class="string">'持有产品'</span> <span class="keyword">AND</span> tagvalue = <span class="string">'保险'</span> <span class="keyword">LIMIT</span> <span class="number">1</span></span><br><span class="line">    ) <span class="keyword">AS</span> bitmap1,</span><br><span class="line">    (</span><br><span class="line">        <span class="keyword">SELECT</span> tagbitmap <span class="keyword">FROM</span> tbl_tag_bitmap_all <span class="keyword">WHERE</span> tagname = <span class="string">'性别'</span> <span class="keyword">AND</span> tagvalue = <span class="string">'女'</span> <span class="keyword">LIMIT</span> <span class="number">1</span></span><br><span class="line">    ) <span class="keyword">AS</span> bitmap2</span><br><span class="line"><span class="keyword">SELECT</span> bitmapCardinality(bitmapAnd(bitmap1, bitmap2)) <span class="keyword">AS</span> res</span><br></pre></td></tr></table></figure>
+
+<h2 id="六、关于ck的一些总结"><a href="#六、关于ck的一些总结" class="headerlink" title="六、关于ck的一些总结"></a>六、关于ck的一些总结</h2><h3 id="1-Clickhouse-数据查询速度为什么这么可快"><a href="#1-Clickhouse-数据查询速度为什么这么可快" class="headerlink" title="1. Clickhouse 数据查询速度为什么这么可快"></a>1. Clickhouse 数据查询速度为什么这么可快</h3><p><strong>大方向上</strong></p>
+<ul>
+<li><p>列式存储与数据压缩</p>
+<p>ClickHouse是一款使用列式存储的数据库，数据按列进行组织，属于同一列的数据会被保存在一起，列与列之间也会由不同的文件分别保存。</p>
+<p>在执行数据查询时，列式存储可以减少数据扫描范围和数据传输时的大小，提高了数据查询的效率。</p>
+</li>
+<li><p>数据分片与分布式查询</p>
+<p>ClickHouse通过分片和分布式表机制提供了线性扩展的能力。</p>
+<p>分片机制：用来解决单节点的性能瓶颈，通过将数据进行水平切分，将一张表中的数据拆分到多个节点，不同节点之间的数据没有重复，这样就可以通过增加分片对ClickHouse进行线性扩展。</p>
+<p>分布式表：在查询分片的数据时，通过分布式表进行查询，分布式表引擎自身不存储任何数据，仅是一层代理，能够自动路由到集群中的各个分片节点获取数据，即分布式表需要和其他数据表一起协同工作。</p>
+</li>
+<li><p>mergetree 和 稀疏索引</p>
+<p>仅需使用少量的索引标记就能够记录大量数据的区间位置信息，快速缩小数据查询范围</p>
+</li>
+<li><p>向量化执行引擎</p>
+<p>ClickHouse利用CPU的SIMD指令实现了向量化执行。SIMD的全称是Single Instruction Multiple Data，即用单条指令操作多条数据，通过数据并行以提高性能的一种实现方式 ( 其他的还有指令级并行和[线程级并行] )，它的原理是在CPU寄存器层面实现数据的并行操作，相比同类OLAP产品执行效率更高。</p>
+</li>
+</ul>
+<p><strong>细节上</strong></p>
+<ul>
+<li><p>极致的算法优化</p>
+<p>在 ClickHouse 的底层实现中，经常会面对一些重复的场景，例如字符串子串查询、数组排序、使用 HashTable 等。 在每种数据处理场景ck都尽量选择了最效率的算法；</p>
+<p>比如在字符串搜索方面，针对不同的场景，ClickHouse 最终选择了这些算法：对于常量，使用 Volnitsky 算法；对于非常量，使用 CPU 的向量化执行 SIMD，暴力优化；正则匹配使用 re2 和hyperscan 算法。性能是算法选择的首要考量指标。</p>
+</li>
+<li><p>极致的cpu利用</p>
+<ul>
+<li>ClickHouse将数据划分为多个partition，每个partition再进一步划分为多个index granularity，然后通过多个CPU核心分别处理其中的一部分来实现并行数据处理。  </li>
+<li>在这种设计下，单条Query就能利用整机所有CPU。极致的并行处理能力，极大的降低了查询延时</li>
+<li>列式存储代替行式存储，不仅可以加快数据扫描和读取效率，可以SIMD指令，还可以充分利用CPU cache 的预读能力，减少了CPU CACHE MISS的概率；</li>
+<li>利用SIMD指令集；</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>ClickHouse实现了向量执行引擎（Vectorized execution engine），对内存中的列式数据，一个batch调用一次SIMD指令（而非每一行调用一次），不仅减少了函数调用次数、降低了cache miss，而且可以充分发挥SIMD指令的并行能力，大幅缩短了计算耗时。向量执行引擎，通常能够带来数倍的性能提升。</p>
+</blockquote>
+<p><strong>使用注意事项</strong></p>
+<ol>
+<li>列式存储，查询列越少效率越高，不要用* ；</li>
+<li>由于单表遍历的性能特别高，非常适合简单的条件查询和group by 查询；</li>
+<li>由于算法优化不足，对复杂场景的查询，比如联表查询和子查询性能很差，复杂查询场景考虑切换引擎；</li>
+<li>选择可以将数据尽量打散的列做为主键，利用稀疏索引去提升查询性能；</li>
+<li>大数据量频繁插入，不要插入分布式表，避免分片数据同步造成网络拥堵；</li>
+<li>插入数据的batch size 不要过小，由于合并树的合并过程，避免造成数据目录过多合并不过来；</li>
+</ol>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Olap/" rel="tag"><i class="fa fa-tag"></i> Olap</a>
+          
+            <a href="/tags/clickhouse/" rel="tag"><i class="fa fa-tag"></i> clickhouse</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/08/03/02.python%E7%88%AC%E8%99%AB/%E7%88%AC%E8%99%AB%E9%80%86%E5%90%91/AST%20BABEL/" rel="next" title="AST BABEL">
+                <i class="fa fa-chevron-left"></i> AST BABEL
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/12/06/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Olap/Clickhouse/" rel="prev" title="Clickhouse">
+                Clickhouse <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%20%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">309</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">82</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">92</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、简单介绍Clickhouse"><span class="nav-text">一、简单介绍Clickhouse</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、clickhouse-表引擎"><span class="nav-text">二、clickhouse 表引擎</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-clickhouse-表引擎和合并树"><span class="nav-text">1. clickhouse 表引擎和合并树</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#clickhouse-表引擎"><span class="nav-text">clickhouse 表引擎</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#合并树MergeTree"><span class="nav-text">合并树MergeTree</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Replicated-MergeTree"><span class="nav-text">Replicated MergeTree</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#合并树优点"><span class="nav-text">合并树优点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#创建一个合并树表"><span class="nav-text">创建一个合并树表</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-数据分区"><span class="nav-text">2. 数据分区</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#分区表目录结构"><span class="nav-text">分区表目录结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分区目录命名规则"><span class="nav-text">分区目录命名规则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#分区目录合并过程"><span class="nav-text">分区目录合并过程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、Clickhouse-的索引和数据存储"><span class="nav-text">三、Clickhouse 的索引和数据存储</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Clickhouse-索引"><span class="nav-text">1. Clickhouse 索引</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#一级索引"><span class="nav-text">一级索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#稀疏索引"><span class="nav-text">稀疏索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#索引数据生成规则"><span class="nav-text">索引数据生成规则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数据标记"><span class="nav-text">数据标记</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#索引查询标记过程"><span class="nav-text">索引查询标记过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#跳数索引"><span class="nav-text">跳数索引</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-数据存储"><span class="nav-text">2. 数据存储</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#数据存储方式"><span class="nav-text">数据存储方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数据快文件头"><span class="nav-text">数据快文件头</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MergeTree-数据写入方式"><span class="nav-text">MergeTree 数据写入方式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Clickhouse-索引查询、写入过程"><span class="nav-text">3. Clickhouse 索引查询、写入过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#查询过程"><span class="nav-text">查询过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#写入过程"><span class="nav-text">写入过程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、本地表与分布式表"><span class="nav-text">四、本地表与分布式表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-CK-的几种表分类"><span class="nav-text">1. CK 的几种表分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-表分片与副本"><span class="nav-text">2. 表分片与副本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-如和创建副本表"><span class="nav-text">3. 如和创建副本表</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#如何创建Replicated-Table"><span class="nav-text">如何创建Replicated Table</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#副本表数据同步的流程"><span class="nav-text">副本表数据同步的流程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-分布式表与分布式引擎"><span class="nav-text">4. 分布式表与分布式引擎</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建分布式表"><span class="nav-text">创建分布式表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数据查询的流程"><span class="nav-text">数据查询的流程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-大量数据插入最好不要使用分布式表"><span class="nav-text">5. 大量数据插入最好不要使用分布式表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#五、Ck-Bitmap和物化视图"><span class="nav-text">五、Ck Bitmap和物化视图</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Bitmap-与宽表"><span class="nav-text">1. Bitmap 与宽表</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#bitmap-VS-大宽表"><span class="nav-text">bitmap VS 大宽表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Clickhouse中的bitmap"><span class="nav-text">Clickhouse中的bitmap</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-物化视图"><span class="nav-text">2. 物化视图</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#概述"><span class="nav-text">概述</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Clickhouse-集成roaringBitmap"><span class="nav-text">3. Clickhouse 集成roaringBitmap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Bitmap标签表实例"><span class="nav-text">4. Bitmap标签表实例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建原始表"><span class="nav-text">创建原始表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#创建分布式表-1"><span class="nav-text">创建分布式表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#建立标签位图表"><span class="nav-text">建立标签位图表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#创建位图分布式表-这里最好可以使用物化视图代替"><span class="nav-text">创建位图分布式表(这里最好可以使用物化视图代替)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#将标签原始表的数据到位图表"><span class="nav-text">将标签原始表的数据到位图表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#标签查询"><span class="nav-text">标签查询</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#六、关于ck的一些总结"><span class="nav-text">六、关于ck的一些总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Clickhouse-数据查询速度为什么这么可快"><span class="nav-text">1. Clickhouse 数据查询速度为什么这么可快</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

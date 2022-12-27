@@ -1,0 +1,1925 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Tidb 架构Tidb 组件介绍TiDB 架构图 TiDB ServerTiDB Server 负责接收 SQL 请求，处理 SQL 相关的逻辑，并通过 PD 找到存储计算所需数据的 TiKV 地址， 与 TiKV 交互 获取数据，最终返回结果。 TiDB Server 是无状态的，其本身并不存储数据，只负责计算，可以无限水平扩展， 可以通过 负载均衡组件（如LVS、HAProxy 或 F5）对外">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tidb">
+<meta property="og:url" content="http://blog.kyleliu.cn/2022/12/25/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.tidb/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle)的云笔记">
+<meta property="og:description" content="Tidb 架构Tidb 组件介绍TiDB 架构图 TiDB ServerTiDB Server 负责接收 SQL 请求，处理 SQL 相关的逻辑，并通过 PD 找到存储计算所需数据的 TiKV 地址， 与 TiKV 交互 获取数据，最终返回结果。 TiDB Server 是无状态的，其本身并不存储数据，只负责计算，可以无限水平扩展， 可以通过 负载均衡组件（如LVS、HAProxy 或 F5）对外">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220723161043866.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1658240512031.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1658240536106.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1658240577173.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1658240602102.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1658240621048.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1658240642814.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1658240661665.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1658240682648.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1658240700286.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1658240716982.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1658240736105.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1658240752698.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1658240768468.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1658240789891.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1658240814833.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1658240945581.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220723163702538.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220723163710780.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220723164125804.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220723164328882.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220723164638828.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220723165202126.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220723171020626.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220723171205445.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220723171341922.png">
+<meta property="article:published_time" content="2022-12-24T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-12-25T08:19:26.653Z">
+<meta property="article:author" content="刘小恺(Kyle)">
+<meta property="article:tag" content="tidb">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/img/image-20220723161043866.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2022/12/25/21.总结/面试总结/1.tidb/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Tidb | 刘小恺(Kyle)的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle)的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2022/12/25/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.tidb/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Tidb
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2022-12-25 00:00:00" itemprop="dateCreated datePublished" datetime="2022-12-25T00:00:00+08:00">2022-12-25</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">总结</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">面试总结</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/12/25/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.tidb/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2022/12/25/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.tidb/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Tidb-架构"><a href="#Tidb-架构" class="headerlink" title="Tidb 架构"></a>Tidb 架构</h1><h2 id="Tidb-组件介绍"><a href="#Tidb-组件介绍" class="headerlink" title="Tidb 组件介绍"></a>Tidb 组件介绍</h2><h3 id="TiDB-架构图"><a href="#TiDB-架构图" class="headerlink" title="TiDB 架构图"></a>TiDB 架构图</h3><p><img src="/img/image-20220723161043866.png" alt="image-20220723161043866"></p>
+<h3 id="TiDB-Server"><a href="#TiDB-Server" class="headerlink" title="TiDB Server"></a><strong>TiDB Server</strong></h3><p>TiDB Server 负责接收 SQL 请求，处理 SQL 相关的逻辑，并通过 PD 找到存储计算所需数据的 TiKV 地址， 与 TiKV 交互</p>
+<p>获取数据，最终返回结果。 TiDB Server 是无状态的，其本身并不存储数据，只负责计算，可以无限水平扩展， 可以通过</p>
+<p>负载均衡组件（如LVS、HAProxy 或 F5）对外提供统一的接入地址。</p>
+<h3 id="PD-Server"><a href="#PD-Server" class="headerlink" title="PD Server"></a><strong>PD Server</strong></h3><p>Placement Driver (简称 PD) 是整个集群的管理模块，其主要工作有三个： </p>
+<ul>
+<li>一是存储集群的元信息（某个 Key 存储在哪个 TiKV 节点）； </li>
+<li>二是对 TiKV 集群进行调度和负载均衡（如数据的迁移、Raft group leader 的迁移等）；</li>
+<li>三是分配全局唯一且递增的事务 ID。</li>
+</ul>
+<p>PD 是一个集群，需要部署奇数个节点，一般线上推荐至少部署 3 个节点。</p>
+<h3 id="TiKVServer"><a href="#TiKVServer" class="headerlink" title="TiKVServer"></a><strong>TiKVServer</strong></h3><p>TiKV Server 负责存储数据，从外部看 TiKV 是一个分布式的提供事务的 Key-Value 存储引擎。存储数据的基本单位是 Region， 每个 Region 负责存储一个 Key Range （从 StartKey 到 EndKey 的左闭右开区间）的数据， 每个 TiKV 节点会负责多个 Region 。TiKV 使用 Raft 协议做复制，保持数据的一致性和容灾。 副本以 Region 为单位进行管理，不同节点上的多个 Region 构成一个 Raft Group，互为副本。 数据在多个 TiKV 之间的负载均衡由 PD 调度，</p>
+<p>这里也是以 Region 为单位进行调度。</p>
+<h2 id="一、Tidb-核心组件介绍"><a href="#一、Tidb-核心组件介绍" class="headerlink" title="一、Tidb 核心组件介绍"></a>一、Tidb 核心组件介绍</h2><h3 id="1-TiDB-Server"><a href="#1-TiDB-Server" class="headerlink" title="1. TiDB Server"></a><strong>1. TiDB Server</strong></h3><p>还是从一个黑盒子讲起，在没有了解之前，我们对 TiDB 的认识就是，我们往里面丢数据，TiDB 负责存储数据。并且由于是分布式的，所以理论上只要存储资源够，多大的数据都能够存下。</p>
+<img src="/img/1658240512031.png" alt="1658240512031" style="zoom: 80%;" />
+
+<p>我们知道，TiDB 支持 MySQL，或者说<strong>兼容</strong>大多数 MySQL 的语法。那我们就还是拿一个 Insert 语句来当作切入点，探索数据在 TiDB 中到底是如何存储的。</p>
+<p>首先要执行语句，必然要先建立连接。</p>
+<img src="/img/1658240536106.png" alt="1658240536106" style="zoom:80%;" />
+
+<p>在 MySQL 中，负责处理客户端连接的是 MySQL Server，在 TiDB 中也有同样的角色 —— <strong>TiDB Server</strong>，虽角色类似，但两者有着很多的<strong>不同</strong>。</p>
+<p>TiDB Server 对外暴露 MySQL 协议，负责 SQL 的解析、优化，并最终生成<strong>分布式执行计划</strong>，MySQL 的 Server 层也会涉及到 SQL 的解析、优化，但与 MySQL 最大的不同在于，TiDB Server 是<strong>无状态</strong>的。</p>
+<p>而 MySQL Server 由于和底层存储引擎的耦合部署在同一个节点，并且在内存中缓存了页的数据，是<strong>有状态</strong>的。</p>
+<blockquote>
+<p>这里其实可以简单的把两者理解为，TiDB 是<strong>无状态的可横向扩展的服务</strong>。而 MySQL 则是在内存中缓存了业务数据、无法横向扩展的<strong>单体服务</strong>。</p>
+</blockquote>
+<p>而由于 TiDB Server 的无状态特性，在生产中可以启动<strong>多个实例</strong>，并通过负载均衡的策略来对外提供统一服务。</p>
+<img src="/img/1658240577173.png" alt="1658240577173" style="zoom: 80%;" />
+
+<blockquote>
+<p>实际情况下，TiDB 的存储节点是单独、分布式部署的，这里只是为了方便理解 TiDB Server 的横向扩展特性，不用纠结，后面会聊到存储</p>
+</blockquote>
+<p>总结下来，TiDB Server 只干一件事：<strong>负责解析 SQL，将实际的数据操作转发给存储节点</strong>。</p>
+<h3 id="2-TiKV"><a href="#2-TiKV" class="headerlink" title="2.TiKV"></a><strong>2.TiKV</strong></h3><p>我们知道，对于 MySQL，其存储引擎（绝大多数情况）是 InnoDB，其存储采用的数据结构是 B+ 树，最终以 .ibd 文件的形式存储在磁盘上。那 TiDB 呢？</p>
+<p>TiDB 的存储是由 TiKV 来负责的，这是一个分布式、支持事务的 <strong>KV 存储引擎</strong>。说到底，它就是个 KV 存储引擎。</p>
+<p>用大白话说，这就是个巨大的、有序的 Map。但说到 KV 存储，很多人可能会联想到 Redis，数据大多数时候是放在内存，就算是 Redis，也会有像 RDB 和 AOF 这样的<strong>持久化方式</strong>。那 TiKV 作为一个分布式的数据库，也不例外。它采用 RocksDB 引擎来实现持久化，具体的数据落地由其全权负责。</p>
+<blockquote>
+<p>RocksDB 是由 Facebook 开源的、用 C++ 实现的单机 KV 存储引擎。</p>
+</blockquote>
+<h2 id="Tidb-数据存储与调度"><a href="#Tidb-数据存储与调度" class="headerlink" title="Tidb 数据存储与调度"></a>Tidb 数据存储与调度</h2><h3 id="1-索引数据"><a href="#1-索引数据" class="headerlink" title="1.索引数据"></a>1.索引数据</h3><p>直接拿官网的例子给大家看看，话说 TiDB 中有这样的一张表：</p>
+<img src="/img/1658240602102.png" alt="1658240602102" style="zoom: 80%;" />
+
+<p>然后表里有三行数据：</p>
+<img src="/img/1658240621048.png" alt="1658240621048" style="zoom: 80%;" />
+
+<p>这三行数据，每一行都会被映射成为一个键值对：</p>
+<img src="/img/1658240642814.png" alt="1658240642814" style="zoom:80%;" />
+
+<p>其中，Key 中的 t10 代表 <strong>ID 为 10 的表</strong>，r1 代表 <strong>RowID 为 1 的行</strong>，由于我们建表时制定了主键，所以 RowID 就为主键的值。Value 就是该行除了主键之外的其他字段的值，上图表示的就是<strong>主键索引</strong>。</p>
+<p>那如果是<strong>非聚簇索引</strong>（二级索引）呢？就比如索引 idxAge，建表语句里对 Age 这一列建立了二级索引：</p>
+<img src="/img/1658240661665.png" alt="1658240661665" style="zoom:80%;" />
+
+<p>i1 代表 ID 为 1 的索引，即当前这个二级索引，10、20、30 则是索引列 Age 的值，最后的 1、2、3 则是对应的行的主键 ID。从建索引的语句部分可以看出来，idxAge 是个普通的二级索引，<strong>不是唯一索引</strong>。所以索引中允许存在多个 Age 为 30 的列。</p>
+<p>但如果我们是唯一索引呢？</p>
+<img src="/img/1658240682648.png" alt="1658240682648" style="zoom:80%;" />
+
+<p>只拿表 ID、索引 ID 和索引值来组成 Key，这样一来如果再次插入 Age 为 30 的数据，TiKV 就会发现该 Key 已经存在了，就能做到唯一键检测。</p>
+<h3 id="2-存储细节"><a href="#2-存储细节" class="headerlink" title="2.存储细节"></a>2.存储细节</h3><p>知道了列数据是如何映射成 Map 的，我们就可以继续了解存储相关的细节了。</p>
+<img src="/img/1658240700286.png" alt="1658240700286" style="zoom:80%;" />
+
+<p>从图中，我们可以看出个问题：如果某个 TiKV 节点挂了，那么该节点上的所有数据是不是都没了？</p>
+<p>当然不是的，TiDB 可以是一款<strong>金融级高可用</strong>的分布式关系型数据库，怎么可能会让这种事发生。</p>
+<p>TiKV 在存储数据时，会将同一份数据想办法存储到多个 TiKV 节点上，并且使用 <strong>Raft</strong> 协议来保证同一份数据在多个 TiKV 节点上的数据一致性。</p>
+<img src="/img/1658240716982.png" alt="1658240716982" style="zoom:80%;" />
+
+<blockquote>
+<p>上图为了方便理解，进行了简化。实际上一个 TiKV 中有存在 2 个 RocksDB。一个用于存储 Raft Log，通常叫 RaftDB，而另一个用于存储用户数据，通常叫 KVDB。</p>
+</blockquote>
+<p>简单来说，就是会选择其中一份数据作为 Leader 对外提供<strong>读、写</strong>服务，其余的作为 Follower <strong>仅仅只同步</strong> Leader 的数据。当 Leader 挂掉之后，可以自动的进行故障转移，从 Follower 中重新选举新的 Leader 出来。</p>
+<p>看到这，是不是觉得跟 Kafka 有那么点神似了。Kafka 中一个 Topic 是逻辑概念，实际上会分成多个 Partition，分散到多个 Broker 上，并且会选举一个 Leader Partition 对外提供服务，当 Leader Partition 出现故障时，会从 Follower Partiiton 中重新再选举一个 Leader 出来。</p>
+<p>那么，Kafka 中选举、提供服务的单位是 Partition，TiDB 中的是什么呢？</p>
+<h3 id="3-Region"><a href="#3-Region" class="headerlink" title="3.Region"></a>3.Region</h3><p><strong>答案是 Region</strong>。刚刚讲过，TiKV 可以理解为一个巨大的 Map，而 Map 中某一段连续的 Key 就是一个 Region。不同的 Region 会保存在不同的 TiKV 上。</p>
+<img src="/img/1658240736105.png" alt="1658240736105" style="zoom: 80%;" />
+
+<p>一个 Region 有多个副本，每个副本也叫 Replica，多个 Replica 组成了一个 <strong>Raft Group</strong>。按照上面介绍的逻辑，某个 Replica 会被选作 Leader，其余 Replica 作为 Follower。</p>
+<p>并且，在数据写入时，TiDB 会<strong>尽量</strong>保证 Region 不会超过一定的大小，目前这个值是 96M。当然，还是可能会超过这个大小限制。</p>
+<blockquote>
+<p>每个 Region 都可以用 [startKey, endKey) 这样一个左闭右开的区间来表示。</p>
+</blockquote>
+<p>但不可能让它无限增长是吧？所以 TiDB 做了一个最大值的限制，当 Region 的大小超过144M（默认） 后，TiKV 会将其<strong>分裂</strong>成两个或更多个 Region，以保证数据在各个 Region 中的<strong>均匀分布</strong>；同理，当某个 Region 由于短时间删除了大量的数据之后，会变的比其他 Region 小很多，TiKV 会将比较小的两个相邻的 Region <strong>合并</strong>。</p>
+<p>大致的存储机制、高可用机制上面已经简单介绍了。</p>
+<p>但其实上面还遗留一了比较大的问题。大家可以结合上面的图思考，一条查询语句过来，TiDB Server 解析了之后，它是怎么知道自己要找的数据在哪个 Region 里？这个 Region 又在哪个 TiKV 上？</p>
+<img src="/img/1658240752698.png" alt="1658240752698" style="zoom:80%;" />
+
+<p>难道要遍历所有的 TiKV 节点？用脚想想都不可能这么完。刚刚讲到多副本，除了要知道提供读、写服务的 Leader Replica 所在的 TiKV，还需要知道其余的 Follower Replica 都分别在哪个实例等等。</p>
+<h3 id="4-PD"><a href="#4-PD" class="headerlink" title="4.PD"></a>4.PD</h3><p>这就需要引入 PD 了，有了 PD 「存储相关的细节」那幅图就会变成这样：</p>
+<p><img src="/img/1658240768468.png" alt="1658240768468"></p>
+<p>PD 是个啥？其全名叫 <strong>P</strong>lacement <strong>D</strong>river，<strong>用于管理整个集群的元数据</strong>，你可以把它当成是整个集群的控制节点也行。PD 集群本身也支持高可用，至少由 3 个节点组成。举个对等的例子应该就好理解了，你可以把 PD <strong>大概</strong>理解成 <a href="https://mp.weixin.qq.com/s/mP5i0ko9Me0ek485OnqNUw" target="_blank" rel="noopener">Zookeeper</a>，或者 RocketMQ 里的 <a href="https://mp.weixin.qq.com/s/kNiNrn1wNNAj7BSEOI3bwQ" target="_blank" rel="noopener">NameServer</a>。Zookeeper 不必多说，NameServer 是负责管理整个 RocketMQ 集群的元数据的组件。</p>
+<blockquote>
+<p>担心大家杠，所以特意把大概两个字加粗了。因为 PD <strong>不仅仅负责元数据管理</strong>，还担任根据数据分布状态进行合理<strong>调度</strong>的工作。</p>
+</blockquote>
+<p>这个根据数据状态进行调度，具体是指啥呢？</p>
+<h3 id="5-调度"><a href="#5-调度" class="headerlink" title="5.调度"></a>5.调度</h3><p>举个例子，假设每个 Raft Group 需要始终保持 3 个副本，那么当某个 Raft Group 的 Replica 由于网络、机器实例等原因不可用了，Replica 数量下降到了 1 个，此时 PD 检测到了就会进行调度，选择适当的机器补充 Replica；Replica 补充完后，掉线的又恢复了就会导致 Raft Group 数量<strong>多于预期</strong>，此时 PD 会合理的删除掉多余的副本。</p>
+<p>一句话概括上面描述的特性：<strong>PD 会让任何时候集群内的 Raft Group 副本数量保持预期值</strong>。</p>
+<blockquote>
+<p>这个可以参考 <a href="http://www.360doc.com/content/22/0425/10/78371584_1028188299.shtml" target="_blank" rel="noopener">Kubernetes</a> 里的 Replica Set 概念，我理解是很类似的。</p>
+</blockquote>
+<p>或者，当 TiDB 集群进行存储扩容，向存储集群新增 TiKV 节点时，PD 会将其他 TiKV 节点上的 Region 迁移到新增的节点上来。</p>
+<p>或者，Leader Replica 挂了，PD 会从 Raft Group 的 Replica 中选举出一个新的 Leader。</p>
+<p>再比如，热点 Region 的情况，并不是所有的 Region 都会被频繁的访问到，PD 就需要对这些热点 Region 进行负载均衡的调度。</p>
+<p>总结一下 PD 的调度行为会发现，就 3 个操作：</p>
+<ol>
+<li>增加一个 Replica</li>
+<li>删除一个 Replica</li>
+<li>将 Leader 角色在一个 Raft Group 的不同副本之间迁移</li>
+</ol>
+<p>了解完了调度的操作，我们再整体的理解一下调度的需求，这点 <a href="http://www.360doc.com/content/22/0425/10/78371584_1028188299.shtml" target="_blank" rel="noopener">TiDB 的官网</a>有很好的总结，我把它们整理成脑图供大家参考：</p>
+<img src="/img/1658240789891.png" alt="1658240789891" style="zoom:80%;" />
+
+<p>大多数点都还好，只是可能会对「控制负载均衡的速度」有点问题。因为 TiDB 集群在进行负载均衡时，会进行 Region 的迁移，可以理解为跟 Redis 的 Rehash 比较耗时是类似的问题，可能会<strong>影响线上的服务</strong>。</p>
+<h3 id="6-心跳"><a href="#6-心跳" class="headerlink" title="6.心跳"></a>6.心跳</h3><p>PD 而要做到调度这些决策，必然需要掌控整个集群的相关数据，比如现在有多少个 TiKV？多少个 Raft Group？每个 Raft Group 的 Leader 在哪里等等，这些其实都是通过心跳机制来收集的。</p>
+<p>在 NameServer 中，所有的 RocketMQ Broker 都会将自己注册到 NameServer 中，并且定时<strong>发送心跳</strong>，Broker 中保存的相关数据也会<strong>随心跳一起发送到 NameServer</strong> 中，以此来更新集群的元数据。</p>
+<p>PD 和 TiKV 也是类似的操作，TiKV 中有两个组件会和 PD 交互，分别是：</p>
+<ol>
+<li>Raft Group 的 Leader Replica</li>
+<li>TiKV 节点本身</li>
+</ol>
+<p>PD 通过心跳来收集数据，更新维护整个集群的元数据，并且在心跳返回时，将对应的「调度指令」返回。</p>
+<p><img src="/img/1658240814833.png" alt="1658240814833"></p>
+<blockquote>
+<p>值得注意的是，上图中每个 TiKV 中 Raft 只连了一条线，实际上一个 TiKV 节点上可能会有多个 Raft Group 的 Leader</p>
+</blockquote>
+<p>Store（即 TiKV 节点本身）心跳会带上当前节点存储的相关数据，例如磁盘的使用状况、Region 的数量等等。通过上报的数据，PD 会维护、更新 TiKV 的状态，PD 用 5 种状态来标识 TiKV 的存储，分别是：</p>
+<ol>
+<li><strong>Up</strong>：这个懂的都懂，不懂的解释了也不懂（手动 doge）</li>
+<li><strong>Disconnect</strong>：超过 <strong>20 秒</strong>没有心跳，就会变成该状态</li>
+<li><strong>Down</strong>：Disconnect 了 <code>max-store-down-time</code> 的值之后，就会变成 Down，默认 30 分钟。此时 PD 会在其他 Up 的 TiKV 上补足 Down 掉的节点上的 Region</li>
+<li><strong>Offline</strong>：通过 PD Control 进行手动下线操作，该 Store 会变为 Offline 状态。PD 会将该节点上所有的 Region 搬迁到其他 Store 上去。当所有的 Region 迁移完成后，就会变成 Tomstone 状态</li>
+<li><strong>Tombstone</strong>：表示已经凉透了，可以安全的清理掉了。</li>
+</ol>
+<blockquote>
+<p>其官网的图已经画的很好了，就不再重新画了，以下状态机来源于 TiDB 官网：</p>
+</blockquote>
+<img src="/img/1658240945581.png" alt="1658240945581" style="zoom:80%;" />
+
+<p>Raft Leader 则更多的是上报当前某个 Region 的状态，比如当前 Leader 的位置、Followers Region 的数量、掉线 Follower 的个数、读写速度等，这样 TiDB Server 层在解析的时候才知道对应的 Leader Region 的位置。</p>
+<h1 id="Tidb-索引"><a href="#Tidb-索引" class="headerlink" title="Tidb 索引"></a>Tidb 索引</h1><h2 id="mysql-ACID机制"><a href="#mysql-ACID机制" class="headerlink" title="mysql ACID机制"></a>mysql ACID机制</h2><p><strong>ACID</strong> 相信小伙伴都被面试官问过，我想简单讨论的一点是：如何 持久化数据 才能保证数据写入的 事务性 和 读写性能？</p>
+<p>事务性可简单理解为：</p>
+<ol>
+<li>数据必须持久化。</li>
+<li>一次数据的写入返回给用户 写入成功就一定成功，失败就一定失败。 读写性能可简单理解为：一次读 或 一次写 需要的IO次数，因为访问速率：CPU&gt;&gt;内存&gt;&gt;SSD/磁盘。</li>
+</ol>
+<p>对于单机存储，最简单的方式当然是：写一条就持久化一条，读一条就遍历一遍所有数据，然后返回。当然没人这么干，在内存中我们都还知道用个HashMap呢。</p>
+<p>拿Mysql InnoDB举例子：读性能体现在数据的索引在磁盘上主要用B+树来保证。写性能体现在运用 <strong>WAL机制</strong> 来避免每次写都去更新B+树上的全量索引和数据内容，而是通过redo log记录下来每次写的增量内容，顺序将redo log写入磁盘。同时在内存中记录下来本次写入应该在B+树上更新的脏页数据，然后在一定条件下触发脏页的刷盘。</p>
+<p><img src="/img/image-20220723163702538.png" alt="image-20220723163702538"></p>
+<p>redo log是数据增删改的实时增量数据，顺序写入保证了写性能和事务性。磁盘上的B+树是数据增删改的全量数据，通过定时脏页刷盘保证这份数据的完整性。</p>
+<p>这里的问题是：虽然通过WAL机制，提高了写入性能，但是仍然避免不了脏页数据定时刷盘的随机IO写入。因为数据在磁盘上是以block为单位存储的（比如4K，16K）,假如你更新了Order表一条数据，又更新了Product表一条数据，脏页刷盘时，这两条数据在磁盘上的block位置可能差了十万八千里，就变成了随机IO的写入。</p>
+<p><img src="/img/image-20220723163710780.png" alt="image-20220723163710780"></p>
+<h2 id="RUM-定理"><a href="#RUM-定理" class="headerlink" title="RUM 定理"></a>RUM 定理</h2><p>RUM（Read,Write,Memory）类似分布式领域的CAP定理。如果想得到三者中的两者性能，必须以牺牲第三者的性能为代价。衡量这三者的性能指标有：读放大、写放大、空间放大。</p>
+<ul>
+<li><strong>读放大：</strong>是指每次查询读取磁盘的次数。如果每次查询需要查询5个page (或block)，则读放大是5.</li>
+<li><strong>写放大：</strong>是指数据写入存储设备的量和数据写入数据库的量之比。如果用户写入数据库的大小是10MB，而实际写入磁盘的大小是30MB，则写放大是3.另外SSD的写入次数是有限的，写放大会减少SSD的寿命。</li>
+<li><strong>空间放大：</strong>是指数据在存储设备的总量和数据在数据库的总量之比。如果用户往数据库上存10MB，而数据库实际在磁盘上用了100MB去存，则空间放大就是10.</li>
+</ul>
+<p>通常，数据结构可以最多优化这其中的两者，如B+树有更少的读放大，LSM Tree有更少的写放大。</p>
+<p>下面我们将介绍LSM Tree的结构，它是如何解决 B+树中“全量数据的随机写入” 问题的；在RUM问题上，又该如何优化LSM Tree。</p>
+<h2 id="LSM-TREE"><a href="#LSM-TREE" class="headerlink" title="LSM TREE"></a>LSM TREE</h2><h3 id="为什么要有LSM-Tree？"><a href="#为什么要有LSM-Tree？" class="headerlink" title="为什么要有LSM Tree？"></a>为什么要有LSM Tree？</h3><p>LSM Tree（Log-structured merge-tree）起源于1996年的一篇论文：<a href="https://link.zhihu.com/?target=http%3A//www.inf.ufpr.br/eduardo/ensino/ci809/papers/lsmtree.pdf">The log-structured merge-tree (LSM-tree)</a>。当时的背景是：为一张数据增长很快的历史数据表设计一种存储结构，使得它能够解决：<strong>在内存不足，磁盘随机IO太慢</strong>下的严重写入性能问题。</p>
+<p>如果我们先后修改两条数据，那么在脏数据块落盘时，不是一条条随机写入，而是以<strong>一个脏块批量落盘</strong>时，就能解决 B+树中“全量数据的随机写入” 问题了。</p>
+<img src="/img/image-20220723164125804.png" alt="image-20220723164125804" style="zoom:67%;" />
+
+<p>所以大佬设计了这么一种结构：</p>
+<img src="/img/image-20220723164328882.png" alt="image-20220723164328882" style="zoom: 80%;" />
+
+<p>Ck tree是一个有序的树状结构，数据的写入流转从C0 tree 内存开始，不断被合并到磁盘上的更大容量的Ck tree上。这种方式写入是顺序写的，增删改操作都是append。 这样一次I/O可以进行多条数据的写入，从而充分利用每一次写I/O。</p>
+<p>merge所做的事情有：当上一棵树容量不足时，1.将上棵树中要删除的数据删除掉，进行GC回收。2.合并数据的最新版本，使得Ck tree不会过度膨胀。</p>
+<p>这种初始结构存在的问题有：随着数据量的增大，merge费劲，没有好的索引结构，读放大严重。现代的LSM Tree结构如下：</p>
+<img src="/img/image-20220723164638828.png" alt="image-20220723164638828" style="zoom:80%;" />
+
+<p><strong>MemTable：</strong>是LSM Tree在内存中还未刷盘的写入数据，这里面的数据可以修改。是一个有序的树状结构，如RocksDB中的跳表。</p>
+<p><strong>SSTable（Sorted String Table）：</strong>是一个键是有序的，存储字符串形式键值对的磁盘文件。当SSTable太大时，可以将其划分为多个block；我们需要通过 下图中的Index 记录下来每个block的起始位置，那么就可以构建每个SSTable的稀疏索引。这样在读SSTable前，通过Index结构就知道要读取的数据块磁盘位置了。</p>
+<p><img src="/img/image-20220723165202126.png" alt="image-20220723165202126"></p>
+<h3 id="LSM-Tree读数据"><a href="#LSM-Tree读数据" class="headerlink" title="LSM Tree读数据"></a>LSM Tree读数据</h3><p>读数据 包括点读和范围读，我们分开讨论。假设LSM Tree中的key为[0-99]，</p>
+<p><strong>点读：</strong>是指准确地取出一条数据，如get(23),则其示意图为：</p>
+<img src="/img/image-20220723171020626.png" alt="image-20220723171020626" style="zoom:80%;" />
+
+<p>按照图中标示的顺序，会先读取内存，在从Level0依次往高层读取，直到找到key=23的数据。</p>
+<p><strong>范围读：</strong>是指读取一个范围内的数据，如读取[23-40]内的所有数据（ select * from t where key &gt;= 23 &amp;&amp; key &lt;=40),</p>
+<p>则需要做的是在每一层SSTable找到这个范围内的第一个block,然后遍历block块的数据，直到不符合范围条件。</p>
+<img src="/img/image-20220723171205445.png" alt="image-20220723171205445" style="zoom:80%;" />
+
+<blockquote>
+<p>ReadOnly MemTable：如RocksDB，在MemTable 和 Level0数据之间还有一个内存的ReadOnly MemTable结构。它是LSM Tree在内存中还未刷盘的写入数据，这里面的数据不可以修改。是当MemTable到达一定量需要刷到SSTable时，由MemTable完整copy下来的。这样可避免从MemTable直接刷到SSTable时的并发竞争问题。</p>
+</blockquote>
+<h3 id="LSM-Tree写数据"><a href="#LSM-Tree写数据" class="headerlink" title="LSM Tree写数据"></a>LSM Tree写数据</h3><p>在LSM Tree写入数据时，我们把ReadOnly MemTable画上，示意图如下：</p>
+<img src="/img/image-20220723171341922.png" alt="image-20220723171341922" style="zoom:80%;" />
+
+<p>当有写请求时，数据会先写入MemTable,同时写入 WAL Log；当MemTable空间不足时，触发ReadOnly MemTable copy,同时写入WAL Log；然后刷新到磁盘Level0的SSTable中。当低层SSTable空间不足时，不断通过Compaction和高层SSTable进行Merge。</p>
+<h3 id="LSM-Tree优化策略"><a href="#LSM-Tree优化策略" class="headerlink" title="LSM Tree优化策略"></a>LSM Tree优化策略</h3><h4 id="点读的优化"><a href="#点读的优化" class="headerlink" title="点读的优化"></a>点读的优化</h4><p>尽管我们可以通过SSTable的内存block稀疏索引结构简单判断key是否可能存在于block中，但如上get(23)，如果level1读不到，仍需要往下读level2,level3。（因为数据是按照增删改的时间顺序一层层往下落盘的，如果一个key不存在低level中，可能存在于更早的高level中）。这样的点读IO次数较多，读放大严重。</p>
+<p><strong>布隆过滤器</strong> 对于精确查询，hash的时间复杂度为 O(1)，那么可以通过布隆过滤器来优化。我们只需要查询时先过一遍布隆过滤器，就能排除掉一定不存在的key了，避免不必要的IO查询。</p>
+<blockquote>
+<p>布隆过滤器：是通过hash算法来判断一个key是否存在于某个集合中，布隆过滤器通常是一个bit数组，用针对一个key多次hash算法确定的多个bit值来表示key是否存在。多个bit值全为1，则表示key可能存在，否则不存在。好处是多个bit值通常比直接存储一个存在的key占用空间小，省内存。</p>
+</blockquote>
+<h4 id="范围读的优化"><a href="#范围读的优化" class="headerlink" title="范围读的优化"></a>范围读的优化</h4><p>Hash的不足就是无法支持范围查询索引，优化方式有： <strong>并行查询</strong> 因为读数据不存在竞争问题，可以并行读每层的数据，缩短整体查询时间，但是这种方式实际并没有缩短IO次数。</p>
+<p><strong>前缀布隆过滤器</strong> 前缀布隆过滤器是以key的前缀来Hash构建布隆过滤器，而不是key本身的值。这样可以起到过滤 like Monica* 这样的查询条件作用。RocksDB有做此优化。</p>
+<h2 id="TiDB与MySQL索引区别"><a href="#TiDB与MySQL索引区别" class="headerlink" title="TiDB与MySQL索引区别"></a>TiDB与MySQL索引区别</h2><h4 id="数据写入方面"><a href="#数据写入方面" class="headerlink" title="数据写入方面"></a>数据写入方面</h4><ul>
+<li>LSMtree 拆分数据为多个小数组 顺序写入 近似o(1)。</li>
+<li>B+Tree则是将数据拆分为固定大小的Block或Page, 一般是4KB大小，和磁盘一个扇区的大小对应 写入o(logN) 随着insert的操作，为了维护B+树结构，节点会不断的分裂和合并。操作磁盘的随机读写概率会变大，故导致性能降低</li>
+</ul>
+<h4 id="数据更新和删除方面"><a href="#数据更新和删除方面" class="headerlink" title="数据更新和删除方面"></a>数据更新和删除方面</h4><ul>
+<li>数据的更新和删除方面，B+Tree可以做到原地更新和删除，这种方式对数据库事务支持更加友好，因为一个key只会出现一个Page页里面</li>
+<li>LSM-Tree只能追加写，并且在L0层key的range会重叠，所以对事务支持较弱，只能在Segment Compaction的时候进行真正地更新和删除</li>
+</ul>
+<h4 id="Tidb的读取优势"><a href="#Tidb的读取优势" class="headerlink" title="Tidb的读取优势"></a>Tidb的读取优势</h4><p>RocksDB 将存储在磁盘上的文件都按照一定大小切分成 block（默认是 64KB），读取 block 时先去内存中的 BlockCache 中查看该块数据是否存在，存在的话则可以直接从内存中读取而不必访问磁盘。</p>
+<h4 id="Tidb-索引类型"><a href="#Tidb-索引类型" class="headerlink" title="Tidb 索引类型"></a>Tidb 索引类型</h4><p>支持</p>
+<ul>
+<li>主键索引</li>
+<li>唯一索引</li>
+<li>普通索引</li>
+</ul>
+<p>不支持 </p>
+<ul>
+<li>FULLTEXT</li>
+<li>HASH </li>
+<li>SPATIAL 索引</li>
+<li>降序索引</li>
+</ul>
+<h4 id="与MySQL不同处"><a href="#与MySQL不同处" class="headerlink" title="与MySQL不同处"></a>与MySQL不同处</h4><ol>
+<li><p>AUTO_INCREMENT<br>自增编号是系统批量分配给每台 TiDB 服务器的值（默认 3 万个值）<br>每个 TiDB 节点在分配 ID 时，都申请一段 ID 作为缓存，用完之后再去取下一段，而不是每次分配都向存储节点申请<br>值的顺序不具有全局单调性</p>
+</li>
+<li><p>DDL<br>不能在单条 ALTER TABLE 语句中完成多个操作。例如，不能在单个语句中添加多个列或索引，否则，可能会输出 Unsupported multi schema change 的错误<br>不支持修改分区表上的列类型</p>
+</li>
+<li><p>分区表<br>分区表支持 Hash、Range 和 Add/Drop/Truncate/Coalesce。其他分区操作将被忽略，可能会报 Warning: Unsupported partition type, treat as normal table 错误。不支持以下分区表语法：<br>PARTITION BY LIST<br>PARTITION BY KEY<br>SUBPARTITION<br>{CHECK|EXCHANGE|TRUNCATE|OPTIMIZE|REPAIR|IMPORT|DISCARD|REBUILD|REORGANIZE} PARTITION</p>
+</li>
+<li><p>锁<br>TiDB 当前不支持 gap locking（间隙锁）</p>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/tidb/" rel="tag"><i class="fa fa-tag"></i> tidb</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/12/21/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.docker/" rel="next" title="docker">
+                <i class="fa fa-chevron-left"></i> docker
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/12/27/21.%E6%80%BB%E7%BB%93/%E5%85%B6%E4%BB%96/%E8%B5%84%E6%96%99%E7%9B%AE%E5%BD%95/" rel="prev" title="21.总结/其他/资料目录">
+                21.总结/其他/资料目录 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%20%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">309</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">82</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">92</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Tidb-架构"><span class="nav-text">Tidb 架构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Tidb-组件介绍"><span class="nav-text">Tidb 组件介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TiDB-架构图"><span class="nav-text">TiDB 架构图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TiDB-Server"><span class="nav-text">TiDB Server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PD-Server"><span class="nav-text">PD Server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TiKVServer"><span class="nav-text">TiKVServer</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一、Tidb-核心组件介绍"><span class="nav-text">一、Tidb 核心组件介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-TiDB-Server"><span class="nav-text">1. TiDB Server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-TiKV"><span class="nav-text">2.TiKV</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tidb-数据存储与调度"><span class="nav-text">Tidb 数据存储与调度</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-索引数据"><span class="nav-text">1.索引数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-存储细节"><span class="nav-text">2.存储细节</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Region"><span class="nav-text">3.Region</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-PD"><span class="nav-text">4.PD</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-调度"><span class="nav-text">5.调度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-心跳"><span class="nav-text">6.心跳</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Tidb-索引"><span class="nav-text">Tidb 索引</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql-ACID机制"><span class="nav-text">mysql ACID机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RUM-定理"><span class="nav-text">RUM 定理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LSM-TREE"><span class="nav-text">LSM TREE</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么要有LSM-Tree？"><span class="nav-text">为什么要有LSM Tree？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LSM-Tree读数据"><span class="nav-text">LSM Tree读数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LSM-Tree写数据"><span class="nav-text">LSM Tree写数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LSM-Tree优化策略"><span class="nav-text">LSM Tree优化策略</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#点读的优化"><span class="nav-text">点读的优化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#范围读的优化"><span class="nav-text">范围读的优化</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TiDB与MySQL索引区别"><span class="nav-text">TiDB与MySQL索引区别</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#数据写入方面"><span class="nav-text">数据写入方面</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数据更新和删除方面"><span class="nav-text">数据更新和删除方面</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Tidb的读取优势"><span class="nav-text">Tidb的读取优势</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Tidb-索引类型"><span class="nav-text">Tidb 索引类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#与MySQL不同处"><span class="nav-text">与MySQL不同处</span></a></li></ol></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

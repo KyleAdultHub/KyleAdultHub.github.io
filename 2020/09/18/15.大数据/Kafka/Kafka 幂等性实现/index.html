@@ -121,7 +121,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20200919161314748.png">
 <meta property="article:published_time" content="2020-09-18T03:00:00.000Z">
-<meta property="article:modified_time" content="2020-10-21T06:14:30.007Z">
+<meta property="article:modified_time" content="2022-12-26T03:28:01.991Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="Kafka">
 <meta name="twitter:card" content="summary">
@@ -562,7 +562,7 @@
 <p><strong>方法中，在加了幂等性之后，drain() 方法多了如下几步判断：</strong></p>
 <pre><code>1. 常规的判断：判断这个 topic-partition 是否可以继续发送（如果出现前面2中的情况是不允许发送的）、判断 PID 是否有效、如果这个 batch 是重试的 batch，那么需要判断这个 batch 之前是否还有 batch 没有发送完成，如果有，这里会先跳过这个 Topic-Partition 的发送，直到前面的 batch 发送完成，**最坏情况下，这个 Topic-Partition 的 in-flight request 将会减少到1**（这个涉及也是考虑到 server 端的一个设置，文章下面会详细分析）；
 
- 2. 如果这个 ProducerBatch 还没有这个相应的 PID 和 sequence number 信息，会在这里进行相应的设置；</code></pre></li>
+2. 如果这个 ProducerBatch 还没有这个相应的 PID 和 sequence number 信息，会在这里进行相应的设置；</code></pre></li>
 <li><p>最后 Sender 线程再调用 <code>sendProduceRequests()</code> 方法发送 ProduceRequest 请求，后面的就跟之前正常的流程保持一致了。</p>
 </li>
 </ol>
@@ -603,7 +603,7 @@
 <h2 id="MAX-IN-FLIGHT-REQUESTS-PER-CONNECTION"><a href="#MAX-IN-FLIGHT-REQUESTS-PER-CONNECTION" class="headerlink" title="MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION"></a>MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION</h2><h3 id="MAX-IN-FLIGHT-REQUESTS-PER-CONNECTION-gt-5"><a href="#MAX-IN-FLIGHT-REQUESTS-PER-CONNECTION-gt-5" class="headerlink" title="MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION &gt; 5"></a>MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION &gt; 5</h3><p>思考: Producer 在设置幂等性时，为什么要求 MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION 小于等于 5，如果设置大于 5（不考虑 Producer 端参数校验的报错），会带来什么后果？</p>
 <p>回答: server 端只会缓存最近 5 个 batch, 会导致异常数据不断重发</p>
 <p>解释: 其实这里，要求 MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION 小于等于 5 的主要原因是：Server 端的 ProducerStateManager 实例会缓存每个 PID 在每个 Topic-Partition 上发送的最近 5 个batch 数据（这个 5 是写死的，至于为什么是 5，可能跟经验有关，当不设置幂等性时，当这个设置为 5 时，性能相对来说较高，社区是有一个相关测试文档，忘记在哪了），如果超过 5，ProducerStateManager 就会将最旧的 batch 数据清除。</p>
-<p>假设应用将 MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION 设置为 6，假设发送的请求顺序是 1、2、3、4、5、6，这时候 server 端只能缓存 2、3、4、5、6 请求对应的 batch 数据，这时候假设请求 1 发送失败，需要重试，当重试的请求发送过来后，首先先检查是否为重复的 batch，这时候检查的结果是否，之后会开始 check 其 sequence number 值，这时候只会返回一个 OutOfOrderSequenceException 异常，client 在收到这个异常后，会再次进行重试，直到超过最大重试次数或者超时，这样不但会影响 Producer 性能，还可能给 Server 带来压力（相当于client 狂发错误请求）。</p>
+<p>假设应用将 MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION 设置为 6，假设发送的请求顺序是 1、2、3、4、5、6，这时候 server 端只能缓存 2、3、4、5、6 请求对应的 batch 数据，这时候假设请求 1 响应失败，需要重试，当重试的请求发送过来后，首先先检查是否为重复的 batch，这时候检查的结果是否，之后会开始 check 其 sequence number 值，这时候只会返回一个 OutOfOrderSequenceException 异常，client 在收到这个异常后，会再次进行重试，直到超过最大重试次数或者超时，这样不但会影响 Producer 性能，还可能给 Server 带来压力（相当于client 狂发错误请求）。</p>
 <p>那有没有更好的方案呢？我认为是有的，那就是对于 OutOfOrderSequenceException 异常，再进行细分，区分这个 sequence number 是大于 nextSeq （期望的下次 sequence number 值）还是小于 nextSeq，如果是小于，那么肯定是重复的数据。</p>
 <h3 id="MAX-IN-FLIGHT-REQUESTS-PER-CONNECTION-gt-1"><a href="#MAX-IN-FLIGHT-REQUESTS-PER-CONNECTION-gt-1" class="headerlink" title="MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION &gt; 1"></a>MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION &gt; 1</h3><p>思考: 先来分析一下，在什么情况下 Producer 会出现乱序的问题？设置幂等性是否可以 保证有序?</p>
 <p>回答: 没有幂等性时，乱序的问题是在重试时出现的，举个例子：client 依然发送了 6 个请求 1、2、3、4、5、6（它们分别对应了一个 batch），这 6 个请求只有 2-6 成功 ack 了，1 失败了，这时候需要重试，重试时就会把 batch 1 的数据添加到待发送的数据列队中），那么下次再发送时，batch 1 的数据将会被发送，这时候数据就已经出现了乱序，因为 batch 1 的数据已经晚于了 batch 2-6。</p>
@@ -689,8 +689,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/HBase/" rel="next" title="HBase 面试题整理">
-                <i class="fa fa-chevron-left"></i> HBase 面试题整理
+              <a href="/2020/06/13/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Redis/reids%E9%97%AE%E9%A2%98%E6%95%B4%E7%90%86/" rel="next" title="Redis 面试题整理">
+                <i class="fa fa-chevron-left"></i> Redis 面试题整理
               </a>
             
           </div>
@@ -778,7 +778,7 @@
                 
                   <a href="/archives/%20%7C%7C%20archive">
                 
-                    <span class="site-state-item-count">302</span>
+                    <span class="site-state-item-count">309</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -1144,7 +1144,15 @@
                     
                       
                     
-                    <span class="site-state-item-count">88</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">92</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>

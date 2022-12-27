@@ -1,0 +1,1930 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Es分布式原理ES分布式集群特点 一个集群拥有相同的cluster.name 配置的节点组成， 它们共同承担数据和负载的压力。 主节点负责管理集群的变更例如增加、删除索引，或者增加、删除节点等。 而主节点并不需要涉及到文档级别的变更和搜索等操作。 屏蔽了分布式系统的复杂性 集群内的扩容能力 垂直扩容和水平扩容 真正的扩容能力是来自于水平扩容–为集群添加更多的节点，并且将负载压力和稳定性分散到这些节">
+<meta property="og:type" content="article">
+<meta property="og:title" content="es">
+<meta property="og:url" content="http://blog.kyleliu.cn/2022/02/23/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.es/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle)的云笔记">
+<meta property="og:description" content="Es分布式原理ES分布式集群特点 一个集群拥有相同的cluster.name 配置的节点组成， 它们共同承担数据和负载的压力。 主节点负责管理集群的变更例如增加、删除索引，或者增加、删除节点等。 而主节点并不需要涉及到文档级别的变更和搜索等操作。 屏蔽了分布式系统的复杂性 集群内的扩容能力 垂直扩容和水平扩容 真正的扩容能力是来自于水平扩容–为集群添加更多的节点，并且将负载压力和稳定性分散到这些节">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223142346702.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223140043517.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223140524303.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223153823350.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223161438056.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223161501064.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211213164629753.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211222114227314.png">
+<meta property="article:published_time" content="2022-02-22T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-12-19T14:21:54.619Z">
+<meta property="article:author" content="刘小恺(Kyle)">
+<meta property="article:tag" content="elasticsearch">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/img/image-20220223142346702.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2022/02/23/21.总结/面试总结/1.es/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>es | 刘小恺(Kyle)的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle)的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2022/02/23/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.es/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">es
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2022-02-23 00:00:00" itemprop="dateCreated datePublished" datetime="2022-02-23T00:00:00+08:00">2022-02-23</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">总结</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">面试总结</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/02/23/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.es/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2022/02/23/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.es/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="Es分布式原理"><a href="#Es分布式原理" class="headerlink" title="Es分布式原理"></a>Es分布式原理</h2><h3 id="ES分布式集群特点"><a href="#ES分布式集群特点" class="headerlink" title="ES分布式集群特点"></a>ES分布式集群特点</h3><ul>
+<li>一个集群拥有相同的cluster.name 配置的节点组成， 它们共同承担数据和负载的压力。</li>
+<li>主节点负责管理集群的变更例如增加、删除索引，或者增加、删除节点等。 而主节点并不需要涉及到文档级别的变更和搜索等操作。</li>
+<li>屏蔽了分布式系统的复杂性</li>
+<li>集群内的扩容能力<ul>
+<li>垂直扩容和水平扩容</li>
+<li>真正的扩容能力是来自于水平扩容–为集群添加更多的节点，并且将负载压力和稳定性分散到这些节点中</li>
+</ul>
+</li>
+</ul>
+<h3 id="Es分布式数据存储形式"><a href="#Es分布式数据存储形式" class="headerlink" title="Es分布式数据存储形式"></a>Es分布式数据存储形式</h3><img src="/img/image-20220223142346702.png" alt="image-20220223142346702" style="zoom:33%;" />
+
+<p>Elasticsearch 的数据是以shard的形式存储在每个es节点的。</p>
+<p>shard是Elasticsearch数据存储的最小单位，index的存储容量为所有shard的存储容量之和。Elasticsearch集群的存储容量则为所有index存储容量之和。</p>
+<p>一个shard就对应了一个lucene的library。对于一个shard，Elasticsearch增加了translog的功能，类似于HBase WAL，是数据写入过程中的中间数据，其余的数据都在lucene库中管理的。</p>
+<h3 id="ES分片Shard的特点"><a href="#ES分片Shard的特点" class="headerlink" title="ES分片Shard的特点"></a>ES分片Shard的特点</h3><ul>
+<li>Elasticsearch 是利用分片将数据分发到集群内各处</li>
+<li>分片是数据的容器，文档保存在分片内</li>
+<li>分片又被分配到集群内的各个节点里</li>
+<li>当集群规模变动，ES会自动在各个节点中迁移分片。使得数据任然均匀分布在集群中</li>
+<li>副分片是主分片的一个拷贝，作为硬件故障时的备份。并提供返回文档读操作</li>
+<li>在创建索引时，确定主分片数，但是副分片可以在后面进行更改</li>
+</ul>
+<h3 id="如何路由一个文档到一个分片中"><a href="#如何路由一个文档到一个分片中" class="headerlink" title="如何路由一个文档到一个分片中"></a>如何路由一个文档到一个分片中</h3><ul>
+<li>当索引一个文档时，我们怎么知道这个文档在什么位置</li>
+<li>使用下面的这个路由选择公式</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shard = hash(routing) % number_of_primary_shards</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>shard: 哪个分片， 也就是分片id</li>
+<li>routing: 一个可变值，默认是文档的id</li>
+<li>hash: 一个哈希函数，对rounting字段进行哈希计算生成一个数字</li>
+<li>number_of_primary_shards: 主分片的数量，<strong>routing</strong>字段经过<strong>hash</strong>函数计算之后的值，将对 主分片的数量也就是 <strong>number_of_primary_shards</strong> 进行取与，之后得到的<strong>shard</strong>就是我们文档所在的分片的位置</li>
+</ul>
+<h3 id="分片全文检索过程"><a href="#分片全文检索过程" class="headerlink" title="分片全文检索过程"></a>分片全文检索过程</h3><p>对于全文检索而言，文档可能分散在各个节点上</p>
+<p>可以分为搜索和取回两个阶段</p>
+<img src="/img/image-20220223140043517.png" alt="image-20220223140043517" style="zoom:33%;" />
+
+<p>查询阶段：</p>
+<ol>
+<li><p>客户端发送一个search(搜索)请求给Node3，Node3创建一个长度为from+size的空优先级队列；</p>
+</li>
+<li><p>Node3转发这个搜索请求到索引中每个副本的主分片或副本分片，每个分片执行本地查询并将结果存储到一个本地的from+size长度的优先队列里；</p>
+</li>
+<li><p>每个分片返回document的ID和优先队列里所有document的排序值给到协调节点Node3。Node3把这些值合并到自己的优先队列里产生全局排序结果；</p>
+<p>​                                                            <img src="/img/image-20220223140524303.png" alt="image-20220223140524303" style="zoom:33%;" />                *</p>
+</li>
+</ol>
+<p>取回阶段：</p>
+<ol>
+<li>协调节点先辨别哪些document需要取回，并且向相关分片发出get请求；</li>
+<li>每个分片加载document并且丰富他们，然后返回给协调节点；</li>
+<li>一旦所有的document都被取回，协调节点会将结果返回给客户端；</li>
+</ol>
+<h2 id="Es-数据存储原理"><a href="#Es-数据存储原理" class="headerlink" title="Es 数据存储原理"></a>Es 数据存储原理</h2><h4 id="写入流程总结"><a href="#写入流程总结" class="headerlink" title="写入流程总结"></a><strong>写入流程总结</strong></h4><img src="/img/image-20220223153823350.png" alt="image-20220223153823350" style="zoom:33%;" />
+
+<p>整体流程：</p>
+<ol>
+<li>数据写入buffer缓冲和translog日志文件中。<br>当你写一条数据document的时候，一方面写入到mem buffer缓冲中，一方面同时写入到translog日志文件中。</li>
+<li>buffer满了或者每隔1秒(可配)，refresh将mem buffer中的数据生成index segment文件并写入os cache，此时index segment可被打开以供search查询读取，这样文档就可以被搜索到了（注意，此时文档还没有写到磁盘上）；然后清空mem buffer供后续使用。可见，refresh实现的是文档从内存移到文件系统缓存的过程。</li>
+<li>重复上两个步骤，新的segment不断添加到os cache，mem buffer不断被清空，而translog的数据不断增加，随着时间的推移，translog文件会越来越大。</li>
+<li>当translog长度达到一定程度的时候，会触发flush操作，否则默认每隔30分钟也会定时flush，其主要过程：<br>4.1. 执行refresh操作将mem buffer中的数据写入到新的segment并写入os cache，然后打开本segment以供search使用，最后再次清空mem buffer。<br>4.2. 一个commit point被写入磁盘，这个commit point中标明所有的index segment。<br>4.3. filesystem cache（os cache）中缓存的所有的index segment文件被fsync强制刷到磁盘os disk，当index segment被fsync强制刷到磁盘上以后，就会被打开，供查询使用。<br>4.4. translog被清空和删除，创建一个新的translog。</li>
+</ol>
+<h4 id="Segment段合并"><a href="#Segment段合并" class="headerlink" title="Segment段合并"></a><strong>Segment段合并</strong></h4><p>通过每秒自动刷新创建新的段，用不了多久段的数量就爆炸了，每个段消费大量文件句柄，内存，cpu资源。更重要的是，每次搜索请求都需要依次检查每个段。段越多，查询越慢。</p>
+<p>ES通过后台合并段解决这个问题。ES利用段合并的时机来真正从文件系统删除那些version较老或者是被标记为删除的文档。被删除的文档（或者是version较老的）不会再被合并到新的更大的段中。</p>
+<img src="/img/image-20220223161438056.png" alt="image-20220223161438056" style="zoom:33%;" />
+
+<p>segment 合并的过程</p>
+<ul>
+<li>新的段flush到硬盘</li>
+<li>编写一个包含新段的新提交点，并排除旧的较小段。</li>
+<li>新的段打开供搜索</li>
+<li>旧的段被删除</li>
+</ul>
+<p>合并完成后新的段可被搜索，旧的段被删除，如下图所示：</p>
+<img src="/img/image-20220223161501064.png" alt="image-20220223161501064" style="zoom:33%;" />
+
+<blockquote>
+<p><strong>注意</strong>：段合并过程虽然看起来很爽，但是大段的合并可能会占用大量的IO和CPU，如果不加以控制，可能会大大降低搜索性能。段合并的optimize API 不是非常特殊的情况下千万不要使用，默认策略已经足够好了。不恰当的使用可能会将你机器的资源全部耗尽在段合并上，导致无法搜索、无法响应。</p>
+</blockquote>
+<h4 id="LUCENE-数据删除"><a href="#LUCENE-数据删除" class="headerlink" title="LUCENE 数据删除"></a><strong>LUCENE 数据删除</strong></h4><p>删除一个ES文档不会立即从磁盘上移除，它只是被标记成已删除。因为段是不可变的，所以文档既不能从旧的段中移除，旧的段也不能更新以反映文档最新的版本。</p>
+<p>ES的做法是，每一个提交点包括一个<code>.del /.liv</code>文件（还包括新段），包含了段上已经被标记为删除状态的文档。所以，当一个文档被做删除操作，实际上只是在<code>.del / .liv</code>文件中将该文档标记为删除，依然会在查询时被匹配到，只不过在最终返回结果之前会被从结果中删除。ES将会在用户之后添加更多索引的时候，在后台进行要删除内容的清理。</p>
+<h4 id="LUCENE-数据更新"><a href="#LUCENE-数据更新" class="headerlink" title="LUCENE 数据更新"></a><strong>LUCENE 数据更新</strong></h4><p>文档的更新操作和删除是类似的：当一个文档被更新，旧版本的文档被标记为删除，新版本的文档在新的段中索引。<br> 该文档的不同版本都会匹配一个查询，但是较旧的版本会从结果中删除。</p>
+<h4 id="ES如何处理冲突-比如并发修改同一docId"><a href="#ES如何处理冲突-比如并发修改同一docId" class="headerlink" title="*ES如何处理冲突 ( 比如并发修改同一docId ) *"></a>*<em>ES如何处理冲突 ( 比如并发修改同一docId ) *</em></h4><ul>
+<li>使用乐观并发控制</li>
+<li>利用 _version 号来确保 应用中相互冲突的变更不会导致数据丢失</li>
+<li>通过外部系统使用版本控制</li>
+</ul>
+<h4 id="LUCENE-内文件构成"><a href="#LUCENE-内文件构成" class="headerlink" title="LUCENE 内文件构成"></a><strong>LUCENE 内文件构成</strong></h4><table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Extension</th>
+<th>Brief Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Segment Info</td>
+<td>.si</td>
+<td>segment的元数据文件</td>
+</tr>
+<tr>
+<td>Compound File</td>
+<td>.cfs, .cfe</td>
+<td>一个segment包含了如下表的各个文件，为减少打开文件的数量，在segment小的时候，segment的所有文件内容都保存在cfs文件中，cfe文件保存了lucene各文件在cfs文件的位置信息</td>
+</tr>
+<tr>
+<td>Fields</td>
+<td>.fnm</td>
+<td>保存了fields的相关信息</td>
+</tr>
+<tr>
+<td>Field Index</td>
+<td>.fdx</td>
+<td>正排存储文件的元数据信息</td>
+</tr>
+<tr>
+<td>Field Data</td>
+<td>.fdt</td>
+<td>存储了正排存储数据，写入的原文存储在这</td>
+</tr>
+<tr>
+<td>Term Dictionary</td>
+<td>.tim</td>
+<td>倒排索引的元数据信息</td>
+</tr>
+<tr>
+<td>Term Index</td>
+<td>.tip</td>
+<td>倒排索引文件，存储了所有的倒排索引数据</td>
+</tr>
+<tr>
+<td>Frequencies</td>
+<td>.doc</td>
+<td>保存了每个term的doc id列表和term在doc中的词频</td>
+</tr>
+<tr>
+<td>Positions</td>
+<td>.pos</td>
+<td>Stores position information about where a term occurs in the index 全文索引的字段，会有该文件，保存了term在doc中的位置</td>
+</tr>
+<tr>
+<td>Payloads</td>
+<td>.pay</td>
+<td>Stores additional per-position metadata information such as character offsets and user payloads 全文索引的字段，使用了一些像payloads的高级特性会有该文件，保存了term在doc中的一些高级特性</td>
+</tr>
+<tr>
+<td>Norms</td>
+<td>.nvd, .nvm</td>
+<td>文件保存索引字段加权数据</td>
+</tr>
+<tr>
+<td>Per-Document Values</td>
+<td>.dvd, .dvm</td>
+<td>lucene的docvalues文件，即数据的列式存储，用作聚合和排序</td>
+</tr>
+<tr>
+<td>Term Vector Data</td>
+<td>.tvx, .tvd, .tvf</td>
+<td>Stores offset into the document data file 保存索引字段的矢量信息，用在对term进行高亮，计算文本相关性中使用</td>
+</tr>
+<tr>
+<td>Live Documents</td>
+<td>.liv / .del</td>
+<td>记录了segment中删除的doc</td>
+</tr>
+</tbody></table>
+<h2 id="Lucene-数据结构"><a href="#Lucene-数据结构" class="headerlink" title="Lucene 数据结构"></a>Lucene 数据结构</h2><h3 id="Lucene的数据类型"><a href="#Lucene的数据类型" class="headerlink" title="Lucene的数据类型"></a><strong>Lucene的数据类型</strong></h3><p>Index：索引，由很多的Document组成。<br>Document：由很多的Field组成，是Index和Search的最小单位。<br>Field：由很多的Term组成，包括Field Name和Field Value。<br>Term：由很多的字节组成。一般将Text类型的Field Value分词之后的每个最小单元叫做Term。</p>
+<h3 id="各种查询结构总结："><a href="#各种查询结构总结：" class="headerlink" title="各种查询结构总结："></a>各种查询结构总结：</h3><ol>
+<li>FST(有穷状态装换器)：保存字符穿类型term字典索引，可以在FST上实现单Term、Term范围、Term前缀和通配符查询等。</li>
+<li>Doc-dictionary 的倒排链：保存了每个term对应的docId的列表，采用skipList的结构保存，用于快速跳跃 (当数据过大的时候，考虑到压缩和加速取交并集会采用roaring bitmap)。</li>
+<li>BKD-Tree(数值类型多维二叉搜索树)：BKD-Tree是一种保存多维空间点的数据结构，用于数值类型(包括空间点)的快速查找。</li>
+<li>DocValues：基于docId的列式存储，由于列式存储的特点，可以有效提升排序聚合的性能。</li>
+</ol>
+<h3 id="如何实现返回结果进行排序聚合"><a href="#如何实现返回结果进行排序聚合" class="headerlink" title="如何实现返回结果进行排序聚合"></a>如何实现返回结果进行排序聚合</h3><p>通过之前介绍可以看出lucene通过倒排的存储模型实现term的搜索，那对于有时候我们需要拿到另一个属性的值进行聚合，或者希望返回结果按照另一个属性进行排序。</p>
+<ul>
+<li>在lucene4之前需要把结果全部拿到再读取原文进行排序，这样效率较低，还比较占用内存，为了加速lucene实现了fieldcache，把读过的field放进内存中。这样可以减少重复的IO，但是也会带来新的问题，就是占用较多内存。</li>
+<li>新版本的lucene中引入了DocValues，DocValues是一个基于docid的列式存储。当我们拿到一系列的docid后，进行排序就可以使用这个列式存储，结合一个堆排序进行。当然额外的列式存储会占用额外的空间，lucene在建索引的时候可以自行选择是否需要DocValue存储和哪些字段需要存储。</li>
+</ul>
+<p>默认情况下，Lucene会按照Score排序，即算分后的分数值，如果指定了其他的Sort字段，就会按照指定的字段排序。那么，排序会非常影响性能吗？</p>
+<p>首先，排序并不会对所有命中的doc进行排序，而是构造一个堆(n个数取前k大问题)，保证前(Offset+Size)个数的doc是有序的，所以排序的性能取决于(Size+Offset)和命中的文档数，另外就是读取docValues的开销。因为(Size+Offset)并不会太大，而且docValues的读取性能很高，所以排序并不会非常的影响性能。</p>
+<p> Roaring Bitmaps**</p>
+<p>细心的你可能发现了，bitmap 有个硬伤，就是不管你有多少个文档，你占用的空间都是一样的，之前说过，Lucene Posting List 的每个 Segement 最多放 65536 个文档ID，举一个极端的例子，有一个数组，里面只有两个文档 ID：</p>
+<p>[0, 65535]</p>
+<p>用 Bitmap，要怎么表示？</p>
+<p>[1,0,0,0,….(超级多个0),…,0,0,1]</p>
+<p>你需要 65536 个 bit，也就是 65536/8 = 8192 bytes，而用 Integer 数组，你只需要 2 * 2 bytes = 4 bytes</p>
+<p>呵呵，死板的 bitmap。可见在文档数量不多的时候，使用 Integer 数组更加节省内存。</p>
+<p>我们来算一下[临界值]，很简单，无论文档数量多少，bitmap都需要 8192 bytes，而 Integer 数组则和文档数量成线性相关，每个文档 ID 占 2 bytes，所以：</p>
+<p>8192 / 2 = 4096</p>
+<p>当文档数量少于 4096 时，用 Integer 数组，否则，用 bitmap.</p>
+<img src="/img/image-20211213164629753.png" alt="image-20211213164629753" style="zoom:33%;" />
+
+<blockquote>
+<p>这里补充一下 [Roaring bitmaps]) 和 之前讲的 Frame Of Reference 的关系。<br>Frame Of Reference 是压缩数据，减少磁盘占用空间，所以当我们从磁盘取数据时，也需要一个反向的过程，即解压，解压后才有我们上面看到的这样子的文档ID数组：[73, 300, 302, 303, 343, 372] ，接着我们需要对数据进行处理，求交集或者并集，这时候数据是需要放到内存进行处理的，我们有三个这样的数组，这些数组可能很大，而内存空间比磁盘还宝贵，于是需要更强有力的压缩算法，同时还要有利于快速的求交并集，于是有了Roaring Bitmaps 算法。<br>另外，Lucene 还会把从磁盘取出来的数据，通过 Roaring bitmaps 处理后，缓存到内存中，Lucene 称之为 [filter cache].</p>
+</blockquote>
+<h3 id="Roaring-Bitmap-数据结构"><a href="#Roaring-Bitmap-数据结构" class="headerlink" title="Roaring Bitmap 数据结构"></a>Roaring Bitmap 数据结构</h3><img src="/img/image-20211222114227314.png" alt="image-20211222114227314" style="zoom: 33%;" />
+
+<p>每个RoaringBitmap中都包含一个<code>RoaringArray</code>，名字叫<code>highLowContainer</code>。<code>highLowContainer</code>存储了<code>RoaringBitmap</code>中的全部数据。</p>
+<p>这个名字意味着，会将32位的整形（<code>int</code>）拆分成高16位和低16位两部分（两个<code>short</code>）来处理。</p>
+<p>RoaringArray的数据结构很简单，核心为以下三个成员：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">short</span>[] keys;</span><br><span class="line">Container[] values;</span><br><span class="line"><span class="keyword">int</span> size;</span><br></pre></td></tr></table></figure>
+
+<p>每个32位的整形，高16位会被作为key存储到short[] keys中，低16位则被看做value，存储到Container[] values中的某个Container中。keys和values通过下标一一对应。size则标示了当前包含的key-value pair的数量，即keys和values中有效数据的数量。</p>
+<p>keys数组永远保持有序，方便二分查找。</p>
+<h4 id="三种Container"><a href="#三种Container" class="headerlink" title="三种Container"></a>三种Container</h4><p>下面介绍到的是RoaringBitmap的核心，三种Container。</p>
+<p>通过上面的介绍我们知道，每个32位整形的高16位已经作为key存储在RoaringArray中了，那么Container只需要处理低16位的数据。</p>
+<p><strong>ArrayContainer</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DEFAULT_MAX_SIZE = <span class="number">4096</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">short</span>[] content;</span><br></pre></td></tr></table></figure>
+
+<p>因为这种Container存储数据没有任何压缩，因此只适合存储少量数据。</p>
+<p>ArrayContainer占用的空间大小与存储的数据量为线性关系，每个short为2字节，因此存储了N个数据的ArrayContainer占用空间大致为2N字节。存储一个数据占用2字节，存储4096个数据占用8kb。</p>
+<p>根据源码可以看出，常量DEFAULT_MAX_SIZE值为4096，当容量超过这个值的时候会将当前Container替换为BitmapContainer。</p>
+<p><strong>BitmapContainer</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="keyword">long</span>[] bitmap;</span><br></pre></td></tr></table></figure>
+
+
+<p>这种Container使用long[]存储位图数据。每个long有64位，因此需要1024个long来提供65536个比特。</p>
+<p>因此，每个BitmapContainer在构建时就会初始化长度为1024的long[]。这就意味着，不管一个BitmapContainer中只存储了1个数据还是存储了65536个数据，占用的空间都是同样的8kb。</p>
+<p><strong>RunContainer</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">short</span>[] valueslength;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> nbrruns = <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+
+<p>RunContainer中的Run指的是行程长度压缩算法(Run Length Encoding)，对连续数据有比较好的压缩效果。</p>
+<p>它的原理是，对于连续出现的数字，只记录初始数字和后续数量。即：</p>
+<p>对于数列11，它会压缩为11,0；<br>对于数列11,12,13,14,15，它会压缩为11,4；<br>对于数列11,12,13,14,15,21,22，它会压缩为11,4,21,1；<br>源码中的  short[] valueslength  中存储的就是压缩后的数据。</p>
+<p>这种压缩算法的性能和数据的连续性（紧凑性）关系极为密切，对于连续的100个short，它能从200字节压缩为4字节，但对于完全不连续的100个short，编码完之后反而会从200字节变为400字节。</p>
+<p>如果要分析RunContainer的容量，我们可以做下面两种极端的假设：</p>
+<p>最好情况，即只存在一个数据或只存在一串连续数字，那么只会存储2个short，占用4字节<br>最坏情况，0~65535的范围内填充所有的奇数位（或所有偶数位），需要存储65536个short，128kb</p>
+<h4 id="RoaringBitmap的优化策略"><a href="#RoaringBitmap的优化策略" class="headerlink" title="RoaringBitmap的优化策略"></a>RoaringBitmap的优化策略</h4><p><strong>创建时：</strong></p>
+<ul>
+<li>创建包含单个值的Container时，选用ArrayContainer</li>
+<li>创建包含一串连续值的Container时，比较ArrayContainer和RunContainer，选取空间占用较少的<br>转换：</li>
+</ul>
+<p><strong>针对ArrayContainer：</strong></p>
+<ul>
+<li>如果插入值后容量超过4096，则自动转换为BitmapContainer。因此正常使用的情况下不会出现容量超过4096的ArrayContainer。</li>
+<li>调用runOptimize()方法时，会比较和RunContainer的空间占用大小，选择是否转换为RunContainer。</li>
+</ul>
+<p><strong>针对BitmapContainer：</strong></p>
+<ul>
+<li>如果删除某值后容量低至4096，则会自动转换为ArrayContainer。因此正常使用的情况下不会出现容量小于4096的BitmapContainer。</li>
+<li>调用runOptimize()方法时，会比较和RunContainer的空间占用大小，选择是否转换为RunContainer。</li>
+</ul>
+<p><strong>针对RunContainer：</strong></p>
+<ul>
+<li>只有在调用runOptimize()方法才会发生转换，会分别和ArrayContainer、BitmapContainer比较空间占用大小，然后选择是否转换</li>
+</ul>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/elasticsearch/" rel="tag"><i class="fa fa-tag"></i> elasticsearch</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/01/04/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Mysql/Mysql%E6%95%B4%E7%90%86/" rel="next" title="Mysql整理">
+                <i class="fa fa-chevron-left"></i> Mysql整理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/02/23/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/Elasticsearch%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8%E5%8E%9F%E7%90%86/" rel="prev" title="Elasticsearch分布式存储原理">
+                Elasticsearch分布式存储原理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%20%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">309</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">82</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">92</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Es分布式原理"><span class="nav-text">Es分布式原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ES分布式集群特点"><span class="nav-text">ES分布式集群特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Es分布式数据存储形式"><span class="nav-text">Es分布式数据存储形式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES分片Shard的特点"><span class="nav-text">ES分片Shard的特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何路由一个文档到一个分片中"><span class="nav-text">如何路由一个文档到一个分片中</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分片全文检索过程"><span class="nav-text">分片全文检索过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Es-数据存储原理"><span class="nav-text">Es 数据存储原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#写入流程总结"><span class="nav-text">写入流程总结</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Segment段合并"><span class="nav-text">Segment段合并</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-数据删除"><span class="nav-text">LUCENE 数据删除</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-数据更新"><span class="nav-text">LUCENE 数据更新</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ES如何处理冲突-比如并发修改同一docId"><span class="nav-text">*ES如何处理冲突 ( 比如并发修改同一docId ) *</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-内文件构成"><span class="nav-text">LUCENE 内文件构成</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lucene-数据结构"><span class="nav-text">Lucene 数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Lucene的数据类型"><span class="nav-text">Lucene的数据类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#各种查询结构总结："><span class="nav-text">各种查询结构总结：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何实现返回结果进行排序聚合"><span class="nav-text">如何实现返回结果进行排序聚合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Roaring-Bitmap-数据结构"><span class="nav-text">Roaring Bitmap 数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#三种Container"><span class="nav-text">三种Container</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RoaringBitmap的优化策略"><span class="nav-text">RoaringBitmap的优化策略</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

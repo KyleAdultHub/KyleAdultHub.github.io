@@ -142,7 +142,7 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223165935798.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223172931852.png">
 <meta property="article:published_time" content="2022-02-22T16:00:00.000Z">
-<meta property="article:modified_time" content="2022-02-24T03:41:46.703Z">
+<meta property="article:modified_time" content="2022-12-19T12:53:27.613Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="elasticsearch">
 <meta name="twitter:card" content="summary">
@@ -613,9 +613,9 @@
 <ol>
 <li><p>客户端发送一个search(搜索)请求给Node3，Node3创建一个长度为from+size的空优先级队列；</p>
 </li>
-<li><p>Node3转发这个搜索请求到索引中每个副本的主分片或副本分片，每个分片执行本地查询并将结果存储到一个本地的from+size长度的有限队列里；</p>
+<li><p>Node3转发这个搜索请求到索引中每个副本的主分片或副本分片，每个分片执行本地查询并将结果存储到一个本地的from+size长度的优先队列里；</p>
 </li>
-<li><p>每个分片分回document的ID和有限队列里所有document的排序值给到协调节点Node3。Node3把这些值合并到自己的优先队列里产生全局排序结果；</p>
+<li><p>每个分片返回document的ID和优先队列里所有document的排序值给到协调节点Node3。Node3把这些值合并到自己的优先队列里产生全局排序结果；</p>
 <p>​                                                            <img src="/img/image-20220223140524303.png" alt="image-20220223140524303" style="zoom:33%;" />                *</p>
 </li>
 </ol>
@@ -876,10 +876,9 @@
 <li>7、对应not_anaylized的string字段，使用的是SORTED_SET类型，number的类型是SORTED_NUMERIC类型</li>
 </ul>
 <p>其中SORTED_SET 的 SORTED_SINGLE_VALUED类型包括了两类数据 ： binary + numeric， binary是按ord排序的term的列表，numeric是doc到ord的映射。</p>
-<h4 id="Filddata-内存"><a href="#Filddata-内存" class="headerlink" title="Filddata (内存)"></a><strong>Filddata</strong> (内存)</h4><p><code>(非磁盘Field Data 文件，该结构为Fied Data 映射的内存结构)</code></p>
-<p>Doc values 是不支持 analyzed 字符串字段的，然而，这些字段仍然可以使用聚合和排序，是因为使用了fielddata 的数据结构。<strong>与 doc values 不同，fielddata 构建和管理 100% 在内存中，常驻于 JVM 内存堆。</strong></p>
-<p>Fielddata默认是不启用的，因为text字段比较长，一般只做关键字分词和搜索，很少拿它来进行全文匹配和聚合还有排序，因为大多数这种情况是无意义的，一旦启用将会把text都加载到内存中，那将带来很大的内存压力。</p>
-<p>Doc values 是不支持 analyzed 字符串字段的，然而，这些字段仍然可以使用聚合，是因为使用了fielddata 的数据结构。<strong>与 doc values 不同，fielddata 构建和管理 100% 在内存中，常驻于 JVM 内存堆。</strong></p>
+<h4 id="Fielddata-内存"><a href="#Fielddata-内存" class="headerlink" title="Fielddata (内存)"></a><strong>Fielddata</strong> (内存)</h4><p><code>(非磁盘Field Data 文件，该结构为Fied Data 映射的内存结构)</code></p>
+<p>Doc values 是不支持 analyzed 字符串字段的，然而，这些字段仍然可以使用聚合和排序</p>
+<p>当ES进行排序、统计时，ES把涉及到的字段数据全部读取到内存(JVM Heap)中进行操作。<strong>与 doc values 不同，fielddata 构建和管理 100% 在内存中，常驻于 JVM 内存堆。</strong></p>
 <p>Fielddata默认是不启用的，因为text字段比较长，一般只做关键字分词和搜索，很少拿它来进行全文匹配和聚合还有排序，因为大多数这种情况是无意义的，一旦启用将会把text都加载到内存中，那将带来很大的内存压力。</p>
 <p>Fielddata一些特性：</p>
 <blockquote>
@@ -956,8 +955,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2022/01/04/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Mysql/Mysql%E6%95%B4%E7%90%86/" rel="next" title="Mysql整理">
-                <i class="fa fa-chevron-left"></i> Mysql整理
+              <a href="/2022/02/23/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.es/" rel="next" title="es">
+                <i class="fa fa-chevron-left"></i> es
               </a>
             
           </div>
@@ -1045,7 +1044,7 @@
                 
                   <a href="/archives/%20%7C%7C%20archive">
                 
-                    <span class="site-state-item-count">302</span>
+                    <span class="site-state-item-count">309</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -1411,7 +1410,15 @@
                     
                       
                     
-                    <span class="site-state-item-count">88</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">92</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -1461,7 +1468,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Es分布式原理"><span class="nav-text">Es分布式原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ES分布式集群特点"><span class="nav-text">ES分布式集群特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Es分布式数据存储形式"><span class="nav-text">Es分布式数据存储形式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES分片Shard的特点"><span class="nav-text">ES分片Shard的特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何路由一个文档到一个分片中"><span class="nav-text">如何路由一个文档到一个分片中</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分布式节点间的数据交互"><span class="nav-text">分布式节点间的数据交互</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#主分片和副分片如何交互"><span class="nav-text">主分片和副分片如何交互</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#各节点间如何交互"><span class="nav-text">各节点间如何交互</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#插入、删除单个文档的流程"><span class="nav-text">插入、删除单个文档的流程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#取回一个文档"><span class="nav-text">取回一个文档</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#局部更新文档"><span class="nav-text">局部更新文档</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#多文档模式"><span class="nav-text">多文档模式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#使用-bulk-修改多个文档"><span class="nav-text">使用 bulk 修改多个文档</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#全文检索"><span class="nav-text">全文检索</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Es-数据存储原理"><span class="nav-text">Es 数据存储原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LUCENE-数据的写入与更新"><span class="nav-text">LUCENE 数据的写入与更新</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-数据的写入"><span class="nav-text">LUCENE 数据的写入</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#数据写入流程"><span class="nav-text">数据写入流程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#索引写入原理"><span class="nav-text">索引写入原理</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#索引基础结构-segment段"><span class="nav-text">索引基础结构-segment段</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#索引写入步骤"><span class="nav-text">索引写入步骤</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#写入流程总结"><span class="nav-text">写入流程总结</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Segment段合并"><span class="nav-text">Segment段合并</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-数据删除"><span class="nav-text">LUCENE 数据删除</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-数据更新"><span class="nav-text">LUCENE 数据更新</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ES如何处理冲突-比如并发修改同一docId"><span class="nav-text">*ES如何处理冲突 ( 比如并发修改同一docId ) *</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LUCENE-数据存储"><span class="nav-text">LUCENE 数据存储</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-内文件构成"><span class="nav-text">LUCENE 内文件构成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE数据元信息文件"><span class="nav-text">LUCENE数据元信息文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#segment的元信息文件"><span class="nav-text">segment的元信息文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#fields信息文件"><span class="nav-text">fields信息文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数据存储文件"><span class="nav-text">数据存储文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#倒排索引文件"><span class="nav-text">倒排索引文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#列存文件（docvalues）"><span class="nav-text">列存文件（docvalues）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Filddata-内存"><span class="nav-text">Filddata (内存)</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Es分布式原理"><span class="nav-text">Es分布式原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ES分布式集群特点"><span class="nav-text">ES分布式集群特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Es分布式数据存储形式"><span class="nav-text">Es分布式数据存储形式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES分片Shard的特点"><span class="nav-text">ES分片Shard的特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何路由一个文档到一个分片中"><span class="nav-text">如何路由一个文档到一个分片中</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分布式节点间的数据交互"><span class="nav-text">分布式节点间的数据交互</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#主分片和副分片如何交互"><span class="nav-text">主分片和副分片如何交互</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#各节点间如何交互"><span class="nav-text">各节点间如何交互</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#插入、删除单个文档的流程"><span class="nav-text">插入、删除单个文档的流程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#取回一个文档"><span class="nav-text">取回一个文档</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#局部更新文档"><span class="nav-text">局部更新文档</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#多文档模式"><span class="nav-text">多文档模式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#使用-bulk-修改多个文档"><span class="nav-text">使用 bulk 修改多个文档</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#全文检索"><span class="nav-text">全文检索</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Es-数据存储原理"><span class="nav-text">Es 数据存储原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LUCENE-数据的写入与更新"><span class="nav-text">LUCENE 数据的写入与更新</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-数据的写入"><span class="nav-text">LUCENE 数据的写入</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#数据写入流程"><span class="nav-text">数据写入流程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#索引写入原理"><span class="nav-text">索引写入原理</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#索引基础结构-segment段"><span class="nav-text">索引基础结构-segment段</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#索引写入步骤"><span class="nav-text">索引写入步骤</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#写入流程总结"><span class="nav-text">写入流程总结</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Segment段合并"><span class="nav-text">Segment段合并</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-数据删除"><span class="nav-text">LUCENE 数据删除</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-数据更新"><span class="nav-text">LUCENE 数据更新</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ES如何处理冲突-比如并发修改同一docId"><span class="nav-text">*ES如何处理冲突 ( 比如并发修改同一docId ) *</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LUCENE-数据存储"><span class="nav-text">LUCENE 数据存储</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-内文件构成"><span class="nav-text">LUCENE 内文件构成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE数据元信息文件"><span class="nav-text">LUCENE数据元信息文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#segment的元信息文件"><span class="nav-text">segment的元信息文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#fields信息文件"><span class="nav-text">fields信息文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数据存储文件"><span class="nav-text">数据存储文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#倒排索引文件"><span class="nav-text">倒排索引文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#列存文件（docvalues）"><span class="nav-text">列存文件（docvalues）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Fielddata-内存"><span class="nav-text">Fielddata (内存)</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>

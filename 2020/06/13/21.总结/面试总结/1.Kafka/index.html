@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Kafka架构Kafka 整体结构介绍 Producer ：消息生产者，就是向kafka broker发消息的客户端。 Consumer ：消息消费者，向kafka broker取消息的客户端 Topic ：咋们可以理解为一个队列。 Consumer Group （CG）：这是kafka用来实现一个topic消息的广播（发给所有的consumer）和单播（发给任意一个consumer）的手段。一个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka 面试题整理">
+<meta property="og:url" content="http://blog.kyleliu.cn/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Kafka/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle)的云笔记">
+<meta property="og:description" content="Kafka架构Kafka 整体结构介绍 Producer ：消息生产者，就是向kafka broker发消息的客户端。 Consumer ：消息消费者，向kafka broker取消息的客户端 Topic ：咋们可以理解为一个队列。 Consumer Group （CG）：这是kafka用来实现一个topic消息的广播（发给所有的consumer）和单播（发给任意一个consumer）的手段。一个">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1594010991499.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1592037825676.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1592037834703.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1592037845195.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1592037856146.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1592037918624.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1592037926311.png">
+<meta property="article:published_time" content="2020-06-13T03:00:00.000Z">
+<meta property="article:modified_time" content="2022-12-26T04:09:27.196Z">
+<meta property="article:author" content="刘小恺(Kyle)">
+<meta property="article:tag" content="面试">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/img/1594010991499.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2020/06/13/21.总结/面试总结/1.Kafka/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Kafka 面试题整理 | 刘小恺(Kyle)的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle)的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Kafka/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Kafka 面试题整理
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-06-13 11:00:00" itemprop="dateCreated datePublished" datetime="2020-06-13T11:00:00+08:00">2020-06-13</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">总结</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">面试总结</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Kafka/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Kafka/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="Kafka架构"><a href="#Kafka架构" class="headerlink" title="Kafka架构"></a>Kafka架构</h2><h3 id="Kafka-整体结构介绍"><a href="#Kafka-整体结构介绍" class="headerlink" title="Kafka 整体结构介绍"></a>Kafka 整体结构介绍</h3><ul>
+<li>Producer ：消息生产者，就是向kafka broker发消息的客户端。</li>
+<li>Consumer ：消息消费者，向kafka broker取消息的客户端</li>
+<li>Topic ：咋们可以理解为一个队列。</li>
+<li>Consumer Group （CG）：这是kafka用来实现一个topic消息的广播（发给所有的consumer）和单播（发给任意一个consumer）的手段。一个topic可以有多个CG。topic的消息会复制（不是真的复制，是概念上的）到所有的CG，但每个partion只会把消息发给该CG中的一个consumer。如果需要实现广播，只要每个consumer有一个独立的CG就可以了。要实现单播只要所有的consumer在同一个CG。用CG还可以将consumer进行自由的分组而不需要多次发送消息到不同的topic。</li>
+<li>Broker ：一台kafka服务器就是一个broker。一个集群由多个broker组成。一个broker可以容纳多个topic。</li>
+<li>Partition：为了实现扩展性，一个非常大的topic可以分布到多个broker（即服务器）上，一个topic可以分为多个partition，每个partition是一个有序的队列。partition中的每条消息都会被分配一个有序的id（offset）。kafka只保证按一个partition中的顺序将消息发给consumer，不保证一个topic的整体（多个partition间）的顺序。</li>
+<li>Offset：kafka的存储文件都是按照offset.kafka来命名，用offset做名字的好处是方便查找。例如你想找位于2049的位置，只要找到2048.kafka的文件即可。当然the first offset就是00000000000.kafka</li>
+</ul>
+<h3 id="Consumer-与topic-的关系"><a href="#Consumer-与topic-的关系" class="headerlink" title="Consumer 与topic 的关系"></a>Consumer 与topic 的关系</h3><p>本质上kafka只支持Topic；</p>
+<ul>
+<li><p>每个group中可以有多个consumer，每个consumer属于一个consumer group；</p>
+<p>通常情况下，一个group中会包含多个consumer，这样不仅可以提高topic中消息的并发消费能力，而且还能提高”故障容错”性，如果group中的某个consumer失效那么其消费的partitions将会有其他consumer自动接管。</p>
+</li>
+<li><p>对于Topic中的一条特定的消息，只会被订阅此Topic的每个group中的其中一个consumer消费，此消息不会发送给一个group的多个consumer；</p>
+<p>那么一个group中所有的consumer将会交错的消费整个Topic，每个group中consumer消息消费互相独立，我们可以认为一个group是一个”订阅”者。</p>
+</li>
+<li><p>在kafka中,一个partition中的消息只会被group中的一个consumer消费<strong>(同一时刻)</strong>；</p>
+<p>一个Topic中的每个partions，只会被一个”订阅者”中的一个consumer消费，不过一个consumer可以同时消费多个partitions中的消息。</p>
+</li>
+<li><p>kafka的设计原理决定,对于一个topic，同一个group中不能有多于partitions个数的consumer同时消费，否则将意味着某些consumer将无法得到消息。</p>
+<p>kafka只能保证一个partition中的消息被某个consumer消费时是顺序的；事实上，从Topic角度来说,当有多个partitions时,消息仍不是全局有序的。</p>
+</li>
+</ul>
+<h3 id="kafka-相对传统技术的优势"><a href="#kafka-相对传统技术的优势" class="headerlink" title="kafka 相对传统技术的优势"></a>kafka 相对传统技术的优势</h3><ul>
+<li>快速:单一的Kafka代理可以处理成千上万的客户端，每秒处理数兆字节的读写操作。</li>
+<li>可伸缩:在一组机器上对数据进行分区和简化，以支持更大的数据</li>
+<li>持久:消息是持久性的，并在集群中进行复制，以防止数据丢失。</li>
+<li>设计:它提供了容错保证和持久性</li>
+</ul>
+<h3 id="Kafka-使用zookeeper-的作用"><a href="#Kafka-使用zookeeper-的作用" class="headerlink" title="Kafka 使用zookeeper 的作用"></a>Kafka 使用zookeeper 的作用</h3><ul>
+<li>Zookeeper主要用于在集群中不同节点之间进行通信</li>
+<li>controller的选举：controller负责集群节点的上下线监控,时刻关注leader是否down机，负责leader的选举，为ISR队列选举备胎</li>
+<li>offset的存储（kafka0.9之前）</li>
+<li>保存broker节点信息</li>
+<li>除此之外，它还执行其他活动，如: leader检测、分布式同步、配置管理、识别新节点何时离开或连接、集群、节点实时状态等等。</li>
+</ul>
+<blockquote>
+<p>0.9之前的数据保存在zk集群中，一定程度上增加了zk集群负担<br>0.9版本及之后默认将consumer offset保存在Kafka的一个内置topic(__consumer_offsets)中。</p>
+</blockquote>
+<h3 id="Kafka-判断一个节点是否还活着有那两个条件？"><a href="#Kafka-判断一个节点是否还活着有那两个条件？" class="headerlink" title="Kafka 判断一个节点是否还活着有那两个条件？"></a>Kafka 判断一个节点是否还活着有那两个条件？</h3><p>（1）节点必须可以维护和 ZooKeeper 的连接，Zookeeper 通过心跳机制检查每个节点的连接</p>
+<p>（2）如果节点是个 follower,他必须能及时的同步 leader 的写操作，延时不能太久</p>
+<h2 id="Kafka分区"><a href="#Kafka分区" class="headerlink" title="Kafka分区"></a>Kafka分区</h2><h3 id="Kafka生产者分区机制"><a href="#Kafka生产者分区机制" class="headerlink" title="Kafka生产者分区机制"></a>Kafka生产者分区机制</h3><p><strong>轮询策略</strong></p>
+<p>也称 Round-robin 策略，即顺序分配。比如一个主题下有 3 个分区，那么第一条消息被发送到分区 0，第二条被发送到分区 1，第三条被发送到分区 2，以此类推。当生产第 4 条消息时又会重新开始，即将其分配到分区 0。</p>
+<p><strong>随机策略</strong></p>
+<p>也称 Randomness 策略。所谓随机就是我们随意地将消息放置到任意一个分区上，如下面这张图所示。</p>
+<p><strong>按消息key保存策略</strong></p>
+<p>也称 Key-ordering 策略。这个可以理解为是自定义的策略之一。</p>
+<p>Kafka 允许为每条消息定义消息键，简称为 Key。这个 Key 的作用非常大，它可以是一个有着明确业务含义的字符串，比如客户代码、部门编号或是业务 ID 等；也可以用来表征消息元数据。特别是在 Kafka 不支持时间戳的年代，在一些场景中，工程师们都是直接将消息创建时间封装进 Key 里面的。一旦消息被定义了 Key，那么你就可以保证同一个 Key 的所有消息都进入到相同的分区里面，由于每个分区下的消息处理都是有顺序的，故这个策略被称为按消息键保序策略</p>
+<h2 id="Kafka-生产者"><a href="#Kafka-生产者" class="headerlink" title="Kafka 生产者"></a>Kafka 生产者</h2><h3 id="producer-是否直接将数据发送到-broker-的-leader-主节点-？"><a href="#producer-是否直接将数据发送到-broker-的-leader-主节点-？" class="headerlink" title="producer 是否直接将数据发送到 broker 的 leader(主节点)？"></a>producer 是否直接将数据发送到 broker 的 leader(主节点)？</h3><p>producer 直接将数据发送到 broker 的 leader(主节点)，不需要在多个节点进行分发。</p>
+<p>为了帮助 producer 做到这点，所有的 Kafka 节点都可以及时的告知:哪些节点是活动的，目标topic 目标分区的 leader 在哪。这样 producer 就可以直接将消息发送到目的地了</p>
+<h2 id="Kafka-消费者"><a href="#Kafka-消费者" class="headerlink" title="Kafka 消费者"></a>Kafka 消费者</h2><h3 id="Kafa-consumer-是否可以消费指定分区消息？"><a href="#Kafa-consumer-是否可以消费指定分区消息？" class="headerlink" title="Kafa consumer 是否可以消费指定分区消息？"></a>Kafa consumer 是否可以消费指定分区消息？</h3><p>Kafa consumer 消费消息时，向 broker 发出”fetch”请求去消费特定分区的消息，consumer指定消息在日志中的偏移量（offset），就可以消费从这个位置开始的消息，customer 拥有了 offset 的控制权，可以向后回滚去重新消费之前的消息，这是很有意义的</p>
+<h3 id="Kafka-消息是采用-Pull-模式，还是-Push-模式？"><a href="#Kafka-消息是采用-Pull-模式，还是-Push-模式？" class="headerlink" title="Kafka 消息是采用 Pull 模式，还是 Push 模式？"></a>Kafka 消息是采用 Pull 模式，还是 Push 模式？</h3><p>Kafka 最初考虑的问题是，customer 应该从 brokes 拉取消息还是 brokers 将消息推送到consumer，也就是 pull 还 push。在这方面，Kafka 遵循了一种大部分消息系统共同的传统的设计：producer 将消息推送到 broker，consumer 从 broker 拉取消息</p>
+<h2 id="Kafka-数据一致性"><a href="#Kafka-数据一致性" class="headerlink" title="Kafka 数据一致性"></a>Kafka 数据一致性</h2><h3 id="ISR解释"><a href="#ISR解释" class="headerlink" title="ISR解释"></a>ISR解释</h3><h4 id="Isr列表的维护"><a href="#Isr列表的维护" class="headerlink" title="Isr列表的维护"></a><strong>Isr列表的维护</strong></h4><p>Leader维护了一个动态的ISR列表（同步副本的作用），只需要这个列表的中的follower和leader同步；当ISR中的follower完成数据的同步之后，leader就会给生产者发送ack，如果follower长时间未向leader同步数据，则该follower将被剔除ISR(为了保证同步的效率)，这个时间阈值也是自定义的；同样leader故障后，就会从ISR中选举新的leader</p>
+<h4 id="怎么选择ISR的节点呢？"><a href="#怎么选择ISR的节点呢？" class="headerlink" title="怎么选择ISR的节点呢？"></a><strong>怎么选择ISR的节点呢？</strong></h4><p>首先通信的时间要快，要和leader要可以很快的完成通信，这个时间默认是10s</p>
+<p>然后就看leader数据差距，消息条数默认是10000条（后面版本被移除）</p>
+<p>为什么移除：因为kafka发送消息是批量发送的，所以会一瞬间leader接受完成，但是follower还没有拉取，所以会频繁的踢出加入ISR，这个数据会保存到zk和内存中，所以会频繁的更新zk和内存。</p>
+<p>但是对于某些不太重要的数据，对数据的可靠性要求不是很高，能够容忍数据的少量丢失，所以没必要等ISR中的follower全部接受成功</p>
+<h3 id="HW和LEO解释"><a href="#HW和LEO解释" class="headerlink" title="HW和LEO解释"></a>HW和LEO解释</h3><p>这里介绍的数据一致性主要是说不论是老的 Leader 还是新选举的 Leader，Consumer 都能读到一样的数据。那么 Kafka 是如何实现的呢？</p>
+<p><img src="/img/1594010991499.png" alt="1594010991499"></p>
+<p>假设分区的副本为3，其中副本0是 Leader，副本1和副本2是 follower，并且在 ISR 列表里面。虽然副本0已经写入了 Message4，但是 Consumer 只能读取到 Message2。因为所有的 ISR 都同步了 Message2，只有 High Water Mark 以上的消息才支持 Consumer 读取，而 High Water Mark 取决于 ISR 列表里面偏移量最小的分区，对应于上图的副本2，这个很类似于木桶原理。</p>
+<p>这样做的原因是还没有被足够多副本复制的消息被认为是“不安全”的，如果 Leader 发生崩溃，另一个副本成为新 Leader，那么这些消息很可能丢失了。如果我们允许消费者读取这些消息，可能就会破坏一致性。试想，一个消费者从当前 Leader（副本0） 读取并处理了 Message4，这个时候 Leader 挂掉了，选举了副本1为新的 Leader，这时候另一个消费者再去从新的 Leader 读取消息，发现这个消息其实并不存在，这就导致了数据不一致性问题。</p>
+<p>当然，引入了 High Water Mark 机制，会导致 Broker 间的消息复制因为某些原因变慢，那么消息到达消费者的时间也会随之变长（因为我们会先等待消息复制完毕）。延迟时间可以通过参数 <code>replica.lag.time.max.ms</code> 参数配置，它指定了副本在复制消息时可被允许的最大延迟时间。</p>
+<blockquote>
+<p> 总结:</p>
+<p>LEO（log end offset，每个副本中最大的offset）,HW(high watermark，所有副本最小的offset)。对于消费者来说不能消费HW之后的数据。</p>
+</blockquote>
+<h3 id="Broker故障后ISR的处理"><a href="#Broker故障后ISR的处理" class="headerlink" title="Broker故障后ISR的处理"></a>Broker故障后ISR的处理</h3><ol>
+<li>follower故障<br>follower发生故障后会被临时踢出ISR，待该follower恢复后，follower会读取本地磁盘记录的上次的HW，并将log文件高于HW的部分截取掉，从HW开始向leader进行同步。等该follower的LEO大于等于该Partition的HW，即follower追上leader之后，就可以重新加入ISR了。</li>
+<li>leader故障<br>leader发生故障之后，会从ISR中选出一个新的leader，之后，为保证多个副本之间的数据一致性，其余的follower会先将各自的log文件高于HW的部分截掉，然后从新的leader同步数据。</li>
+</ol>
+<h3 id="Kafka-的ISR中有follower落后，怎么处理？"><a href="#Kafka-的ISR中有follower落后，怎么处理？" class="headerlink" title="Kafka 的ISR中有follower落后，怎么处理？"></a>Kafka 的ISR中有follower落后，怎么处理？</h3><p>leader收到数据，所有follower都开始同步数据，但有一个follower，因为某种故障，迟迟不能与leader进行同步，那leader就要一直等下去，直到它完成同步，才能发送ack。这个问题怎么解决呢？<br>Leader维护了一个动态的in-sync replica set (ISR)，意为和leader保持同步的follower集合。当ISR中的follower完成数据的同步之后，leader就会给follower发送ack。如果follower长时间未向leader同步数据，则该follower将被踢出ISR，该时间阈值由replica.lag.time.max.ms参数（默认10秒）设定。Leader发生故障之后，就会从ISR中选举新的leader。</p>
+<h3 id="kafka-Broker-数据一致性"><a href="#kafka-Broker-数据一致性" class="headerlink" title="kafka  Broker 数据一致性"></a>kafka  Broker 数据一致性</h3><h5 id="什么情况下broker会数据不一致"><a href="#什么情况下broker会数据不一致" class="headerlink" title="什么情况下broker会数据不一致"></a>什么情况下broker会数据不一致</h5><ol>
+<li>未设置ack=-1， leader和follower未完成同步，leader挂掉， 数据未来得及同步造成数据丢失</li>
+<li>数据存储在page cache中， 还未来得及刷盘，这时宕机(极端情况)</li>
+<li>生产者没有开启幂等的话， 会造成数据重复的情况</li>
+</ol>
+<h5 id="怎么实现broker数据一致性"><a href="#怎么实现broker数据一致性" class="headerlink" title="怎么实现broker数据一致性"></a>怎么实现broker数据一致性</h5><ol>
+<li><p>首先由于leo、hw的机制会保证消费者消费的数据的一致性</p>
+</li>
+<li><p>设置ack=all， 加上isr队列会保证isr中的broker都完成了同步</p>
+<ul>
+<li>0: producer不会等待broker发送ack </li>
+<li>1: 当leader接收到消息之后发送ack </li>
+<li>-1: 当所有的follower都同步消息成功后发送ack</li>
+</ul>
+</li>
+<li><p>如果需要保证数据不重复，可以开启幂等功能</p>
+</li>
+</ol>
+<h3 id="怎么实现producer的数据一致性"><a href="#怎么实现producer的数据一致性" class="headerlink" title="怎么实现producer的数据一致性"></a>怎么实现producer的数据一致性</h3><h5 id="什么情况下producer会数据不一致"><a href="#什么情况下producer会数据不一致" class="headerlink" title="什么情况下producer会数据不一致"></a>什么情况下producer会数据不一致</h5><ol>
+<li>broker未采用同步发送的方式，使用默认异步发送</li>
+<li>异步发送未设置ack=-1，未等待broker端isr全部同步</li>
+<li>在发送的queue中的消息还没有完全发送， 这时发生了宕机(极端情况)</li>
+<li>没有对超过重试次数的消息进行处理</li>
+<li>没有开启幂等，在数据重试的情况下会产生数据重复的情况</li>
+</ol>
+<h5 id="怎么保证producer的数据一致"><a href="#怎么保证producer的数据一致" class="headerlink" title="怎么保证producer的数据一致"></a>怎么保证producer的数据一致</h5><ol>
+<li>设置ack=all + 同步发送，可以基本保证数据一致性，但是不推荐</li>
+<li>设置ack=all + 异步发送 + 对超过重试次数的请求进行记录 or 重试 (在生产者宕机的极端情况，会丢失数据)</li>
+<li>保证数据不重复只有开启幂等一种方法了</li>
+</ol>
+<h2 id="Kafka-文件系统"><a href="#Kafka-文件系统" class="headerlink" title="Kafka 文件系统"></a>Kafka 文件系统</h2><h3 id="Kafka-零复制技术"><a href="#Kafka-零复制技术" class="headerlink" title="Kafka 零复制技术"></a>Kafka 零复制技术</h3><p>正常情况下，先把数据读到内核空间，在从内核空间把数据读到用户空间，然后在调操作系统的io接口写到内核空间，最终在写到硬盘中</p>
+<p>Kafka是这样做的，直接在内核空间流转io流，所以kafka的性能非常高</p>
+<p>kafka利用了Linux的sendFile技术（NIO），省去了进程切换和一次数据拷贝，让性能变得更好。</p>
+<h3 id="Kafka-文件存储机制"><a href="#Kafka-文件存储机制" class="headerlink" title="Kafka 文件存储机制"></a>Kafka 文件存储机制</h3><p><strong>Kafka 文件存储基本结构</strong></p>
+<ul>
+<li>在Kafka文件存储中，同一个topic下有多个不同partition，每个partition为一个目录，partiton命名规则为topic名称+有序序号，第一个partiton序号从0开始，序号最大值为partitions数量减1。</li>
+<li>每个partion(目录)相当于一个巨型文件被平均分配到多个大小相等segment(段)数据文件中。但每个段segment file消息数量不一定相等，这种特性方便old segment file快速被删除。默认保留7天的数据。</li>
+</ul>
+<p><img src="/img/1592037825676.png" alt="1592037825676"></p>
+<ul>
+<li>每个partiton只需要支持顺序读写就行了，segment文件生命周期由服务端配置参数决定。（什么时候创建，什么时候删除）</li>
+</ul>
+<p><img src="/img/1592037834703.png" alt="1592037834703"></p>
+<p><strong>数据有序的讨论？</strong></p>
+<p>​    一个partition的数据是否是有序的？    间隔性有序，不连续</p>
+<p>​    针对一个topic里面的数据，只能做到partition内部有序，不能做到全局有序。</p>
+<p>​    特别加入消费者的场景后，如何保证消费者消费的数据全局有序的？伪命题。</p>
+<p>​    只有一种情况下才能保证全局有序？就是只有一个partition。</p>
+<p><strong>Kafka Partition Segment</strong></p>
+<ul>
+<li>Segment file组成：由2大部分组成，分别为index file和data file，此2个文件一 一对应，成对出现，后缀”.index”和“.log”分别表示为segment索引文件、数据文件。</li>
+</ul>
+<p><img src="/img/1592037845195.png" alt="1592037845195"></p>
+<ul>
+<li>Segment文件命名规则：partion全局的第一个segment从0开始，后续每个segment文件名为上一个segment文件最后一条消息的offset值。数值最大为64位long大小，19位数字字符长度，没有数字用0填充。</li>
+<li>索引文件存储大量元数据，数据文件存储大量消息，索引文件中元数据指向对应数据文件中message的物理偏移地址。</li>
+</ul>
+<p><img src="/img/1592037856146.png" alt="1592037856146"></p>
+<blockquote>
+<p>​    3，497：当前log文件中的第几条信息，存放在磁盘上的那个地方</p>
+<p>​    上述图中索引文件存储大量元数据，数据文件存储大量消息，索引文件中元数据指向对应数据文件中message的物理偏移地址。</p>
+<p>​    其中以索引文件中元数据3,497为例，依次在数据文件中表示第3个message(在全局partiton表示第368772个message)</p>
+<p>​    以及该消息的物理偏移地址为497。</p>
+</blockquote>
+<ul>
+<li>segment data file由许多message组成， 物理结构如下：</li>
+</ul>
+<p><img src="/img/1592037918624.png" alt="1592037918624"></p>
+<h3 id="Kafka-查找Message"><a href="#Kafka-查找Message" class="headerlink" title="Kafka 查找Message"></a>Kafka 查找Message</h3><p>读取offset=368776的message，需要通过下面2个步骤查找。</p>
+<p><img src="/img/1592037926311.png" alt="1592037926311"></p>
+<p><strong>1.查找segment file</strong></p>
+<p>00000000000000000000.index表示最开始的文件，起始偏移量(offset)为0</p>
+<p>00000000000000368769.index的消息量起始偏移量为368770 = 368769 + 1</p>
+<p>00000000000000737337.index的起始偏移量为737338=737337 + 1</p>
+<p>其他后续文件依次类推。</p>
+<p>以起始偏移量命名并排序这些文件，只要根据offset 二分查找文件列表，就可以快速定位到具体文件。当offset=368776时定位到00000000000000368769.index和对应log文件。</p>
+<p><strong>2.通过segment file 查找 message</strong></p>
+<p>当offset=368776时，依次定位到00000000000000368769.index的元数据物理位置和00000000000000368769.log的物理偏移地址</p>
+<p>然后再通过00000000000000368769.log顺序查找直到offset=368776为止。</p>
+<h3 id="生产者常用配置"><a href="#生产者常用配置" class="headerlink" title="生产者常用配置"></a>生产者常用配置</h3><p>bootstrap.servers=host:port1,host2:port2</p>
+<p>key.serializer 和 value.serializer一般不建议自己实现,采用默认string实现即可</p>
+<p>retries=3  若能接受数据丢失可配置为0</p>
+<p>max.in.flight.requests.per.connection=1 越大则性能越高,但发生消息重试会打破消息有序性 </p>
+<p>acks=all  等待所有isr副本确认或配置1 仅leader确认即返回</p>
+<p>buffer.memory=33554432  默认32MB</p>
+<p>linger.ms=100  最慢0.1s会发送一个批次的消息</p>
+<p>batch.size=163840  160k,取默认值的10倍,增大该配置可降低发送频次</p>
+<p>compression.type=snappy  对消息做压缩,切记保持客户端和服务端版本及压缩格式一致 client.id=xxxx  标识生产者,可以为任意的一个字符串</p>
+<p>send.buffer.bytes=327680   320kb,默认128kb,适量调整即可</p>
+<p>receive.buffer.bytes=163840  160kb,默认32kb,适量调整即可</p>
+<h2 id="Kafka-幂等性"><a href="#Kafka-幂等性" class="headerlink" title="Kafka 幂等性"></a>Kafka 幂等性</h2><h3 id="Producer-的幂等性"><a href="#Producer-的幂等性" class="headerlink" title="Producer 的幂等性"></a>Producer 的幂等性</h3><p>Producer 的幂等性指的是当发送同一条消息时，数据在 Server 端只会被持久化一次，数据不丟不重，但是这里的幂等性是有条件的：</p>
+<ul>
+<li>只能保证 Producer 在单个会话内不丟不重，如果 Producer 出现意外挂掉再重启是无法保证的（幂等性情况下，是无法获取之前的状态信息，因此是无法做到跨会话级别的不丢不重）;</li>
+<li>幂等性不能跨多个 Topic-Partition，只能保证单个 partition 内的幂等性，当涉及多个 Topic-Partition 时，这中间的状态并没有同步。</li>
+</ul>
+<p>如果需要跨会话、跨多个 topic-partition 的情况，需要使用 Kafka 的事务性来实现。</p>
+<h3 id="幂等性用来解决什么问题"><a href="#幂等性用来解决什么问题" class="headerlink" title="幂等性用来解决什么问题?"></a>幂等性用来解决什么问题?</h3><p>在 0.11.0 之前，Kafka 通过 Producer 端和 Server 端的相关配置可以做到<strong>数据不丢</strong>，也就是 at least once，但是在一些情况下，可能会导致数据重复，比如：网络请求延迟等导致的重试操作，在发送请求重试时 Server 端并不知道这条请求是否已经处理（没有记录之前的状态信息），所以就会有可能导致数据请求的重复发送，这是 Kafka 自身的机制（异常时请求重试机制）导致的数据重复。</p>
+<h3 id="幂等性的实现原理"><a href="#幂等性的实现原理" class="headerlink" title="幂等性的实现原理"></a>幂等性的实现原理</h3><h4 id="PID"><a href="#PID" class="headerlink" title="PID"></a>PID</h4><p>每个 Producer 在初始化时都会被分配一个唯一的 PID，这个 PID 对应用是透明的，完全没有暴露给用户。对于一个给定的 PID，sequence number 将会从0开始自增，每个 Topic-Partition 都会有一个独立的 sequence number。Producer 在发送数据时，将会给每条 msg 标识一个 sequence number，Server 也就是通过这个来验证数据是否重复。这里的 PID 是全局唯一的，Producer 故障后重新启动后会被分配一个新的 PID，这也是幂等性无法做到跨会话的一个原因。</p>
+<h4 id="Sequence-number"><a href="#Sequence-number" class="headerlink" title="Sequence number"></a>Sequence number</h4><p>在有了 PID 之后，在 PID + Topic-Partition 级别上添加一个 sequence numbers 信息，就可以实现 Producer 的幂等性了。ProducerBatch 也提供了一个 <code>setProducerState()</code> 方法，它可以给一个 batch 添加一些 meta 信息（pid、baseSequence、isTransactional），这些信息是会伴随着 ProduceRequest 发到 Server 端，Server 端也正是通过这些 meta 来做相应的判断，如下所示：</p>
+<h3 id="幂等性实现流程"><a href="#幂等性实现流程" class="headerlink" title="幂等性实现流程"></a>幂等性实现流程</h3><h4 id="Producer-幂等性的处理工作"><a href="#Producer-幂等性的处理工作" class="headerlink" title="Producer 幂等性的处理工作"></a>Producer 幂等性的处理工作</h4><p>在KafkaProducer 在初始化时会初始化一个TransactionManager实例， 它的左右有以下几部分:</p>
+<ol>
+<li>记录本地事物状态(事务性必须)</li>
+<li>记录一些状态信息以保证幂等性，比如：每个 topic-partition 对应的下一个 sequence numbers 和 last acked batch（最近一个已经确认的 batch）的最大的 sequence number 等；</li>
+<li>记录ProducerIdAndEpoch信息(PID信息)；</li>
+</ol>
+<h4 id="Producer-幂等性的发送流程"><a href="#Producer-幂等性的发送流程" class="headerlink" title="Producer 幂等性的发送流程"></a>Producer 幂等性的发送流程</h4><ol>
+<li>应用通过 KafkaProducer 的 <code>send()</code> 方法将数据添加到 RecordAccumulator 中，添加时会判断是否需要新建一个 ProducerBatch，这时这个 ProducerBatch 还是没有 PID 和 sequence number 信息的；</li>
+<li>Producer 后台发送线程 Sender，在 <code>run()</code> 方法中，会先根据 TransactionManager 判断当前的 PID 是否需要重置，重置的原因是因为：如果有 topic-partition 的 batch 重试多次失败最后因为超时而被移除，这时 sequence number 将无法做到连续，因为 sequence number 有部分已经分配出去，这时系统依赖自身的机制无法继续进行下去（因为幂等性是要保证不丢不重的），相当于程序遇到了一个 fatal 异常，PID 会进行重置，TransactionManager 相关的缓存信息被清空（Producer 不会重启），只是保存状态信息的 TransactionManager 做了 <code>clear+new</code> 操作，遇到这个问题时是无法保证 exactly once 的（有数据已经发送失败了，并且超过了重试次数）；</li>
+<li>Sender 线程通过 <code>maybeWaitForProducerId()</code> 方法判断是否需要申请 PID，如果需要的话，这里会阻塞直到获取到相应的 PID 信息；</li>
+<li>Sender 线程通过 sendProducerData() 方法发送数据，整体流程与之前的 Producer 流程相似，不同的地方是在 RecordAccumulator 的 drain() 方法中，在加了幂等性之后，drain() 方法多了如下几步判断：<ol>
+<li>常规的判断：判断这个 topic-partition 是否可以继续发送（如果出现前面2中的情况是不允许发送的）、判断 PID 是否有效、如果这个 batch 是重试的 batch，那么需要判断这个 batch 之前是否还有 batch 没有发送完成，如果有，这里会先跳过这个 Topic-Partition 的发送，直到前面的 batch 发送完成，最坏情况下，这个 Topic-Partition 的 in-flight request 将会减少到1（这个涉及也是考虑到 server 端的一个设置，文章下面会详细分析）</li>
+<li>如果这个ProdecerBatch 还没有这个相应的PID和sequence number 信息， 会在这里进行相应的设置；</li>
+</ol>
+</li>
+<li>最后 Sender 线程再调用 <code>sendProduceRequests()</code> 方法发送 ProduceRequest 请求，后面的就跟之前正常的流程保持一致了。</li>
+</ol>
+<h4 id="Server-幂等性的请求生产处理流程"><a href="#Server-幂等性的请求生产处理流程" class="headerlink" title="Server 幂等性的请求生产处理流程"></a>Server 幂等性的请求生产处理流程</h4><ol>
+<li>如果请求设置了幂等性，检查是否对 ClusterResource 有 IdempotentWrite 权限，没有的话返回 CLUSTER_AUTHORIZATION_FAILED；</li>
+<li>验证对 topic 是否有 Write 权限以及 Topic 是否存在，否则返回 TOPIC_AUTHORIZATION_FAILED 或 UNKNOWN_TOPIC_OR_PARTITION 异常；</li>
+<li>检查是否有 PID 信息，没有的话走正常的写入流程；</li>
+<li>LOG 对象会在 <code>analyzeAndValidateProducerState()</code> 方法先根据 batch 的 sequence number 信息检查这个 batch 是否重复（server 端会缓存 PID 对应这个 Topic-Partition 的最近5个 batch 信息），如果有重复，这里当做写入成功返回（不更新 LOG 对象中相应的状态信息，比如这个 replica 的 the end offset 等）；</li>
+<li>有了 PID 信息，并且不是重复 batch 时，在更新 producer 信息时，会做以下校验：<ol>
+<li>检查该 PID 是否已经缓存中存在（主要是在 ProducerStateManager 对象中检查）；</li>
+<li>如果不存在，那么判断 sequence number 是否 从0 开始，是的话，在缓存中记录 PID 的 meta（PID，epoch， sequence number），并执行写入操作，否则返回 UnknownProducerIdException（PID 在 server 端已经过期或者这个 PID 写的数据都已经过期了，但是 Client 还在接着上次的 sequence number 发送数据）；</li>
+<li>如果该 PID 存在，先检查 PID epoch 与 server 端记录的是否相同；</li>
+<li>如果不同并且 sequence number 不从 0 开始，那么返回 OutOfOrderSequenceException 异常；</li>
+<li>如果不同并且 sequence number 从 0 开始，那么正常写入；</li>
+<li>如果相同，那么根据缓存中记录的最近一次 sequence number（currentLastSeq）检查是否为连续（会区分为 0、Int.MaxValue 等情况），不连续的情况下返回 OutOfOrderSequenceException 异常。</li>
+</ol>
+</li>
+<li>下面与正常写入相同。</li>
+</ol>
+<h3 id="MAX-INFLIGHT-参数-lt-5-的意义"><a href="#MAX-INFLIGHT-参数-lt-5-的意义" class="headerlink" title="MAX_INFLIGHT 参数&lt;5 的意义"></a>MAX_INFLIGHT 参数&lt;5 的意义</h3><p>如果这个 batch 有 PID 信息，会首先检查这个 batch 是否为重复的 batch 数据，其实现如下，batchMetadata 会缓存最新 5个 batch 的数据（如果超过5个，添加时会进行删除，这个也是幂等性要求 MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION 小于等于5 的原因，与这个值的设置有关），根据 batchMetadata 缓存的 batch 数据来判断这个 batch 是否为重复的数据。</p>
+<p>思考: Producer 在设置幂等性时，为什么要求 MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION 小于等于 5，如果设置大于 5（不考虑 Producer 端参数校验的报错），会带来什么后果？</p>
+<p>回答: server 端只会缓存最近 5 个 batch, 会导致异常数据不断重发</p>
+<p>解释: 其实这里，要求 MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION 小于等于 5 的主要原因是：Server 端的 ProducerStateManager 实例会缓存每个 PID 在每个 Topic-Partition 上发送的最近 5 个batch 数据（这个 5 是写死的，至于为什么是 5，可能跟经验有关，当不设置幂等性时，当这个设置为 5 时，性能相对来说较高，社区是有一个相关测试文档，忘记在哪了），如果超过 5，ProducerStateManager 就会将最旧的 batch 数据清除。</p>
+<p>假设应用将 MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION 设置为 6，假设发送的请求顺序是 1、2、3、4、5、6，这时候 server 端只能缓存 2、3、4、5、6 请求对应的 batch 数据，这时候假设请求 1 响应失败，需要重试，当重试的请求发送过来后，首先先检查是否为重复的 batch，这时候检查的结果是否，之后会开始 check 其 sequence number 值，这时候只会返回一个 OutOfOrderSequenceException 异常，client 在收到这个异常后，会再次进行重试，直到超过最大重试次数或者超时，这样不但会影响 Producer 性能，还可能给 Server 带来压力（相当于client 狂发错误请求）。</p>
+<h3 id="幂等性怎么保证有序"><a href="#幂等性怎么保证有序" class="headerlink" title="幂等性怎么保证有序"></a>幂等性怎么保证有序</h3><p>简单来说，其实现机制概括为：</p>
+<ol>
+<li>Server 端验证 batch 的 sequence number 值，不连续时，直接返回异常；</li>
+<li>Client 端请求重试时，batch 在 reenqueue 时会根据 sequence number 值放到合适的位置（有序保证之一）；</li>
+<li>Sender 线程发送时，在遍历 queue 中的 batch 时，会检查这个 batch 是否是重试的 batch，如果是的话，只有这个 batch 是最旧的那个需要重试的 batch，才允许发送，否则本次发送跳过这个 Topic-Partition 数据的发送等待下次发送。</li>
+</ol>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E9%9D%A2%E8%AF%95/" rel="tag"><i class="fa fa-tag"></i> 面试</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Golang/" rel="next" title="Golang 面试题整理">
+                <i class="fa fa-chevron-left"></i> Golang 面试题整理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/06/13/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Redis/reids%E9%97%AE%E9%A2%98%E6%95%B4%E7%90%86/" rel="prev" title="Redis 面试题整理">
+                Redis 面试题整理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%20%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">309</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">82</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">92</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka架构"><span class="nav-text">Kafka架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-整体结构介绍"><span class="nav-text">Kafka 整体结构介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Consumer-与topic-的关系"><span class="nav-text">Consumer 与topic 的关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kafka-相对传统技术的优势"><span class="nav-text">kafka 相对传统技术的优势</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-使用zookeeper-的作用"><span class="nav-text">Kafka 使用zookeeper 的作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-判断一个节点是否还活着有那两个条件？"><span class="nav-text">Kafka 判断一个节点是否还活着有那两个条件？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka分区"><span class="nav-text">Kafka分区</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka生产者分区机制"><span class="nav-text">Kafka生产者分区机制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka-生产者"><span class="nav-text">Kafka 生产者</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#producer-是否直接将数据发送到-broker-的-leader-主节点-？"><span class="nav-text">producer 是否直接将数据发送到 broker 的 leader(主节点)？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka-消费者"><span class="nav-text">Kafka 消费者</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafa-consumer-是否可以消费指定分区消息？"><span class="nav-text">Kafa consumer 是否可以消费指定分区消息？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-消息是采用-Pull-模式，还是-Push-模式？"><span class="nav-text">Kafka 消息是采用 Pull 模式，还是 Push 模式？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka-数据一致性"><span class="nav-text">Kafka 数据一致性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ISR解释"><span class="nav-text">ISR解释</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Isr列表的维护"><span class="nav-text">Isr列表的维护</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#怎么选择ISR的节点呢？"><span class="nav-text">怎么选择ISR的节点呢？</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HW和LEO解释"><span class="nav-text">HW和LEO解释</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Broker故障后ISR的处理"><span class="nav-text">Broker故障后ISR的处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-的ISR中有follower落后，怎么处理？"><span class="nav-text">Kafka 的ISR中有follower落后，怎么处理？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kafka-Broker-数据一致性"><span class="nav-text">kafka  Broker 数据一致性</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#什么情况下broker会数据不一致"><span class="nav-text">什么情况下broker会数据不一致</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#怎么实现broker数据一致性"><span class="nav-text">怎么实现broker数据一致性</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#怎么实现producer的数据一致性"><span class="nav-text">怎么实现producer的数据一致性</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#什么情况下producer会数据不一致"><span class="nav-text">什么情况下producer会数据不一致</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#怎么保证producer的数据一致"><span class="nav-text">怎么保证producer的数据一致</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka-文件系统"><span class="nav-text">Kafka 文件系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-零复制技术"><span class="nav-text">Kafka 零复制技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-文件存储机制"><span class="nav-text">Kafka 文件存储机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-查找Message"><span class="nav-text">Kafka 查找Message</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#生产者常用配置"><span class="nav-text">生产者常用配置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka-幂等性"><span class="nav-text">Kafka 幂等性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Producer-的幂等性"><span class="nav-text">Producer 的幂等性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#幂等性用来解决什么问题"><span class="nav-text">幂等性用来解决什么问题?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#幂等性的实现原理"><span class="nav-text">幂等性的实现原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#PID"><span class="nav-text">PID</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Sequence-number"><span class="nav-text">Sequence number</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#幂等性实现流程"><span class="nav-text">幂等性实现流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Producer-幂等性的处理工作"><span class="nav-text">Producer 幂等性的处理工作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Producer-幂等性的发送流程"><span class="nav-text">Producer 幂等性的发送流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Server-幂等性的请求生产处理流程"><span class="nav-text">Server 幂等性的请求生产处理流程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MAX-INFLIGHT-参数-lt-5-的意义"><span class="nav-text">MAX_INFLIGHT 参数&lt;5 的意义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#幂等性怎么保证有序"><span class="nav-text">幂等性怎么保证有序</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

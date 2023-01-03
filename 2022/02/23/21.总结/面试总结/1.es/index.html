@@ -125,10 +125,9 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223153823350.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223161438056.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223161501064.png">
-<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211213164629753.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211222114227314.png">
 <meta property="article:published_time" content="2022-02-22T16:00:00.000Z">
-<meta property="article:modified_time" content="2022-12-19T14:21:54.619Z">
+<meta property="article:modified_time" content="2023-01-02T13:12:50.507Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="elasticsearch">
 <meta name="twitter:card" content="summary">
@@ -507,7 +506,7 @@
 
 <p>查询阶段：</p>
 <ol>
-<li><p>客户端发送一个search(搜索)请求给Node3，Node3创建一个长度为from+size的空优先级队列；</p>
+<li><p>客户端发送一个search(搜索)请求给Node3，Node 3创建一个长度为from+size的空优先级队列；</p>
 </li>
 <li><p>Node3转发这个搜索请求到索引中每个副本的主分片或副本分片，每个分片执行本地查询并将结果存储到一个本地的from+size长度的优先队列里；</p>
 </li>
@@ -521,7 +520,7 @@
 <li>每个分片加载document并且丰富他们，然后返回给协调节点；</li>
 <li>一旦所有的document都被取回，协调节点会将结果返回给客户端；</li>
 </ol>
-<h2 id="Es-数据存储原理"><a href="#Es-数据存储原理" class="headerlink" title="Es 数据存储原理"></a>Es 数据存储原理</h2><h4 id="写入流程总结"><a href="#写入流程总结" class="headerlink" title="写入流程总结"></a><strong>写入流程总结</strong></h4><img src="/img/image-20220223153823350.png" alt="image-20220223153823350" style="zoom:33%;" />
+<h2 id="Es-数据存储原理"><a href="#Es-数据存储原理" class="headerlink" title="Es 数据存储原理"></a>Es 数据存储原理</h2><h4 id="写入流程总结"><a href="#写入流程总结" class="headerlink" title="写入流程总结"></a><strong>写入流程总结</strong></h4><img src="/img/image-20220223153823350.png" alt="image-20220223153823350" style="zoom: 67%;" />
 
 <p>整体流程：</p>
 <ol>
@@ -648,22 +647,8 @@
 </ul>
 <p>默认情况下，Lucene会按照Score排序，即算分后的分数值，如果指定了其他的Sort字段，就会按照指定的字段排序。那么，排序会非常影响性能吗？</p>
 <p>首先，排序并不会对所有命中的doc进行排序，而是构造一个堆(n个数取前k大问题)，保证前(Offset+Size)个数的doc是有序的，所以排序的性能取决于(Size+Offset)和命中的文档数，另外就是读取docValues的开销。因为(Size+Offset)并不会太大，而且docValues的读取性能很高，所以排序并不会非常的影响性能。</p>
-<p> Roaring Bitmaps**</p>
-<p>细心的你可能发现了，bitmap 有个硬伤，就是不管你有多少个文档，你占用的空间都是一样的，之前说过，Lucene Posting List 的每个 Segement 最多放 65536 个文档ID，举一个极端的例子，有一个数组，里面只有两个文档 ID：</p>
-<p>[0, 65535]</p>
-<p>用 Bitmap，要怎么表示？</p>
-<p>[1,0,0,0,….(超级多个0),…,0,0,1]</p>
-<p>你需要 65536 个 bit，也就是 65536/8 = 8192 bytes，而用 Integer 数组，你只需要 2 * 2 bytes = 4 bytes</p>
-<p>呵呵，死板的 bitmap。可见在文档数量不多的时候，使用 Integer 数组更加节省内存。</p>
-<p>我们来算一下[临界值]，很简单，无论文档数量多少，bitmap都需要 8192 bytes，而 Integer 数组则和文档数量成线性相关，每个文档 ID 占 2 bytes，所以：</p>
-<p>8192 / 2 = 4096</p>
-<p>当文档数量少于 4096 时，用 Integer 数组，否则，用 bitmap.</p>
-<img src="/img/image-20211213164629753.png" alt="image-20211213164629753" style="zoom:33%;" />
-
-<blockquote>
-<p>这里补充一下 [Roaring bitmaps]) 和 之前讲的 Frame Of Reference 的关系。<br>Frame Of Reference 是压缩数据，减少磁盘占用空间，所以当我们从磁盘取数据时，也需要一个反向的过程，即解压，解压后才有我们上面看到的这样子的文档ID数组：[73, 300, 302, 303, 343, 372] ，接着我们需要对数据进行处理，求交集或者并集，这时候数据是需要放到内存进行处理的，我们有三个这样的数组，这些数组可能很大，而内存空间比磁盘还宝贵，于是需要更强有力的压缩算法，同时还要有利于快速的求交并集，于是有了Roaring Bitmaps 算法。<br>另外，Lucene 还会把从磁盘取出来的数据，通过 Roaring bitmaps 处理后，缓存到内存中，Lucene 称之为 [filter cache].</p>
-</blockquote>
-<h3 id="Roaring-Bitmap-数据结构"><a href="#Roaring-Bitmap-数据结构" class="headerlink" title="Roaring Bitmap 数据结构"></a>Roaring Bitmap 数据结构</h3><img src="/img/image-20211222114227314.png" alt="image-20211222114227314" style="zoom: 33%;" />
+<h3 id="Roaring-Bitmap-数据结构"><a href="#Roaring-Bitmap-数据结构" class="headerlink" title="Roaring Bitmap 数据结构"></a>Roaring Bitmap 数据结构</h3><p>倒排链的数据结构(数据量较大的时候)</p>
+<img src="/img/image-20211222114227314.png" alt="image-20211222114227314" style="zoom: 33%;" />
 
 <p>每个RoaringBitmap中都包含一个<code>RoaringArray</code>，名字叫<code>highLowContainer</code>。<code>highLowContainer</code>存储了<code>RoaringBitmap</code>中的全部数据。</p>
 <p>这个名字意味着，会将32位的整形（<code>int</code>）拆分成高16位和低16位两部分（两个<code>short</code>）来处理。</p>
@@ -869,7 +854,7 @@
                 
                   <a href="/archives/%20%7C%7C%20archive">
                 
-                    <span class="site-state-item-count">309</span>
+                    <span class="site-state-item-count">310</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -1243,7 +1228,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">92</span>
+                      
+                    
+                    <span class="site-state-item-count">93</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -1320,7 +1307,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>

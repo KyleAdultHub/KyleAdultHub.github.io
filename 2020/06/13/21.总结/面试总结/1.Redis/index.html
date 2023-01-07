@@ -140,7 +140,7 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220608123716895.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220608134348677.png">
 <meta property="article:published_time" content="2020-06-13T03:00:00.000Z">
-<meta property="article:modified_time" content="2023-01-07T08:58:06.031Z">
+<meta property="article:modified_time" content="2023-01-07T09:05:11.283Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="面试">
 <meta name="twitter:card" content="summary">
@@ -834,14 +834,14 @@
 </ol>
 <p><strong>如果一个节点被认为客观下线了，那么就需要从它的从节点当中选出一个节点来代替它成为主节点。选举过程如下：</strong></p>
 <ol>
-<li>当从节点发现自己正在复制的主节点被标记为客观下线时，从节点会向集群中发送一条CLUSTERMSG_TYPE_FAILOVER_AUTH_REQUEST消息，要求所有收到这条消息的具有投票权的主节点向这个从节点投票</li>
-<li>如果一个主节点具有投票权，并且未投票给其他从节点，那么这个主节点会向要求投票的从节点返回一条CLUSTERMSG_TYPE_FAILOVER_AUTH_ACK消息，表示这个主节点支持该从节点成为新的主节点</li>
-<li>每个从节点都会接收返回的CLUSTERMSG_TYPE_FAILOVER_AUTH_ACK消息，并会进行统计自己得到了多少主节点的支持</li>
-<li>每个具有投票权的主节点只能投一次票，当一个从节点获得了一半以上的主节点的支持票时，那么这个节点就会成为新的主节点，</li>
-<li>如果没有任何一个从节点获取大于半数的投票，那么将进行新的选举，直到选出新的主节点为止。</li>
-<li>新的主节点产生后，它会撤销所有对已下线的主节点的槽指派，并将这些槽指派给自己。</li>
-<li>新的主节点会向集群中广播一条PONG消息，让集群中的其他节点直到这个从节点已经成为了新的主节点，并且接管了原先主节点的所有槽。</li>
-<li>新的主节点负责接收和自己处理的槽相关的指令，至此故障转移结束。</li>
+<li>从节点FAILOVER_AUTH_REQUEST:：当从节点发现自己正在复制的主节点被标记为客观下线时，从节点会向集群中发送一条CLUSTERMSG_TYPE_FAILOVER_AUTH_REQUEST消息，要求所有收到这条消息的具有投票权的主节点向这个从节点投票</li>
+<li>主节点进行ACK：如果一个主节点具有投票权，并且未投票给其他从节点，那么这个主节点会向要求投票的从节点返回一条CLUSTERMSG_TYPE_FAILOVER_AUTH_ACK消息，表示这个主节点支持该从节点成为新的主节点</li>
+<li>票数统计：每个从节点都会接收返回的CLUSTERMSG_TYPE_FAILOVER_AUTH_ACK消息，并会进行统计自己得到了多少主节点的支持</li>
+<li>选出主节点：每个具有投票权的主节点只能投一次票，当一个从节点获得了一半以上的主节点的支持票时，那么这个节点就会成为新的主节点，</li>
+<li>重复执行：如果没有任何一个从节点获取大于半数的投票，那么将进行新的选举，直到选出新的主节点为止。</li>
+<li>接受槽的指派：新的主节点产生后，它会撤销所有对已下线的主节点的槽指派，并将这些槽指派给自己。</li>
+<li>广播Leader信息：新的主节点会向集群中广播一条PONG消息，让集群中的其他节点直到这个从节点已经成为了新的主节点，并且接管了原先主节点的所有槽。</li>
+<li>结束：新的主节点负责接收和自己处理的槽相关的指令，至此故障转移结束。</li>
 </ol>
 
       

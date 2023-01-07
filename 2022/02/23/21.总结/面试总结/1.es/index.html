@@ -112,13 +112,14 @@
 
 
 
-  <meta name="description" content="Es分布式原理ES分布式集群特点 一个集群拥有相同的cluster.name 配置的节点组成， 它们共同承担数据和负载的压力。 主节点负责管理集群的变更例如增加、删除索引，或者增加、删除节点等。 而主节点并不需要涉及到文档级别的变更和搜索等操作。 屏蔽了分布式系统的复杂性 集群内的扩容能力 垂直扩容和水平扩容 真正的扩容能力是来自于水平扩容–为集群添加更多的节点，并且将负载压力和稳定性分散到这些节">
+  <meta name="description" content="Es分布式原理ES分布式集群特点 一个集群拥有相同的cluster.name 配置的节点组成， 它们共同承担数据和负载的压力。 主节点负责管理集群的变更例如增加、删除索引，或者增加、删除节点、shard副本的选举和迁移等。 而主节点并不需要涉及到文档级别的变更和搜索等操作。 屏蔽了分布式系统的复杂性 集群内的扩容能力 垂直扩容和水平扩容 真正的扩容能力是来自于水平扩容–为集群添加更多的节点，并且将">
 <meta property="og:type" content="article">
 <meta property="og:title" content="es">
 <meta property="og:url" content="http://blog.kyleliu.cn/2022/02/23/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.es/index.html">
 <meta property="og:site_name" content="刘小恺(Kyle)的云笔记">
-<meta property="og:description" content="Es分布式原理ES分布式集群特点 一个集群拥有相同的cluster.name 配置的节点组成， 它们共同承担数据和负载的压力。 主节点负责管理集群的变更例如增加、删除索引，或者增加、删除节点等。 而主节点并不需要涉及到文档级别的变更和搜索等操作。 屏蔽了分布式系统的复杂性 集群内的扩容能力 垂直扩容和水平扩容 真正的扩容能力是来自于水平扩容–为集群添加更多的节点，并且将负载压力和稳定性分散到这些节">
+<meta property="og:description" content="Es分布式原理ES分布式集群特点 一个集群拥有相同的cluster.name 配置的节点组成， 它们共同承担数据和负载的压力。 主节点负责管理集群的变更例如增加、删除索引，或者增加、删除节点、shard副本的选举和迁移等。 而主节点并不需要涉及到文档级别的变更和搜索等操作。 屏蔽了分布式系统的复杂性 集群内的扩容能力 垂直扩容和水平扩容 真正的扩容能力是来自于水平扩容–为集群添加更多的节点，并且将">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230106164908030.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223142346702.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223140043517.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223140524303.png">
@@ -127,11 +128,11 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223161501064.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211222114227314.png">
 <meta property="article:published_time" content="2022-02-22T16:00:00.000Z">
-<meta property="article:modified_time" content="2023-01-02T13:12:50.507Z">
+<meta property="article:modified_time" content="2023-01-06T09:23:54.186Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="elasticsearch">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://blog.kyleliu.cn/img/image-20220223142346702.png">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/img/image-20230106164908030.png">
 
 
 
@@ -467,14 +468,38 @@
       
         <h2 id="Es分布式原理"><a href="#Es分布式原理" class="headerlink" title="Es分布式原理"></a>Es分布式原理</h2><h3 id="ES分布式集群特点"><a href="#ES分布式集群特点" class="headerlink" title="ES分布式集群特点"></a>ES分布式集群特点</h3><ul>
 <li>一个集群拥有相同的cluster.name 配置的节点组成， 它们共同承担数据和负载的压力。</li>
-<li>主节点负责管理集群的变更例如增加、删除索引，或者增加、删除节点等。 而主节点并不需要涉及到文档级别的变更和搜索等操作。</li>
+<li>主节点负责管理集群的变更例如增加、删除索引，或者增加、删除节点、shard副本的选举和迁移等。 而主节点并不需要涉及到文档级别的变更和搜索等操作。</li>
 <li>屏蔽了分布式系统的复杂性</li>
 <li>集群内的扩容能力<ul>
 <li>垂直扩容和水平扩容</li>
 <li>真正的扩容能力是来自于水平扩容–为集群添加更多的节点，并且将负载压力和稳定性分散到这些节点中</li>
 </ul>
 </li>
+<li><strong>Coordinating Node 节点</strong>：协调节点主要负责协调客户端的请求，将接收到的请求分发给合适的节点，并把结果汇集到一起。比如客户端请求查询某个索引的数据，协调节点将会把请求分发给保存相关的数据的 DataNode 节点，找到相应的分片，并把查询到的结果都汇集返回。并且每个节点都默认起到了 Coordinating Node 的职责。</li>
 </ul>
+<h3 id="ES-集群架构"><a href="#ES-集群架构" class="headerlink" title="ES 集群架构"></a>ES 集群架构</h3><p>　<img src="/img/image-20230106164908030.png" alt="image-20230106164908030"></p>
+<p> 　ES的架构总体如上图所示，从下到上分为网关、搜索引擎、四大组件、自动发现、通信和Restful API</p>
+<p>　　1、Gateway网关</p>
+<p>　　　　其作用是用来对数据进行持久化以及ES重启后重新恢复数据。</p>
+<p>　　　　es支持多种类型的gateway，有本地文件系统、分布式文件系统、Hadoop的HDFS等。</p>
+<p>　　　　其存储的信息包括索引信息、集群信息、mapping等</p>
+<p>　　2、districted lucene directory搜索引擎</p>
+<p>　　　　Gateway上层就是Lucene的分布式检索框架。</p>
+<p>　　　　ES是分布式的搜索引擎，虽然底层用的是Lucene，但是需要在每个节点上都运行Lucene进行相应的索引、查询、更新等操作，所以需要做成一个分布式的运行框架来满足业务需要。</p>
+<p>　　3、四大组件模块</p>
+<p>　　　　districted lucene directory之上就是ES的四大模块。</p>
+<p>　　　　Index Model：索引模块，对数据建立索引（通常是建立倒排索引）</p>
+<p>　　　　Seacher Model：搜索模块，就是对数据进行查询搜索</p>
+<p>　　　　Mapping Model：是数据映射与解析模块，数据的每个字段可以根据建立的表结构通过mapping进行映射解析；如果没有建立表结构，那么ES会根据数据类型来推测数据结构，并自动生成一个mapping，然后根据mapping进行解析</p>
+<p>　　　　River Model：在es2.0之后被取消了，表示可以使用插件处理。例如可以通过一些自定义脚本将传统数据库的数据实时同步到es中。</p>
+<p>　　4、自动发现Discovery Script</p>
+<p>　　　　es集群中各个节点通过discovery相互发现的，默认使用的是Zen discovery(底层实现算法依赖Bully)。es是一个基于p2p的系统，他先通过广播寻找存在的节点，再通过多播协议来进行节点之间的通信，同时也支持点对点的交互。</p>
+<p>　　　　es还可以支持多种script脚本语言，例如mvel、js、python等。</p>
+<p>　　5、通信（Transport）</p>
+<p>　　　　代表es内部节点或集群与客户的交互方式，默认内部使用tcp协议进行交互，同时其还支持http协议，thrift、servlet、memcached、zeroMQ等通信协议。</p>
+<p>　　　　节点间通信端口默认9300-9400</p>
+<p>　　6、Restful接口</p>
+<p>　　　　最上层就是ES暴漏给我们的访问接口。　</p>
 <h3 id="Es分布式数据存储形式"><a href="#Es分布式数据存储形式" class="headerlink" title="Es分布式数据存储形式"></a>Es分布式数据存储形式</h3><img src="/img/image-20220223142346702.png" alt="image-20220223142346702" style="zoom:33%;" />
 
 <p>Elasticsearch 的数据是以shard的形式存储在每个es节点的。</p>
@@ -675,7 +700,7 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">short</span>[] valueslength;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> nbrruns = <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
 
 
-<p>RunContainer中的Run指的是行程长度压缩算法(Run Length Encoding)，对连续数据有比较好的压缩效果。</p>
+<p>RunContainer中的Run指的是<strong>行程长度压缩算法</strong>(Run Length Encoding)，对连续数据有比较好的压缩效果。</p>
 <p>它的原理是，对于连续出现的数字，只记录初始数字和后续数量。即：</p>
 <p>对于数列11，它会压缩为11,0；<br>对于数列11,12,13,14,15，它会压缩为11,4；<br>对于数列11,12,13,14,15,21,22，它会压缩为11,4,21,1；<br>源码中的  short[] valueslength  中存储的就是压缩后的数据。</p>
 <p>这种压缩算法的性能和数据的连续性（紧凑性）关系极为密切，对于连续的100个short，它能从200字节压缩为4字节，但对于完全不连续的100个short，编码完之后反而会从200字节变为400字节。</p>
@@ -1280,7 +1305,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Es分布式原理"><span class="nav-text">Es分布式原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ES分布式集群特点"><span class="nav-text">ES分布式集群特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Es分布式数据存储形式"><span class="nav-text">Es分布式数据存储形式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES分片Shard的特点"><span class="nav-text">ES分片Shard的特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何路由一个文档到一个分片中"><span class="nav-text">如何路由一个文档到一个分片中</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分片全文检索过程"><span class="nav-text">分片全文检索过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Es-数据存储原理"><span class="nav-text">Es 数据存储原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#写入流程总结"><span class="nav-text">写入流程总结</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Segment段合并"><span class="nav-text">Segment段合并</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-数据删除"><span class="nav-text">LUCENE 数据删除</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-数据更新"><span class="nav-text">LUCENE 数据更新</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ES如何处理冲突-比如并发修改同一docId"><span class="nav-text">*ES如何处理冲突 ( 比如并发修改同一docId ) *</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-内文件构成"><span class="nav-text">LUCENE 内文件构成</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lucene-数据结构"><span class="nav-text">Lucene 数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Lucene的数据类型"><span class="nav-text">Lucene的数据类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#各种查询结构总结："><span class="nav-text">各种查询结构总结：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何实现返回结果进行排序聚合"><span class="nav-text">如何实现返回结果进行排序聚合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Roaring-Bitmap-数据结构"><span class="nav-text">Roaring Bitmap 数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#三种Container"><span class="nav-text">三种Container</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RoaringBitmap的优化策略"><span class="nav-text">RoaringBitmap的优化策略</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Es分布式原理"><span class="nav-text">Es分布式原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ES分布式集群特点"><span class="nav-text">ES分布式集群特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES-集群架构"><span class="nav-text">ES 集群架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Es分布式数据存储形式"><span class="nav-text">Es分布式数据存储形式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES分片Shard的特点"><span class="nav-text">ES分片Shard的特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何路由一个文档到一个分片中"><span class="nav-text">如何路由一个文档到一个分片中</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分片全文检索过程"><span class="nav-text">分片全文检索过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Es-数据存储原理"><span class="nav-text">Es 数据存储原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#写入流程总结"><span class="nav-text">写入流程总结</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Segment段合并"><span class="nav-text">Segment段合并</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-数据删除"><span class="nav-text">LUCENE 数据删除</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-数据更新"><span class="nav-text">LUCENE 数据更新</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ES如何处理冲突-比如并发修改同一docId"><span class="nav-text">*ES如何处理冲突 ( 比如并发修改同一docId ) *</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-内文件构成"><span class="nav-text">LUCENE 内文件构成</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lucene-数据结构"><span class="nav-text">Lucene 数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Lucene的数据类型"><span class="nav-text">Lucene的数据类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#各种查询结构总结："><span class="nav-text">各种查询结构总结：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何实现返回结果进行排序聚合"><span class="nav-text">如何实现返回结果进行排序聚合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Roaring-Bitmap-数据结构"><span class="nav-text">Roaring Bitmap 数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#三种Container"><span class="nav-text">三种Container</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RoaringBitmap的优化策略"><span class="nav-text">RoaringBitmap的优化策略</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>

@@ -148,13 +148,15 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220104143656543.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220104143730940.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220104143800491.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220104143800491.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230107135340658.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220104143227586.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220104144314614.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220104144339834.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220104144934140.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220104150525890.png">
 <meta property="article:published_time" content="2022-01-03T16:00:00.000Z">
-<meta property="article:modified_time" content="2022-07-20T03:11:01.363Z">
+<meta property="article:modified_time" content="2023-01-07T05:57:55.542Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="Mysql">
 <meta name="twitter:card" content="summary">
@@ -836,6 +838,34 @@
 <p>redo log意义</p>
 <p>体积小，记录页的修改，比写入页代价低<br>末尾追加，随机写变顺序写，发生改变的页不固定</p>
 </blockquote>
+<ul>
+<li>commit redo log 刷盘策略</li>
+</ul>
+<p>​                    inodb_flush_log_atrx_comit 可调整</p>
+<p>​                    （1）<strong>设置为0</strong> ：表示每次事务提交时不进行刷盘操作。默认master thread每隔1s进行一次重做日志的同步。</p>
+<p>​                    （2）<strong>设置为1</strong> ：表示每次事务提交时都将进行同步，刷盘操作（ 默认值 ）</p>
+<p>​                    （3）<strong>设置为2</strong> ：表示每次事务提交时都只把 redo log buffer 内容写入 page cache，不进行同步。由os自己决定什么时候同步到磁盘文件。</p>
+<img src="/img/image-20220104143800491.png" alt="image-20220104143800491" style="zoom: 50%;" />
+
+<blockquote>
+<p>redo log意义</p>
+<p>体积小，记录页的修改，比写入页代价低<br>末尾追加，随机写变顺序写，发生改变的页不固定</p>
+</blockquote>
+<h3 id="redo-log-、-binlog-区别"><a href="#redo-log-、-binlog-区别" class="headerlink" title="redo log 、 binlog 区别"></a>redo log 、 binlog 区别</h3><ol>
+<li>redo log 是 InnoDB 引擎特有的；binlog 是 MySQL 的 Server 层实现的，所有引擎都可以使用。</li>
+<li>redo log 是物理日志，记录的是在某个数据页上做了什么修改；binlog 是逻辑日志，记录的是DDL和DML操作语句。</li>
+<li>redo log 是循环写的，空间固定会用完；binlog 是可以追加写入的。追加写是指 binlog 文件写到一定大小后会切换到下一个，并不会覆盖以前的日志。</li>
+<li>redo log+bin log保证crash-safe，bin log日志用于数据恢复和主从复制。</li>
+</ol>
+<img src="/img/image-20230107135340658.png" alt="image-20230107135340658" style="zoom:67%;" />
+
+<h3 id="redolog、binlog-的2阶段提交"><a href="#redolog、binlog-的2阶段提交" class="headerlink" title="redolog、binlog 的2阶段提交"></a>redolog、binlog 的2阶段提交</h3><p>redo log 和 binlog 有一个共同的数据字段，叫 XID。崩溃恢复的时候，会按顺序扫描 redo log：</p>
+<ol>
+<li>如果碰到既有 prepare、又有 commit 的 redo log，就直接提交；</li>
+<li>如果碰到只有 parepare、而没有 commit 的 redo log，就拿着 XID 去 binlog 找对应的事务。<br> binlog无记录，回滚事务<br> binlog有记录，提交事务。</li>
+</ol>
+<p>如果同一阶段提交，redo log写完提交，写bin log时mysql进程崩溃，但由于bin log日志没有修改记录，使用redo log+bin log恢复的数据就是数据库旧的数据<br> 如果先写bin log后写redo log，在bin log写完提交之后崩溃，崩溃恢复以后这个事务需要回滚，在之后用redo log+bin log来恢复的时候就多了一个事务出来，</p>
+<p>由此得出，如果不使用“两阶段提交”，那么数据库的状态就有可能和用它的日志恢复出来的库的状态不一致。</p>
 <h4 id="MVCC-多版本并发控制"><a href="#MVCC-多版本并发控制" class="headerlink" title="MVCC 多版本并发控制"></a>MVCC 多版本并发控制</h4><p>全称Multi-Version COncurrentcy Control，多版本并发控制。指维护一个数据的多个版本，使得读写操作没有冲突，快照读为Mysql实现MVCC提供了一个非阻塞读功能。MVCC的具体实现，还需要依赖于数据库记录中的三个隐式字段、undo log日志，readVIew。（多版本并发控制，它是通过读取历史版本的数据，来降低并发事务冲突，从而提高并发性能的一种机制）</p>
 <ul>
 <li><p>当前读/快照读</p>
@@ -1487,7 +1517,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql架构介绍"><span class="nav-text">Mysql架构介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql架构设计"><span class="nav-text">mysql架构设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql数据存储目录结构"><span class="nav-text">mysql数据存储目录结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql数据存储方式"><span class="nav-text">mysql数据存储方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-页的物理存储结构"><span class="nav-text">mysql 页的物理存储结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql页结构"><span class="nav-text">Mysql页结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#页的组成"><span class="nav-text">页的组成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql页内数据维护方式"><span class="nav-text">mysql页内数据维护方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#溢出页-BLOB页"><span class="nav-text">溢出页(BLOB页)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql的行结构"><span class="nav-text">Mysql的行结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Innodb内存管理"><span class="nav-text">Innodb内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Innodb内存管理-1"><span class="nav-text">Innodb内存管理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#索引原理分析"><span class="nav-text">索引原理分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#聚簇索引"><span class="nav-text">聚簇索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二级索引"><span class="nav-text">二级索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#联合索引"><span class="nav-text">联合索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#索引使用优化"><span class="nav-text">索引使用优化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#索引失效场景"><span class="nav-text">索引失效场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql-事务"><span class="nav-text">mysql 事务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-事务基本概念"><span class="nav-text">mysql 事务基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事物的实现原理"><span class="nav-text">事物的实现原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undo-log-版本链"><span class="nav-text">undo log(版本链)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Read-View"><span class="nav-text">Read View</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redo-log"><span class="nav-text">redo log</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MVCC-多版本并发控制"><span class="nav-text">MVCC 多版本并发控制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事物的实现总结"><span class="nav-text">事物的实现总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql-锁"><span class="nav-text">mysql 锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql锁的种类"><span class="nav-text">mysql锁的种类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#各种锁介绍"><span class="nav-text">各种锁介绍</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql架构介绍"><span class="nav-text">Mysql架构介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql架构设计"><span class="nav-text">mysql架构设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql数据存储目录结构"><span class="nav-text">mysql数据存储目录结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql数据存储方式"><span class="nav-text">mysql数据存储方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-页的物理存储结构"><span class="nav-text">mysql 页的物理存储结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql页结构"><span class="nav-text">Mysql页结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#页的组成"><span class="nav-text">页的组成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql页内数据维护方式"><span class="nav-text">mysql页内数据维护方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#溢出页-BLOB页"><span class="nav-text">溢出页(BLOB页)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql的行结构"><span class="nav-text">Mysql的行结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Innodb内存管理"><span class="nav-text">Innodb内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Innodb内存管理-1"><span class="nav-text">Innodb内存管理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#索引原理分析"><span class="nav-text">索引原理分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#聚簇索引"><span class="nav-text">聚簇索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二级索引"><span class="nav-text">二级索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#联合索引"><span class="nav-text">联合索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#索引使用优化"><span class="nav-text">索引使用优化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#索引失效场景"><span class="nav-text">索引失效场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql-事务"><span class="nav-text">mysql 事务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-事务基本概念"><span class="nav-text">mysql 事务基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事物的实现原理"><span class="nav-text">事物的实现原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undo-log-版本链"><span class="nav-text">undo log(版本链)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Read-View"><span class="nav-text">Read View</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redo-log"><span class="nav-text">redo log</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redo-log-、-binlog-区别"><span class="nav-text">redo log 、 binlog 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redolog、binlog-的2阶段提交"><span class="nav-text">redolog、binlog 的2阶段提交</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MVCC-多版本并发控制"><span class="nav-text">MVCC 多版本并发控制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事物的实现总结"><span class="nav-text">事物的实现总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql-锁"><span class="nav-text">mysql 锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql锁的种类"><span class="nav-text">mysql锁的种类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#各种锁介绍"><span class="nav-text">各种锁介绍</span></a></li></ol></li></ol></div>
             
 
           </div>

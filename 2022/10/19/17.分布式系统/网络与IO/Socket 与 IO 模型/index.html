@@ -133,7 +133,7 @@
 <meta property="og:image" content="https://img-blog.csdnimg.cn/img_convert/3a22a40e804317d986380ade27e6d52f.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20221019170445443.png">
 <meta property="article:published_time" content="2022-10-18T16:00:00.000Z">
-<meta property="article:modified_time" content="2022-12-21T06:11:52.473Z">
+<meta property="article:modified_time" content="2023-01-09T07:58:16.847Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="网络">
 <meta property="article:tag" content="linux">
@@ -629,18 +629,20 @@
 <p>poll 中的描述符是 pollfd 类型的数组，pollfd 的定义如下：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">pollfd</span> &#123;</span></span><br><span class="line">               <span class="keyword">int</span>   fd;         <span class="comment">/* file descriptor */</span></span><br><span class="line">               short events;     <span class="comment">/* requested events */</span></span><br><span class="line">               short revents;    <span class="comment">/* returned events */</span></span><br><span class="line">           &#125;;</span><br></pre></td></tr></table></figure>
 
-<h3 id="select和poll的区别"><a href="#select和poll的区别" class="headerlink" title="select和poll的区别"></a>select和poll的区别</h3><p>以下是系统调用select()和poll()之间的一些区别。</p>
+<h3 id="select和poll的区别"><a href="#select和poll的区别" class="headerlink" title="select和poll的区别"></a>select和poll的区别</h3><p>相同点</p>
+<ul>
+<li>select 和 poll 速度都比较慢，每次调用都需要将全部描述符从应用进程缓冲区复制到内核缓冲区。</li>
+<li>如果一个线程对某个描述符调用了 select 或者 poll，另一个线程关闭了该描述符，会导致调用结果不确定。</li>
+</ul>
+<p>不通电</p>
 <ul>
 <li>select()所使用的数据类型fd_set对于被检查的文件描述符数量有一个上限限制(FD_SETSIZE)。在Linux下，这个上限值默认为1024，修改这个上限需要重新编译应用程序。与之相反，poll()对于被检查的文件描述符数量本质上是没有限制的。</li>
 <li>由于select()的参数fd_set同时也是保存调用结果的地方，如果要在循环中重复调用select()的话，我们必须每次都要重新初始化fd_set。而poll()通过独立的两个字段events（针对输入）和revents（针对输出）来处理，从而避免每次都要重新初始化参数。</li>
 <li>select()提供的超时精度（微秒）比poll()提供的超时精度（毫秒）高。（这两个系统调用的超时精度都受软件时钟粒度的限制。）</li>
-<li>如果其中一个被检查的文件描述符关闭了，通过在对应的revents字段中设定POLLNVAL标记，poll()会准确告诉我们是哪一个文件描述符关闭了。与之相反，select()只会返回-1，并设错误码为EBADF。通过在描述符上执行I/O系统调用并检查错误码，让我们自己来判断哪个文件描述符关闭了。通常这些区别都不重要，因为应用程序一般都会自己跟踪已经关闭的文件描述符。</li>
 <li>select用的是数组，是定长的，而poll用的是链表，可以不断扩充。</li>
+<li>几乎所有的系统都支持 select，但是只有比较新的系统支持 poll。</li>
 <li>select 会修改描述符，而 poll 不会；</li>
 <li>poll 提供了更多的事件类型，并且对描述符的重复利用上比 select 高。</li>
-<li>如果一个线程对某个描述符调用了 select 或者 poll，另一个线程关闭了该描述符，会导致调用结果不确定。</li>
-<li>select 和 poll 速度都比较慢，每次调用都需要将全部描述符从应用进程缓冲区复制到内核缓冲区。</li>
-<li>几乎所有的系统都支持 select，但是只有比较新的系统支持 poll。</li>
 </ul>
 <h3 id="select和poll的问题"><a href="#select和poll的问题" class="headerlink" title="select和poll的问题"></a>select和poll的问题</h3><p>系统调用select()和poll()是用来同时检查多个文件描述符就绪状态的方法，它们是可移植的、长期存在且被广泛使用的。但是当检查大量的文件描述符时，这两个API都会遇到一些问题。</p>
 <ul>

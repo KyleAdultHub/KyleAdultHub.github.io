@@ -129,8 +129,10 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/1592037810278.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230107222947555.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230107223134955.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230108211638758.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230108211419018.png">
 <meta property="article:published_time" content="2022-12-29T16:00:00.000Z">
-<meta property="article:modified_time" content="2023-01-08T03:36:31.989Z">
+<meta property="article:modified_time" content="2023-01-09T04:06:53.483Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="补充">
 <meta name="twitter:card" content="summary">
@@ -492,7 +494,8 @@
 </ul>
 </li>
 </ul>
-<h3 id="4-三次握手、四次挥手"><a href="#4-三次握手、四次挥手" class="headerlink" title="4. 三次握手、四次挥手"></a>4. 三次握手、四次挥手</h3><p>三次握手</p>
+<h3 id="4-三次握手、四次挥手"><a href="#4-三次握手、四次挥手" class="headerlink" title="4. 三次握手、四次挥手"></a>4. 三次握手、四次挥手</h3><p><em>SYN:同步序列编号(Synchronize Sequence Numbers)</em></p>
+<p>三次握手</p>
 <ul>
 <li>握手前（服务器端为listen状态）：服务器端首先客户端和服务端要创建socket，并且服务端绑定端口变为listen状态</li>
 <li>第一次握手（客户端SYN_SEND状态）：客户端发起SYN包到服务器，进入SYN_SEND状态，进入服务器端连接等候列队，等待服务器的确认；</li>
@@ -514,9 +517,22 @@
 <p>5）服务端使用私钥进行解密，获取到随机数</p>
 <p>6）服务端将对称加密后的数据传递给客户端，客户端收到后使用对称解密， 得到服务端的数据，完成二次http请求</p>
 <h3 id="6-DNS域名解析过程"><a href="#6-DNS域名解析过程" class="headerlink" title="6.DNS域名解析过程"></a>6.DNS域名解析过程</h3><p>域名 -&gt; 浏览器缓存 -&gt; 本机缓存 -&gt; hosts文件 -&gt; 缓存服务器 -&gt; 根域名服务器 -&gt;顶级域名服务器 -&gt; 权威域名服务器</p>
-<ul>
-<li></li>
-</ul>
+<h3 id="7-跨域的常见解决办法"><a href="#7-跨域的常见解决办法" class="headerlink" title="7.跨域的常见解决办法"></a>7.跨域的常见解决办法</h3><ol>
+<li><p>使用 ajax 或者 jquery 的jsonp</p>
+</li>
+<li><p>服务端添加cors响应头</p>
+<ol>
+<li><p>需要注意当需要进行cookie验证的场景， 服务端需要另外设置， credentials响应头， web端需要将withCredentials设置为true</p>
+</li>
+<li><p>响应头示例：</p>
+<p>header(‘Access-Control-Allow-Origin:’.$_SERVER[‘HTTP_ORIGIN’]);</p>
+<p>header(“Access-Control-Allow-Credentials:true”);</p>
+<p>header(“Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept,Authorization”);</p>
+<p>header(‘Access-Control-Allow-Methods:GET,POST,PUT,DELETE,OPTIONS,PATCH’);</p>
+</li>
+</ol>
+</li>
+</ol>
 <h2 id="Golang"><a href="#Golang" class="headerlink" title="Golang"></a>Golang</h2><h3 id="1-WaitGroup原理"><a href="#1-WaitGroup原理" class="headerlink" title="1. WaitGroup原理"></a>1. WaitGroup原理</h3><p><img src="/img/image-20221231233522645.png" alt="image-20221231233522645"></p>
 <p>state1字段</p>
 <ul>
@@ -526,6 +542,9 @@
 <p>state2为信号量， 信号量，用来唤醒 Wait() 函数。</p>
 <p>WaitGroup 的整个调用过程可以简单地描述成下面这样：</p>
 <p>当调用 WaitGroup.Add(n) 时，counter 将会自增: counter + n<br>当调用 WaitGroup.Wait() 时，会将 waiter++。同时调用 runtime_Semacquire(semap)，并挂起当前 goroutine。<br>当调用 WaitGroup.Done() 时，将会 counter–。如果自减后的 counter 等于 0，说明 WaitGroup 的等待过程已经结束，则需要调用 runtime_Semrelease 释放信号量，唤醒正在 WaitGroup.Wait 的 goroutine。</p>
+<blockquote>
+<p>信号量是一个<strong>计数器</strong>，可以用来控制多个进程(groutine)对共享资源的访问。它常作为一种<strong>锁机制</strong>，防止某进程正在访问共享资源时，其他进程也访问该资源。因此，主要作为进程间以及同一进程内不同线程之间的同步手段</p>
+</blockquote>
 <h3 id="2-什么是Map"><a href="#2-什么是Map" class="headerlink" title="2. 什么是Map"></a>2. 什么是Map</h3><h5 id="key，value存储"><a href="#key，value存储" class="headerlink" title="key，value存储"></a>key，value存储</h5><p>最通俗的话说Map是一种通过key来获取value的一个数据结构，其底层存储方式为数组，在存储时key不能重复，当key重复时，value进行覆盖，我们通过key进行hash运算（可以简单理解为把key转化为一个整形数字）然后对数组的长度取余，得到key存储在数组的哪个下标位置，最后将key和value组装为一个结构体，放入数组下标处，看下图：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">length &#x3D; len(array) &#x3D; 4</span><br><span class="line">hashkey1 &#x3D; hash(xiaoming) &#x3D; 4</span><br><span class="line">index1  &#x3D; hashkey1% length&#x3D; 0</span><br><span class="line">hashkey2 &#x3D; hash(xiaoli) &#x3D; 6</span><br><span class="line">index2  &#x3D; hashkey2% length&#x3D; 2</span><br></pre></td></tr></table></figure>
 
@@ -601,9 +620,11 @@
 <p>最后我们分析一下go的整体内存结构，阅读一下map存储的源码，如下图所示，当往map中存储一个kv对时，通过k获取hash值，hash值的低八位和bucket数组长度取余，定位到在数组中的那个下标，hash值的高八位存储在bucket中的tophash中，用来快速判断key是否存在，key和value的具体值则通过指针运算存储，当一个bucket满时，通过overfolw指针链接到下一个bucket。</p>
 <p><img src="/img/1592037810278.png" alt="1592037810278"></p>
 <h3 id="4-golang-map扩容"><a href="#4-golang-map扩容" class="headerlink" title="4.golang map扩容"></a>4.golang map扩容</h3><ol>
-<li><p><strong>双倍扩容</strong>：数据太多了增加普通桶的数量， 扩容采取了一种称为“渐进式”的方式，原有的 key 并不会一次性搬迁完毕，每次最多只会搬迁 2 个 bucket。</p>
+<li><p><strong>双倍扩容</strong>：数据太多了增加普通桶的数量， Go创建一个新的buckets数组,这个buckets数组的容量是旧buckets数组的两倍,并将旧数组的数据逐步迁移至新数组。 扩容采取了一种称为“渐进式”的方式，原有的 key 并不会一次性搬迁完毕，每次最多只会搬迁 2 个 bucket。</p>
 </li>
-<li><p>*<em>等量扩容: *</em> 数据不多但是溢出桶太多了，使数据更紧凑, 重新排列，极端情况下，重新排列也解决不了，map 存储就会蜕变成链表，性能大大降低，此时哈希因子 hash0 的设置，可以降低此类极端场景的发生。</p>
+<li><p>*<em>等量扩容: *</em>   如果出现了这种情况，可能是因为哈希表里有过多的空键值对，很多桶的内部出现了空洞（装不满）。这个时候就需要通过map扩容做内存整理。目的就是为了清除bmap桶中空闲的键值对。</p>
+<p>这种情况下map扩容步骤与情况一基本相同，只不过扩容后map容量还是原来的大小。Go会创建一个与原buckets数组容量相同的buckets数组，并将旧数组的数据逐步迁移至这个新数组。再去除旧数组的引用，让GC来清除内存。</p>
+<p>极端情况下，重新排列也解决不了，map 存储就会蜕变成链表，性能大大降低，此时哈希因子 hash0 的设置，可以降低此类极端场景的发生。</p>
 </li>
 </ol>
 <h3 id="5-goroutine-与thread比较"><a href="#5-goroutine-与thread比较" class="headerlink" title="5. goroutine 与thread比较"></a>5. goroutine 与thread比较</h3><p>goroutine可看作是thread的进一步抽象，它更加轻量，可单独执行；与thread相比：</p>
@@ -612,24 +633,23 @@
 <li>创建与销毁：goroutine由go runtime管理，其创建是用户级的，消耗小；而thread由操作系统管理，是内核级的，消耗巨大；</li>
 <li>切换：goroutines 切换只需保存三个寄存器（Program Counter, Stack Pointer and BP），一般200ns即可完成；而thread切换时需要保存各种寄存器，一般需要1000~1500ns。</li>
 </ul>
-<h3 id="什么操作叫做原子操作"><a href="#什么操作叫做原子操作" class="headerlink" title="什么操作叫做原子操作"></a><strong>什么操作叫做原子操作</strong></h3><p>原子操作即是进行过程中不能被中断的操作，针对某个值的原子操作在被进行的过程中，CPU 绝不会再去进行其他的针对该值的操作。为了实现这样的严谨性，原子操作<strong>仅会由一个独立的 CPU 指令代表和完成</strong>。原子操作是无锁的，常常直接通过 CPU 指令直接实现。 事实上，其它同步技术的实现常常依赖于原子操作。</p>
-<h3 id="什么是-CAS"><a href="#什么是-CAS" class="headerlink" title="什么是 CAS"></a>什么是 CAS</h3><p>原理上就是一个乐观锁的实现。</p>
+<h3 id="6-什么操作叫做原子操作"><a href="#6-什么操作叫做原子操作" class="headerlink" title="6. 什么操作叫做原子操作"></a>6. 什么操作叫做原子操作</h3><p>原子操作即是进行过程中不能被中断的操作，针对某个值的原子操作在被进行的过程中，CPU 绝不会再去进行其他的针对该值的操作。为了实现这样的严谨性，原子操作<strong>仅会由一个独立的 CPU 指令代表和完成</strong>。原子操作是<strong>无锁的</strong>，常常直接通过 CPU 指令直接实现。 事实上，其它同步技术的实现常常依赖于原子操作。</p>
+<h3 id="7-什么是-CAS"><a href="#7-什么是-CAS" class="headerlink" title="7.什么是 CAS"></a>7.什么是 CAS</h3><p>原理上就是一个<strong>乐观锁</strong>的实现。</p>
 <p>CAS 的全称为 Compare And Swap，直译就是比较交换。<strong>是一条 CPU 的原子指令，其作用是让 CPU 先进行比较两个值是否相等，然后原子地更新某个位置的值</strong>，其实现方式是给予硬件平台的汇编指令，在 intel 的 CPU 中，使用的cmpxchg 指令，就是说 CAS 是靠硬件实现的，从而在硬件层面提升效率。</p>
 <p><strong>简述过程是这样：</strong> 假设包含 3 个参数, V 表示要更新变量的值，E 表示预期值，N 表示新值。</p>
 <p>仅当 V 值等于 E 值时，才会将 V 的值设为 N，如果 V 值和 E 值不同，则说明已经有其他线程在做更新，则当前线程什么都不做，最后 CAS 返回当前 V 的真实值。CAS 操作时抱着乐观的态度进行的，它总是认为自己可以成功完成操作。基于这样的原理，CAS 操作即使没有锁，也可以发现其他线程对于当前线程的干扰。 </p>
-<p><strong>GMP</strong> <strong>调度过程中存在哪些阻塞</strong></p>
-<ul>
+<h3 id="8-GMP调度过程中存在哪些阻塞"><a href="#8-GMP调度过程中存在哪些阻塞" class="headerlink" title="8.GMP调度过程中存在哪些阻塞"></a>8.GMP调度过程中存在哪些阻塞</h3><ul>
 <li>I/O，select</li>
 <li>block on syscall</li>
 <li>channel</li>
 <li>等待锁</li>
 <li>runtime.Gosched()</li>
 </ul>
-<h3 id="Golang-互斥锁"><a href="#Golang-互斥锁" class="headerlink" title="Golang 互斥锁"></a>Golang 互斥锁</h3><p>1、锁的实现</p>
+<h3 id="9-Golang-互斥锁"><a href="#9-Golang-互斥锁" class="headerlink" title="9.Golang 互斥锁"></a>9.Golang 互斥锁</h3><p>1、锁的实现</p>
 <p><img src="/img/image-20230107222947555.png" alt="image-20230107222947555"></p>
 <ul>
 <li>sema 表示信号量，用来控制 goroutine 的 阻塞休眠和唤醒。协程阻塞时等待该信号量，协程解锁是释放该信号量并唤醒等待信号量的协程</li>
-<li>state 表示 互斥锁的状态，0表示 未上锁，1表示上锁状态</li>
+<li>state 表示 互斥锁的状态，0表示 未上锁，1表示上锁状态(实际上是更改locked 的bit 位)</li>
 </ul>
 <p>2、state 状态组成</p>
 <p><img src="/img/image-20230107223134955.png" alt="image-20230107223134955"></p>
@@ -640,12 +660,12 @@
 <ul>
 <li>Waiter 表示等待锁释放的goroutine数量</li>
 <li>starving 表示当前锁释放处于饥饿状态，0 不饿 1 饥饿。饥饿状态说是有协程阻塞超过了1ms</li>
-<li>woken 表示唤醒状态，0 没唤醒，1 唤醒状态。唤醒状态表示正在加锁</li>
+<li>woken 表示唤醒状态，0 没唤醒，1 唤醒状态。唤醒状态表示正在加锁。 处于自旋状态的加锁协程会把Woken标记为1，通知解锁协程不必释放信号量了。</li>
 <li>locked 表述是否锁定 0 未锁定 1 已锁定</li>
 </ul>
 <p>4、Mutex 正常模式和饥饿模式</p>
 <p><strong>正常模式（非公平锁）</strong></p>
-<p>正常模式下，所有等待锁的 goroutine 按照 FIFO（先进先出）顺序等待。唤醒的 goroutine 不会直接拥有锁，而是会和新请求 goroutine 竞争锁。新请求的goroutine 更容易抢占：因为它正在 CPU 上执行，所以刚刚唤醒的 goroutine20有很大可能在锁竞争中失败。在这种情况下，这个被唤醒的 goroutine 会加入到等待队列的前面。</p>
+<p>正常模式下，所有等待锁的 goroutine 按照 FIFO（先进先出）顺序等待。唤醒的 goroutine 不会直接拥有锁，而是会和新请求 goroutine 竞争锁。新请求的goroutine 更容易抢占：因为它正在 CPU 上执行，所以刚刚唤醒的 goroutine有很大可能在锁竞争中失败。在这种情况下，这个被唤醒的 goroutine 会加入到等待队列的前面。</p>
 <p><strong>饥饿模式（公平锁）</strong></p>
 <p>为了解决了等待 goroutine 队列的长尾问题饥饿模式下，直接由 unlock 把锁交给等待队列中排在第一位的 goroutine (队头)，同时，饥饿模式下，新进来的 goroutine 会参与抢锁也不会进入自旋状态，会直接进入等待队列的尾部。这样很好的解决了老的 goroutine 一直抢不到锁的场景。饥饿模式的触发条件：当一个 goroutine 等待锁时间超过 1 毫秒时，或者当前队列只剩下一个 goroutine 的时候，Mutex 切换到饥饿模式。</p>
 <p><strong>总结</strong></p>
@@ -658,15 +678,14 @@
 <li>有空闲的 P。</li>
 <li>当前 Goroutine 所挂载的 P 下，本地待运行队列为空。</li>
 </ul>
-<h3 id="sync-Pool-有什么用"><a href="#sync-Pool-有什么用" class="headerlink" title="sync.Pool 有什么用"></a><strong>sync.Pool 有什么用</strong></h3><p>对于很多需要重复分配、回收内存的地方，sync.Pool 是一个很好的选择。频繁地分配、回收内存会给 GC 带来一定的负担，严重的时候会引起 CPU 的毛</p>
-<p>刺。而 sync.Pool 可以将暂时将不用的对象缓存起来，待下次需要的时候直接使用，不用再次经过内存分配，复用对象的内存，减轻 GC 的压力，提升系统的性能</p>
-<p><strong>GC 触发时机</strong></p>
-<p><strong>主动触发</strong>：调用 runtime.GC </p>
+<h3 id="10-sync-Pool-有什么用"><a href="#10-sync-Pool-有什么用" class="headerlink" title="10. sync.Pool 有什么用"></a>10. sync.Pool 有什么用</h3><p>对于很多需要重复分配、回收内存的地方，sync.Pool 是一个很好的选择。频繁地分配、回收内存会给 GC 带来一定的负担，严重的时候会引起 CPU 的毛刺。</p>
+<p>而 sync.Pool 可以将暂时将不用的对象缓存起来，待下次需要的时候直接使用，不用再次经过内存分配，复用对象的内存，减轻 GC 的压力，提升系统的性能</p>
+<h3 id="11-GC-触发时机"><a href="#11-GC-触发时机" class="headerlink" title="11.GC 触发时机"></a>11.GC 触发时机</h3><p><strong>主动触发</strong>：调用 runtime.GC </p>
 <p><strong>被动触发</strong>：</p>
 <p>使用系统监控，该触发条件由 runtime.forcegcperiod 变量控制，默认为 2 分钟。</p>
 <p>当超过两分钟没有产生任何 GC 时，强制触发 GC。使用步调（Pacing）算法，其核心思想是控制内存增长的比例。如 Go 的 GC 是一种比例 GC, 下一次 GC 结束时的堆大小和上一次 GC 存活堆大小成比例. </p>
 <p>什么意思呢，就是GOGC默认值是100，举个例子：你程序的上一次GC完，驻留内存是100MB，由于你GOGC设置的是100，所以下次你的内存达到200MB的时候就会触发一次GC，如果你GOGC设置的是200，那么下次你的内存达到300MB的时候就会触发GC。</p>
-<h3 id="GC-如何调优"><a href="#GC-如何调优" class="headerlink" title="GC 如何调优"></a>GC 如何调优</h3><p>通过 go tool pprof 和 go tool trace 等工具</p>
+<h3 id="12-GC-如何调优"><a href="#12-GC-如何调优" class="headerlink" title="12.GC 如何调优"></a>12.GC 如何调优</h3><p>通过 go tool pprof 和 go tool trace 等工具</p>
 <ul>
 <li><p>控制内存分配的速度，限制 Goroutine 的数量，从而提高赋值器对 CPU 的利用率。</p>
 </li>
@@ -675,34 +694,59 @@
 <li><p>需要时，增大 GOGC 的值，降低 GC 的运行频率。</p>
 </li>
 </ul>
-<h2 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h2><h3 id="1-mysql-utf8-和-utf8mb4-区别"><a href="#1-mysql-utf8-和-utf8mb4-区别" class="headerlink" title="1. mysql utf8 和 utf8mb4 区别"></a>1. mysql utf8 和 utf8mb4 区别</h3><p>mysql utf8 字符集最多支持3个字节的字符， 不支持4个字节的特殊unicode。 utf8mb4 增加了对4个字节字符的支持。</p>
-<h3 id="6-mysql-binlog-里的内容和作用"><a href="#6-mysql-binlog-里的内容和作用" class="headerlink" title="6. mysql  binlog 里的内容和作用"></a>6. mysql  binlog 里的内容和作用</h3><p>概述：MySql二进制日志（binlog），也叫变更日志（update log），是Mysql中非常重要的日志。二进制日志中记录了对Mysql数据库执行变更的所有操作，并且记录了语句发生时间、执行时长、操作数据等其他额外信息，但是他不记录select、show等不改变数据的SQL语句。binlog主要用于数据库恢复和主从复制以及审计操作，如果Mysql数据库意外停止，可以使用binlog来查看用户执行了哪些操作，对于数据服务器文件做了哪些修改，然后根据binlog中的记录来恢复数据库服务器</p>
-<p>内容：记录了对Mysql数据库执行变更的所有操作，并且记录了语句发生时间、执行时长、操作数据等其他额外信息，但是他不记录select、show等不改变数据的SQL语句。</p>
-<p>作用：（1）基于时间的恢复：在备份文件恢复的基础上，通过binlog可以将数据库恢复到某一个时间点。（2）主从复制，在主从复制的模式下，必须在主服务器上开启binlog日志。（3）操作审计：对所有更改数据的操作进行审计。</p>
-<p>binlog 生成的时机是事物提交的时候</p>
-<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><ol>
-<li><p>rpc 性能比http 好的原因</p>
+<h3 id="13-Golang-Slice-的底层实现"><a href="#13-Golang-Slice-的底层实现" class="headerlink" title="13.Golang Slice 的底层实现"></a>13.Golang Slice 的底层实现</h3><p>切片是基于数组实现的，它的底层是数组，它自己本身非常小，可以理解为对底层数组的抽象。因为基于数组实现，所以它的底层的内存是连续分配的，效率非常高，还可以通过索引获得数据。切片本身并不是动态数组或者数组指针。它内部实现的数据结构通过指针引用底层数组，设定相关属性将数据读写操作限定在指定的区域内。切片本身是一个只读对象，其工作机制类似数组指针的一种封装。切片对象非常小，是因为它是只有 3 个字段的数据结构：</p>
 <ul>
+<li>指向底层数组的指针</li>
+<li>切片的长度</li>
+<li>切片的容量</li>
+</ul>
+<h2 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h2><h3 id="1-mysql-utf8-和-utf8mb4-区别"><a href="#1-mysql-utf8-和-utf8mb4-区别" class="headerlink" title="1. mysql utf8 和 utf8mb4 区别"></a>1. mysql utf8 和 utf8mb4 区别</h3><p>mysql utf8 字符集最多支持3个字节的字符， 不支持4个字节的特殊unicode。 utf8mb4 增加了对4个字节字符的支持。</p>
+<h3 id="2-mysql-binlog-里的内容和作用"><a href="#2-mysql-binlog-里的内容和作用" class="headerlink" title="2. mysql  binlog 里的内容和作用"></a>2. mysql  binlog 里的内容和作用</h3><p>概述：MySql二进制日志（binlog），也叫变更日志（update log），是Mysql中非常重要的日志。二进制日志中记录了对Mysql数据库执行变更的所有操作，并且记录了语句发生时间、执行时长、操作数据等其他额外信息，但是他不记录select、show等不改变数据的SQL语句。binlog主要用于数据库恢复和主从复制以及审计操作，如果Mysql数据库意外停止，可以使用binlog来查看用户执行了哪些操作，对于数据服务器文件做了哪些修改，然后根据binlog中的记录来恢复数据库服务器</p>
+<p>内容：记录了对Mysql数据库执行变更的所有操作，并且记录了语句发生时间、执行时长、操作数据等其他额外信息，但是他不记录select、show等不改变数据的SQL语句。</p>
+<p>作用:</p>
+<p>（1）基于时间的恢复：在备份文件恢复的基础上，通过binlog可以将数据库恢复到某一个时间点。</p>
+<p>（2）主从复制，在主从复制的模式下，必须在主服务器上开启binlog日志。</p>
+<p>（3）操作审计：对所有更改数据的操作进行审计。</p>
+<p>binlog 生成的时机是事物提交的时候</p>
+<h3 id="3-MySQL-里记录货币用什么字段类型好"><a href="#3-MySQL-里记录货币用什么字段类型好" class="headerlink" title="3.MySQL 里记录货币用什么字段类型好"></a>3.MySQL 里记录货币用什么字段类型好</h3><p>NUMERIC 和 DECIMAL 类型被 MySQL 实现为同样的类型，这在 SQL92 标准允许。他们被用于保存值，该值的准确精度是极其重要的值，例如与金钱有关的数据。当声明一个类是这些类型之一时，精度和规模的能被(并且通常是)指定。</p>
+<p>例如：</p>
+<p>salary DECIMAL(9,2)77在这个例子中，9(precision)代表将被用于存储值的总的小数位数，而2(scale)代表将被用于存储小数点后的位数。因此，在这种情况下，能被存储在 salary 列中的值的范围是从-9999999.99 到9999999.99。</p>
+<h3 id="4-什么是临时表，何时删除临时表？"><a href="#4-什么是临时表，何时删除临时表？" class="headerlink" title="4.什么是临时表，何时删除临时表？"></a>4.什么是临时表，何时删除临时表？</h3><blockquote>
+<p>EXPLAIN 查看执行计划结果的 Extra 列中，如果使用 Using Temporary 就表示会用到临时表。</p>
+</blockquote>
+<p>什么是临时表?MySQL 在执行 SQL 语句的过程中 通常会临时创建一些存储中间结果集的表，临时 <strong>表只对当前连接可见，在连接关闭时</strong>，临时表会被删除并释放所有表空间。</p>
+<p>临时表分为两种:一种是内存临时表，一种是磁盘临时表，什么区别呢?  内存临时表使用的是 MEMORY 存储引擎，而临时表采用的是 MylSAM 存储引擎。</p>
+<p>MySQL 会在下面这几种情况产生临时表。</p>
+<ul>
+<li>使用 UNION 查询:UNION 有两种，一种是 UNION，一种是 UNION ALL，它们都用于联合查询;区别是使用 UNION 会去掉两个表中的重复数据，相当于对结果集做了一下 去重(distinct)。使用 UNIONALL，则不会排重，返回所有的行。使用 UNION 查询会产生临时表。</li>
+<li>FROM 中的子查询;</li>
+<li>使用 TEMPTABLE 算法或者是 UNION 查询中的视图。TEMPTABLE 算法是一种创建临时表的算法，它是将结果放置到临时表中，意味这要 MySQL 要先创建好一个临时表，然后将结果放到临时表中去，然后再使用这个临时表进行相应的查询。</li>
+<li>ORDER BY 和 GROUPBY 的子句不一样时也会产生临时表。</li>
+<li>DISTINCT 查询并且加上 ORDER BY 时;</li>
+<li>SQL 中用到 SQL_SMALL_RESULT 选项时;如果查询结果比较小的时候，可以加上 SQL SMALL RESULT 来优化，产生临时表</li>
+</ul>
+<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><h3 id="1-rpc-性能比http-好的原因"><a href="#1-rpc-性能比http-好的原因" class="headerlink" title="1. rpc 性能比http 好的原因"></a>1. rpc 性能比http 好的原因</h3><ul>
 <li>序列化方式：<br>RPC服务序列化是针对二进制协议（0/1）来做序列化和反序列化，所以性能高。<br>而Http服务是基于文本的序列化和反序列化，需要读一行一行的文本（比如json格式的），进行序列化和反序列化，所以性能低。</li>
 <li>报文长度：<br>RPC服务是自定义的传输协议，传输的报文都是干货。<br>而Http服务里面包括很多没用的报文内容，比如Http Header里面的accept，referer等等</li>
 <li>http 还需要域名解析， ssl 等过程， rpc 专注于请求和响应， 过程简洁</li>
 </ul>
-</li>
-<li><p>一个基础的rpc框架包含哪些部分</p>
-<ul>
+<h3 id="2-一个基础的rpc框架包含哪些部分"><a href="#2-一个基础的rpc框架包含哪些部分" class="headerlink" title="2. 一个基础的rpc框架包含哪些部分"></a>2. 一个基础的rpc框架包含哪些部分</h3><ul>
 <li>客户端和服务端建立网络连接模块( <strong>server</strong>模块、<strong>client</strong>模块 )</li>
 <li>服务端<strong>处理请求模块</strong></li>
-<li><strong>协议</strong>模块</li>
+<li><strong>传输协议</strong>模块</li>
 <li><strong>序列化</strong>和<strong>反序列</strong>模块。</li>
+<li>服务发现</li>
 </ul>
+<h3 id="3-设计一个RPC框架，可以从PRC包含的几个模块去考虑，对每一个模块分别进行设计。"><a href="#3-设计一个RPC框架，可以从PRC包含的几个模块去考虑，对每一个模块分别进行设计。" class="headerlink" title="3. 设计一个RPC框架，可以从PRC包含的几个模块去考虑，对每一个模块分别进行设计。"></a>3. 设计一个RPC框架，可以从PRC包含的几个模块去考虑，对每一个模块分别进行设计。</h3><ul>
+<li><p><strong>客户端</strong>和<strong>服务端如何建立网络连接</strong>？</p>
 </li>
-<li><p>设计一个RPC框架，可以从PRC包含的几个模块去考虑，对每一个模块分别进行设计。</p>
-<ul>
-<li><strong>客户端</strong>和<strong>服务端如何建立网络连接</strong>？</li>
-<li><strong>服务端</strong>如何<strong>处理请求</strong>？</li>
-<li><strong>数据传输</strong>采用什么<strong>协议</strong>？</li>
-<li><strong>数据</strong>该如何<strong>序列化</strong>和<strong>反序列化</strong>？</li>
-</ul>
+<li><p><strong>服务端</strong>如何<strong>处理请求</strong>？</p>
+</li>
+<li><p><strong>数据传输</strong>采用什么<strong>协议</strong>？</p>
+</li>
+<li><p><strong>数据</strong>该如何<strong>序列化</strong>和<strong>反序列化</strong>？</p>
+</li>
+<li><p>服务发现采用什么方式</p>
 </li>
 <li><p>如何设计一个rpc 框架</p>
 <ol>
@@ -733,13 +777,73 @@
 </li>
 </ul>
 </li>
-</ol>
-<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><ol>
-<li><p>什么是M3U8 和HLS</p>
-<p>M3U8，是一种基于HTTP Live Streaming文件的视频格式，由整个视频的基本信息和分片(Segment)组成而成，其中HTTP Live Streaming是苹果公司实现的基于 HTTP 的流媒体协议，能够实现流媒体的点播和直播播放。在早期的时候，M3U8仅支持苹果的设备，后来搭载安卓操作系统的移动设备也逐渐兼容了M3U8格式。</p>
+</ul>
+<h3 id="4-分布式服务接口的幂等性如何设计？"><a href="#4-分布式服务接口的幂等性如何设计？" class="headerlink" title="4. 分布式服务接口的幂等性如何设计？"></a>4. <strong>分布式服务接口的幂等性如何设计？</strong></h3><p>所谓幂等性，就是说一个接口，多次发起同一个请求，你这个接口得保证结果是准确得。比如不能多扣款。不能多插入一条数据，不能将统计值多加了 1，这就是幂等性。</p>
+<p>其实保证幂等性主要是三点：</p>
+<ul>
+<li>对于每个请求必须有一个唯一的标识，举个例子：订单支付请求，肯定得包含订单 ID，一个订单 ID 最多支付一次。</li>
+<li>每次处理完请求之后，必须有一个记录标识这个请求处理过了，比如说常见得方案是再 MySQL 中记录个状态啥得，比如支付之前记录一条这个订单得支付流水，而且支付流水采用 order id 作为唯一键（unique key）。只有成功插入这个支付流水，才可以执行实际得支付扣款</li>
+<li>每次接收请求需要进行判断之前是否处理过得逻辑处理，比如说，如果有一个订单已经支付了，就已经有了一条支付流水，那么如果重复发送这个请求，则此时先插入支付流水，order id 已经存在了，唯一键约束生效，报错插入不进去得。然后你就不用再扣款了</li>
+</ul>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><h3 id="1-什么是M3U8-和HLS"><a href="#1-什么是M3U8-和HLS" class="headerlink" title="1. 什么是M3U8 和HLS"></a>1. 什么是M3U8 和HLS</h3><p>M3U8，是一种基于HTTP Live Streaming文件的视频格式，由整个视频的基本信息和分片(Segment)组成而成，其中HTTP Live Streaming是苹果公司实现的基于 HTTP 的流媒体协议，能够实现流媒体的点播和直播播放。在早期的时候，M3U8仅支持苹果的设备，后来搭载安卓操作系统的移动设备也逐渐兼容了M3U8格式。</p>
 <p>与传统的在线视频MP4格式相比，M3U8格式将视频流分成不同的片段。当我们缓存视频时，我们会不断地下载这些片段。因为片段之间的间隔很短，所以看起来是一个非常完整的视频。M3U8文件一般包括两个部分，一个是纯索引文件，一个是视频列表文件。</p>
-</li>
+<h3 id="2-进程的切换流程？"><a href="#2-进程的切换流程？" class="headerlink" title="2. 进程的切换流程？"></a>2. <strong>进程的切换流程？</strong></h3><p>进程切换分两步：</p>
+<p>1、切换<strong>页表</strong>以使用新的地址空间，一旦去切换上下文，处理器中所有已经缓存的内存地址一瞬间都作废了。</p>
+<p>2、切换<strong>内核栈</strong>和<strong>硬件上下文</strong>。对于 linux 来说，线程和进程的最大区别就在于地址空间，对于线程切换，第1 步是不需要做的，第 2 步是进程和线程切换都要做的。因为每个进程都有自己的虚拟地址空间，而线程是共享所在进程的虚拟地址空间的，因此同一个进程中的线程进行线程切换时不涉及虚拟地址空间的转换。</p>
+<h3 id="3-什么是内存分页"><a href="#3-什么是内存分页" class="headerlink" title="3. 什么是内存分页"></a>3. 什么是内存分页</h3><p>把内存空间划分为<strong>大小相等且固定的块</strong>，作为主存的基本单位。因为程序数据存储在不同的页面中，而页面又离散的分布在内存中，因此需要一个页表来记</p>
+<p>录映射关系，以实现从页号到物理块号的映射。<strong>访问分页系统中内存数据需要</strong>两次的内存访问** (一次是从内存中访问页表，从中找到指定的物理块号，加上页内偏移得到实际物理地址；第二次就是根据第一次得到的物理地址访问内存取出数据)</p>
+<p><img src="/img/image-20230108211638758.png" alt="image-20230108211638758">、</p>
+<h3 id="4-什么是交换空间"><a href="#4-什么是交换空间" class="headerlink" title="4. 什么是交换空间"></a>4. 什么是交换空间</h3><p>操作系统把物理内存(physical RAM)分成一块一块的小内存，每一块内存被称为<strong>页(page)</strong>。当内存资源不足时，Linux 把某些页的内容转移至硬盘上的一块空间上，以释放内存空间<strong>。硬盘上的那块空间叫做</strong>交换空间<strong>(swap space),而这一过程被称为交换(swapping)。</strong>物理内存和交换空间的总容量就是虚拟内存的可用容量。</p>
+<p>用途：</p>
+<ul>
+<li>物理内存不足时一些不常用的页可以被交换出去，腾给系统。</li>
+<li>程序启动时很多内存页被用来初始化，之后便不再需要，可以交换出去。</li>
+</ul>
+<p><strong>进程间通信方式有哪些</strong></p>
+<ul>
+<li><p>管道：管道这种通讯方式有两种限制，一是半双工的通信，数据只能单向流动，二是只能在具有亲缘关系的进程间使用。进程的亲缘关系通常是指父子进程关系。       管道可以分为两类：</p>
+<ol>
+<li>匿名管道和命名管道。匿名管道是单向的，只能在有亲缘关系的进程间通信；</li>
+<li>命名管道以磁盘文件的方式存在，可以实现本机任意两个进程通信。</li>
 </ol>
+</li>
+<li><p><strong>信号：</strong>信号是一种比较复杂的通信方式，信号可以在任何时候发给某一进程，而无需知道该进程的状态。</p>
+<p><strong>Linux 系统中常用信号</strong>：</p>
+<p>（1）<strong>SIGHUP</strong>：用户从终端注销，所有已启动进程都将收到该进程。系统缺省状态下对该信号的处理是终止进程。</p>
+<p>（2）<strong>SIGINT</strong>：程序终止信号。程序运行过程中，按 Ctrl+C 键将产生该信号。</p>
+<p>（3）<strong>SIGQUIT</strong>：程序退出信号。程序运行过程中，按 Ctrl+\键将产生该信号。</p>
+<p>（4）<strong>SIGBUS 和 SIGSEGV</strong>：进程访问非法地址。</p>
+<p>（5）<strong>SIGFPE</strong>：运算中出现致命错误，如除零操作、数据溢出等。</p>
+<p>（6）<strong>SIGKILL</strong>：用户终止进程执行信号。shell 下执行 kill -9 发送该信号。</p>
+<p>（7）<strong>SIGTERM</strong>：结束进程信号。shell 下执行 kill 进程 pid 发送该信号。</p>
+<p>（8）<strong>SIGALRM</strong>：定时器信号。</p>
+<p>（9）<strong>SIGCLD</strong>：子进程退出信号。如果其父进程没有忽略该信号也没有处理该信号，则子进程退出后将形成僵尸进程。</p>
+</li>
+<li><p>信号量：信号量是一个<strong>计数器</strong>，可以用来控制多个进程对共享资源的访问。它常作为一种<strong>锁机制</strong>，防止某进程正在访问共享资源时，其他进程也访问该资源。因此，主要作为进程间以及同一进程内不同线程之间的同步手段。</p>
+</li>
+<li><p>消息队列：消息队列是消息的链接表，包括 Posix 消息队列和 System V 消息队列。有足够权限的进程可以向队列中添加消息，被赋予读权限的进程100则可以读走队列中的消息。消息队列克服了信号承载信息量少，管道只能承载无格式字节流以及缓冲区大小受限等缺点。</p>
+</li>
+<li><p>共享内存：共享内存就是映射一段能被其他进程所访问的内存，这段共享内存由一个进程创建，但多个进程都可以访问。共享内存是最快的 IPC 方式，它是针对其他进程间通信方式运行效率低而专门设计的。它往往与其他通信机制，如信号量，配合使用，来实现进程间的同步和通信。</p>
+</li>
+<li><p>Socket：与其他通信机制不同的是，它可用于不同机器间的进程通信。</p>
+</li>
+</ul>
+<p>​    <strong>优缺点</strong>：</p>
+<ul>
+<li>管道：速度慢，容量有限；</li>
+<li>信号：只能传递信号， 不能传递消息；</li>
+<li>Socket：任何进程间都能通讯，但速度慢；</li>
+<li>消息队列：容量受到系统限制，且要注意第一次读的时候，要考虑上一次没有读完数据的问题；</li>
+<li>信号量：不能传递复杂消息，只能用来同步；</li>
+<li>共享内存区：能够很容易控制容量，速度快，但要保持同步，比如一个进程在写的时候，另一个进程要注意读写的问题，相当于线程中的线程安全，当然，共享内存区同样可以用作线程间通讯，不过没这个必要，线程间本来就已经共享了同一进程内的一块内存</li>
+</ul>
+<h3 id="5-进程的状态"><a href="#5-进程的状态" class="headerlink" title="5. 进程的状态"></a>5. 进程的状态</h3><p>进程一共有 5 种状态，分别是创建、就绪、运行（执行）、终止、阻塞。</p>
+<ul>
+<li>运行：运行状态就是进程正在 CPU 上运行。在单处理机环境下，每一时刻最多只有一个进程处于运行状态。</li>
+<li>就绪：就绪状态就是说进程已处于准备运行的状态，即进程获得了除 CPU 之外的一切所需资源，一旦得到 CPU 即可运行。</li>
+<li>阻塞：阻塞状态就是进程正在等待某一事件而暂停运行，比如等待某资源为可用或等待 I/O 完成。即使 CPU 空闲，该进程也不能运行</li>
+</ul>
+<p><img src="/img/image-20230108211419018.png" alt="image-20230108211419018"></p>
 
       
     </div>
@@ -1314,7 +1418,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#网络"><span class="nav-text">网络</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-浏览器输入url-发生了什么过程"><span class="nav-text">1. 浏览器输入url 发生了什么过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-网路-四层、七层模型"><span class="nav-text">2.网路  四层、七层模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-TCP-UDP-区别"><span class="nav-text">3.TCP UDP 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-三次握手、四次挥手"><span class="nav-text">4. 三次握手、四次挥手</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-https-请求过程"><span class="nav-text">5.https 请求过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-DNS域名解析过程"><span class="nav-text">6.DNS域名解析过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Golang"><span class="nav-text">Golang</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-WaitGroup原理"><span class="nav-text">1. WaitGroup原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-什么是Map"><span class="nav-text">2. 什么是Map</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#key，value存储"><span class="nav-text">key，value存储</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#hash冲突"><span class="nav-text">hash冲突</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Golang-Map"><span class="nav-text">3. Golang Map</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-golang-map扩容"><span class="nav-text">4.golang map扩容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-goroutine-与thread比较"><span class="nav-text">5. goroutine 与thread比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么操作叫做原子操作"><span class="nav-text">什么操作叫做原子操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是-CAS"><span class="nav-text">什么是 CAS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Golang-互斥锁"><span class="nav-text">Golang 互斥锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#sync-Pool-有什么用"><span class="nav-text">sync.Pool 有什么用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GC-如何调优"><span class="nav-text">GC 如何调优</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据库"><span class="nav-text">数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-mysql-utf8-和-utf8mb4-区别"><span class="nav-text">1. mysql utf8 和 utf8mb4 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-mysql-binlog-里的内容和作用"><span class="nav-text">6. mysql  binlog 里的内容和作用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#架构"><span class="nav-text">架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他"><span class="nav-text">其他</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#网络"><span class="nav-text">网络</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-浏览器输入url-发生了什么过程"><span class="nav-text">1. 浏览器输入url 发生了什么过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-网路-四层、七层模型"><span class="nav-text">2.网路  四层、七层模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-TCP-UDP-区别"><span class="nav-text">3.TCP UDP 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-三次握手、四次挥手"><span class="nav-text">4. 三次握手、四次挥手</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-https-请求过程"><span class="nav-text">5.https 请求过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-DNS域名解析过程"><span class="nav-text">6.DNS域名解析过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-跨域的常见解决办法"><span class="nav-text">7.跨域的常见解决办法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Golang"><span class="nav-text">Golang</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-WaitGroup原理"><span class="nav-text">1. WaitGroup原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-什么是Map"><span class="nav-text">2. 什么是Map</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#key，value存储"><span class="nav-text">key，value存储</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#hash冲突"><span class="nav-text">hash冲突</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Golang-Map"><span class="nav-text">3. Golang Map</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-golang-map扩容"><span class="nav-text">4.golang map扩容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-goroutine-与thread比较"><span class="nav-text">5. goroutine 与thread比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-什么操作叫做原子操作"><span class="nav-text">6. 什么操作叫做原子操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-什么是-CAS"><span class="nav-text">7.什么是 CAS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-GMP调度过程中存在哪些阻塞"><span class="nav-text">8.GMP调度过程中存在哪些阻塞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-Golang-互斥锁"><span class="nav-text">9.Golang 互斥锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-sync-Pool-有什么用"><span class="nav-text">10. sync.Pool 有什么用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-GC-触发时机"><span class="nav-text">11.GC 触发时机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-GC-如何调优"><span class="nav-text">12.GC 如何调优</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#13-Golang-Slice-的底层实现"><span class="nav-text">13.Golang Slice 的底层实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据库"><span class="nav-text">数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-mysql-utf8-和-utf8mb4-区别"><span class="nav-text">1. mysql utf8 和 utf8mb4 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-mysql-binlog-里的内容和作用"><span class="nav-text">2. mysql  binlog 里的内容和作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-MySQL-里记录货币用什么字段类型好"><span class="nav-text">3.MySQL 里记录货币用什么字段类型好</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-什么是临时表，何时删除临时表？"><span class="nav-text">4.什么是临时表，何时删除临时表？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#架构"><span class="nav-text">架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-rpc-性能比http-好的原因"><span class="nav-text">1. rpc 性能比http 好的原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-一个基础的rpc框架包含哪些部分"><span class="nav-text">2. 一个基础的rpc框架包含哪些部分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-设计一个RPC框架，可以从PRC包含的几个模块去考虑，对每一个模块分别进行设计。"><span class="nav-text">3. 设计一个RPC框架，可以从PRC包含的几个模块去考虑，对每一个模块分别进行设计。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-分布式服务接口的幂等性如何设计？"><span class="nav-text">4. 分布式服务接口的幂等性如何设计？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他"><span class="nav-text">其他</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-什么是M3U8-和HLS"><span class="nav-text">1. 什么是M3U8 和HLS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-进程的切换流程？"><span class="nav-text">2. 进程的切换流程？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-什么是内存分页"><span class="nav-text">3. 什么是内存分页</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-什么是交换空间"><span class="nav-text">4. 什么是交换空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-进程的状态"><span class="nav-text">5. 进程的状态</span></a></li></ol></li></ol></div>
             
 
           </div>

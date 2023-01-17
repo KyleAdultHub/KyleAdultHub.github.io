@@ -134,7 +134,7 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230108211638758.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230108211419018.png">
 <meta property="article:published_time" content="2022-12-29T16:00:00.000Z">
-<meta property="article:modified_time" content="2023-01-14T06:03:50.649Z">
+<meta property="article:modified_time" content="2023-01-17T04:03:56.051Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="补充">
 <meta name="twitter:card" content="summary">
@@ -480,22 +480,27 @@
 <p>七层：物理层、数据链路层、网络层、传输层、表示层、会话层、应用层</p>
 <h3 id="3-TCP-UDP-区别"><a href="#3-TCP-UDP-区别" class="headerlink" title="3.TCP UDP 区别"></a>3.TCP UDP 区别</h3><ul>
 <li><p><strong>UDP</strong></p>
-</li>
-<li><ul>
+<ul>
 <li>是面向无连接的通讯协议，数据包括目的端口号和源端口号信息。</li>
 <li>优点：UDP速度快、操作简单、需要系统资源较少，由于通讯不需要连接，可以实现广播发送。</li>
 <li>缺点：UDP传送数据前并不与对方建立连接，对接收到的数据也不发送确认信号，发送端不知道数据是否会正确接收，也不用重发，不可靠。</li>
 </ul>
 </li>
 <li><p><strong>TCP</strong></p>
-</li>
-<li><ul>
+<ul>
 <li>是面向连接的通信协议，通过三次握手建立连接，通讯完成时四次挥手。</li>
-<li>优点：TCP在数据传递时，有确认、编号、重传、拥塞控制等机制，能保证数据正确性，较可靠。</li>
+<li>优点：TCP在数据传递时，有确认、编号、重传、流量控制、拥塞控制等机制，能保证数据正确性，较可靠。</li>
 <li>缺点：TCP相对于UDP速度慢一点、要求系统资源较多。</li>
 </ul>
 </li>
 </ul>
+<blockquote>
+<p><strong>流量控制</strong>  </p>
+<p> 流量控制就是让发送方的发送速率不要太快，要让接收方来的及接收。</p>
+<p> 原理是通过确认报文中窗口字段来控制发送方的发送速率，发送方的发送窗口大小不能超过接收方给出窗口大小。</p>
+<p><strong>拥塞控制</strong></p>
+<p>防止过多的数据注入到网络中，这样可以使网络中的路由器或链路过载。如果网络出现拥塞，分组将会丢失，此时发送方会继续重传，从而导致网络拥塞程度更高。因此当出现拥塞时，应当控制发送方的速率。</p>
+</blockquote>
 <h3 id="4-三次握手、四次挥手"><a href="#4-三次握手、四次挥手" class="headerlink" title="4. 三次握手、四次挥手"></a>4. 三次握手、四次挥手</h3><p><em>SYN:同步序列编号(Synchronize Sequence Numbers)</em></p>
 <p>三次握手</p>
 <ul>
@@ -871,8 +876,8 @@
 <p>让业务架构和系统架构行成绑定的关系</p>
 <p><strong>微服务划分原则</strong></p>
 <ul>
-<li>按照部门只能</li>
-<li>确定模块的边界和紧密成都</li>
+<li>按照部门职能</li>
+<li>确定模块的边界和紧密程度</li>
 <li>按照服务的请求负载</li>
 <li>按照故障率和变化率</li>
 </ul>
@@ -883,11 +888,11 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DTO -&gt; DO 需要在领域模型内完成， 数据装载的interface 需要在领域模型内repo中完成， 数据实际获取以及 data -&gt; DO 需要在data层完成</span><br></pre></td></tr></table></figure>
 
 <h3 id="6-服务端-高并发、高可用可以考虑的点"><a href="#6-服务端-高并发、高可用可以考虑的点" class="headerlink" title="6. 服务端 高并发、高可用可以考虑的点"></a>6. 服务端 高并发、高可用可以考虑的点</h3><ul>
-<li>微服务的拆分， 数据资源、计算资源、运行资源都进行拆分和隔离；</li>
+<li>微服务的拆分， 数据资源、计算资源、运行资源都进行拆分和隔离(根据服务等级和业务范围)，；</li>
 <li>读多服务， 可以考虑redis缓存、local 缓存、多级缓存、缓存降级等； 写多服务可以考虑优先写kv， 通过消息队列异步更新db和缓存；</li>
-<li>数据库层面可以做到分库分表，主从读写分离；</li>
-<li>部署方面可以做到微服务容器的动态伸缩</li>
-<li>服务的限流、熔断等机制，避免对整条调用链路的影响；</li>
+<li>数据库层面可以做到分库分表(水平和垂直)，主从读写分离；</li>
+<li>部署方面可以做到微服务容器的动态伸缩；</li>
+<li>服务的限流、熔断、重试、降级等机制，避免对整条调用链路的影响；</li>
 <li>多机房主备部署；</li>
 </ul>
 <h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><h3 id="1-什么是M3U8-和HLS"><a href="#1-什么是M3U8-和HLS" class="headerlink" title="1. 什么是M3U8 和HLS"></a>1. 什么是M3U8 和HLS</h3><p>M3U8，是一种基于HTTP Live Streaming文件的视频格式，由整个视频的基本信息和分片(Segment)组成而成，其中HTTP Live Streaming是苹果公司实现的基于 HTTP 的流媒体协议，能够实现流媒体的点播和直播播放。在早期的时候，M3U8仅支持苹果的设备，后来搭载安卓操作系统的移动设备也逐渐兼容了M3U8格式。</p>
@@ -896,8 +901,8 @@
 <p>1、切换<strong>页表</strong>以使用新的地址空间，一旦去切换上下文，处理器中所有已经缓存的内存地址一瞬间都作废了。</p>
 <p>2、切换<strong>内核栈</strong>和<strong>硬件上下文</strong>。对于 linux 来说，线程和进程的最大区别就在于地址空间，对于线程切换，第1 步是不需要做的，第 2 步是进程和线程切换都要做的。因为每个进程都有自己的虚拟地址空间，而线程是共享所在进程的虚拟地址空间的，因此同一个进程中的线程进行线程切换时不涉及虚拟地址空间的转换。</p>
 <h3 id="3-什么是内存分页"><a href="#3-什么是内存分页" class="headerlink" title="3. 什么是内存分页"></a>3. 什么是内存分页</h3><p>把内存空间划分为<strong>大小相等且固定的块</strong>，作为主存的基本单位。因为程序数据存储在不同的页面中，而页面又离散的分布在内存中，因此需要一个页表来记</p>
-<p>录映射关系，以实现从页号到物理块号的映射。<strong>访问分页系统中内存数据需要</strong>两次的内存访问** (一次是从内存中访问页表，从中找到指定的物理块号，加上页内偏移得到实际物理地址；第二次就是根据第一次得到的物理地址访问内存取出数据)</p>
-<p><img src="/img/image-20230108211638758.png" alt="image-20230108211638758">、</p>
+<p>录映射关系，以实现从页号到物理块号的映射。<strong>访问分页系统中内存数据需要</strong>两次的内存访问 (一次是从内存中访问页表，从中找到指定的物理块号，加上页内偏移得到实际物理地址；第二次就是根据第一次得到的物理地址访问内存取出数据)</p>
+<p><img src="/img/image-20230108211638758.png" alt="image-20230108211638758"></p>
 <h3 id="4-什么是交换空间"><a href="#4-什么是交换空间" class="headerlink" title="4. 什么是交换空间"></a>4. 什么是交换空间</h3><p>操作系统把物理内存(physical RAM)分成一块一块的小内存，每一块内存被称为<strong>页(page)</strong>。当内存资源不足时，Linux 把某些页的内容转移至硬盘上的一块空间上，以释放内存空间<strong>。硬盘上的那块空间叫做</strong>交换空间<strong>(swap space),而这一过程被称为交换(swapping)。</strong>物理内存和交换空间的总容量就是虚拟内存的可用容量。</p>
 <p>用途：</p>
 <ul>
@@ -959,6 +964,12 @@
 <li>优点：不存在redis的超时、数据一致性可以保障，可靠性很高，基于watch + 回调的方式获取锁，实现简单。</li>
 <li>缺点：保证了可靠性的同时牺牲了一部分效率（但是依然很高）。性能不如redis。</li>
 </ul>
+<h3 id="7-http-与http2-0区别"><a href="#7-http-与http2-0区别" class="headerlink" title="7. http 与http2.0区别"></a>7. http 与http2.0区别</h3><ol>
+<li>新的二进制格式（Binary Format），HTTP1.x的解析是基于文本。基于文本协议的格式解析存在天然缺陷，文本的表现形式有多样性，要做到健壮性考虑的场景必然很多，二进制则不同，只认0和1的组合。基于这种考虑HTTP2.0的协议解析决定采用二进制格式，实现方便且健壮。</li>
+<li>多路复用（MultiPlexing），即连接共享，即每一个request都是是用作连接共享机制的。一个request对应一个id，这样一个连接上可以有多个request，每个连接的request可以随机的混杂在一起，接收方可以根据request的 id将request再归属到各自不同的服务端请求里面。</li>
+<li>header压缩，如上文中所言，对前面提到过HTTP1.x的header带有大量信息，而且每次都要重复发送，HTTP2.0使用encoder来减少需要传输的header大小，通讯双方各自cache一份header fields表，既避免了重复header的传输，又减小了需要传输的大小。</li>
+<li>服务端推送（server push），同SPDY一样，HTTP2.0也具有server push功能。</li>
+</ol>
 
       
     </div>
@@ -1533,7 +1544,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#网络"><span class="nav-text">网络</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-浏览器输入url-发生了什么过程"><span class="nav-text">1. 浏览器输入url 发生了什么过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-网路-四层、七层模型"><span class="nav-text">2.网路  四层、七层模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-TCP-UDP-区别"><span class="nav-text">3.TCP UDP 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-三次握手、四次挥手"><span class="nav-text">4. 三次握手、四次挥手</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-https-请求过程"><span class="nav-text">5.https 请求过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-DNS域名解析过程"><span class="nav-text">6.DNS域名解析过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-跨域的常见解决办法"><span class="nav-text">7.跨域的常见解决办法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Golang"><span class="nav-text">Golang</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-WaitGroup原理"><span class="nav-text">1. WaitGroup原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-什么是Map"><span class="nav-text">2. 什么是Map</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#key，value存储"><span class="nav-text">key，value存储</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#hash冲突"><span class="nav-text">hash冲突</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Golang-Map"><span class="nav-text">3. Golang Map</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-golang-map扩容"><span class="nav-text">4.golang map扩容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-goroutine-与thread比较"><span class="nav-text">5. goroutine 与thread比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-什么操作叫做原子操作"><span class="nav-text">6. 什么操作叫做原子操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-什么是-CAS"><span class="nav-text">7.什么是 CAS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-GMP调度过程中存在哪些阻塞"><span class="nav-text">8.GMP调度过程中存在哪些阻塞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-Golang-互斥锁"><span class="nav-text">9.Golang 互斥锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-sync-Pool-有什么用"><span class="nav-text">10. sync.Pool 有什么用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-GC-触发时机"><span class="nav-text">11.GC 触发时机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-GC-如何调优"><span class="nav-text">12.GC 如何调优</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#13-Golang-Slice-的底层实现"><span class="nav-text">13.Golang Slice 的底层实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据库"><span class="nav-text">数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-mysql-utf8-和-utf8mb4-区别"><span class="nav-text">1. mysql utf8 和 utf8mb4 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-磁盘中数据的存取"><span class="nav-text">2.磁盘中数据的存取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-B-树的扇出系数、高度、存储容量-、io次数"><span class="nav-text">3. B+树的扇出系数、高度、存储容量 、io次数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-mysql-binlog-里的内容和作用"><span class="nav-text">4. mysql  binlog 里的内容和作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-MySQL-里记录货币用什么字段类型好"><span class="nav-text">5.MySQL 里记录货币用什么字段类型好</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-什么是临时表，何时删除临时表？"><span class="nav-text">6.什么是临时表，何时删除临时表？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-redis-多线程与后台线程"><span class="nav-text">7. redis 多线程与后台线程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#架构"><span class="nav-text">架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-rpc-性能比http-好的原因"><span class="nav-text">1. rpc 性能比http 好的原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-一个基础的rpc框架包含哪些部分"><span class="nav-text">2. 一个基础的rpc框架包含哪些部分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-设计一个RPC框架，可以从PRC包含的几个模块去考虑，对每一个模块分别进行设计。"><span class="nav-text">3. 设计一个RPC框架，可以从PRC包含的几个模块去考虑，对每一个模块分别进行设计。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-分布式服务接口的幂等性如何设计？"><span class="nav-text">4. 分布式服务接口的幂等性如何设计？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-领域模型相关"><span class="nav-text">5. 领域模型相关</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-服务端-高并发、高可用可以考虑的点"><span class="nav-text">6. 服务端 高并发、高可用可以考虑的点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他"><span class="nav-text">其他</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-什么是M3U8-和HLS"><span class="nav-text">1. 什么是M3U8 和HLS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-进程的切换流程？"><span class="nav-text">2. 进程的切换流程？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-什么是内存分页"><span class="nav-text">3. 什么是内存分页</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-什么是交换空间"><span class="nav-text">4. 什么是交换空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-进程的状态"><span class="nav-text">5. 进程的状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-reids-和zookeeper-分布式锁的区别"><span class="nav-text">6. reids 和zookeeper 分布式锁的区别</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#网络"><span class="nav-text">网络</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-浏览器输入url-发生了什么过程"><span class="nav-text">1. 浏览器输入url 发生了什么过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-网路-四层、七层模型"><span class="nav-text">2.网路  四层、七层模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-TCP-UDP-区别"><span class="nav-text">3.TCP UDP 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-三次握手、四次挥手"><span class="nav-text">4. 三次握手、四次挥手</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-https-请求过程"><span class="nav-text">5.https 请求过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-DNS域名解析过程"><span class="nav-text">6.DNS域名解析过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-跨域的常见解决办法"><span class="nav-text">7.跨域的常见解决办法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Golang"><span class="nav-text">Golang</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-WaitGroup原理"><span class="nav-text">1. WaitGroup原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-什么是Map"><span class="nav-text">2. 什么是Map</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#key，value存储"><span class="nav-text">key，value存储</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#hash冲突"><span class="nav-text">hash冲突</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Golang-Map"><span class="nav-text">3. Golang Map</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-golang-map扩容"><span class="nav-text">4.golang map扩容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-goroutine-与thread比较"><span class="nav-text">5. goroutine 与thread比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-什么操作叫做原子操作"><span class="nav-text">6. 什么操作叫做原子操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-什么是-CAS"><span class="nav-text">7.什么是 CAS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-GMP调度过程中存在哪些阻塞"><span class="nav-text">8.GMP调度过程中存在哪些阻塞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-Golang-互斥锁"><span class="nav-text">9.Golang 互斥锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-sync-Pool-有什么用"><span class="nav-text">10. sync.Pool 有什么用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-GC-触发时机"><span class="nav-text">11.GC 触发时机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-GC-如何调优"><span class="nav-text">12.GC 如何调优</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#13-Golang-Slice-的底层实现"><span class="nav-text">13.Golang Slice 的底层实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据库"><span class="nav-text">数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-mysql-utf8-和-utf8mb4-区别"><span class="nav-text">1. mysql utf8 和 utf8mb4 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-磁盘中数据的存取"><span class="nav-text">2.磁盘中数据的存取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-B-树的扇出系数、高度、存储容量-、io次数"><span class="nav-text">3. B+树的扇出系数、高度、存储容量 、io次数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-mysql-binlog-里的内容和作用"><span class="nav-text">4. mysql  binlog 里的内容和作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-MySQL-里记录货币用什么字段类型好"><span class="nav-text">5.MySQL 里记录货币用什么字段类型好</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-什么是临时表，何时删除临时表？"><span class="nav-text">6.什么是临时表，何时删除临时表？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-redis-多线程与后台线程"><span class="nav-text">7. redis 多线程与后台线程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#架构"><span class="nav-text">架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-rpc-性能比http-好的原因"><span class="nav-text">1. rpc 性能比http 好的原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-一个基础的rpc框架包含哪些部分"><span class="nav-text">2. 一个基础的rpc框架包含哪些部分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-设计一个RPC框架，可以从PRC包含的几个模块去考虑，对每一个模块分别进行设计。"><span class="nav-text">3. 设计一个RPC框架，可以从PRC包含的几个模块去考虑，对每一个模块分别进行设计。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-分布式服务接口的幂等性如何设计？"><span class="nav-text">4. 分布式服务接口的幂等性如何设计？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-领域模型相关"><span class="nav-text">5. 领域模型相关</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-服务端-高并发、高可用可以考虑的点"><span class="nav-text">6. 服务端 高并发、高可用可以考虑的点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他"><span class="nav-text">其他</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-什么是M3U8-和HLS"><span class="nav-text">1. 什么是M3U8 和HLS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-进程的切换流程？"><span class="nav-text">2. 进程的切换流程？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-什么是内存分页"><span class="nav-text">3. 什么是内存分页</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-什么是交换空间"><span class="nav-text">4. 什么是交换空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-进程的状态"><span class="nav-text">5. 进程的状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-reids-和zookeeper-分布式锁的区别"><span class="nav-text">6. reids 和zookeeper 分布式锁的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-http-与http2-0区别"><span class="nav-text">7. http 与http2.0区别</span></a></li></ol></li></ol></div>
             
 
           </div>

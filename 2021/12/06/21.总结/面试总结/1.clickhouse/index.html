@@ -143,7 +143,7 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211207175142024.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/2021/12/06/img/image-20211207175304210.png">
 <meta property="article:published_time" content="2021-12-05T16:00:00.000Z">
-<meta property="article:modified_time" content="2023-01-12T09:08:50.294Z">
+<meta property="article:modified_time" content="2023-01-30T07:19:12.940Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="Olap">
 <meta property="article:tag" content="clickhouse">
@@ -556,7 +556,7 @@
 <p><img src="../../../img/506119fbe6534457bdd5f0ed442484e1.png" alt="506119fbe6534457bdd5f0ed442484e1"></p>
 <h2 id="三、Clickhouse-的索引和数据存储"><a href="#三、Clickhouse-的索引和数据存储" class="headerlink" title="三、Clickhouse 的索引和数据存储"></a>三、Clickhouse 的索引和数据存储</h2><h3 id="1-Clickhouse-索引"><a href="#1-Clickhouse-索引" class="headerlink" title="1. Clickhouse 索引"></a>1. Clickhouse 索引</h3><h4 id="一级索引"><a href="#一级索引" class="headerlink" title="一级索引"></a>一级索引</h4><p>合并树的主键使用PRIMARY KEY定义，待主键定义之后，合并树会依据settings 中 （index_granularity）间隔参数，生成一级索引并保存至primary.idx文件内，索引数据按照PRIMARY KEY排序。PRIMARY KEY可通过ORDER BY指代主键。在此种情形下，PRIMARY KEY与ORDER BY定义相同，所以索引（primary.idx）和数据（.bin）会按照完全相同的规则排序。</p>
 <p><strong>primary.idx</strong>文件内的一级索引采用稀疏索引实现。</p>
-<h4 id="稀疏索引"><a href="#稀疏索引" class="headerlink" title="稀疏索引"></a>稀疏索引</h4><p>稀疏索引的优势是显而易见的，它仅需使用<strong>少量的索引标记就能够记录大量数据的区间位置信息</strong>，且数据量越大优势越为明显。以默认的索引粒度（8192）为例，MergeTree只需要12208行索引标记就能为1亿行数据记录提供索引。由于稀疏索引占用空间小，所以primary.idx内的索引数据常驻内存，取用速度自然极快。 </p>
+<h4 id="稀疏索引"><a href="#稀疏索引" class="headerlink" title="稀疏索引"></a>稀疏索引</h4><p>稀疏索引的优势是显而易见的，它仅需使用<strong>少量的索引标记就能够记录大量数据的区间位置信息</strong>，且数据量越大优势越为明显。以默认的索引粒度（8192）为例，MergeTree只需要12208行索引标记就能为1亿行数据记录提供索引。由于稀疏索引占用空间小，所以primary.idx内的<strong>索引数据常驻内存</strong>，取用速度自然极快。 </p>
 <img src="../../../img/image-20211206191156441.png" alt="image-20211206191156441" style="zoom:50%;" />
 
 <h4 id="索引数据生成规则"><a href="#索引数据生成规则" class="headerlink" title="索引数据生成规则"></a><strong>索引数据生成规则</strong></h4><p>由于是稀疏索引，所以MergeTree需要间隔设定的索引粒度才会生成一条索引记录，其索引值会依据声明的主键字段获取。</p>
@@ -617,7 +617,7 @@
 <li>单个批次数据 size &gt;1MB：如果单个批次数据直接超过1MB，则首先按照1MB大小截断并生成下一个压缩数据块。剩余数据继续依照上述规则执行</li>
 </ol>
 <h3 id="3-Clickhouse-索引查询、写入过程"><a href="#3-Clickhouse-索引查询、写入过程" class="headerlink" title="3. Clickhouse 索引查询、写入过程"></a>3. Clickhouse 索引查询、写入过程</h3><h4 id="查询过程"><a href="#查询过程" class="headerlink" title="查询过程"></a>查询过程</h4><p>数据查询的本质，可以看作一个不断减小数据范围的过程。在最理想的情况下，MergeTree首先可以依次借助分区索引、一级索引和跳数索引，将数据扫描范围缩至最小。然后再借助数据标记，将需要解压与计算的数据范围缩至最小。</p>
-<img src="../../../img/image-20211206195825723.png" alt="image-20211206195825723" style="zoom: 67%;" />
+<img src="../../../img/image-20211206195825723.png" alt="image-20211206195825723" style="zoom:67%;" />
 
 <h4 id="写入过程"><a href="#写入过程" class="headerlink" title="写入过程"></a>写入过程</h4><p>数据写入的第一步是生成分区目录，伴随着每一批数据的写入，都会生成一个新的分区目录。在后续的某一时刻，属于相同分区的目录会依照规则合并到一起；接着，按照索引粒度，会分别生成primary.idx一级索引、每一个列字段的．mrk数据标记文件和．bin压缩数据文件。</p>
 <img src="../../../img/image-20211206194833687.png" alt="image-20211206194833687" style="zoom: 50%;" />
@@ -805,11 +805,12 @@
 <li><p>物化视图创建好之后，若源表被写入新数据则物化视图也会同步更新</p>
 </li>
 <li><p>POPULATE 关键字决定了物化视图的更新策略：</p>
-<ul>
-<li>若有 POPULATE 则在创建视图的过程会将源表已经存在的数据一并导入，类似于create table … as</li>
-<li>若无 POPULATE 则物化视图在创建之后没有数据，只会同步创建表之后写入源表的数据</li>
-<li>clickhouse 官方并不推荐使用 POPULATE，因为在创建物化视图的过程中同时写入的数据不能被插入物化视图。</li>
-</ul>
+</li>
+<li><p>若有 POPULATE 则在创建视图的过程会将源表已经存在的数据一并导入，类似于create table … as</p>
+</li>
+<li><p>若无 POPULATE 则物化视图在创建之后没有数据，只会同步创建表之后写入源表的数据</p>
+</li>
+<li><p>clickhouse 官方并不推荐使用 POPULATE，因为在创建物化视图的过程中同时写入的数据不能被插入物化视图。</p>
 </li>
 <li><p>物化视图不支持同步删除，若源表的数据不存在（删除了）则物化视图的数据仍然保留</p>
 </li>

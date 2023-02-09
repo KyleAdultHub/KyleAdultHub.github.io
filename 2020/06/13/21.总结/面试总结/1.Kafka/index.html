@@ -130,7 +130,7 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230106165526696.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230106165541777.png">
 <meta property="article:published_time" content="2020-06-13T03:00:00.000Z">
-<meta property="article:modified_time" content="2023-01-06T08:56:14.257Z">
+<meta property="article:modified_time" content="2023-01-29T05:41:17.980Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="面试">
 <meta name="twitter:card" content="summary">
@@ -500,7 +500,7 @@
 </ul>
 <h3 id="Kafka-使用zookeeper-的作用"><a href="#Kafka-使用zookeeper-的作用" class="headerlink" title="Kafka 使用zookeeper 的作用"></a>Kafka 使用zookeeper 的作用</h3><ul>
 <li>Zookeeper主要用于在集群中不同节点之间进行通信</li>
-<li>controller的选举：controller负责集群节点的上下线监控,时刻关注leader是否down机，负责leader的选举，为ISR队列选举备胎</li>
+<li>controller的选举（/controller 分布式锁）：controller负责集群节点的上下线监控,时刻关注leader是否down机，负责leader的选举，为ISR队列选举备胎</li>
 <li>offset的存储（kafka0.9之前）</li>
 <li>保存broker节点信息</li>
 <li>除此之外，它还执行其他活动，如: leader检测、分布式同步、配置管理、识别新节点何时离开或连接、集群、节点实时状态等等。</li>
@@ -521,7 +521,9 @@
 <p>为了帮助 producer 做到这点，所有的 Kafka 节点都可以及时的告知:哪些节点是活动的，目标topic 目标分区的 leader 在哪。这样 producer 就可以直接将消息发送到目的地了</p>
 <h2 id="Kafka-消费者"><a href="#Kafka-消费者" class="headerlink" title="Kafka 消费者"></a>Kafka 消费者</h2><h3 id="Kafa-consumer-是否可以消费指定分区消息？"><a href="#Kafa-consumer-是否可以消费指定分区消息？" class="headerlink" title="Kafa consumer 是否可以消费指定分区消息？"></a>Kafa consumer 是否可以消费指定分区消息？</h3><p>Kafa consumer 消费消息时，向 broker 发出”fetch”请求去消费特定分区的消息，consumer指定消息在日志中的偏移量（offset），就可以消费从这个位置开始的消息，customer 拥有了 offset 的控制权，可以向后回滚去重新消费之前的消息，这是很有意义的</p>
 <h3 id="Kafka-消息是采用-Pull-模式，还是-Push-模式？"><a href="#Kafka-消息是采用-Pull-模式，还是-Push-模式？" class="headerlink" title="Kafka 消息是采用 Pull 模式，还是 Push 模式？"></a>Kafka 消息是采用 Pull 模式，还是 Push 模式？</h3><p>Kafka 最初考虑的问题是，customer 应该从 brokes 拉取消息还是 brokers 将消息推送到consumer，也就是 pull 还 push。在这方面，Kafka 遵循了一种大部分消息系统共同的传统的设计：producer 将消息推送到 broker，consumer 从 broker 拉取消息</p>
-<h2 id="Kafka-数据一致性"><a href="#Kafka-数据一致性" class="headerlink" title="Kafka 数据一致性"></a>Kafka 数据一致性</h2><h3 id="ISR解释"><a href="#ISR解释" class="headerlink" title="ISR解释"></a>ISR解释</h3><h4 id="Isr列表的维护"><a href="#Isr列表的维护" class="headerlink" title="Isr列表的维护"></a><strong>Isr列表的维护</strong></h4><p>Leader维护了一个动态的ISR列表（同步副本的作用），只需要这个列表的中的follower和leader同步；当ISR中的follower完成数据的同步之后，leader就会给生产者发送ack，如果follower长时间未向leader同步数据，则该follower将被剔除ISR(为了保证同步的效率)，这个时间阈值也是自定义的；同样leader故障后，就会从ISR中选举新的leader</p>
+<h2 id="Kafka-数据一致性"><a href="#Kafka-数据一致性" class="headerlink" title="Kafka 数据一致性"></a>Kafka 数据一致性</h2><h3 id="ISR解释"><a href="#ISR解释" class="headerlink" title="ISR解释"></a>ISR解释</h3><p>分区中的所有副本统称为AR（Assigned Replicas）。所有与leader副本保持一定程度同步的副本（包括leader）组成ISR（in-sync replicas）。而与leader副本同步滞后过多的副本（不包括leader），组成OSR（out-sync replicas），所以，AR = ISR + OSR。在正常情况下，所有的follower副本都应该与leader副本保持一定程度的同步，即AR = ISR，OSR集合为空。</p>
+<p>leader副本负责维护和跟踪ISR中所有follower的滞后状态，当follower落后太多或者长时间没有向leader发起同步请求，leader副本就会认为它出问题了，会把它从ISR中移除，这时候这个follower就会放入OSR集合中，直到某个时候这个follower同步跟上了leader，然后这个副本又会被加入到ISR中。此外，当leader副本挂了，只有ISR中的follower副本才有资格成为leader，OSR中的则没有资格。</p>
+<h4 id="Isr列表的维护"><a href="#Isr列表的维护" class="headerlink" title="Isr列表的维护"></a><strong>Isr列表的维护</strong></h4><p>Leader维护了一个动态的ISR列表（同步副本的作用），只需要这个列表的中的follower和leader同步；当ISR中的follower完成数据的同步之后，leader就会给生产者发送ack，如果follower长时间未向leader同步数据，则该follower将被剔除ISR(为了保证同步的效率)，这个时间阈值也是自定义的；同样leader故障后，就会从ISR中选举新的leader</p>
 <h4 id="怎么选择ISR的节点呢？"><a href="#怎么选择ISR的节点呢？" class="headerlink" title="怎么选择ISR的节点呢？"></a><strong>怎么选择ISR的节点呢？</strong></h4><p>首先通信的时间要快，要和leader要可以很快的完成通信，这个时间默认是10s</p>
 <p>然后就看leader数据差距，消息条数默认是10000条（后面版本被移除）</p>
 <p>为什么移除：因为kafka发送消息是批量发送的，所以会一瞬间leader接受完成，但是follower还没有拉取，所以会频繁的踢出加入ISR，这个数据会保存到zk和内存中，所以会频繁的更新zk和内存。</p>

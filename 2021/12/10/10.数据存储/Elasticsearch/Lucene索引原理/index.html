@@ -134,7 +134,7 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211213164629753.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211222114227314.png">
 <meta property="article:published_time" content="2021-12-09T16:00:00.000Z">
-<meta property="article:modified_time" content="2023-01-02T13:18:17.411Z">
+<meta property="article:modified_time" content="2023-01-29T08:50:57.976Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="elasticsearch">
 <meta name="twitter:card" content="summary">
@@ -720,6 +720,8 @@
 <img src="/img/image-20211213164250949.png" alt="image-20211213164250949" style="zoom:33%;" />
 
 <h3 id="Roaring-bitmaps"><a href="#Roaring-bitmaps" class="headerlink" title="Roaring bitmaps"></a>Roaring bitmaps</h3><p>接着来聊聊 Posting List 的第二个痛点 —— 如何快速求交并集（intersections and unions）。</p>
+<p>ES会缓存频率比较高的filter查询，其中的原理也比较简单，即生成(fitler, segment)和id列表的映射，但是和倒排索引不同，我们只把常用的filter缓存下来而倒排索引是保存所有的，并且filter缓存应该足够快，不然直接查询不就可以了。ES直接把缓存的filter放到内存里面，映射的posting list放入磁盘中。</p>
+<p>ES在filter缓存使用的压缩方式和倒排索引的压缩方式并不相同，filter缓存使用了roaring bitmap的数据结构，在查询的时候相对于上面的Frame of Reference方式CPU消耗要小，查询效率更高，代价就是需要的存储空间（磁盘）更多。</p>
 <p>在 Lucene 中查询，通常不只有一个查询条件，比如我们想搜索：</p>
 <ul>
 <li>含有“生存”相关词语的文档</li>

@@ -128,7 +128,7 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223161501064.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211222114227314.png">
 <meta property="article:published_time" content="2022-02-22T16:00:00.000Z">
-<meta property="article:modified_time" content="2023-01-08T14:02:45.274Z">
+<meta property="article:modified_time" content="2023-01-29T08:46:09.367Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="elasticsearch">
 <meta name="twitter:card" content="summary">
@@ -547,6 +547,7 @@
 </ol>
 <h2 id="Es-数据存储原理"><a href="#Es-数据存储原理" class="headerlink" title="Es 数据存储原理"></a>Es 数据存储原理</h2><h4 id="写入流程总结"><a href="#写入流程总结" class="headerlink" title="写入流程总结"></a><strong>写入流程总结</strong></h4><img src="/img/image-20220223153823350.png" alt="image-20220223153823350" style="zoom: 67%;" />
 
+<p>translog 其实也是先写入 os cache 的，默认每隔 5 秒刷一次到磁盘中去，所以默认写translog也不能保证数据不丢失，极端情况会丢失5s的数据；</p>
 <p>整体流程：</p>
 <ol>
 <li>数据写入buffer缓冲和translog日志文件中。<br>当你写一条数据document的时候，一方面写入到mem buffer缓冲中，一方面同时写入到translog日志文件中。</li>
@@ -661,7 +662,7 @@
 <h2 id="Lucene-数据结构"><a href="#Lucene-数据结构" class="headerlink" title="Lucene 数据结构"></a>Lucene 数据结构</h2><h3 id="Lucene的数据类型"><a href="#Lucene的数据类型" class="headerlink" title="Lucene的数据类型"></a><strong>Lucene的数据类型</strong></h3><p>Index：索引，由很多的Document组成。<br>Document：由很多的Field组成，是Index和Search的最小单位。<br>Field：由很多的Term组成，包括Field Name和Field Value。<br>Term：由很多的字节组成。一般将Text类型的Field Value分词之后的每个最小单元叫做Term。</p>
 <h3 id="各种查询结构总结："><a href="#各种查询结构总结：" class="headerlink" title="各种查询结构总结："></a>各种查询结构总结：</h3><ol>
 <li>FST(有穷状态装换器)：保存字符穿类型term字典索引，可以在FST上实现单Term、Term范围、Term前缀和通配符查询等。</li>
-<li>Doc-dictionary 的倒排链：保存了每个term对应的docId的列表，采用skipList的结构保存，用于快速跳跃 (当数据过大的时候，考虑到压缩和加速取交并集会采用roaring bitmap)。</li>
+<li>Doc-dictionary 的倒排链：保存了每个term对应的docId的列表，采用skipList的结构保存，用于快速跳跃。</li>
 <li>BKD-Tree(数值类型多维二叉搜索树)：BKD-Tree是一种保存多维空间点的数据结构，用于数值类型(包括空间点)的快速查找。</li>
 <li>DocValues：基于docId的列式存储，由于列式存储的特点，可以有效提升排序聚合的性能。</li>
 </ol>
@@ -672,7 +673,9 @@
 </ul>
 <p>默认情况下，Lucene会按照Score排序，即算分后的分数值，如果指定了其他的Sort字段，就会按照指定的字段排序。那么，排序会非常影响性能吗？</p>
 <p>首先，排序并不会对所有命中的doc进行排序，而是构造一个堆(n个数取前k大问题)，保证前(Offset+Size)个数的doc是有序的，所以排序的性能取决于(Size+Offset)和命中的文档数，另外就是读取docValues的开销。因为(Size+Offset)并不会太大，而且docValues的读取性能很高，所以排序并不会非常的影响性能。</p>
-<h3 id="Roaring-Bitmap-数据结构"><a href="#Roaring-Bitmap-数据结构" class="headerlink" title="Roaring Bitmap 数据结构"></a>Roaring Bitmap 数据结构</h3><p>倒排链的数据结构(数据量较大的时候)</p>
+<h3 id="Roaring-Bitmap-数据结构"><a href="#Roaring-Bitmap-数据结构" class="headerlink" title="Roaring Bitmap 数据结构"></a>Roaring Bitmap 数据结构</h3><p>ES会缓存频率比较高的filter查询，其中的原理也比较简单，即生成(fitler, segment)和id列表的映射，但是和倒排索引不同，我们只把常用的filter缓存下来而倒排索引是保存所有的，并且filter缓存应该足够快，不然直接查询不就可以了。ES直接把缓存的filter放到内存里面，映射的posting list放入磁盘中。</p>
+<p>ES在filter缓存使用的压缩方式和倒排索引的压缩方式并不相同，filter缓存使用了roaring bitmap的数据结构，在查询的时候相对于上面的Frame of Reference方式CPU消耗要小，查询效率更高，代价就是需要的存储空间（磁盘）更多。</p>
+<p>倒排链的数据结构(数据量较大的时候)</p>
 <img src="/img/image-20211222114227314.png" alt="image-20211222114227314" style="zoom: 33%;" />
 
 <p>每个RoaringBitmap中都包含一个<code>RoaringArray</code>，名字叫<code>highLowContainer</code>。<code>highLowContainer</code>存储了<code>RoaringBitmap</code>中的全部数据。</p>

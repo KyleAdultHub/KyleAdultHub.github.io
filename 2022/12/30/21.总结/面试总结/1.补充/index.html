@@ -134,7 +134,7 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230108211638758.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230108211419018.png">
 <meta property="article:published_time" content="2022-12-29T16:00:00.000Z">
-<meta property="article:modified_time" content="2023-01-19T06:49:27.035Z">
+<meta property="article:modified_time" content="2023-02-09T05:25:17.721Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="补充">
 <meta name="twitter:card" content="summary">
@@ -540,6 +540,49 @@
 </ol>
 </li>
 </ol>
+<h3 id="8-http-1-1-和http2-0区别"><a href="#8-http-1-1-和http2-0区别" class="headerlink" title="8. http 1.1 和http2.0区别"></a>8. http 1.1 和http2.0区别</h3><p>1.新的传输格式</p>
+<p>HTTP 1.1 ：使用基于文本格式</p>
+<p>HTTP 2.0 ：使用二进制格式</p>
+<p>2.多路复用</p>
+<p>做到同一个连接并发处理多个请求，而且并发请求的数量比HTTP1.0大了好几个数量级。</p>
+<p>3.header 压缩</p>
+<p>HTTP 1.x的 header 带有大量信息，而且每次都要重复发送，HTTP 2.0使用 encoder 来减少需要传输的 header 大小，通讯双方各自 cache 一份 header fields 表，既避免了重复 header 的传输，又减小了需要传输的大小。</p>
+<h3 id="9-epoll-为什么用红黑树"><a href="#9-epoll-为什么用红黑树" class="headerlink" title="9. epoll 为什么用红黑树"></a>9. epoll 为什么用红黑树</h3><ul>
+<li>红黑树虽然定义复杂，但是它的限制条件是相对AVL宽松的。所以在进行插入删除操作的时候出现违反限制条件的状况较少，因而重平衡操作出现的机会比AVL少。基于上述原因，许多需要进行频繁删插操作的场景都使用来红黑树：</li>
+<li>B+树主要应用于文件系统中，最大的原因是它高度平衡，branch factor较大，这样可以减少磁盘IO。</li>
+</ul>
+<h3 id="10-CSRF-和-XSS的区别"><a href="#10-CSRF-和-XSS的区别" class="headerlink" title="10. CSRF 和 XSS的区别"></a>10. CSRF 和 XSS的区别</h3><p><strong>XSS：跨站脚本攻击</strong></p>
+<p><strong>提交内容中，包含不速之客(影响页面功能的js脚本)</strong></p>
+<p>其特点是不对服务器端造成任何伤害，而是通过一些正常的站内交互途径，例如发布评论，提交含有 JavaScript 的内容文本。这时服务器端如果没有过滤或转义掉这些脚本，作为内容发布到了页面上，其他用户访问这个页面的时候就会运行这些脚本。</p>
+<p><strong>怎么解决</strong></p>
+<ol>
+<li>输入：在输入方面对所有用户提交内容进行可靠的输入验证，提交内容包括URL、查询关键字、http头、post数据等</li>
+<li>输出：html 编码，js编码，在输出方面，在用户输内容中使用标签。标签内的内容不会解释，直接显示。</li>
+<li>严格执行字符输入字数控制。</li>
+<li>http only cookie， 防止脚本获取cookie;</li>
+</ol>
+<p>CSRF：跨站请求伪造</p>
+<p><strong>冒充用户之手，伪造危险请求</strong></p>
+<p>CSRF 的全称是“跨站请求伪造”，而 XSS 的全称是“跨站脚本”。看起来有点相似，它们都是属于跨站攻击——不攻击服务器端而攻击正常访问网站的用户，但前面说了，它们的攻击类型是不同维度上的分类。CSRF 顾名思义，是伪造请求，冒充用户在站内的正常操作。我们知道，绝大多数网站是通过 cookie 等方式辨识用户身份（包括使用服务器端 Session 的网站，因为 Session ID 也是大多保存在 cookie 里面的），再予以授权的。所以要伪造用户的正常操作，最好的方法是通过 XSS 或链接欺骗等途径，让用户在本机（即拥有身份 cookie 的浏览器端）发起用户所不知道的请求。</p>
+<p>严格意义上来说，CSRF 不能分类为注入攻击，因为 CSRF 的实现途径远远不止 XSS 注入这一条。通过 XSS 来实现 CSRF 易如反掌，但对于设计不佳的网站，一条正常的链接都能造成 CSRF。</p>
+<p><strong>怎么解决</strong></p>
+<ol>
+<li>referer校验</li>
+<li>增加隐藏 csrf_token令牌， 但是可以被破解</li>
+<li>重要场景增加验证码</li>
+</ol>
+<h3 id="11-tcp-连接问什么是三次握手"><a href="#11-tcp-连接问什么是三次握手" class="headerlink" title="11. tcp 连接问什么是三次握手"></a>11. tcp 连接问什么是三次握手</h3><ul>
+<li>三次握手才可以阻止重复历史连接的初始化（主要原因）</li>
+<li>三次握手才可以同步双方的初始序列号</li>
+<li>三次握手才可以避免资源浪费</li>
+</ul>
+<p>​    <strong>tcp close 为什么需要四次挥手</strong></p>
+<ul>
+<li>关闭连接时，客户端向服务端发送 <code>FIN</code> 时，仅仅表示客户端不再发送数据了但是还能接收数据。</li>
+<li>服务端收到客户端的 <code>FIN</code> 报文时，先回一个 <code>ACK</code> 应答报文，而服务端可能还有数据需要处理和发送，等服务端不再发送数据时，才发送 <code>FIN</code> 报文给客户端来表示同意现在关闭连接。</li>
+</ul>
+<p>从上面过程可知，服务端通常需要等待完成数据的发送和处理，所以服务端的 <code>ACK</code> 和 <code>FIN</code> 一般都会分开发送，因此是需要四次挥手。</p>
+<p>当被动关闭方（上图的服务端）在 TCP 挥手过程中，「<strong>没有数据要发送」并且「开启了 TCP 延迟确认机制」，那么第二和第三次挥手就会合并传输，这样就出现了三次挥手。</strong></p>
 <h2 id="Golang"><a href="#Golang" class="headerlink" title="Golang"></a>Golang</h2><h3 id="1-WaitGroup原理"><a href="#1-WaitGroup原理" class="headerlink" title="1. WaitGroup原理"></a>1. WaitGroup原理</h3><p><img src="/img/image-20221231233522645.png" alt="image-20221231233522645"></p>
 <p>state1字段</p>
 <ul>
@@ -592,7 +635,12 @@
 <li>buckets 指向2^B个桶组成的数组的指针，数据存在这里</li>
 <li>oldbuckets 指向扩容前的旧buckets数组，只在map增长时有效</li>
 <li>nevacuate 计数器，标示扩容后搬迁的进度</li>
-<li>extra 保存溢出桶的链表和未使用的溢出桶数组的首地址</li>
+<li>extra 保存溢出桶的链表和未使用的溢出桶数组的首地址<ul>
+<li>overflow是一个slice，记录目前已经使用的溢出桶的地址 </li>
+<li>oldoverfolw也是一个slice，用于在扩容阶段存储旧桶用到的那些溢出桶的地址 </li>
+<li>nextoverflow指向下一个空闲溢出桶</li>
+</ul>
+</li>
 </ul>
 <p><img src="/img/image-20221231234758810.png" alt="image-20221231234758810"></p>
 <p>桶指针指向桶的首地址，可通过桶首地址及偏移量查询所有的桶，通过每个桶可查找到对应的键值。hmap.B=2， 而hmap.buckets长度是2^B为4. 元素经过哈希运算后会落到某个bucket中进行存储。查找过程类似。bucket很多时候被翻译为桶，所谓的哈希桶实际上就是bucket</p>
@@ -634,6 +682,11 @@
 <p>极端情况下，重新排列也解决不了，map 存储就会蜕变成链表，性能大大降低，此时哈希因子 hash0 的设置，可以降低此类极端场景的发生。</p>
 </li>
 </ol>
+<p>​    <strong>golang map 扩容时机</strong></p>
+<ol>
+<li>装载因子超过阈值，源码里定义的阈值是 6.5。  loadFactor := count / (2^B)</li>
+<li>overflow 的 bucket 数量过多：当 B 小于 15，也就是 bucket 总数 2^B 小于 2^15 时，如果  <strong>overflow 的 bucket 数量超过 2^B</strong> ；当 B &gt;= 15，也就是 bucket 总数 2^B 大于等于 2^15，如果 <strong>overflow 的 bucket 数量超过 2^15</strong> ;</li>
+</ol>
 <h3 id="5-goroutine-与thread比较"><a href="#5-goroutine-与thread比较" class="headerlink" title="5. goroutine 与thread比较"></a>5. goroutine 与thread比较</h3><p>goroutine可看作是thread的进一步抽象，它更加轻量，可单独执行；与thread相比：</p>
 <ul>
 <li>内存占用：goroutine默认栈为2KB（实际运行中，根据需要可自动扩容）；而thread至少需要1MB，而且还需要一个’guard page‘区域，以隔离不同thread区域；</li>
@@ -647,10 +700,10 @@
 <p>仅当 V 值等于 E 值时，才会将 V 的值设为 N，如果 V 值和 E 值不同，则说明已经有其他线程在做更新，则当前线程什么都不做，最后 CAS 返回当前 V 的真实值。CAS 操作时抱着乐观的态度进行的，它总是认为自己可以成功完成操作。基于这样的原理，CAS 操作即使没有锁，也可以发现其他线程对于当前线程的干扰。 </p>
 <h3 id="8-GMP调度过程中存在哪些阻塞"><a href="#8-GMP调度过程中存在哪些阻塞" class="headerlink" title="8.GMP调度过程中存在哪些阻塞"></a>8.GMP调度过程中存在哪些阻塞</h3><ul>
 <li>I/O，select</li>
-<li>block on syscall</li>
 <li>channel</li>
 <li>等待锁</li>
-<li>runtime.Gosched()</li>
+<li>block on syscall： 系统调用阻塞</li>
+<li>runtime.Gosched()：让出cpu 时间片</li>
 </ul>
 <h3 id="9-Golang-互斥锁"><a href="#9-Golang-互斥锁" class="headerlink" title="9.Golang 互斥锁"></a>9.Golang 互斥锁</h3><p>1、锁的实现</p>
 <p><img src="/img/image-20230107222947555.png" alt="image-20230107222947555"></p>
@@ -674,7 +727,7 @@
 <p><strong>正常模式（非公平锁）</strong></p>
 <p>正常模式下，所有等待锁的 goroutine 按照 FIFO（先进先出）顺序等待。唤醒的 goroutine 不会直接拥有锁，而是会和新请求 goroutine 竞争锁。新请求的goroutine 更容易抢占：因为它正在 CPU 上执行，所以刚刚唤醒的 goroutine有很大可能在锁竞争中失败。在这种情况下，这个被唤醒的 goroutine 会加入到等待队列的前面。</p>
 <p><strong>饥饿模式（公平锁）</strong></p>
-<p>为了解决了等待 goroutine 队列的长尾问题饥饿模式下，直接由 unlock 把锁交给等待队列中排在第一位的 goroutine (队头)，同时，饥饿模式下，新进来的 goroutine 会参与抢锁也不会进入自旋状态，会直接进入等待队列的尾部。这样很好的解决了老的 goroutine 一直抢不到锁的场景。饥饿模式的触发条件：当一个 goroutine 等待锁时间超过 1 毫秒时，或者当前队列只剩下一个 goroutine 的时候，Mutex 切换到饥饿模式。</p>
+<p>为了解决了等待 goroutine 队列的长尾问题饥饿模式下，直接由 unlock 把锁交给等待队列中排在第一位的 goroutine (队头)，同时，饥饿模式下，新进来的 goroutine 不会参与抢锁也不会进入自旋状态，会直接进入等待队列的尾部。这样很好的解决了老的 goroutine 一直抢不到锁的场景。饥饿模式的触发条件：当一个 goroutine 等待锁时间超过 1 毫秒时，或者当前队列只剩下一个 goroutine 的时候，Mutex 切换到饥饿模式。</p>
 <p><strong>总结</strong></p>
 <p>对于两种模式，正常模式下的性能是最好的，goroutine 可以连续多次获取锁，饥饿模式解决了取锁公平的问题，但是性能会下降，这其实是性能和公平的一个平衡模式。</p>
 <p>5、Mutex 允许自旋的条件</p>
@@ -719,7 +772,7 @@
 <p>大体逻辑一样, 只是数据源换成了内存分析, 例如</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go tool pprof -http 127.0.0.1:8849 http://localhost:8080/debug/pprof/heap</span><br></pre></td></tr></table></figure>
 
-<h3 id="Golang-Select"><a href="#Golang-Select" class="headerlink" title="Golang Select"></a>Golang Select</h3><p>select为golang提供了多路IO复用机制，和其他IO复用一样，用于检测是否有读写事件是否ready。</p>
+<h3 id="15-Golang-Select"><a href="#15-Golang-Select" class="headerlink" title="15.Golang Select"></a>15.Golang Select</h3><p>select为golang提供了多路IO复用机制，和其他IO复用一样，用于检测是否有读写事件是否ready。</p>
 <p>golang实现select的时候，实际上为每一个case语句定义了一个数据结构，select语句块执行的时候，实际上可以类比成对一个case数组处理的代码块（或者函数），然后程序流程转到选中的case块。</p>
 <h4 id="case数据结构"><a href="#case数据结构" class="headerlink" title="case数据结构"></a>case数据结构</h4><p>源码包<code>src/runtime/select.go:scase</code>定义了表示case语句的数据结构：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> scase <span class="keyword">struct</span> &#123;</span><br><span class="line">    c           *hchan         <span class="comment">// chan</span></span><br><span class="line">    kind        <span class="keyword">uint16</span></span><br><span class="line">    elem        unsafe.Pointer <span class="comment">// data element</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -762,14 +815,98 @@
 <li>所有case都未ready，且没有default语句<ol>
 <li>将当前协程加入到所有channel的等待队列</li>
 <li>将协程转入阻塞，等待被唤醒</li>
+<li>解锁所有的channel</li>
 </ol>
 </li>
-<li>唤醒后返回channel对应的case index<ol>
-<li>如果是读操作，解锁所有的channel，然后返回(case index)</li>
-<li>如果是写操作，解锁所有的channel，然后返回(case index)</li>
+<li>唤醒后，重新走1-3</li>
 </ol>
+<h3 id="16-Contenxt"><a href="#16-Contenxt" class="headerlink" title="16. Contenxt"></a>16. Contenxt</h3><h4 id="context-的功能"><a href="#context-的功能" class="headerlink" title="context 的功能"></a>context 的功能</h4><p>他的底层是通过 channel 去传递管理信号。例如，父 goroutine 可以传递一个close信号来关闭此channel，子 goroutine 通过监听这个channel，那么子goroutine也会退出。</p>
+<p>但是在go中，goroutine之间都是平等调度的，并没有父子goroutine的概念，我们只是人为的给有当前goroutine所创建出的goroutine认为是当前goroutine的子goroutine。因此也就不存在当父goroutine退出之后子goroutine会自动退出，也就是会导致所创建的内存不能够及时的释放，内存发生泄漏。因此context就由此诞生来解决上述问题。</p>
+<p><strong>1 控制goroutine退出</strong></p>
+<ul>
+<li>及时退出 WithCancel</li>
+<li>时间点退出 WithDeadline</li>
+<li>时间间隔退出 WithTimeout</li>
+</ul>
+<p><strong>2 设置值</strong></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Copyfunc WithValue(parent Context, key, val <span class="keyword">interface</span>&#123;&#125;)</span><br></pre></td></tr></table></figure>
+
+<h4 id="Context-的结构"><a href="#Context-的结构" class="headerlink" title="Context 的结构"></a>Context 的结构</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Context <span class="keyword">interface</span> &#123;               </span><br><span class="line">    Done() &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;      </span><br><span class="line">    Err() error </span><br><span class="line">    Deadline() (deadline time.Time, ok <span class="keyword">bool</span>)</span><br><span class="line">    Value(key <span class="keyword">interface</span>&#123;&#125;) <span class="keyword">interface</span>&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="context-包主要方法"><a href="#context-包主要方法" class="headerlink" title="context 包主要方法"></a>context 包主要方法</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithCancel</span><span class="params">(parent Context)</span> <span class="params">(ctx Context, cancel CancelFunc)</span></span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithDeadline</span><span class="params">(parent Context, deadline time.Time)</span> <span class="params">(Context, CancelFunc)</span></span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithTimeout</span><span class="params">(parent Context, timeout time.Duration)</span> <span class="params">(Context, CancelFunc)</span></span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithValue</span><span class="params">(parent Context, key <span class="keyword">interface</span>&#123;&#125;, val <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">Context</span></span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>WithCancel 对应的是 cancelCtx ,其中，返回一个 cancelCtx ，同时返回一个 CancelFunc，CancelFunc 是 context 包中定义的一个函数类型：type CancelFunc func()。调用这个 CancelFunc 时，关闭对应的c.done，也就是让他的后代goroutine退出</li>
+<li>WithDeadline 和 WithTimeout 对应的是 timerCtx ，WithDeadline 和 WithTimeout 是相似的，WithDeadline 是设置具体的 deadline 时间，到达 deadline 的时候，后代 goroutine 退出，而 WithTimeout 简单粗暴，直接 return WithDeadline(parent, time.Now().Add(timeout))\</li>
+<li>WithValue 对应 valueCtx ，WithValue 是在 Context 中设置一个 map，拿到这个 Context 以及它的后代的 goroutine 都可以拿到 map 里的值</li>
+</ul>
+<h4 id="Context是如何实现退出通知机制的"><a href="#Context是如何实现退出通知机制的" class="headerlink" title="Context是如何实现退出通知机制的"></a>Context是如何实现退出通知机制的</h4><p>Context的WithCancel是来实现退出通知的</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithCancel</span><span class="params">(parent Context)</span> <span class="params">(ctx Context, cancel CancelFunc)</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 实例化一个子 context</span></span><br><span class="line">    c := newCancelCtx(parent)</span><br><span class="line">    <span class="comment">// 父和子绑定关系</span></span><br><span class="line">    propagateCancel(parent, &amp;c)</span><br><span class="line">    <span class="keyword">return</span> &amp;c, <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123; c.cancel(<span class="literal">true</span>, Canceled) &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>上文说到Context在内存中实际上维护了一个树状的goroutine调用链，但是其主要是依靠一个函数来实现的，而这个调用链也是由这个函数来维护的，：<br>propagateCancel(parent Context,child canceler)</p>
+<p>接下来我们来看看这个函数</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">propagateCancel</span><span class="params">(parent Context, child canceler)</span></span> &#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">if</span> p, ok := parentCancelCtx(parent); ok &#123;</span><br><span class="line">        <span class="comment">// 当 child 的继承链包含可以取消的上下文时，会判断 parent 是否已经触发了取消信号；</span></span><br><span class="line">        p.mu.Lock()</span><br><span class="line">        <span class="keyword">if</span> p.err != <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="comment">// 如果已经被取消，child 会立刻被取消；</span></span><br><span class="line">            child.cancel(<span class="literal">false</span>, p.err)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> p.children == <span class="literal">nil</span> &#123;</span><br><span class="line">                p.children = <span class="built_in">make</span>(<span class="keyword">map</span>[canceler]<span class="keyword">struct</span>&#123;&#125;)</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 如果没有被取消，child 会被加入 parent 的 children 列表中，等待 parent 释放取消信号；</span></span><br><span class="line">            p.children[child] = <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">        &#125;</span><br><span class="line">        p.mu.Unlock()</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        atomic.AddInt32(&amp;goroutines, +<span class="number">1</span>)</span><br><span class="line">        <span class="comment">// 运行一个新的 Goroutine 同时监听 parent.Done() 和 child.Done() 两个 Channel</span></span><br><span class="line">        <span class="comment">// 在 parent.Done() 关闭时调用 child.cancel 取消子上下文；</span></span><br><span class="line">        <span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">            <span class="keyword">select</span> &#123;</span><br><span class="line">            <span class="keyword">case</span> &lt;-parent.Done():</span><br><span class="line">                child.cancel(<span class="literal">false</span>, parent.Err())</span><br><span class="line">            <span class="keyword">case</span> &lt;-child.Done():</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从源码中可以看到，在调用链的过程中，会调用一个goroutine同时监听parent.Done()和child.Done()，当有parent.Done()关闭的时候就会调用child.cancel的方法来取消上下文，同时会在构造树上将该child节点删掉，删掉此child节点之后，还会轮训的将此child节点的child节点全部都调用cancel函数使其退出，最终实现了此parent节点的全部孩子节点都退出。</p>
+<h3 id="17-Golang的内存模型"><a href="#17-Golang的内存模型" class="headerlink" title="17. Golang的内存模型"></a>17. Golang的内存模型</h3><p>为了保证共享内存的正确性（可见性、有序性、原子性），内存模型定义了共享内存系统中多线程程序读写操作行为的规范。</p>
+<p>通过这些规则来规范对内存的读写操作，从而保证指令执行的正确性。它与处理器有关、与缓存有关、与并发有关、与编译器也有关。</p>
+<p>它解决了 CPU 多级缓存、指令重排等导致的内存访问问题，保证了并发场景下的一致性、原子性和有序性。</p>
+<p>上面提到，内存模型与处理器有关、与缓存有关、与并发有关、与编译器也有关，那么我们在编写Go程序的时候，需要去了解CPU等底层特性吗？其实是不需要的！因为内存模型是抽象的，在不同的平台下，编译器会生成合适的内存屏障，帮我们屏蔽了底层的差异。这里将面向抽象编程的思想体现的淋漓尽致！</p>
+<p>Go 中也定义了Happens Before以及各种发生Happens Before关系的操作，因为有了这些Happens Before操作的保证，我们写的多goroutine的程序才会按照我们期望的方式来工作</p>
+<h4 id="什么是Happens-Before"><a href="#什么是Happens-Before" class="headerlink" title="什么是Happens Before"></a>什么是Happens Before</h4><p>如果A happens before B，那么A的执行结果对B可见（<strong>并不一定表示A比B先执行，如果A与B执行的顺序对结果没有影响是可以重排序的</strong>）</p>
+<h4 id="Go-中Happens-Before保证"><a href="#Go-中Happens-Before保证" class="headerlink" title="Go 中Happens Before保证"></a>Go 中Happens Before保证</h4><h5 id="单线程"><a href="#单线程" class="headerlink" title="单线程"></a>单线程</h5><p>在单线程环境下，所有的表达式，按照代码中的先后顺序，具有Happens Before关系<br> ——说白了，就是能够保证不管CPU，编译器怎么优化，代码从结果看按顺序执行的。<br> 举个例子，如下代码中如果CPU或者编译器将指令重排（出于优化目的，比如多核CPU同时执行E1跟E3指令）后，有可能是E1-&gt;E3-&gt;E2的顺序执行，那么结果就会不对。Happens Before关系杜绝了这种错误。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">"fmt"</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    a := <span class="number">1</span><span class="comment">//E1</span></span><br><span class="line">    a++<span class="comment">//E2</span></span><br><span class="line">    fmt.Print(a + b)<span class="comment">//E3</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="Init-函数"><a href="#Init-函数" class="headerlink" title="Init 函数"></a>Init 函数</h5><ul>
+<li>如果包P1中导入了包P2，则P2中的init函数Happens Before 所有P1中的操作</li>
+<li>main函数Happens After 所有的init函数</li>
+</ul>
+<p>——说白了，就是保证从结果看，Go程序的启动顺序如下</p>
+<ol>
+<li>按顺序导入所有被 main 包引用的其它包，然后在每个包中执行如下流程：</li>
+<li>如果该包又导入了其它的包，则从第一步开始递归执行，但是每个包只会被导入一次。</li>
+<li>然后以相反的顺序在每个包中初始化常量和变量，如果该包含有 init 函数的话，则调用该函数。</li>
+<li>在完成这一切之后，main 也执行同样的过程，最后调用 main 函数开始执行程序。</li>
+</ol>
+<h5 id="Goroutine"><a href="#Goroutine" class="headerlink" title="Goroutine"></a>Goroutine</h5><ul>
+<li>Goroutine的创建Happens Before所有此Goroutine中的操作</li>
+<li>Goroutine的销毁Happens After所有此Goroutine中的操作</li>
+</ul>
+<p>——说白了，就是保证了Goroutine创建前修改的数据在Goroutine执行时一定已经生效，以及Goroutine执行时的修改在Goroutine销毁后主Goroutine再去读取时一定已经生效</p>
+<h5 id="Channel"><a href="#Channel" class="headerlink" title="Channel"></a>Channel</h5><ul>
+<li>对一个元素的send操作Happens Before对应的<strong>receive完成</strong>操作<br> ——说白了，就是保证了receive操作，在接受完成之前一定会阻塞，所以我们可以使用channel做同步</li>
+<li>对channel的close操作Happens Before receive 端的收到关闭通知操作<br> ——说白了，就是保证send端close通道完成之后，receive 端可以感知到</li>
+<li>对于Unbuffered Channel，对一个元素的receive 操作Happens Before对应的<strong>send完成</strong>操作<br> ——说白了，就是保证元素send了没被receive时，在send端会阻塞</li>
+<li>对于Buffered Channel，假设Channel 的buffer 大小为C，那么对第k个元素的receive操作，Happens Before第k+C个<strong>send完成</strong>操作。可以看出上一条Unbuffered Channel规则就是这条规则C=0时的特例<br> ——说白了，就是保证了在Buffer满了之后，元素send了没被receive时，在send端会阻塞</li>
+</ul>
+<p>注意这里面，<strong>send</strong>和<strong>send完成</strong>，这是两个事件，<strong>receive</strong>和<strong>receive完成</strong>也是两个事件。参考<a href="https://www.jianshu.com/p/0e47de9a94f5" target="_blank" rel="noopener">Golang使用2个goroutine分别打印奇偶数，顺序输出1-10</a>，就是利用channel来控制2个goroutine的顺序的</p>
+<h4 id="Lock"><a href="#Lock" class="headerlink" title="Lock"></a>Lock</h4><p>Go里面有Mutex和RWMutex两种锁，RWMutex除了支持互斥的Lock/Unlock，还支持共享的RLock/RUnlock。</p>
+<ul>
+<li>对于一个Mutex/RWMutex，设n &lt; m，则第n个Unlock操作Happens Before第m个Lock操作。</li>
+<li>对于一个RWMutex，存在数值n，RLock操作Happens After 第n个UnLock，其对应的RUnLockHappens Before 第n+1个Lock操作。</li>
+</ul>
+<p>简单理解就是这一次的Lock总是Happens After上一次的Unlock，读写锁的RLock HappensAfter上一次的UnLock，其对应的RUnlock Happens Before 下一次的Lock。</p>
+<h5 id="Once"><a href="#Once" class="headerlink" title="Once"></a>Once</h5><p>once.Do中执行的操作，Happens Before 任何一个once.Do调用的返回</p>
+<h3 id="18-Golang-读写已经关闭的channel"><a href="#18-Golang-读写已经关闭的channel" class="headerlink" title="18. Golang 读写已经关闭的channel"></a>18. Golang 读写已经关闭的channel</h3><ol>
+<li><p>读已关闭的channel</p>
+<p>读已经关闭的channel无影响。</p>
+<p>如果在关闭前，通道内部有元素，会正确读到元素的值；如果关闭前通道无元素，则会读取到通道内元素类型对应的零值。</p>
+<p>若遍历通道，最好遍历已经关闭的channel，如果通道未关闭，读完元素后，会报死锁的错误。</p>
 </li>
 </ol>
+<blockquote>
+<p>fatal error: all goroutines are asleep - deadlock!</p>
+</blockquote>
+<ol start="2">
+<li>写已关闭的通道</li>
+</ol>
+<p>​    会引发panic: send on closed channel</p>
+<ol start="3">
+<li>关闭已关闭的通道</li>
+</ol>
+<p>​    会引发panic: close of closed channel</p>
+<p><strong>总结：</strong>对于一个已初始化，但并未关闭的通道来说，收发操作一定不会引发 panic。但是通道一旦关闭，再对它进行发送操作，就会引发 panic。如果我们试图关闭一个已经关闭了的通道，也会引发 panic。</p>
 <h2 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h2><h3 id="1-mysql-utf8-和-utf8mb4-区别"><a href="#1-mysql-utf8-和-utf8mb4-区别" class="headerlink" title="1. mysql utf8 和 utf8mb4 区别"></a>1. mysql utf8 和 utf8mb4 区别</h3><p>mysql utf8 字符集最多支持3个字节的字符， 不支持4个字节的特殊unicode。 utf8mb4 增加了对4个字节字符的支持。</p>
 <h3 id="2-磁盘中数据的存取"><a href="#2-磁盘中数据的存取" class="headerlink" title="2.磁盘中数据的存取"></a>2.磁盘中数据的存取</h3><p>以机械硬盘来说，先了解几个概念。</p>
 <p><strong>扇区</strong>：磁盘存储的最小单位，扇区一般大小为512Byte。</p>
@@ -867,6 +1004,21 @@
 <p><strong>总结</strong></p>
 <p>本文从 redis 架构演进开始讲起，从单线程模型 =&gt; 单线程 + 后台线程 =&gt; 多线程 + 后台线程 演进。</p>
 <p>每一次演进，都是为了解决某一类特殊问题；后台线程的出现，解决了一些耗时长的重操作。同样，多线程的出现，解决了网络模块的性能瓶颈。</p>
+<h3 id="8-接口幂等性，有哪些方案？"><a href="#8-接口幂等性，有哪些方案？" class="headerlink" title="8. 接口幂等性，有哪些方案？"></a>8. <strong>接口幂等性，有哪些方案？</strong></h3><p><code>Select 查询</code>天然支持幂等，而<code>写操作</code> 多次执行可能会导致数据错误，下面简单列举常见的解决方案：</p>
+<ul>
+<li>表中加唯一约束， 有些表不适合添加<code>唯一约束</code>，可以单独建一张<code>防重表</code>，在<code>防重表</code>插入成功，在操作其它<code>业务表</code></li>
+<li>加悲观锁 ， <code>select * from order where order_id= 100000 for update;</code> 对操作行锁定。</li>
+<li>加乐观锁，表中增加一个<code>attribute_cc</code>自增字段，借助<code>CAS</code>机制控制并发</li>
+<li>采用 <code>分布式锁</code>，第一次请求可以成功加锁，后续请求加锁失败，认为是重复请求。</li>
+<li>token机制，client 首先请求获取token，提交时除了业务参数外还要带上这个token，server端会对这个token核销，只能核销一次。如果 server 查询不到token，则认为是重复请求。</li>
+</ul>
+<h3 id="9-分布式服务接口的幂等性如何设计？"><a href="#9-分布式服务接口的幂等性如何设计？" class="headerlink" title="9. 分布式服务接口的幂等性如何设计？"></a>9. <strong>分布式服务接口的幂等性如何设计？</strong></h3><p>所谓幂等性，就是说一个接口，多次发起同一个请求，你这个接口得保证结果是准确得。比如不能多扣款。不能多插入一条数据，不能将统计值多加了 1，这就是幂等性。</p>
+<p>其实保证幂等性主要是三点：</p>
+<ul>
+<li>对于每个请求必须有一个唯一的标识，举个例子：订单支付请求，肯定得包含订单 ID，一个订单 ID 最多支付一次。</li>
+<li>每次处理完请求之后，必须有一个记录标识这个请求处理过了，比如说常见得方案是再 MySQL 中记录个状态啥得，比如支付之前记录一条这个订单得支付流水，而且支付流水采用 order id 作为唯一键（unique key）。只有成功插入这个支付流水，才可以执行实际得支付扣款</li>
+<li>每次接收请求需要进行判断之前是否处理过得逻辑处理，比如说，如果有一个订单已经支付了，就已经有了一条支付流水，那么如果重复发送这个请求，则此时先插入支付流水，order id 已经存在了，唯一键约束生效，报错插入不进去得。然后你就不用再扣款了</li>
+</ul>
 <h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><h3 id="1-rpc-性能比http-好的原因"><a href="#1-rpc-性能比http-好的原因" class="headerlink" title="1. rpc 性能比http 好的原因"></a>1. rpc 性能比http 好的原因</h3><ul>
 <li>序列化方式：<br>RPC服务序列化是针对二进制协议（0/1）来做序列化和反序列化，所以性能高。<br>而Http服务是基于文本的序列化和反序列化，需要读一行一行的文本（比如json格式的），进行序列化和反序列化，所以性能低。</li>
 <li>报文长度：<br>RPC服务是自定义的传输协议，传输的报文都是干货。<br>而Http服务里面包括很多没用的报文内容，比如Http Header里面的accept，referer等等</li>
@@ -920,14 +1072,7 @@
 </ul>
 </li>
 </ul>
-<h3 id="4-分布式服务接口的幂等性如何设计？"><a href="#4-分布式服务接口的幂等性如何设计？" class="headerlink" title="4. 分布式服务接口的幂等性如何设计？"></a>4. <strong>分布式服务接口的幂等性如何设计？</strong></h3><p>所谓幂等性，就是说一个接口，多次发起同一个请求，你这个接口得保证结果是准确得。比如不能多扣款。不能多插入一条数据，不能将统计值多加了 1，这就是幂等性。</p>
-<p>其实保证幂等性主要是三点：</p>
-<ul>
-<li>对于每个请求必须有一个唯一的标识，举个例子：订单支付请求，肯定得包含订单 ID，一个订单 ID 最多支付一次。</li>
-<li>每次处理完请求之后，必须有一个记录标识这个请求处理过了，比如说常见得方案是再 MySQL 中记录个状态啥得，比如支付之前记录一条这个订单得支付流水，而且支付流水采用 order id 作为唯一键（unique key）。只有成功插入这个支付流水，才可以执行实际得支付扣款</li>
-<li>每次接收请求需要进行判断之前是否处理过得逻辑处理，比如说，如果有一个订单已经支付了，就已经有了一条支付流水，那么如果重复发送这个请求，则此时先插入支付流水，order id 已经存在了，唯一键约束生效，报错插入不进去得。然后你就不用再扣款了</li>
-</ul>
-<h3 id="5-领域模型相关"><a href="#5-领域模型相关" class="headerlink" title="5. 领域模型相关"></a>5. 领域模型相关</h3><p><strong>公司层面领域拆分维度</strong></p>
+<h3 id="4-领域模型相关"><a href="#4-领域模型相关" class="headerlink" title="4. 领域模型相关"></a>4. 领域模型相关</h3><p><strong>公司层面领域拆分维度</strong></p>
 <ul>
 <li>核心领域</li>
 <li>通用领域</li>
@@ -950,13 +1095,40 @@
 <p>DDD主要需要考虑的点 1. 对领域的划分   2. 领域模型的装载和逻辑交给领域模型(对领域模型的处理和逻辑都在单独领域内完成)  3. service 层只负责对领域的编排，用以对外提供服务</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DTO -&gt; DO 需要在领域模型内完成， 数据装载的interface 需要在领域模型内repo中完成， 数据实际获取以及 data -&gt; DO 需要在data层完成</span><br></pre></td></tr></table></figure>
 
-<h3 id="6-服务端-高并发、高可用可以考虑的点"><a href="#6-服务端-高并发、高可用可以考虑的点" class="headerlink" title="6. 服务端 高并发、高可用可以考虑的点"></a>6. 服务端 高并发、高可用可以考虑的点</h3><ul>
+<h3 id="5-服务端-高并发、高可用可以考虑的点"><a href="#5-服务端-高并发、高可用可以考虑的点" class="headerlink" title="5. 服务端 高并发、高可用可以考虑的点"></a>5. 服务端 高并发、高可用可以考虑的点</h3><ul>
 <li>微服务的拆分， 数据资源、计算资源、运行资源都进行拆分和隔离(根据服务等级和业务范围)，；</li>
 <li>读多服务， 可以考虑redis缓存、local 缓存、多级缓存、缓存降级等； 写多服务可以考虑优先写kv， 通过消息队列异步更新db和缓存；</li>
 <li>数据库层面可以做到分库分表(水平和垂直)，主从读写分离；</li>
+<li>索引优化， 查询优化；</li>
 <li>部署方面可以做到微服务容器的动态伸缩；</li>
 <li>服务的限流、熔断、重试、降级等机制，避免对整条调用链路的影响；</li>
 <li>多机房主备部署；</li>
+</ul>
+<h3 id="6-常见负载均衡算法"><a href="#6-常见负载均衡算法" class="headerlink" title="6. 常见负载均衡算法"></a>6. 常见负载均衡算法</h3><ul>
+<li><p>轮询法</p>
+</li>
+<li><p>加权轮询法</p>
+</li>
+<li><p>加权随机法</p>
+</li>
+<li><p>最小连接数法</p>
+</li>
+<li><p>随机法</p>
+</li>
+<li><p>源地址哈希法</p>
+</li>
+<li><p>最闲轮训</p>
+</li>
+<li><p>P2C</p>
+<p><strong>B站负载均衡算法</strong></p>
+<p>参考JSQ（最闲轮训）负载均衡算法带来的问题，缺乏的是服务端全局视图，因此我们目标需要综合考虑：负载+可用性。</p>
+<p>参考了《The power of two choices in randomized load balancing》的思路，我们使用 p2c 算法，随机选取的两个节点进行打分，选择更优的节点:</p>
+<ul>
+<li>选择 backend：CPU，client：成功率、inflight(处理中请求)、RT(响应时间) 作为指标，使用一个简单的线性方程进行打分。</li>
+<li>对新启动的节点使用常量惩罚值（penalty），以及使用探针方式最小化放量，进行预热；</li>
+<li>打分比较低的节点，避免进入“永久黑名单”而无法恢复，使用统计衰减的方式，让节点指标逐渐恢复到初始状态（即默认值）。</li>
+</ul>
+</li>
 </ul>
 <h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><h3 id="1-什么是M3U8-和HLS"><a href="#1-什么是M3U8-和HLS" class="headerlink" title="1. 什么是M3U8 和HLS"></a>1. 什么是M3U8 和HLS</h3><p>M3U8，是一种基于HTTP Live Streaming文件的视频格式，由整个视频的基本信息和分片(Segment)组成而成，其中HTTP Live Streaming是苹果公司实现的基于 HTTP 的流媒体协议，能够实现流媒体的点播和直播播放。在早期的时候，M3U8仅支持苹果的设备，后来搭载安卓操作系统的移动设备也逐渐兼容了M3U8格式。</p>
 <p>与传统的在线视频MP4格式相比，M3U8格式将视频流分成不同的片段。当我们缓存视频时，我们会不断地下载这些片段。因为片段之间的间隔很短，所以看起来是一个非常完整的视频。M3U8文件一般包括两个部分，一个是纯索引文件，一个是视频列表文件。</p>
@@ -1607,7 +1779,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#网络"><span class="nav-text">网络</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-浏览器输入url-发生了什么过程"><span class="nav-text">1. 浏览器输入url 发生了什么过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-网路-四层、七层模型"><span class="nav-text">2.网路  四层、七层模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-TCP-UDP-区别"><span class="nav-text">3.TCP UDP 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-三次握手、四次挥手"><span class="nav-text">4. 三次握手、四次挥手</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-https-请求过程"><span class="nav-text">5.https 请求过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-DNS域名解析过程"><span class="nav-text">6.DNS域名解析过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-跨域的常见解决办法"><span class="nav-text">7.跨域的常见解决办法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Golang"><span class="nav-text">Golang</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-WaitGroup原理"><span class="nav-text">1. WaitGroup原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-什么是Map"><span class="nav-text">2. 什么是Map</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#key，value存储"><span class="nav-text">key，value存储</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#hash冲突"><span class="nav-text">hash冲突</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Golang-Map"><span class="nav-text">3. Golang Map</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-golang-map扩容"><span class="nav-text">4.golang map扩容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-goroutine-与thread比较"><span class="nav-text">5. goroutine 与thread比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-什么操作叫做原子操作"><span class="nav-text">6. 什么操作叫做原子操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-什么是-CAS"><span class="nav-text">7.什么是 CAS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-GMP调度过程中存在哪些阻塞"><span class="nav-text">8.GMP调度过程中存在哪些阻塞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-Golang-互斥锁"><span class="nav-text">9.Golang 互斥锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-sync-Pool-有什么用"><span class="nav-text">10. sync.Pool 有什么用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-GC-触发时机"><span class="nav-text">11.GC 触发时机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-GC-如何调优"><span class="nav-text">12.GC 如何调优</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#13-Golang-Slice-的底层实现"><span class="nav-text">13.Golang Slice 的底层实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#14-pprof-工具的使用"><span class="nav-text">14.pprof 工具的使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Golang-Select"><span class="nav-text">Golang Select</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#case数据结构"><span class="nav-text">case数据结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#select实现逻辑"><span class="nav-text">select实现逻辑</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据库"><span class="nav-text">数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-mysql-utf8-和-utf8mb4-区别"><span class="nav-text">1. mysql utf8 和 utf8mb4 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-磁盘中数据的存取"><span class="nav-text">2.磁盘中数据的存取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-B-树的扇出系数、高度、存储容量-、io次数"><span class="nav-text">3. B+树的扇出系数、高度、存储容量 、io次数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-mysql-binlog-里的内容和作用"><span class="nav-text">4. mysql  binlog 里的内容和作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-MySQL-里记录货币用什么字段类型好"><span class="nav-text">5.MySQL 里记录货币用什么字段类型好</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-什么是临时表，何时删除临时表？"><span class="nav-text">6.什么是临时表，何时删除临时表？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-redis-多线程与后台线程"><span class="nav-text">7. redis 多线程与后台线程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#架构"><span class="nav-text">架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-rpc-性能比http-好的原因"><span class="nav-text">1. rpc 性能比http 好的原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-一个基础的rpc框架包含哪些部分"><span class="nav-text">2. 一个基础的rpc框架包含哪些部分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-设计一个RPC框架，可以从PRC包含的几个模块去考虑，对每一个模块分别进行设计。"><span class="nav-text">3. 设计一个RPC框架，可以从PRC包含的几个模块去考虑，对每一个模块分别进行设计。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-分布式服务接口的幂等性如何设计？"><span class="nav-text">4. 分布式服务接口的幂等性如何设计？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-领域模型相关"><span class="nav-text">5. 领域模型相关</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-服务端-高并发、高可用可以考虑的点"><span class="nav-text">6. 服务端 高并发、高可用可以考虑的点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他"><span class="nav-text">其他</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-什么是M3U8-和HLS"><span class="nav-text">1. 什么是M3U8 和HLS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-进程的切换流程？"><span class="nav-text">2. 进程的切换流程？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-什么是内存分页"><span class="nav-text">3. 什么是内存分页</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-什么是交换空间"><span class="nav-text">4. 什么是交换空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-进程的状态"><span class="nav-text">5. 进程的状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-reids-和zookeeper-分布式锁的区别"><span class="nav-text">6. reids 和zookeeper 分布式锁的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-http-与http2-0区别"><span class="nav-text">7. http 与http2.0区别</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#网络"><span class="nav-text">网络</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-浏览器输入url-发生了什么过程"><span class="nav-text">1. 浏览器输入url 发生了什么过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-网路-四层、七层模型"><span class="nav-text">2.网路  四层、七层模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-TCP-UDP-区别"><span class="nav-text">3.TCP UDP 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-三次握手、四次挥手"><span class="nav-text">4. 三次握手、四次挥手</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-https-请求过程"><span class="nav-text">5.https 请求过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-DNS域名解析过程"><span class="nav-text">6.DNS域名解析过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-跨域的常见解决办法"><span class="nav-text">7.跨域的常见解决办法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-http-1-1-和http2-0区别"><span class="nav-text">8. http 1.1 和http2.0区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-epoll-为什么用红黑树"><span class="nav-text">9. epoll 为什么用红黑树</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-CSRF-和-XSS的区别"><span class="nav-text">10. CSRF 和 XSS的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-tcp-连接问什么是三次握手"><span class="nav-text">11. tcp 连接问什么是三次握手</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Golang"><span class="nav-text">Golang</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-WaitGroup原理"><span class="nav-text">1. WaitGroup原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-什么是Map"><span class="nav-text">2. 什么是Map</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#key，value存储"><span class="nav-text">key，value存储</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#hash冲突"><span class="nav-text">hash冲突</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Golang-Map"><span class="nav-text">3. Golang Map</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-golang-map扩容"><span class="nav-text">4.golang map扩容</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-goroutine-与thread比较"><span class="nav-text">5. goroutine 与thread比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-什么操作叫做原子操作"><span class="nav-text">6. 什么操作叫做原子操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-什么是-CAS"><span class="nav-text">7.什么是 CAS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-GMP调度过程中存在哪些阻塞"><span class="nav-text">8.GMP调度过程中存在哪些阻塞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-Golang-互斥锁"><span class="nav-text">9.Golang 互斥锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-sync-Pool-有什么用"><span class="nav-text">10. sync.Pool 有什么用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-GC-触发时机"><span class="nav-text">11.GC 触发时机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-GC-如何调优"><span class="nav-text">12.GC 如何调优</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#13-Golang-Slice-的底层实现"><span class="nav-text">13.Golang Slice 的底层实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#14-pprof-工具的使用"><span class="nav-text">14.pprof 工具的使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#15-Golang-Select"><span class="nav-text">15.Golang Select</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#case数据结构"><span class="nav-text">case数据结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#select实现逻辑"><span class="nav-text">select实现逻辑</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#16-Contenxt"><span class="nav-text">16. Contenxt</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#context-的功能"><span class="nav-text">context 的功能</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Context-的结构"><span class="nav-text">Context 的结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#context-包主要方法"><span class="nav-text">context 包主要方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Context是如何实现退出通知机制的"><span class="nav-text">Context是如何实现退出通知机制的</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#17-Golang的内存模型"><span class="nav-text">17. Golang的内存模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#什么是Happens-Before"><span class="nav-text">什么是Happens Before</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Go-中Happens-Before保证"><span class="nav-text">Go 中Happens Before保证</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#单线程"><span class="nav-text">单线程</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Init-函数"><span class="nav-text">Init 函数</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Goroutine"><span class="nav-text">Goroutine</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Channel"><span class="nav-text">Channel</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Lock"><span class="nav-text">Lock</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Once"><span class="nav-text">Once</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#18-Golang-读写已经关闭的channel"><span class="nav-text">18. Golang 读写已经关闭的channel</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据库"><span class="nav-text">数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-mysql-utf8-和-utf8mb4-区别"><span class="nav-text">1. mysql utf8 和 utf8mb4 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-磁盘中数据的存取"><span class="nav-text">2.磁盘中数据的存取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-B-树的扇出系数、高度、存储容量-、io次数"><span class="nav-text">3. B+树的扇出系数、高度、存储容量 、io次数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-mysql-binlog-里的内容和作用"><span class="nav-text">4. mysql  binlog 里的内容和作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-MySQL-里记录货币用什么字段类型好"><span class="nav-text">5.MySQL 里记录货币用什么字段类型好</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-什么是临时表，何时删除临时表？"><span class="nav-text">6.什么是临时表，何时删除临时表？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-redis-多线程与后台线程"><span class="nav-text">7. redis 多线程与后台线程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-接口幂等性，有哪些方案？"><span class="nav-text">8. 接口幂等性，有哪些方案？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-分布式服务接口的幂等性如何设计？"><span class="nav-text">9. 分布式服务接口的幂等性如何设计？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#架构"><span class="nav-text">架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-rpc-性能比http-好的原因"><span class="nav-text">1. rpc 性能比http 好的原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-一个基础的rpc框架包含哪些部分"><span class="nav-text">2. 一个基础的rpc框架包含哪些部分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-设计一个RPC框架，可以从PRC包含的几个模块去考虑，对每一个模块分别进行设计。"><span class="nav-text">3. 设计一个RPC框架，可以从PRC包含的几个模块去考虑，对每一个模块分别进行设计。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-领域模型相关"><span class="nav-text">4. 领域模型相关</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-服务端-高并发、高可用可以考虑的点"><span class="nav-text">5. 服务端 高并发、高可用可以考虑的点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-常见负载均衡算法"><span class="nav-text">6. 常见负载均衡算法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他"><span class="nav-text">其他</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-什么是M3U8-和HLS"><span class="nav-text">1. 什么是M3U8 和HLS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-进程的切换流程？"><span class="nav-text">2. 进程的切换流程？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-什么是内存分页"><span class="nav-text">3. 什么是内存分页</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-什么是交换空间"><span class="nav-text">4. 什么是交换空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-进程的状态"><span class="nav-text">5. 进程的状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-reids-和zookeeper-分布式锁的区别"><span class="nav-text">6. reids 和zookeeper 分布式锁的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-http-与http2-0区别"><span class="nav-text">7. http 与http2.0区别</span></a></li></ol></li></ol></div>
             
 
           </div>

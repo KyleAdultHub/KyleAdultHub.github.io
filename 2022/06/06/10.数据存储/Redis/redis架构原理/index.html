@@ -139,8 +139,10 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220608123435366.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220608123716895.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220608134348677.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230110110144015.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230110110301288.png">
 <meta property="article:published_time" content="2022-06-05T16:00:00.000Z">
-<meta property="article:modified_time" content="2022-07-20T03:11:01.363Z">
+<meta property="article:modified_time" content="2023-02-13T13:35:06.335Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="Redis">
 <meta name="twitter:card" content="summary">
@@ -769,6 +771,36 @@
 <li>新的主节点会向集群中广播一条PONG消息，让集群中的其他节点直到这个从节点已经成为了新的主节点，并且接管了原先主节点的所有槽。</li>
 <li>新的主节点负责接收和自己处理的槽相关的指令，至此故障转移结束。</li>
 </ol>
+<h2 id="redis-多线程与后台线程"><a href="#redis-多线程与后台线程" class="headerlink" title="redis 多线程与后台线程"></a>redis 多线程与后台线程</h2><p><strong>redis 单线程 + 后台线程</strong></p>
+<p>再次强调：我们经常听说的 redis 单线程模型（上图），其实仅仅指的是对客户端的请求处理过程，另外还有一些工作由部分特殊的独立线程来完成。</p>
+<p>在 redis 6.0 以前，完整的 redis 线程模型是 主线程（1个）+ 后台线程（三个），我画了一张图，你可以看下：</p>
+<img src="/img/image-20230110110144015.png" alt="image-20230110110144015" style="zoom: 50%;" />
+
+
+<p>三个后台线程分别处理：</p>
+<ul>
+<li>close_file：关闭 AOF、RDB 等过程中产生的大临时文件</li>
+<li>aof_fsync：将追加至 AOF 文件的数据刷盘（一般情况下 write 调用之后，数据被写入内核缓冲区，通过 fsync 调用才将内核缓冲区的数据写入磁盘）</li>
+<li>lazy_free：惰性释放大对象<br>这三个线程有一个共同特点，都是用来处理耗时长的操作，也印证了我们常说的，专业的人做专业的事。</li>
+</ul>
+<p><strong>redis 多线程 + 后台线程</strong><br>咱们继续将时钟往后拨到 redis6.0 版本，此版本出现了一种新的 IO 线程，也称为「多线程」。</p>
+<p>我同样也画了张图，你可以看下：</p>
+<p><img src="/img/image-20230110110301288.png" alt="image-20230110110301288"></p>
+<p>我们先思考下，引进 IO 线程解决了哪些问题？</p>
+<p>在之前系列文章中，我们提到过，通常情况下，redis 性能在于网络和内存，而不是 CPU。针对 网络，一般是处理速度较慢的问题；针对内存，一般是指物理空间的限制。</p>
+<p>所以到这，你应该很清楚了，究竟哪个模块需要引入多线程来处理？</p>
+<p>对，就是网络模块，因此，引入的这些线程也叫 IO线程；由于主线程也会处理网络模块的工作，主线程习惯上也叫做主IO线程。</p>
+<p>网络模块有接收连接、IO读（包括数据解析）、IO写等操作，其中，主线程负责接收新连接，然后分发到 IO线程进行处理（主线程也参与）。</p>
+<p>默认情况下，只针对写操作启用IO线程，如果读操作也需要的话，需要在配置文件中进行配置</p>
+<p>值得注意的是，命令处理仍然是单线程执行。</p>
+<p><strong>配置：</strong></p>
+<p>redis 默认情况下不会开启多线程处理，官方也建议，除非性能达到瓶颈，否则没必要开启多线程。</p>
+<p>开启多线程：配置 io-thread 即可。io-thread = 1 表示只使用主 IO 线程  <code>io-threads 4</code></p>
+<p>开启之后，默认写操作会通过多线程来处理，而读操作则不会。</p>
+<p>如果读操作也想要开启多线程，则需要配置：<code>io-threads-do-reads yes</code></p>
+<p><strong>总结</strong></p>
+<p>本文从 redis 架构演进开始讲起，从单线程模型 =&gt; 单线程 + 后台线程 =&gt; 多线程 + 后台线程 演进。</p>
+<p>每一次演进，都是为了解决某一类特殊问题；后台线程的出现，解决了一些耗时长的重操作。同样，多线程的出现，解决了网络模块的性能瓶颈。</p>
 
       
     </div>
@@ -923,7 +955,7 @@
                 
                   <a href="/archives/%20%7C%7C%20archive">
                 
-                    <span class="site-state-item-count">309</span>
+                    <span class="site-state-item-count">310</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -1100,7 +1132,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">82</span>
+                      
+                    
+                    <span class="site-state-item-count">83</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -1297,7 +1331,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">92</span>
+                      
+                    
+                    <span class="site-state-item-count">93</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -1347,7 +1383,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-的三种工作模式介绍"><span class="nav-text">Redis 的三种工作模式介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-主从模式"><span class="nav-text">1. 主从模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-哨兵模式"><span class="nav-text">2. 哨兵模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Cluster模式"><span class="nav-text">3. Cluster模式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-主从数据同步过程"><span class="nav-text">Redis 主从数据同步过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#主从复制的方式"><span class="nav-text">主从复制的方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#持续复制"><span class="nav-text">持续复制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#全量复制"><span class="nav-text">全量复制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#部分复制"><span class="nav-text">部分复制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#积压缓冲区"><span class="nav-text">积压缓冲区</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#复制积压缓冲区的特点："><span class="nav-text">复制积压缓冲区的特点：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#复制积压缓冲区索引"><span class="nav-text">复制积压缓冲区索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#偏移量在复制积压缓冲区的作用"><span class="nav-text">偏移量在复制积压缓冲区的作用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-Cluster-模式"><span class="nav-text">Redis Cluster 模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-Cluster-集群介绍"><span class="nav-text">Redis  Cluster 集群介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#一、概述"><span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#二、redis集群的特点"><span class="nav-text">二、redis集群的特点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#节点间内部通讯机制"><span class="nav-text">节点间内部通讯机制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#基础通讯原理"><span class="nav-text">基础通讯原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#gossip协议"><span class="nav-text">gossip协议</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ping消息深入"><span class="nav-text">ping消息深入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基于重定向的客户端"><span class="nav-text">基于重定向的客户端</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#smart-jedis"><span class="nav-text">smart jedis</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-Cluster-集群伸缩"><span class="nav-text">Redis Cluster 集群伸缩</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#槽和数据与节点的对应关系"><span class="nav-text">槽和数据与节点的对应关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#扩容操作"><span class="nav-text">扩容操作</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#集群master选举原理"><span class="nav-text">集群master选举原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis集群方案"><span class="nav-text">Redis集群方案</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-客户端分区方案"><span class="nav-text">1. 客户端分区方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-代理分区方案"><span class="nav-text">2. 代理分区方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-查询路由方案"><span class="nav-text">3.查询路由方案</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据分步"><span class="nav-text">数据分步</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#数据分步理论"><span class="nav-text">数据分步理论</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#节点取余分区"><span class="nav-text">节点取余分区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#一致性哈希分区"><span class="nav-text">一致性哈希分区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#虚拟槽分区"><span class="nav-text">虚拟槽分区</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redus-Cluster-故障转移与恢复"><span class="nav-text">Redus Cluster 故障转移与恢复</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-的三种工作模式介绍"><span class="nav-text">Redis 的三种工作模式介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-主从模式"><span class="nav-text">1. 主从模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-哨兵模式"><span class="nav-text">2. 哨兵模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Cluster模式"><span class="nav-text">3. Cluster模式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-主从数据同步过程"><span class="nav-text">Redis 主从数据同步过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#主从复制的方式"><span class="nav-text">主从复制的方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#持续复制"><span class="nav-text">持续复制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#全量复制"><span class="nav-text">全量复制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#部分复制"><span class="nav-text">部分复制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#积压缓冲区"><span class="nav-text">积压缓冲区</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#复制积压缓冲区的特点："><span class="nav-text">复制积压缓冲区的特点：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#复制积压缓冲区索引"><span class="nav-text">复制积压缓冲区索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#偏移量在复制积压缓冲区的作用"><span class="nav-text">偏移量在复制积压缓冲区的作用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-Cluster-模式"><span class="nav-text">Redis Cluster 模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-Cluster-集群介绍"><span class="nav-text">Redis  Cluster 集群介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#一、概述"><span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#二、redis集群的特点"><span class="nav-text">二、redis集群的特点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#节点间内部通讯机制"><span class="nav-text">节点间内部通讯机制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#基础通讯原理"><span class="nav-text">基础通讯原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#gossip协议"><span class="nav-text">gossip协议</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ping消息深入"><span class="nav-text">ping消息深入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基于重定向的客户端"><span class="nav-text">基于重定向的客户端</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#smart-jedis"><span class="nav-text">smart jedis</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-Cluster-集群伸缩"><span class="nav-text">Redis Cluster 集群伸缩</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#槽和数据与节点的对应关系"><span class="nav-text">槽和数据与节点的对应关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#扩容操作"><span class="nav-text">扩容操作</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#集群master选举原理"><span class="nav-text">集群master选举原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis集群方案"><span class="nav-text">Redis集群方案</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-客户端分区方案"><span class="nav-text">1. 客户端分区方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-代理分区方案"><span class="nav-text">2. 代理分区方案</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-查询路由方案"><span class="nav-text">3.查询路由方案</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据分步"><span class="nav-text">数据分步</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#数据分步理论"><span class="nav-text">数据分步理论</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#节点取余分区"><span class="nav-text">节点取余分区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#一致性哈希分区"><span class="nav-text">一致性哈希分区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#虚拟槽分区"><span class="nav-text">虚拟槽分区</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redus-Cluster-故障转移与恢复"><span class="nav-text">Redus Cluster 故障转移与恢复</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#redis-多线程与后台线程"><span class="nav-text">redis 多线程与后台线程</span></a></li></ol></div>
             
 
           </div>

@@ -119,19 +119,19 @@
 <meta property="og:site_name" content="刘小恺(Kyle)的云笔记">
 <meta property="og:description" content="HDFS原理HDFS 工作机制介绍 HDFS集群分为两大角色：NameNode、DataNode  (Secondary Namenode) NameNode负责管理整个文件系统的元数据 DataNode 负责管理用户的文件数据块 文件会按照固定的大小（blocksize）切成若干块后分布式存储在若干台datanode上 每一个文件块可以有多个副本，并存放在不同的datanode上 Datanod">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://blog.kyleliu.cn/2020/06/13/img/1587966152835.png">
-<meta property="og:image" content="http://blog.kyleliu.cn/2020/06/13/img/1587966235182.png">
-<meta property="og:image" content="http://blog.kyleliu.cn/2020/06/13/img/1587967356303.png">
-<meta property="og:image" content="http://blog.kyleliu.cn/2020/06/13/img/1587988401191.png">
-<meta property="og:image" content="http://blog.kyleliu.cn/2020/06/13/img/1587988654365.png">
-<meta property="og:image" content="http://blog.kyleliu.cn/2020/06/13/img/1587991593319.png">
-<meta property="og:image" content="http://blog.kyleliu.cn/2020/06/13/img/1578902472291.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1587966152835.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1587966235182.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1587967356303.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1587988401191.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1587988654365.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1587991593319.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1578902472291.png">
 <meta property="article:published_time" content="2020-06-13T03:00:00.000Z">
-<meta property="article:modified_time" content="2022-12-24T11:36:02.794Z">
+<meta property="article:modified_time" content="2023-02-10T05:35:45.675Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="面试">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://blog.kyleliu.cn/2020/06/13/img/1587966152835.png">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/img/1587966152835.png">
 
 
 
@@ -474,7 +474,7 @@
 <li>Datanode会定期向Namenode汇报自身所保存的文件block信息，而namenode则会负责保持文件的副本数量</li>
 <li>HDFS的内部工作机制对客户端保持透明，客户端请求访问HDFS都是通过向namenode申请来进行</li>
 </ol>
-<h3 id="HDFS-写数据流程"><a href="#HDFS-写数据流程" class="headerlink" title="HDFS 写数据流程"></a>HDFS 写数据流程</h3><p><img src="../../../img/1587966152835.png" alt="1587966152835"></p>
+<h3 id="HDFS-写数据流程"><a href="#HDFS-写数据流程" class="headerlink" title="HDFS 写数据流程"></a>HDFS 写数据流程</h3><p><img src="/img/1587966152835.png" alt="1587966152835"></p>
 <ol>
 <li>客户端与namenode通信请求上传文件，namenode检查目标文件是否已存在，父目录是否存在</li>
 <li>namenode返回是否可以上传</li>
@@ -484,7 +484,7 @@
 <li>client开始往A上传第一个block（先从磁盘读取数据放到一个本地内存缓存），以packet为单位(chunk为校验单位)，A收到一个packet就会传给B，B传给C；A每传一个packet会放入一个应答队列等待应答</li>
 <li>当一个block传输完成之后(只要有一个节点上传成功，就算成功)，client再次请求namenode上传第二个block的服务器。</li>
 </ol>
-<h3 id="HDFS-读数据流程"><a href="#HDFS-读数据流程" class="headerlink" title="HDFS 读数据流程"></a>HDFS 读数据流程</h3><p><img src="../../../img/1587966235182.png" alt="1587966235182"></p>
+<h3 id="HDFS-读数据流程"><a href="#HDFS-读数据流程" class="headerlink" title="HDFS 读数据流程"></a>HDFS 读数据流程</h3><p><img src="/img/1587966235182.png" alt="1587966235182"></p>
 <ol>
 <li>client跟namenode通信查询元数据，找到文件块所在的datanode服务器</li>
 <li>cilent挑选一台datanode（就近原则，然后随机）服务器，请求建立socket流</li>
@@ -510,7 +510,7 @@
 </ol>
 <h3 id="元数据checkpoint机制"><a href="#元数据checkpoint机制" class="headerlink" title="元数据checkpoint机制"></a>元数据checkpoint机制</h3><p>由于在数据备份的时候会占用计算资源，所以为了减轻namenode的负载，通常可以将数据备份的工作交给另外一个专门用来做数据备份的namenode–&gt; sencondary namenode</p>
 <p>每隔一段时间，会由secondary namenode 将namenode上积累的所有edits和一个最新的fsimage下载到本地(只有第一次merge才会下载fsimage)，并加载到内存进行merge(这个过程称之为checkpoint)</p>
-<p><img src="../../../img/1587967356303.png" alt="1587967356303"></p>
+<p><img src="/img/1587967356303.png" alt="1587967356303"></p>
 <h3 id="namenode的一些情况"><a href="#namenode的一些情况" class="headerlink" title="namenode的一些情况"></a>namenode的一些情况</h3><p><strong>namenode如果宕机，hdfs是否还能正常提供服务</strong></p>
 <p>不能，secondarynamenode虽然有元数据信息，但是不能更新元数据， 不能充当namenode使用</p>
 <p><strong>如果namenode的硬盘损坏，元数据是否能回复，能恢复多少?</strong></p>
@@ -557,8 +557,8 @@
 <li>yarn中的主管角色叫ResourceManager</li>
 <li>yarn中具体提供运算资源的角色叫NodeManager</li>
 </ol>
-<h3 id="MR运行任务的流程"><a href="#MR运行任务的流程" class="headerlink" title="MR运行任务的流程"></a>MR运行任务的流程</h3><p><img src="../../../img/1587988401191.png" alt="1587988401191"></p>
-<p><img src="../../../img/1587988654365.png" alt="1587988654365"></p>
+<h3 id="MR运行任务的流程"><a href="#MR运行任务的流程" class="headerlink" title="MR运行任务的流程"></a>MR运行任务的流程</h3><p><img src="/img/1587988401191.png" alt="1587988401191"></p>
+<p><img src="/img/1587988654365.png" alt="1587988654365"></p>
 <ol>
 <li><p>一个mr程序启动的时候，最先启动的是MRAppMaster，MRAppMaster启动后根据本次job的描述信息，计算出需要的maptask实例数量，然后向集群申请机器启动相应数量的maptask进程</p>
 </li>
@@ -572,13 +572,13 @@
 <li><p>Reducetask进程启动之后，根据MRAppMaster告知的待处理数据所在位置，从若干台maptask运行所在机器上获取到若干个maptask输出结果文件，并在本地进行重新归并排序，然后按照相同key的KV为一个组，调用客户定义的reduce()方法进行逻辑运算，并收集运算输出的结果KV，然后调用客户指定的outputformat将结果数据输出到外部存储</p>
 </li>
 </ol>
-<h3 id="MapReduce运行原理图"><a href="#MapReduce运行原理图" class="headerlink" title="MapReduce运行原理图"></a>MapReduce运行原理图</h3><p><img src="../../../img/1587991593319.png" alt="1587991593319"></p>
+<h3 id="MapReduce运行原理图"><a href="#MapReduce运行原理图" class="headerlink" title="MapReduce运行原理图"></a>MapReduce运行原理图</h3><p><img src="/img/1587991593319.png" alt="1587991593319"></p>
 <h3 id="MAPREDUCE的shuffle机制"><a href="#MAPREDUCE的shuffle机制" class="headerlink" title="MAPREDUCE的shuffle机制"></a>MAPREDUCE的shuffle机制</h3><h4 id="shuffle机制概述"><a href="#shuffle机制概述" class="headerlink" title="shuffle机制概述"></a>shuffle机制概述</h4><ul>
 <li>mapreduce中，map阶段处理的数据如何传递给reduce阶段，是mapreduce框架中最关键的一个流程，这个流程就叫shuffle(如上图绿色框部分)；</li>
 <li>shuffle: 洗牌、发牌 ——（核心机制：数据分区，排序，缓存）；</li>
 <li>具体来说：就是将maptask输出的处理结果数据，分发给reducetask，并在分发的过程中，对数据按key进行了分区、合并和排序；</li>
 </ul>
-<h4 id="shuffle主要流程"><a href="#shuffle主要流程" class="headerlink" title="shuffle主要流程"></a>shuffle主要流程</h4><p><img src="../../../img/1578902472291.png" alt="1578902472291"></p>
+<h4 id="shuffle主要流程"><a href="#shuffle主要流程" class="headerlink" title="shuffle主要流程"></a>shuffle主要流程</h4><p><img src="/img/1578902472291.png" alt="1578902472291"></p>
 <p>shuffle是MR处理流程中的一个过程，它的每一个处理步骤是分散在各个mapTask和reduceTask几点上完成的，主要有3个动作:</p>
 <ol>
 <li>将结果分区</li>
@@ -765,7 +765,7 @@
                 
                   <a href="/archives/%20%7C%7C%20archive">
                 
-                    <span class="site-state-item-count">309</span>
+                    <span class="site-state-item-count">310</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -942,7 +942,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">82</span>
+                      
+                    
+                    <span class="site-state-item-count">83</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -1139,7 +1141,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">92</span>
+                      
+                    
+                    <span class="site-state-item-count">93</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>

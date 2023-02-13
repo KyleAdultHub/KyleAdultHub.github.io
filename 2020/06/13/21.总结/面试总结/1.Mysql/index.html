@@ -156,7 +156,7 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220104144934140.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220104150525890.png">
 <meta property="article:published_time" content="2020-06-13T03:00:00.000Z">
-<meta property="article:modified_time" content="2023-01-28T13:51:21.632Z">
+<meta property="article:modified_time" content="2023-02-13T14:07:59.384Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="面试">
 <meta name="twitter:card" content="summary">
@@ -765,6 +765,24 @@
 <blockquote>
 <p>备注: m为阶数</p>
 </blockquote>
+<h2 id="索引失效场景"><a href="#索引失效场景" class="headerlink" title="索引失效场景"></a>索引失效场景</h2><ol>
+<li><p>A=xx OR B=xx</p>
+<p>5.1开始，引入Index merge技术<br>对同一个表可以使用多个索引分别扫描</p>
+</li>
+<li><p>隐式类型转换</p>
+<p>WHER moblie = ‘135XX’；<br>WHER moblie = 135XX</p>
+</li>
+<li><p>索引列包含计算</p>
+</li>
+<li><p>联合索引，未遵循最左前缀，字段范围查询右边列不会使用索引</p>
+</li>
+<li><p>is null / is not null 查询</p>
+</li>
+<li><p>联合索引，范围查询</p>
+</li>
+<li><p>like ‘%查询’</p>
+</li>
+</ol>
 <h2 id="mysql-事务"><a href="#mysql-事务" class="headerlink" title="mysql 事务"></a>mysql 事务</h2><h3 id="mysql-事务基本概念"><a href="#mysql-事务基本概念" class="headerlink" title="mysql 事务基本概念"></a>mysql 事务基本概念</h3><ul>
 <li>事务特性<ul>
 <li>A（Atomicty原子性）：全部成功或全部失败</li>
@@ -970,31 +988,31 @@
 <li>另一种策略是，发起死锁检测，发现死锁后，主动回滚死锁链条中的某一个事务，让其他事务得以继续执行。将参数 innodb_deadlock_detect 设置为 on，表示开启这个逻辑。</li>
 </ul>
 <p>减少死锁的主要方向，就是控制访问相同资源的并发事务量。</p>
-<h2 id="Mysql-引擎"><a href="#Mysql-引擎" class="headerlink" title="Mysql 引擎"></a>Mysql 引擎</h2><h3 id="两种存储引擎区别"><a href="#两种存储引擎区别" class="headerlink" title="两种存储引擎区别"></a>两种存储引擎区别</h3><h4 id="InnoDB"><a href="#InnoDB" class="headerlink" title="InnoDB:"></a>InnoDB:</h4><ul>
+<h2 id="Mysql-其他"><a href="#Mysql-其他" class="headerlink" title="Mysql 其他"></a>Mysql 其他</h2><h3 id="Mysql-引擎"><a href="#Mysql-引擎" class="headerlink" title="Mysql 引擎"></a>Mysql 引擎</h3><h4 id="两种存储引擎区别"><a href="#两种存储引擎区别" class="headerlink" title="两种存储引擎区别"></a>两种存储引擎区别</h4><h5 id="InnoDB"><a href="#InnoDB" class="headerlink" title="InnoDB:"></a>InnoDB:</h5><ul>
 <li>InnoDB 存储引擎支持事务、支持外键、支持非锁定读、行锁设计其设计主要面向OLTP 应用。</li>
 <li>InnoDB 存储引擎表采用聚集的方式存储，因此每张表的存储顺序都按主键的顺序存放，如果没有指定主键，InnoDB 存储引擎会为每一行生成一个6字节的ROWID并以此作为主键。</li>
 <li>InnoDB 存储引擎通过MVCC 获的高并发性，并提供了插入缓冲、二次写、自适应哈希索引和预读等高性能高可用功能</li>
 <li>InnoDB 存储引擎默认隔离级别为REPEATABLE_READ（重复读）并采用next-key locking(间隙锁)和MVCC来避免幻读</li>
 </ul>
-<h4 id="MySIAM"><a href="#MySIAM" class="headerlink" title="MySIAM:"></a>MySIAM:</h4><ul>
+<h5 id="MySIAM"><a href="#MySIAM" class="headerlink" title="MySIAM:"></a>MySIAM:</h5><ul>
 <li>MYISAM 存储引擎不支持事务、表锁设计、支持全文索引其设计主要面向OLAP 应用</li>
 <li>MYISAM 存储引擎表由frm、MYD 和MYI 组成，frm 文件存放表格定义，MYD 用来存放数据文件，MYI 存放索引文件。MYISAM 存储引擎与众不同的地方在于它的缓冲池只缓存索引文件而不缓存数据文件，数据文件的缓存依赖于操作系统。<br>操作区别：</li>
 </ul>
 <blockquote>
 <p>MYISAM 保存表的具体行数，不带where 是可直接返回。InnoDB 要扫描全表。<br>DELETE 表时，InnoDB 是一行一行的删除，MYISAM 是先drop表，然后重建表<br>InnoDB 跨平台可直接拷贝使用，MYISAM 不行<br>InnoDB 表格很难被压缩，MYISAM 可以</p>
 </blockquote>
-<h3 id="引擎选择"><a href="#引擎选择" class="headerlink" title="引擎选择"></a>引擎选择</h3><p>MyISAM相对简单所以在效率上要优于InnoDB。</p>
+<h5 id="引擎选择"><a href="#引擎选择" class="headerlink" title="引擎选择"></a>引擎选择</h5><p>MyISAM相对简单所以在效率上要优于InnoDB。</p>
 <p>如果系统读多，写少。对原子性要求低,那么MyISAM最好的选择。且MyISAM恢复速度快。可直接用备份覆盖恢复。</p>
 <p>InnoDB 更适合系统读少，写多的时候，尤其是高并发场景。</p>
-<h2 id="Mysql-主从同步过程"><a href="#Mysql-主从同步过程" class="headerlink" title="Mysql 主从同步过程"></a>Mysql 主从同步过程</h2><h3 id="在master机器上的操作"><a href="#在master机器上的操作" class="headerlink" title="在master机器上的操作"></a>在master机器上的操作</h3><p>当master上的数据发生改变的时候，该事件(insert、update、delete)变化会按照顺序写入到binlog中。</p>
+<h3 id="Mysql-主从同步过程"><a href="#Mysql-主从同步过程" class="headerlink" title="Mysql 主从同步过程"></a>Mysql 主从同步过程</h3><h4 id="在master机器上的操作"><a href="#在master机器上的操作" class="headerlink" title="在master机器上的操作"></a>在master机器上的操作</h4><p>当master上的数据发生改变的时候，该事件(insert、update、delete)变化会按照顺序写入到binlog中。</p>
 <p>当slave连接到master的时候，master机器会为slave开启binlog dump线程。如果读取的进度已经跟上了master，就进入睡眠状态并等待master产生新的事件。</p>
 <p>当master 的 binlog发生变化的时候，binlog dump线程会通知slave，并将相应的binlog内容发送给slave。</p>
-<h3 id="在slave机器上的操作"><a href="#在slave机器上的操作" class="headerlink" title="在slave机器上的操作"></a>在slave机器上的操作</h3><p>当主从同步开启的时候，slave上会创建2个线程。</p>
+<h4 id="在slave机器上的操作"><a href="#在slave机器上的操作" class="headerlink" title="在slave机器上的操作"></a>在slave机器上的操作</h4><p>当主从同步开启的时候，slave上会创建2个线程。</p>
 <ul>
 <li>I/O线程。该线程连接到master机器，master机器上的<strong>binlog dump线程</strong>会将binlog的内容发送给该<strong>I/O线程</strong>。该<strong>I/O线程</strong>接收到binlog内容后，再将内容写入到本地的relay log。</li>
 <li>SQL线程。该线程读取I/O线程写入的relay log。并且根据relay log的内容对slave数据库做相应的操作。</li>
 </ul>
-<h2 id="执行计划"><a href="#执行计划" class="headerlink" title="执行计划"></a>执行计划</h2><h3 id="mysql-exlain-各参数解释"><a href="#mysql-exlain-各参数解释" class="headerlink" title="mysql  exlain 各参数解释"></a>mysql  exlain 各参数解释</h3><p>1、id 主要是用来标识sql的执行顺序，如果没有子查询，一般来说id只有一个，执行顺序也是从上到下</p>
+<h3 id="执行计划"><a href="#执行计划" class="headerlink" title="执行计划"></a>执行计划</h3><h4 id="mysql-exlain-各参数解释"><a href="#mysql-exlain-各参数解释" class="headerlink" title="mysql  exlain 各参数解释"></a>mysql  exlain 各参数解释</h4><p>1、id 主要是用来标识sql的执行顺序，如果没有子查询，一般来说id只有一个，执行顺序也是从上到下</p>
 <p>2、select_type 每个select子句的类型</p>
 <p>　　a:  simple 查询中不包含任何子查询或者union</p>
 <p>　　b:  primary 查询中包含了任何复杂的子部分，最外层的就会变为primary</p>
@@ -1027,7 +1045,7 @@
 <p>​    e:   using join buffer:      使用连接缓存</p>
 <p>​    f:    impossible where：where语句的结果总是false</p>
 <p>​        explain select * from emp where empno = 7469;</p>
-<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><h3 id="mysql-datetime-和timestamp-的区别"><a href="#mysql-datetime-和timestamp-的区别" class="headerlink" title="mysql datetime  和timestamp 的区别"></a>mysql datetime  和timestamp 的区别</h3><p>其中，datetime和timestamp这两种类型都是用于表示<code>YYYY-MM-DD HH:MM:SS</code> 这种年月日时分秒格式的数据，但两者还是有些许不同之处的。</p>
+<h3 id="mysql-datetime-和timestamp-的区别"><a href="#mysql-datetime-和timestamp-的区别" class="headerlink" title="mysql datetime  和timestamp 的区别"></a>mysql datetime  和timestamp 的区别</h3><p>其中，datetime和timestamp这两种类型都是用于表示<code>YYYY-MM-DD HH:MM:SS</code> 这种年月日时分秒格式的数据，但两者还是有些许不同之处的。</p>
 <ol>
 <li>存储范围不同：datetime的存储范围是 <code>1000-01-01 00:00:00.000000</code> 到 <code>9999-12-31 23:59:59.999999</code>，而timestamp的范围是 <code>1970-01-01 00:00:01.000000</code> 到 <code>2038-01-19 03:14:07.999999</code>；</li>
 <li>datetime存储与时区无关，而timestamp存储的是与时区有关，这也是两者最大的不同。</li>
@@ -1036,6 +1054,73 @@
 <h3 id="一条SQL语句在MySQL中如何执行的？"><a href="#一条SQL语句在MySQL中如何执行的？" class="headerlink" title="一条SQL语句在MySQL中如何执行的？"></a>一条SQL语句在MySQL中如何执行的？</h3><p>客户端请求 —&gt; 连接器（验证用户身份，给予权限） —&gt; 查询缓存（存在缓存则直接返回，不存在则执行后续操作） —&gt; 分析器（对SQL进行词法分析和语法分析操作） —&gt; 优化器（主要对执行的sql优化选择最优的执行方案方法） —&gt; 执行器（执行时会先看用户是否有执行权限，有才去使用这个引擎提供的接口） —&gt; 去引擎层获取数据返回（如果开启查询缓存则会缓存查询结果）</p>
 <h3 id="一张表，里面有ID自增主键，当insert了17条记录之后，删除了第15-16-17条记录，再把Mysql重启，再insert一条记录，这条记录的ID是18还是15-？"><a href="#一张表，里面有ID自增主键，当insert了17条记录之后，删除了第15-16-17条记录，再把Mysql重启，再insert一条记录，这条记录的ID是18还是15-？" class="headerlink" title="一张表，里面有ID自增主键，当insert了17条记录之后，删除了第15,16,17条记录，再把Mysql重启，再insert一条记录，这条记录的ID是18还是15 ？"></a>一张表，里面有ID自增主键，当insert了17条记录之后，删除了第15,16,17条记录，再把Mysql重启，再insert一条记录，这条记录的ID是18还是15 ？</h3><p>如果表的类型是MyISAM，那么是18。因为MyISAM表会把自增主键的最大ID 记录到数据文件中，重启MySQL自增主键的最大ID也不会丢失；</p>
 <p>如果表的类型是InnoDB，那么是15。因为InnoDB 表只是把自增主键的最大ID记录到内存中，所以重启数据库或对表进行OPTION操作，都会导致最大ID丢失。</p>
+<h3 id="mysql-utf8-和-utf8mb4-区别"><a href="#mysql-utf8-和-utf8mb4-区别" class="headerlink" title="mysql utf8 和 utf8mb4 区别"></a>mysql utf8 和 utf8mb4 区别</h3><p>mysql utf8 字符集最多支持3个字节的字符， 不支持4个字节的特殊unicode。 utf8mb4 增加了对4个字节字符的支持。</p>
+<h3 id="磁盘中数据的存取"><a href="#磁盘中数据的存取" class="headerlink" title="磁盘中数据的存取"></a>磁盘中数据的存取</h3><p>以机械硬盘来说，先了解几个概念。</p>
+<p><strong>扇区</strong>：磁盘存储的最小单位，扇区一般大小为512Byte。</p>
+<p><strong>磁盘块</strong>：文件系统与磁盘交互的的最小单位（计算机系统读写磁盘的最小单位），一个磁盘块由连续几个（2^n）扇区组成，块一般大小一般为4KB。</p>
+<p><strong>磁盘读取数据</strong>：磁盘读取数据靠的是机械运动，每次读取数据花费的时间可以分为<strong>寻道时间、旋转延迟、传输时间</strong>三个部分，寻道时间指的是磁臂移动到指定磁道所需要的时间，主流磁盘一般在5ms以下；旋转延迟就是我们经常听说的磁盘转速，比如一个磁盘7200转，表示每分钟能转7200次，也就是说1秒钟能转120次，旋转延迟就是1/120/2 = 4.17ms；传输时间指的是从磁盘读出或将数据写入磁盘的时间，一般在零点几毫秒，相对于前两个时间可以忽略不计。那么访问一次磁盘的时间，即一次磁盘IO的时间约等于5+4.17 = 9ms左右，听起来还挺不错的，但要知道一台500 -MIPS的机器每秒可以执行5亿条指令，因为指令依靠的是电的性质，换句话说执行一次IO的时间可以执行40万条指令，数据库动辄十万百万乃至千万级数据，每次9毫秒的时间，显然是个灾难。</p>
+<blockquote>
+<p>实际上，操作系统读取硬盘的时候，不会一个个扇区的读取，这样效率太低，一般一次性连续读取8个扇区(4KB)来当做一块，这种由多个扇区组成的<strong>块</strong>，是文件存取的最小单位。</p>
+<p>一次IO，不光把当前磁盘地址的数据，而是把相邻的数据也读取到内存缓冲区中。这叫局部预读性。innodb存储引擎一页16k，即一次IO读16k导内存中。</p>
+</blockquote>
+<p><strong>为了减少io次数，我们迫切需要这样的数据结构和算法：</strong></p>
+<ol>
+<li>需要一种数据存储结构：当从磁盘中检索数据的时候能，够减少磁盘的io次数，最好能够降低到一个稳定的常量值</li>
+<li>需要一种检索算法：当从磁盘中读取磁盘块的数据之后，这些块中可能包含多条记录，这些记录被加载到内存中，那么需要一种算法能够快速从内存多条记录中快速检索出目标数据</li>
+</ol>
+<p>​    因此，B+树得以在innodb引擎中得以使用</p>
+<h3 id="B-树的扇出系数、高度、存储容量-、io次数"><a href="#B-树的扇出系数、高度、存储容量-、io次数" class="headerlink" title="B+树的扇出系数、高度、存储容量 、io次数"></a>B+树的扇出系数、高度、存储容量 、io次数</h3><ul>
+<li>h：统称索引的高度；</li>
+<li>h1：聚簇索引的高度；</li>
+<li>h2：二级辅助索引的高度；</li>
+<li>k：中间结点的扇出系数。</li>
+</ul>
+<p><strong>B+树的io次数</strong></p>
+<p>从索引结构可以看出，每次查询都要访问到叶子结点，其访问的页面数正好就是索引的高度h。例如，一次主键上的点查询SELECT * FROM USER WHERE id=1，那么要查询h1个页面才能找到叶子结点里的行数据，也即进行h1次页面I/O。（假设索引未加载到内存中）</p>
+<p>综上，查询对应的页面I/O数跟利用的索引有关，主要分为以下几种情况：</p>
+<ul>
+<li>点查询：<ul>
+<li>聚族索引：h1</li>
+</ul>
+</li>
+<li>二级索引：<ul>
+<li>覆盖索引：h2</li>
+<li>回表查询：h2+h1</li>
+</ul>
+</li>
+<li>范围查询：这种情况相对比较复杂，但跟点查询的原理类似，可以根据树的结构和页的存储形式进行分析；、</li>
+<li>全表查询：B+树的叶子结点是通过链表连接起来的，对于全表查询，需要从头到尾将所有的叶子结点访问一遍。 </li>
+</ul>
+<p><strong>索引扇出系数、高度、存储容量的计算</strong></p>
+<p>innodb 的每一个叶子节点， 和中间节点， 都是按照页的方式进行存储的(16k)</p>
+<p>我们假设中间结点的扇出系数为k、叶子结点的行记录数为n，则叶子结点数为k^(h-1)，总记录数为k^(h-1)*n。</p>
+<p>在InnoDB里，每个页面默认16KB，假设主键是4B的int类型。对于中间节点，每个主键值后有个页号4B，还有6B的其他数据(参考《MySQL技术内幕：InnoDB存储引擎》)，那么扇出系数k=16KB/(4B+4B+6B)≈1170。我们再假设每行记录大小为1KB，则每个叶子结点可以容纳的记录数n=16KB/1KB=16。</p>
+<p>在高度h=3时，叶子结点数=1170^2 ≈137W，总记录数=1170^2*16=2190W！！也就是说，InnoDB通过三次索引页面的I/O，即可索引2190W行记录。</p>
+<p>同理，在高度h=4时，总行数=1170^3*16≈256亿条！！！</p>
+<h3 id="mysql-binlog-里的内容和作用"><a href="#mysql-binlog-里的内容和作用" class="headerlink" title="mysql  binlog 里的内容和作用"></a>mysql  binlog 里的内容和作用</h3><p>概述：MySql二进制日志（binlog），也叫变更日志（update log），是Mysql中非常重要的日志。二进制日志中记录了对Mysql数据库执行变更的所有操作，并且记录了语句发生时间、执行时长、操作数据等其他额外信息，但是他不记录select、show等不改变数据的SQL语句。binlog主要用于数据库恢复和主从复制以及审计操作，如果Mysql数据库意外停止，可以使用binlog来查看用户执行了哪些操作，对于数据服务器文件做了哪些修改，然后根据binlog中的记录来恢复数据库服务器</p>
+<p>内容：记录了对Mysql数据库执行变更的所有操作，并且记录了语句发生时间、执行时长、操作数据等其他额外信息，但是他不记录select、show等不改变数据的SQL语句。</p>
+<p>作用:</p>
+<p>（1）基于时间的恢复：在备份文件恢复的基础上，通过binlog可以将数据库恢复到某一个时间点。</p>
+<p>（2）主从复制，在主从复制的模式下，必须在主服务器上开启binlog日志。</p>
+<p>（3）操作审计：对所有更改数据的操作进行审计。</p>
+<p>binlog 生成的时机是事物提交的时候</p>
+<h3 id="MySQL-里记录货币用什么字段类型好"><a href="#MySQL-里记录货币用什么字段类型好" class="headerlink" title="MySQL 里记录货币用什么字段类型好"></a>MySQL 里记录货币用什么字段类型好</h3><p>NUMERIC 和 DECIMAL 类型被 MySQL 实现为同样的类型，这在 SQL92 标准允许。他们被用于保存值，该值的准确精度是极其重要的值，例如与金钱有关的数据。当声明一个类是这些类型之一时，精度和规模的能被(并且通常是)指定。</p>
+<p>例如：</p>
+<p>salary DECIMAL(9,2)77在这个例子中，9(precision)代表将被用于存储值的总的小数位数，而2(scale)代表将被用于存储小数点后的位数。因此，在这种情况下，能被存储在 salary 列中的值的范围是从-9999999.99 到9999999.99。</p>
+<h3 id="什么是临时表，何时删除临时表？"><a href="#什么是临时表，何时删除临时表？" class="headerlink" title="什么是临时表，何时删除临时表？"></a>什么是临时表，何时删除临时表？</h3><blockquote>
+<p>EXPLAIN 查看执行计划结果的 Extra 列中，如果使用 Using Temporary 就表示会用到临时表。</p>
+</blockquote>
+<p>什么是临时表?MySQL 在执行 SQL 语句的过程中 通常会临时创建一些存储中间结果集的表，临时 <strong>表只对当前连接可见，在连接关闭时</strong>，临时表会被删除并释放所有表空间。</p>
+<p>临时表分为两种:一种是内存临时表，一种是磁盘临时表，什么区别呢?  内存临时表使用的是 MEMORY 存储引擎，而临时表采用的是 MylSAM 存储引擎。</p>
+<p>MySQL 会在下面这几种情况产生临时表。</p>
+<ul>
+<li>使用 UNION 查询:UNION 有两种，一种是 UNION，一种是 UNION ALL，它们都用于联合查询;区别是使用 UNION 会去掉两个表中的重复数据，相当于对结果集做了一下 去重(distinct)。使用 UNIONALL，则不会排重，返回所有的行。使用 UNION 查询会产生临时表。</li>
+<li>FROM 中的子查询;</li>
+<li>使用 TEMPTABLE 算法或者是 UNION 查询中的视图。TEMPTABLE 算法是一种创建临时表的算法，它是将结果放置到临时表中，意味这要 MySQL 要先创建好一个临时表，然后将结果放到临时表中去，然后再使用这个临时表进行相应的查询。</li>
+<li>ORDER BY 和 GROUPBY 的子句不一样时也会产生临时表。</li>
+<li>DISTINCT 查询并且加上 ORDER BY 时;</li>
+<li>SQL 中用到 SQL_SMALL_RESULT 选项时;如果查询结果比较小的时候，可以加上 SQL SMALL RESULT 来优化，产生临时表</li>
+</ul>
 
       
     </div>
@@ -1190,7 +1275,7 @@
                 
                   <a href="/archives/%20%7C%7C%20archive">
                 
-                    <span class="site-state-item-count">309</span>
+                    <span class="site-state-item-count">310</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -1367,7 +1452,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">82</span>
+                      
+                    
+                    <span class="site-state-item-count">83</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -1564,7 +1651,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">92</span>
+                      
+                    
+                    <span class="site-state-item-count">93</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -1614,7 +1703,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql架构介绍"><span class="nav-text">Mysql架构介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql架构设计"><span class="nav-text">mysql架构设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql数据存储目录结构"><span class="nav-text">mysql数据存储目录结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql数据存储方式"><span class="nav-text">mysql数据存储方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-页的物理存储结构"><span class="nav-text">mysql 页的物理存储结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql页、行结构"><span class="nav-text">Mysql页、行结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#页的组成"><span class="nav-text">页的组成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql页内数据维护方式"><span class="nav-text">mysql页内数据维护方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#溢出页-BLOB页"><span class="nav-text">溢出页(BLOB页)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mysql的行结构"><span class="nav-text">Mysql的行结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Innodb内存管理"><span class="nav-text">Innodb内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Innodb内存管理-1"><span class="nav-text">Innodb内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#脏页刷盘时机"><span class="nav-text">脏页刷盘时机</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#索引原理分析"><span class="nav-text">索引原理分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#聚簇索引"><span class="nav-text">聚簇索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二级索引"><span class="nav-text">二级索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#联合索引"><span class="nav-text">联合索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#索引使用优化"><span class="nav-text">索引使用优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在group-by-和-order-by-上使用联合索引"><span class="nav-text">在group by  和 order  by 上使用联合索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-允许null-的字段设置索引哪些需要注意"><span class="nav-text">mysql 允许null 的字段设置索引哪些需要注意</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#B-树"><span class="nav-text">B 树</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#B树特征"><span class="nav-text">B树特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#B-树特征"><span class="nav-text">B+ 树特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#B-树的优势："><span class="nav-text">B+树的优势：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql-事务"><span class="nav-text">mysql 事务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-事务基本概念"><span class="nav-text">mysql 事务基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事物的实现原理"><span class="nav-text">事物的实现原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undo-log-版本链"><span class="nav-text">undo log(版本链)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Read-View"><span class="nav-text">Read View</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redo-log"><span class="nav-text">redo log</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redo-log-、-binlog-区别"><span class="nav-text">redo log 、 binlog 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redolog、binlog-的2阶段提交"><span class="nav-text">redolog、binlog 的2阶段提交</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MVCC-多版本并发控制"><span class="nav-text">MVCC 多版本并发控制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事物的实现总结"><span class="nav-text">事物的实现总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql-锁"><span class="nav-text">mysql 锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql锁的种类"><span class="nav-text">mysql锁的种类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#各种锁介绍"><span class="nav-text">各种锁介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#临键锁加锁原则"><span class="nav-text">临键锁加锁原则</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#死锁解决策略"><span class="nav-text">死锁解决策略</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql-引擎"><span class="nav-text">Mysql 引擎</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#两种存储引擎区别"><span class="nav-text">两种存储引擎区别</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#InnoDB"><span class="nav-text">InnoDB:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MySIAM"><span class="nav-text">MySIAM:</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#引擎选择"><span class="nav-text">引擎选择</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql-主从同步过程"><span class="nav-text">Mysql 主从同步过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#在master机器上的操作"><span class="nav-text">在master机器上的操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在slave机器上的操作"><span class="nav-text">在slave机器上的操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#执行计划"><span class="nav-text">执行计划</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-exlain-各参数解释"><span class="nav-text">mysql  exlain 各参数解释</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他"><span class="nav-text">其他</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-datetime-和timestamp-的区别"><span class="nav-text">mysql datetime  和timestamp 的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一条SQL语句在MySQL中如何执行的？"><span class="nav-text">一条SQL语句在MySQL中如何执行的？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一张表，里面有ID自增主键，当insert了17条记录之后，删除了第15-16-17条记录，再把Mysql重启，再insert一条记录，这条记录的ID是18还是15-？"><span class="nav-text">一张表，里面有ID自增主键，当insert了17条记录之后，删除了第15,16,17条记录，再把Mysql重启，再insert一条记录，这条记录的ID是18还是15 ？</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql架构介绍"><span class="nav-text">Mysql架构介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql架构设计"><span class="nav-text">mysql架构设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql数据存储目录结构"><span class="nav-text">mysql数据存储目录结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql数据存储方式"><span class="nav-text">mysql数据存储方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-页的物理存储结构"><span class="nav-text">mysql 页的物理存储结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql页、行结构"><span class="nav-text">Mysql页、行结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#页的组成"><span class="nav-text">页的组成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql页内数据维护方式"><span class="nav-text">mysql页内数据维护方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#溢出页-BLOB页"><span class="nav-text">溢出页(BLOB页)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mysql的行结构"><span class="nav-text">Mysql的行结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Innodb内存管理"><span class="nav-text">Innodb内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Innodb内存管理-1"><span class="nav-text">Innodb内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#脏页刷盘时机"><span class="nav-text">脏页刷盘时机</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#索引原理分析"><span class="nav-text">索引原理分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#聚簇索引"><span class="nav-text">聚簇索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二级索引"><span class="nav-text">二级索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#联合索引"><span class="nav-text">联合索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#索引使用优化"><span class="nav-text">索引使用优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在group-by-和-order-by-上使用联合索引"><span class="nav-text">在group by  和 order  by 上使用联合索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-允许null-的字段设置索引哪些需要注意"><span class="nav-text">mysql 允许null 的字段设置索引哪些需要注意</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#B-树"><span class="nav-text">B 树</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#B树特征"><span class="nav-text">B树特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#B-树特征"><span class="nav-text">B+ 树特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#B-树的优势："><span class="nav-text">B+树的优势：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#索引失效场景"><span class="nav-text">索引失效场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql-事务"><span class="nav-text">mysql 事务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-事务基本概念"><span class="nav-text">mysql 事务基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事物的实现原理"><span class="nav-text">事物的实现原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undo-log-版本链"><span class="nav-text">undo log(版本链)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Read-View"><span class="nav-text">Read View</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redo-log"><span class="nav-text">redo log</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redo-log-、-binlog-区别"><span class="nav-text">redo log 、 binlog 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redolog、binlog-的2阶段提交"><span class="nav-text">redolog、binlog 的2阶段提交</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MVCC-多版本并发控制"><span class="nav-text">MVCC 多版本并发控制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事物的实现总结"><span class="nav-text">事物的实现总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql-锁"><span class="nav-text">mysql 锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql锁的种类"><span class="nav-text">mysql锁的种类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#各种锁介绍"><span class="nav-text">各种锁介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#临键锁加锁原则"><span class="nav-text">临键锁加锁原则</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#死锁解决策略"><span class="nav-text">死锁解决策略</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql-其他"><span class="nav-text">Mysql 其他</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Mysql-引擎"><span class="nav-text">Mysql 引擎</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#两种存储引擎区别"><span class="nav-text">两种存储引擎区别</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#InnoDB"><span class="nav-text">InnoDB:</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#MySIAM"><span class="nav-text">MySIAM:</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#引擎选择"><span class="nav-text">引擎选择</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mysql-主从同步过程"><span class="nav-text">Mysql 主从同步过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#在master机器上的操作"><span class="nav-text">在master机器上的操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在slave机器上的操作"><span class="nav-text">在slave机器上的操作</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#执行计划"><span class="nav-text">执行计划</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#mysql-exlain-各参数解释"><span class="nav-text">mysql  exlain 各参数解释</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-datetime-和timestamp-的区别"><span class="nav-text">mysql datetime  和timestamp 的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一条SQL语句在MySQL中如何执行的？"><span class="nav-text">一条SQL语句在MySQL中如何执行的？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一张表，里面有ID自增主键，当insert了17条记录之后，删除了第15-16-17条记录，再把Mysql重启，再insert一条记录，这条记录的ID是18还是15-？"><span class="nav-text">一张表，里面有ID自增主键，当insert了17条记录之后，删除了第15,16,17条记录，再把Mysql重启，再insert一条记录，这条记录的ID是18还是15 ？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-utf8-和-utf8mb4-区别"><span class="nav-text">mysql utf8 和 utf8mb4 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#磁盘中数据的存取"><span class="nav-text">磁盘中数据的存取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#B-树的扇出系数、高度、存储容量-、io次数"><span class="nav-text">B+树的扇出系数、高度、存储容量 、io次数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-binlog-里的内容和作用"><span class="nav-text">mysql  binlog 里的内容和作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MySQL-里记录货币用什么字段类型好"><span class="nav-text">MySQL 里记录货币用什么字段类型好</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是临时表，何时删除临时表？"><span class="nav-text">什么是临时表，何时删除临时表？</span></a></li></ol></li></ol></div>
             
 
           </div>

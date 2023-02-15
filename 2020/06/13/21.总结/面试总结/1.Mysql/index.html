@@ -156,7 +156,7 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220104144934140.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220104150525890.png">
 <meta property="article:published_time" content="2020-06-13T03:00:00.000Z">
-<meta property="article:modified_time" content="2023-02-13T14:07:59.384Z">
+<meta property="article:modified_time" content="2023-02-14T07:50:28.104Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="面试">
 <meta name="twitter:card" content="summary">
@@ -824,6 +824,7 @@
 <p>update undo log</p>
 <p>因为会对已经存在的记录产生影响，为了提供 MVCC机制，因此 update undo log 不能在事务提交时就进行删除，而是将事务提交时放到入 history list 上，等待 purge 线程进行最后的删除操作</p>
 <p>为了更好的支持并发，InnoDB的多版本一致性读是采用了基于回滚段的的方式。另外，对于更新和删除操作，InnoDB并不是真正的删除原来的记录，而是设置记录的delete mark为1。因此为了解决数据Page和Undo Log膨胀的问题，需要引入purge机制进行回收</p>
+<p>另外， 未来保证宕机后的事务准确性，只有undolog刷盘后脏数据才能刷盘</p>
 <h4 id="Read-View"><a href="#Read-View" class="headerlink" title="Read View"></a>Read View</h4><p>用来判断undolog里的版本数据是否对当前版本可见，其存储了当前活跃的事务id，把存储事物id的列表称为m_ids。</p>
 <p>其中RC级别是在每次sql语句的时候建立read view, RR 级别是在事物第一次读建立ReadView</p>
 <ul>

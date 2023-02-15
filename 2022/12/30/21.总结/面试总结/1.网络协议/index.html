@@ -120,7 +120,7 @@
 <meta property="og:description" content="基础网路  四层、七层模型四层:   网络接口层、网络层、传输层、应用层 七层：物理层、数据链路层、网络层、传输层、表示层、会话层、应用层 DNS域名解析过程域名 -&gt; 浏览器缓存 -&gt; 本机缓存 -&gt; hosts文件 -&gt; 缓存服务器 -&gt; 根域名服务器 -&gt;顶级域名服务器 -&gt; 权威域名服务器 TCPTCP UDP 区别 UDP  是面向无连接的通讯协">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-12-29T16:00:00.000Z">
-<meta property="article:modified_time" content="2023-02-13T14:19:27.822Z">
+<meta property="article:modified_time" content="2023-02-15T12:22:09.865Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="网络协议">
 <meta name="twitter:card" content="summary">
@@ -574,6 +574,26 @@
 </li>
 </ol>
 </li>
+</ol>
+<h3 id="CSRF-和-XSS的区别与解决"><a href="#CSRF-和-XSS的区别与解决" class="headerlink" title="CSRF 和 XSS的区别与解决"></a>CSRF 和 XSS的区别与解决</h3><p><strong>XSS：跨站脚本攻击</strong></p>
+<p><strong>提交内容中，包含不速之客(影响页面功能的js脚本)</strong></p>
+<p>其特点是不对服务器端造成任何伤害，而是通过一些正常的站内交互途径，例如发布评论，提交含有 JavaScript 的内容文本。这时服务器端如果没有过滤或转义掉这些脚本，作为内容发布到了页面上，其他用户访问这个页面的时候就会运行这些脚本。</p>
+<p><strong>怎么解决</strong></p>
+<ol>
+<li>输入：在输入方面对所有用户提交内容进行可靠的输入验证，提交内容包括URL、查询关键字、http头、post数据等</li>
+<li>输出：html 编码，js编码，在输出方面，在用户输内容中使用标签。标签内的内容不会解释，直接显示。</li>
+<li>严格执行字符输入字数控制。</li>
+<li>http only cookie， 防止脚本获取cookie;</li>
+</ol>
+<p>CSRF：跨站请求伪造</p>
+<p><strong>冒充用户之手，伪造危险请求</strong></p>
+<p>CSRF 的全称是“跨站请求伪造”，而 XSS 的全称是“跨站脚本”。看起来有点相似，它们都是属于跨站攻击——不攻击服务器端而攻击正常访问网站的用户，但前面说了，它们的攻击类型是不同维度上的分类。CSRF 顾名思义，是伪造请求，冒充用户在站内的正常操作。我们知道，绝大多数网站是通过 cookie 等方式辨识用户身份（包括使用服务器端 Session 的网站，因为 Session ID 也是大多保存在 cookie 里面的），再予以授权的。所以要伪造用户的正常操作，最好的方法是通过 XSS 或链接欺骗等途径，让用户在本机（即拥有身份 cookie 的浏览器端）发起用户所不知道的请求。</p>
+<p>严格意义上来说，CSRF 不能分类为注入攻击，因为 CSRF 的实现途径远远不止 XSS 注入这一条。通过 XSS 来实现 CSRF 易如反掌，但对于设计不佳的网站，一条正常的链接都能造成 CSRF。</p>
+<p><strong>怎么解决</strong></p>
+<ol>
+<li>referer校验</li>
+<li>增加隐藏 csrf_token令牌， 但是可以被破解</li>
+<li>重要场景增加验证码</li>
 </ol>
 
       
@@ -1155,7 +1175,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#基础"><span class="nav-text">基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#网路-四层、七层模型"><span class="nav-text">网路  四层、七层模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DNS域名解析过程"><span class="nav-text">DNS域名解析过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP"><span class="nav-text">TCP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-UDP-区别"><span class="nav-text">TCP UDP 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三次握手、四次挥手"><span class="nav-text">三次握手、四次挥手</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是粘包和拆包？为什么会出现？"><span class="nav-text">什么是粘包和拆包？为什么会出现？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-的控制位"><span class="nav-text">TCP 的控制位</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tcp-连接问什么是三次握手"><span class="nav-text">tcp 连接问什么是三次握手</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP"><span class="nav-text">HTTP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#浏览器输入url-发生了什么过程"><span class="nav-text">浏览器输入url 发生了什么过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#https-请求过程"><span class="nav-text">https 请求过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#http-1-1-和http2-0区别"><span class="nav-text">http 1.1 和http2.0区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-Keep-Alive-与-HTTP-Keep-Alive-比较"><span class="nav-text">TCP Keep Alive 与 HTTP Keep-Alive 比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#http-与http2-0区别"><span class="nav-text">http 与http2.0区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rpc-性能比http-好的原因"><span class="nav-text">rpc 性能比http 好的原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#跨域的常见解决办法"><span class="nav-text">跨域的常见解决办法</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#基础"><span class="nav-text">基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#网路-四层、七层模型"><span class="nav-text">网路  四层、七层模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DNS域名解析过程"><span class="nav-text">DNS域名解析过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP"><span class="nav-text">TCP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-UDP-区别"><span class="nav-text">TCP UDP 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三次握手、四次挥手"><span class="nav-text">三次握手、四次挥手</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是粘包和拆包？为什么会出现？"><span class="nav-text">什么是粘包和拆包？为什么会出现？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-的控制位"><span class="nav-text">TCP 的控制位</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tcp-连接问什么是三次握手"><span class="nav-text">tcp 连接问什么是三次握手</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP"><span class="nav-text">HTTP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#浏览器输入url-发生了什么过程"><span class="nav-text">浏览器输入url 发生了什么过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#https-请求过程"><span class="nav-text">https 请求过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#http-1-1-和http2-0区别"><span class="nav-text">http 1.1 和http2.0区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-Keep-Alive-与-HTTP-Keep-Alive-比较"><span class="nav-text">TCP Keep Alive 与 HTTP Keep-Alive 比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#http-与http2-0区别"><span class="nav-text">http 与http2.0区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rpc-性能比http-好的原因"><span class="nav-text">rpc 性能比http 好的原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#跨域的常见解决办法"><span class="nav-text">跨域的常见解决办法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CSRF-和-XSS的区别与解决"><span class="nav-text">CSRF 和 XSS的区别与解决</span></a></li></ol></li></ol></div>
             
 
           </div>

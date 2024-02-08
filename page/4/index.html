@@ -345,7 +345,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/09/19/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Kafka/Kafka%20%E4%BA%8B%E7%89%A9%E5%AE%9E%E7%8E%B0/">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2022/07/19/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Tidb/tidb%E6%9E%B6%E6%9E%84%E4%BB%8B%E7%BB%8D/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="刘小恺(Kyle)">
@@ -364,8 +364,8 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/09/19/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Kafka/Kafka%20%E4%BA%8B%E7%89%A9%E5%AE%9E%E7%8E%B0/" itemprop="url">
-                  Kafka 事物实现
+                <a class="post-title-link" href="/2022/07/19/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Tidb/tidb%E6%9E%B6%E6%9E%84%E4%BB%8B%E7%BB%8D/" itemprop="url">
+                  tidb存储架构介绍
                 </a>
               
             
@@ -391,7 +391,7 @@
                 
               
 
-              <time title="创建时间：2020-09-19 11:00:00" itemprop="dateCreated datePublished" datetime="2020-09-19T11:00:00+08:00">2020-09-19</time>
+              <time title="创建时间：2022-07-19 00:00:00" itemprop="dateCreated datePublished" datetime="2022-07-19T00:00:00+08:00">2022-07-19</time>
             
 
             
@@ -409,14 +409,14 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/" itemprop="url" rel="index"><span itemprop="name">数据存储</span></a></span>
 
                 
                 
                   ，
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/Kafka/" itemprop="url" rel="index"><span itemprop="name">Kafka</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Tidb/" itemprop="url" rel="index"><span itemprop="name">Tidb</span></a></span>
 
                 
                 
@@ -431,8 +431,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/09/19/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Kafka/Kafka%20%E4%BA%8B%E7%89%A9%E5%AE%9E%E7%8E%B0/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/09/19/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Kafka/Kafka%20%E4%BA%8B%E7%89%A9%E5%AE%9E%E7%8E%B0/" itemprop="commentCount"></span>
+                <a href="/2022/07/19/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Tidb/tidb%E6%9E%B6%E6%9E%84%E4%BB%8B%E7%BB%8D/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2022/07/19/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Tidb/tidb%E6%9E%B6%E6%9E%84%E4%BB%8B%E7%BB%8D/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -462,11 +462,16 @@
       
         
           
-          Kafka 事物(Transactions)简介 幂等性实现是事务性实现的基础，幂等性提供了单会话单 Partition Exactly-Once 语义的实现，正是因为 Idempotent Producer 不提供跨多个 Partition 和跨会话场景下的保证，因此，我们是需要一种更强的事务保证，能够原子处理多个 Partition 的写入操作，数据要么全部写入成功，要么全部失败，不期望出现中间状态。这就是 Kafka Transactions 希望解决的问题，简单来说就是能够实现 atomic writes across partitions，本文以 Apache Kafka 2.0.0 代码实现为例，深入分析一下 Kafka
+          Tidb 组件介绍TiDB 架构图
+TiDB ServerTiDB Server 负责接收 SQL 请求，处理 SQL 相关的逻辑，并通过 PD 找到存储计算所需数据的 TiKV 地址， 与 TiKV 交互
+获取数据，最终返回结果。 TiDB Server 是无状态的，其本身并不存储数据，只负责计算，可以无限水平扩展， 可以通过
+负载均衡组件（如LVS、HAProxy 或 F5）对外提供统一的接入地址。
+PD ServerPlacement Driver (简称 PD) 是整个集群的管理模块，其主要工作有三个： 一是存储集群的元信息（某个 Key 存储在哪个 
+TiKV 节点）； 二是对 TiKV 集群进行调度和负载均衡（如数据的迁
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2020/09/19/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Kafka/Kafka%20%E4%BA%8B%E7%89%A9%E5%AE%9E%E7%8E%B0/" rel="contents">
+            <a class="btn" href="/2022/07/19/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Tidb/tidb%E6%9E%B6%E6%9E%84%E4%BB%8B%E7%BB%8D/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -522,7 +527,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/09/18/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Kafka/Kafka%20%E5%B9%82%E7%AD%89%E6%80%A7%E5%AE%9E%E7%8E%B0/">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2022/07/19/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Tidb/tidb%E7%B4%A2%E5%BC%95%E7%BB%93%E6%9E%84/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="刘小恺(Kyle)">
@@ -541,8 +546,8 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/09/18/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Kafka/Kafka%20%E5%B9%82%E7%AD%89%E6%80%A7%E5%AE%9E%E7%8E%B0/" itemprop="url">
-                  Kafka 幂等性实现
+                <a class="post-title-link" href="/2022/07/19/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Tidb/tidb%E7%B4%A2%E5%BC%95%E7%BB%93%E6%9E%84/" itemprop="url">
+                  tidb索引结构
                 </a>
               
             
@@ -568,7 +573,7 @@
                 
               
 
-              <time title="创建时间：2020-09-18 11:00:00" itemprop="dateCreated datePublished" datetime="2020-09-18T11:00:00+08:00">2020-09-18</time>
+              <time title="创建时间：2022-07-19 00:00:00" itemprop="dateCreated datePublished" datetime="2022-07-19T00:00:00+08:00">2022-07-19</time>
             
 
             
@@ -586,14 +591,14 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/" itemprop="url" rel="index"><span itemprop="name">数据存储</span></a></span>
 
                 
                 
                   ，
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/Kafka/" itemprop="url" rel="index"><span itemprop="name">Kafka</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Tidb/" itemprop="url" rel="index"><span itemprop="name">Tidb</span></a></span>
 
                 
                 
@@ -608,8 +613,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/09/18/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Kafka/Kafka%20%E5%B9%82%E7%AD%89%E6%80%A7%E5%AE%9E%E7%8E%B0/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/09/18/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Kafka/Kafka%20%E5%B9%82%E7%AD%89%E6%80%A7%E5%AE%9E%E7%8E%B0/" itemprop="commentCount"></span>
+                <a href="/2022/07/19/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Tidb/tidb%E7%B4%A2%E5%BC%95%E7%BB%93%E6%9E%84/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2022/07/19/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Tidb/tidb%E7%B4%A2%E5%BC%95%E7%BB%93%E6%9E%84/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -639,21 +644,18 @@
       
         
           
-          Producer 的事物和幂等性简介简述Apache Kafka 从 0.11.0开始， 支持了事物特性
-其对应着三种层面的含义:
+          mysql ACID机制ACID 相信小伙伴都被面试官问过，我想简单讨论的一点是：如何 持久化数据 才能保证数据写入的 事务性 和 读写性能？
+事务性可简单理解为：
 
-幂等性的支持
-事务性的支持
-Kafka Streams 的 exactly once 的实现
+数据必须持久化。
+一次数据的写入返回给用户 写入成功就一定成功，失败就一定失败。 读写性能可简单理解为：一次读 或 一次写 需要的IO次数，因为访问速率：CPU&gt;&gt;内存&gt;&gt;SSD/磁盘。
 
-Producer 的幂等性Producer 的幂等性指的是当发送同一条消息时，数据在 Server 端只会被持久化一次，数据不丟不重，但是这里的幂等性是有条件的：
-
-只能保证 Producer 在单个会话内不丟不重，如果 Producer 出现意外挂掉再重启是无法保证的（幂等性情况下，是无法获取之前的状态信息，因此是无法做到跨会话级别的不丢不重）;
-幂等性不能跨多个 Topic-Partition，只能保证
+对于单机存储，最简单的方式当然是：写一条就持久化一条，读一条就遍历一遍所有数据，然后返回。当然没人这么干，在内存中我们都还知道用个HashMap呢。
+拿Mysql InnoDB举例子：读性能体现在数据的索引在磁盘上主要用B+树来保证。写性能体现在运用 WAL
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2020/09/18/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Kafka/Kafka%20%E5%B9%82%E7%AD%89%E6%80%A7%E5%AE%9E%E7%8E%B0/" rel="contents">
+            <a class="btn" href="/2022/07/19/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Tidb/tidb%E7%B4%A2%E5%BC%95%E7%BB%93%E6%9E%84/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -709,7 +711,7 @@ Producer 的幂等性Producer 的幂等性指的是当发送同一条消息时�
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Kafka/">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2022/06/06/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Redis/redis%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="刘小恺(Kyle)">
@@ -728,8 +730,8 @@ Producer 的幂等性Producer 的幂等性指的是当发送同一条消息时�
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Kafka/" itemprop="url">
-                  Kafka 面试题整理
+                <a class="post-title-link" href="/2022/06/06/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Redis/redis%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86/" itemprop="url">
+                  Redis 架构原理
                 </a>
               
             
@@ -755,7 +757,380 @@ Producer 的幂等性Producer 的幂等性指的是当发送同一条消息时�
                 
               
 
-              <time title="创建时间：2020-06-13 11:00:00" itemprop="dateCreated datePublished" datetime="2020-06-13T11:00:00+08:00">2020-06-13</time>
+              <time title="创建时间：2022-06-06 00:00:00" itemprop="dateCreated datePublished" datetime="2022-06-06T00:00:00+08:00">2022-06-06</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/" itemprop="url" rel="index"><span itemprop="name">数据存储</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Redis/" itemprop="url" rel="index"><span itemprop="name">Redis</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/06/06/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Redis/redis%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2022/06/06/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Redis/redis%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          Redis 的三种工作模式介绍1. 主从模式
+主数据库可以执行读写功能，而从数据库只能执行读功能。
+主数据库数据发生变化，会自动同步到从数据库。
+主数据库为 master，从数据库为 slave，一个master可以有多个slave，一个slave只能有一个master
+slave挂了，重新启动会从master同步数据， master挂了，服务器只能进行读功能，不能执行写功能，直到master重新启动同步数据后，才能提供写服务。
+
+2. 哨兵模式
+可以解决主从模式的弊端：master挂掉之后不能提供写功能。
+哨兵模式是建立在主从模式的
+当master挂掉之后，会自动从slave中选一个作为master。
+若master重新启动，ma
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2022/06/06/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Redis/redis%E6%9E%B6%E6%9E%84%E5%8E%9F%E7%90%86/" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2022/02/23/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/Elasticsearch%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8%E5%8E%9F%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/02/23/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/Elasticsearch%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8%E5%8E%9F%E7%90%86/" itemprop="url">
+                  Elasticsearch分布式存储原理
+                </a>
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2022-02-23 00:00:00" itemprop="dateCreated datePublished" datetime="2022-02-23T00:00:00+08:00">2022-02-23</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/" itemprop="url" rel="index"><span itemprop="name">数据存储</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/" itemprop="url" rel="index"><span itemprop="name">Elasticsearch</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/02/23/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/Elasticsearch%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8%E5%8E%9F%E7%90%86/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2022/02/23/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/Elasticsearch%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8%E5%8E%9F%E7%90%86/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          Es分布式原理ES分布式集群特点
+一个集群拥有相同的cluster.name 配置的节点组成， 它们共同承担数据和负载的压力。
+主节点负责管理集群的变更例如增加、删除索引，或者增加、删除节点等。 而主节点并不需要涉及到文档级别的变更和搜索等操作。
+屏蔽了分布式系统的复杂性
+集群内的扩容能力
+垂直扩容和水平扩容
+真正的扩容能力是来自于水平扩容–为集群添加更多的节点，并且将负载压力和稳定性分散到这些节点中
+
+
+Coordinating Node 节点：协调节点主要负责协调客户端的请求，将接收到的请求分发给合适的节点，并把结果汇集到一起。比如客户端请求查询某个索引的数据，协调节点将会把请求分发给保存相关的数据的 DataNode 节点，找
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2022/02/23/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/Elasticsearch%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8%E5%8E%9F%E7%90%86/" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2022/02/23/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.es/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/02/23/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.es/" itemprop="url">
+                  es
+                </a>
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2022-02-23 00:00:00" itemprop="dateCreated datePublished" datetime="2022-02-23T00:00:00+08:00">2022-02-23</time>
             
 
             
@@ -795,8 +1170,8 @@ Producer 的幂等性Producer 的幂等性指的是当发送同一条消息时�
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Kafka/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Kafka/" itemprop="commentCount"></span>
+                <a href="/2022/02/23/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.es/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2022/02/23/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.es/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -826,15 +1201,20 @@ Producer 的幂等性Producer 的幂等性指的是当发送同一条消息时�
       
         
           
-          Kafka架构Kafka 整体结构介绍
-Producer ：消息生产者，就是向kafka broker发消息的客户端。
-Consumer ：消息消费者，向kafka broker取消息的客户端
-Topic ：可以理解为一个队列。
-Consumer Group （CG）：这是kafka用来实现一个topic消息的广播（发给所有的consumer）和单播（发给任意一个consumer）的手段。一个topic可以有多个CG。topic的消息会复制（不是真的复制，是概念上的）到所有的CG，但每个partion只会把消息发给该CG中的一个consumer。如果需要实现广播，只要每个consumer有一个独立的CG就可以了。要实现单播只要所有的
+          Es分布式原理ES分布式集群特点
+一个集群拥有相同的cluster.name 配置的节点组成， 它们共同承担数据和负载的压力。
+主节点负责管理集群的变更例如增加、删除索引，或者增加、删除节点、shard副本的选举和迁移等。 而主节点并不需要涉及到文档级别的变更和搜索等操作。
+屏蔽了分布式系统的复杂性
+集群内的扩容能力
+垂直扩容和水平扩容
+真正的扩容能力是来自于水平扩容–为集群添加更多的节点，并且将负载压力和稳定性分散到这些节点中
+
+
+Coordinating Node 节点：协调节点主要负责协调客户端的请求，将接收到的请求分发给合适的节点，并把结果汇集到一起。比如客户端请求查询某个索引的数据，协调节点将会把请求分发给保存相关的数据的
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Kafka/" rel="contents">
+            <a class="btn" href="/2022/02/23/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.es/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -890,7 +1270,7 @@ Consumer Group （CG）：这是kafka用来实现一个topic消息的广播（�
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Golang/">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2022/01/04/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Mysql/Mysql%E6%95%B4%E7%90%86/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="刘小恺(Kyle)">
@@ -909,8 +1289,8 @@ Consumer Group （CG）：这是kafka用来实现一个topic消息的广播（�
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Golang/" itemprop="url">
-                  Golang 面试题整理
+                <a class="post-title-link" href="/2022/01/04/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Mysql/Mysql%E6%95%B4%E7%90%86/" itemprop="url">
+                  Mysql整理
                 </a>
               
             
@@ -936,7 +1316,7 @@ Consumer Group （CG）：这是kafka用来实现一个topic消息的广播（�
                 
               
 
-              <time title="创建时间：2020-06-13 11:00:00" itemprop="dateCreated datePublished" datetime="2020-06-13T11:00:00+08:00">2020-06-13</time>
+              <time title="创建时间：2022-01-04 00:00:00" itemprop="dateCreated datePublished" datetime="2022-01-04T00:00:00+08:00">2022-01-04</time>
             
 
             
@@ -954,14 +1334,14 @@ Consumer Group （CG）：这是kafka用来实现一个topic消息的广播（�
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">总结</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/" itemprop="url" rel="index"><span itemprop="name">数据存储</span></a></span>
 
                 
                 
                   ，
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">面试总结</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Mysql/" itemprop="url" rel="index"><span itemprop="name">Mysql</span></a></span>
 
                 
                 
@@ -976,201 +1356,8 @@ Consumer Group （CG）：这是kafka用来实现一个topic消息的广播（�
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Golang/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Golang/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          Golang 基础golang中常量是怎么实现的从汇编中看是对字符串常量加了一个标号，同时设置为SRODATA，也就是只读，对数字常量直接在代码中作为立即数使用了
-协程，线程，进程的区别。
-进程
-
-进程是程序一次动态执行的过程，是资源分配和调度的基本单位。
-
-每个进程都有自己的独立内存空间，不同进程通过进程间通信来通信。
-
-进程占据独立的内存，所以上下文进程间的切换开销（栈、寄存器、页表、文件句柄等）比较大，但相对比较稳定安全。协程切换和协程切换
-
-
-
-线程
-
-线程又叫做轻量级进程，是CPU调度的最小单位。
-线程从属于进程，是程序的实际执行者。一个进程至少包含一个主线程，也可以有更多的子线程。
-多个线程共享所属进程的资源，同时线程也
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Golang/" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Mysql/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="刘小恺(Kyle)">
-      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Mysql/" itemprop="url">
-                  Mysql 面试题整理
-                </a>
-              
-            
-          </h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2020-06-13 11:00:00" itemprop="dateCreated datePublished" datetime="2020-06-13T11:00:00+08:00">2020-06-13</time>
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">总结</span></a></span>
-
-                
-                
-                  ，
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">面试总结</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Mysql/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Mysql/" itemprop="commentCount"></span>
+                <a href="/2022/01/04/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Mysql/Mysql%E6%95%B4%E7%90%86/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2022/01/04/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Mysql/Mysql%E6%95%B4%E7%90%86/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1225,7 +1412,7 @@ Mysql页、行结构页的组成
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Mysql/" rel="contents">
+            <a class="btn" href="/2022/01/04/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Mysql/Mysql%E6%95%B4%E7%90%86/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1281,7 +1468,7 @@ Mysql页、行结构页的组成
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Redis/">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2021/12/21/17.%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F%E6%9C%8D%E5%8A%A1%E7%9B%B8%E5%85%B3%E7%AE%97%E6%B3%95/%E9%99%90%E6%B5%81%E7%AD%96%E7%95%A5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="刘小恺(Kyle)">
@@ -1300,8 +1487,8 @@ Mysql页、行结构页的组成
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Redis/" itemprop="url">
-                  Redis 面试题整理
+                <a class="post-title-link" href="/2021/12/21/17.%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F%E6%9C%8D%E5%8A%A1%E7%9B%B8%E5%85%B3%E7%AE%97%E6%B3%95/%E9%99%90%E6%B5%81%E7%AD%96%E7%95%A5/" itemprop="url">
+                  限流策略
                 </a>
               
             
@@ -1327,7 +1514,7 @@ Mysql页、行结构页的组成
                 
               
 
-              <time title="创建时间：2020-06-13 11:00:00" itemprop="dateCreated datePublished" datetime="2020-06-13T11:00:00+08:00">2020-06-13</time>
+              <time title="创建时间：2021-12-21 00:00:00" itemprop="dateCreated datePublished" datetime="2021-12-21T00:00:00+08:00">2021-12-21</time>
             
 
             
@@ -1345,14 +1532,14 @@ Mysql页、行结构页的组成
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">总结</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">分布式系统</span></a></span>
 
                 
                 
                   ，
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">面试总结</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F%E6%9C%8D%E5%8A%A1%E7%9B%B8%E5%85%B3%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">分布式服务相关算法</span></a></span>
 
                 
                 
@@ -1367,8 +1554,8 @@ Mysql页、行结构页的组成
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Redis/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Redis/" itemprop="commentCount"></span>
+                <a href="/2021/12/21/17.%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F%E6%9C%8D%E5%8A%A1%E7%9B%B8%E5%85%B3%E7%AE%97%E6%B3%95/%E9%99%90%E6%B5%81%E7%AD%96%E7%95%A5/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2021/12/21/17.%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F%E6%9C%8D%E5%8A%A1%E7%9B%B8%E5%85%B3%E7%AE%97%E6%B3%95/%E9%99%90%E6%B5%81%E7%AD%96%E7%95%A5/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1398,22 +1585,16 @@ Mysql页、行结构页的组成
       
         
           
-          Redis基础单线程的redis为什么这么快
-纯内存操作
-单线程操作，避免了频繁的上下文切换
-采用了非阻塞I/O多路复用机制
+          限流算法的整理在资源有限的情况下，遇到突发流量（如双十一）或系统 RT 剧增，为了保证系统不被拖垮引起更大规模的雪崩，必须进行限流。也就是说限流是系统的自我保护。限流本质上是根据系统处理能力，限制单位时间内处理的请求数量。
+滑动窗口这里的窗口是一个时间窗口，比如把一分钟划分为 6 个窗口，则每个窗口的时间范围是 10 秒。通过移动窗口，统计窗口期内流量，可以实现窗口期的限流。但是滑动窗口存在精度问题，在精度范围内统计到的窗口期流量可能在限流范围内，但进一步细分就会看到仍有突增流量。
+滑动窗口时间范围越小，就越平滑，限流的效果越精确，但时间细分的粒度受到客观限制。
 
-Redis 优点
-速度快，因为数据存在内存中，类似于HashMap，HashMap的优势就是查找和操作的时间复杂度都是O(1)
-支持丰富数据类型，支持string，list，set，sorted set，hash
-支持事务，操作都是原子性，所谓的原子性就是对数据的更改要么全部执行，要么全部不执行
-丰富的特性：可用于缓存，消息，按key设置过期时间，过期后将会自动删除
 
-Redis 为什么是单线程的官方FAQ表示，因为Redis是基于内存的操作，CPU不是Redis的瓶颈，Redis的瓶颈最有可能是机器内存的
+漏桶算法漏桶算法，英文名 Leaky Bucket，是网络中流量整
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.Redis/" rel="contents">
+            <a class="btn" href="/2021/12/21/17.%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F%E6%9C%8D%E5%8A%A1%E7%9B%B8%E5%85%B3%E7%AE%97%E6%B3%95/%E9%99%90%E6%B5%81%E7%AD%96%E7%95%A5/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1469,7 +1650,7 @@ Redis 为什么是单线程的官方FAQ表示，因为Redis是基于内存的操
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/2.Flink/">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2021/12/21/17.%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F%E6%9C%8D%E5%8A%A1%E7%9B%B8%E5%85%B3%E7%AE%97%E6%B3%95/%E7%86%94%E6%96%AD%E7%AD%96%E7%95%A5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="刘小恺(Kyle)">
@@ -1488,8 +1669,8 @@ Redis 为什么是单线程的官方FAQ表示，因为Redis是基于内存的操
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/2.Flink/" itemprop="url">
-                  Flink面试题整理
+                <a class="post-title-link" href="/2021/12/21/17.%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F%E6%9C%8D%E5%8A%A1%E7%9B%B8%E5%85%B3%E7%AE%97%E6%B3%95/%E7%86%94%E6%96%AD%E7%AD%96%E7%95%A5/" itemprop="url">
+                  熔断策略
                 </a>
               
             
@@ -1515,7 +1696,7 @@ Redis 为什么是单线程的官方FAQ表示，因为Redis是基于内存的操
                 
               
 
-              <time title="创建时间：2020-06-13 11:00:00" itemprop="dateCreated datePublished" datetime="2020-06-13T11:00:00+08:00">2020-06-13</time>
+              <time title="创建时间：2021-12-21 00:00:00" itemprop="dateCreated datePublished" datetime="2021-12-21T00:00:00+08:00">2021-12-21</time>
             
 
             
@@ -1533,14 +1714,14 @@ Redis 为什么是单线程的官方FAQ表示，因为Redis是基于内存的操
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">总结</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">分布式系统</span></a></span>
 
                 
                 
                   ，
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">面试总结</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F%E6%9C%8D%E5%8A%A1%E7%9B%B8%E5%85%B3%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">分布式服务相关算法</span></a></span>
 
                 
                 
@@ -1555,8 +1736,8 @@ Redis 为什么是单线程的官方FAQ表示，因为Redis是基于内存的操
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/2.Flink/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/2.Flink/" itemprop="commentCount"></span>
+                <a href="/2021/12/21/17.%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F%E6%9C%8D%E5%8A%A1%E7%9B%B8%E5%85%B3%E7%AE%97%E6%B3%95/%E7%86%94%E6%96%AD%E7%AD%96%E7%95%A5/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2021/12/21/17.%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F%E6%9C%8D%E5%8A%A1%E7%9B%B8%E5%85%B3%E7%AE%97%E6%B3%95/%E7%86%94%E6%96%AD%E7%AD%96%E7%95%A5/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1586,16 +1767,15 @@ Redis 为什么是单线程的官方FAQ表示，因为Redis是基于内存的操
       
         
           
-          Flink架构Flink 分层SQL &amp; Table API
-SQL &amp; Table API 同时适用于批处理和流处理，这意味着你可以对有界数据流和无界数据流以相同的语义进行查询，并产生相同的结果。除了基本查询外， 它还支持自定义的标量函数，聚合函数以及表值函数，可以满足多样化的查询需求。 
-DataStream &amp; DataSet API
-DataStream &amp;  DataSet API 是 Flink 数据处理的核心 API，支持使用 Java 语言或 Scala 语言进行调用，提供了数据读取，数据转换和数据输出等一系列常用操作的封装。
-Stateful Stream Processing
-St
+          熔断模式的介绍熔断模式该模式借鉴了电路熔断的理念，如果一条线路电压过高，保险丝会熔断，防止火灾。
+如果某个目标服务调用慢或者有大量超时，此时，熔断该服务的调用，对于后续调用请求，不在继续调用目标服务，直接返回，快速释放资源。如果目标服务情况好转则恢复调用。
+还是之前的银行柜员的例子，假定处理每个业务的时间是5分钟，当某个柜员的处理速度降低了，超过了5分钟，或者干脆去吃午饭等等原因根本不在座位上，此时熔断机制将不会允许再有客户到其窗口前排队（如果有排队的也无法正常办理业务，只能造成阻塞的发生）。
+下面来看看Hystrix是如何熔断的。
+熔断器:Circuit Breaker熔断器是位于线程池之前的组件。用户请求某一服务之后，Hystr
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/2.Flink/" rel="contents">
+            <a class="btn" href="/2021/12/21/17.%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/%E5%88%86%E5%B8%83%E5%BC%8F%E6%9C%8D%E5%8A%A1%E7%9B%B8%E5%85%B3%E7%AE%97%E6%B3%95/%E7%86%94%E6%96%AD%E7%AD%96%E7%95%A5/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1651,7 +1831,7 @@ St
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/2.HDFS/">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2021/12/10/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/Lucene%E7%B4%A2%E5%BC%95%E5%8E%9F%E7%90%86/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="刘小恺(Kyle)">
@@ -1670,8 +1850,8 @@ St
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/2.HDFS/" itemprop="url">
-                  HDFS 面试题整理
+                <a class="post-title-link" href="/2021/12/10/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/Lucene%E7%B4%A2%E5%BC%95%E5%8E%9F%E7%90%86/" itemprop="url">
+                  Lucene索引原理
                 </a>
               
             
@@ -1697,7 +1877,7 @@ St
                 
               
 
-              <time title="创建时间：2020-06-13 11:00:00" itemprop="dateCreated datePublished" datetime="2020-06-13T11:00:00+08:00">2020-06-13</time>
+              <time title="创建时间：2021-12-10 00:00:00" itemprop="dateCreated datePublished" datetime="2021-12-10T00:00:00+08:00">2021-12-10</time>
             
 
             
@@ -1715,14 +1895,14 @@ St
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">总结</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/" itemprop="url" rel="index"><span itemprop="name">数据存储</span></a></span>
 
                 
                 
                   ，
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">面试总结</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/" itemprop="url" rel="index"><span itemprop="name">Elasticsearch</span></a></span>
 
                 
                 
@@ -1737,8 +1917,8 @@ St
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/2.HDFS/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/2.HDFS/" itemprop="commentCount"></span>
+                <a href="/2021/12/10/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/Lucene%E7%B4%A2%E5%BC%95%E5%8E%9F%E7%90%86/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2021/12/10/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/Lucene%E7%B4%A2%E5%BC%95%E5%8E%9F%E7%90%86/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1768,22 +1948,16 @@ St
       
         
           
-          HDFS原理HDFS 工作机制介绍
-HDFS集群分为两大角色：NameNode、DataNode  (Secondary Namenode)
-NameNode负责管理整个文件系统的元数据
-DataNode 负责管理用户的文件数据块
-文件会按照固定的大小（blocksize）切成若干块后分布式存储在若干台datanode上
-每一个文件块可以有多个副本，并存放在不同的datanode上
-Datanode会定期向Namenode汇报自身所保存的文件block信息，而namenode则会负责保持文件的副本数量
-HDFS的内部工作机制对客户端保持透明，客户端请求访问HDFS都是通过向namenode申请来进行
-
-HDFS 写数据流程
-
-客户端
+          简单介绍下LuceneEs 与 Lucene说道es，我们首先就会想到什么？ 分词?  倒排索引?  搜索？
+大部分情况下我们都知道，项目中如果需要分词+倒排索引的场景就使用es就好了，那么倒排索引到底是什么？他有什么作用？它的原理？为什么选择倒排索引？它与传统数据库的区别？
+接下来为了更加深入的了解es的索引，简单分析下它的索引引擎-lucene。
+为什么使用倒排索引倒排索引、倒排索引，既然是索引。首先，其首要目的肯定是为了加快查询速度。
+对于每种数据库类产品都有自己要解决的问题，对应的就有自己的数据存储结构，而不同的使用场景和数据存储结构，需要用不同的索引，才能起到最大化加快查询的目的。
+对 Mysql 来说，是 B+ 树，对 
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/2.HDFS/" rel="contents">
+            <a class="btn" href="/2021/12/10/10.%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8/Elasticsearch/Lucene%E7%B4%A2%E5%BC%95%E5%8E%9F%E7%90%86/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1839,7 +2013,7 @@ HDFS 写数据流程
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/2.Hive/">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2021/12/06/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Olap/Clickhouse/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="刘小恺(Kyle)">
@@ -1858,8 +2032,8 @@ HDFS 写数据流程
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/2.Hive/" itemprop="url">
-                  Hive 面试题整理
+                <a class="post-title-link" href="/2021/12/06/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Olap/Clickhouse/" itemprop="url">
+                  Clickhouse
                 </a>
               
             
@@ -1885,7 +2059,7 @@ HDFS 写数据流程
                 
               
 
-              <time title="创建时间：2020-06-13 11:00:00" itemprop="dateCreated datePublished" datetime="2020-06-13T11:00:00+08:00">2020-06-13</time>
+              <time title="创建时间：2021-12-06 00:00:00" itemprop="dateCreated datePublished" datetime="2021-12-06T00:00:00+08:00">2021-12-06</time>
             
 
             
@@ -1903,14 +2077,14 @@ HDFS 写数据流程
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">总结</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
 
                 
                 
                   ，
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">面试总结</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/Olap/" itemprop="url" rel="index"><span itemprop="name">Olap</span></a></span>
 
                 
                 
@@ -1925,8 +2099,8 @@ HDFS 写数据流程
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/2.Hive/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/2.Hive/" itemprop="commentCount"></span>
+                <a href="/2021/12/06/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Olap/Clickhouse/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2021/12/06/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Olap/Clickhouse/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1956,208 +2130,23 @@ HDFS 写数据流程
       
         
           
-          Hive架构Hive 的数据模型
-db：在hdfs中表现为${hive.metastore.warehouse.dir}目录下一个文件夹
+          一、简单介绍ClickhouseClickHouse是一个面向联机分析处理(OLAP)的开源的面向列式存储的数据库管理系统，简称CK, 与Hadoop, Spark相比，ClickHouse很轻量级,由俄罗斯第一大搜索引擎Yandex于2016年6月发布, 开发语言为C++
+有以下特点:
 
-table：在hdfs中表现所属db目录下一个文件夹
+开源: 开源的列存储数据库管理系统，支持线性扩展，简单方便，高可靠性，
+速度快：比Vertica快5倍，比Hive快279倍，比MySQL快800倍,其可处理的数据级别已达到10亿级别
+功能多：支持数据统计分析各种场景，支持类SQL查询，异地复制部署
 
-external table：外部表, 与table类似，不过其数据存放位置可以在任意指定路径
-
-普通表: 删除表后, hdfs上的文件都删了
-External外部表: 删除后, hdfs上的文件没有删除, 只是把文件删除了
-
-
-partition：在hdfs中表现为table目录下的子目录
-
-bucket：桶, 在hdfs中表现为同一个表目录下根据hash散列之后的多个文件, 会根据不同的文件把数据放到不同的文件中 
+集群架构
 
 
-Hive 架构图
+ClickHouse 采用典型的分组式的分布式架构，具体集群架构如上图所示：
+
+
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/2.Hive/" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/2.HBase/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="刘小恺(Kyle)">
-      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/2.HBase/" itemprop="url">
-                  HBase 面试题整理
-                </a>
-              
-            
-          </h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2020-06-13 11:00:00" itemprop="dateCreated datePublished" datetime="2020-06-13T11:00:00+08:00">2020-06-13</time>
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">总结</span></a></span>
-
-                
-                
-                  ，
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/" itemprop="url" rel="index"><span itemprop="name">面试总结</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/2.HBase/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/2.HBase/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          HBase 原理
-存储原理
-HBase中的每张表都通过行键按照一定的范围被分割成多个子表（HRegion），默认一个HRegion超过256M就要被分割成两个，由HRegionServer管理，管理哪些HRegion由HMaster分配。
-
-HRegionServer存取一个子表时，会创建一个HRegion对象，表的Region信息存在.meta表中，该表信息可通过Zookeeper进行追踪。然后对表的每个列族(Column Family)创建一个Store实例，每个Store都会有0个或多个StoreFile与之对应，每个StoreFile都会对应一个HFile， HFile就是实际的存储文件。因此，一个HRegion有多少个列族
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/06/13/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/2.HBase/" rel="contents">
+            <a class="btn" href="/2021/12/06/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Olap/Clickhouse/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2202,7 +2191,7 @@ HRegionServer存取一个子表时，会创建一个HRegion对象，表的Region
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/3/">&lt;上一页&gt;</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/31/">31</a><a class="extend next" rel="next" href="/page/5/">&lt;下一页&gt;</a>
+    <a class="extend prev" rel="prev" href="/page/3/">&lt;上一页&gt;</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/33/">33</a><a class="extend next" rel="next" href="/page/5/">&lt;下一页&gt;</a>
   </nav>
 
 
@@ -2249,7 +2238,7 @@ HRegionServer存取一个子表时，会创建一个HRegion对象，表的Region
                 
                   <a href="/archives/%20%7C%7C%20archive">
                 
-                    <span class="site-state-item-count">310</span>
+                    <span class="site-state-item-count">326</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -2428,7 +2417,13 @@ HRegionServer存取一个子表时，会创建一个HRegion对象，表的Region
                     
                       
                     
-                    <span class="site-state-item-count">83</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -2625,7 +2620,9 @@ HRegionServer存取一个子表时，会创建一个HRegion对象，表的Region
                     
                       
                     
-                    <span class="site-state-item-count">92</span>
+                      
+                    
+                    <span class="site-state-item-count">93</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -2686,7 +2683,7 @@ HRegionServer存取一个子表时，会创建一个HRegion对象，表的Region
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>

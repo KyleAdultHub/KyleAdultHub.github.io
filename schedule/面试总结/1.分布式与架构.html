@@ -1,0 +1,1872 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="微服务服务发现基本流程 通过appid(服务名)和Addr(IP:Port)定位实例  Provider  注册后定期(30s)心跳一次，注册， 心跳，下线都需要进行同步，注册和下线需要进行长轮询推送  Consumer  启动时拉取实例，发起30s长轮询  Server 定期(60s) 检测失效(90s)的实例,失效则剔除。短时间里丢失了大量的心跳连接(15分钟内心跳低于期望值*85%)，开启自">
+<meta property="og:type" content="website">
+<meta property="og:title" content="分布式与架构">
+<meta property="og:url" content="http://blog.kyleliu.cn/schedule/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%8E%E6%9E%B6%E6%9E%84.html">
+<meta property="og:site_name" content="刘小恺(Kyle)的云笔记">
+<meta property="og:description" content="微服务服务发现基本流程 通过appid(服务名)和Addr(IP:Port)定位实例  Provider  注册后定期(30s)心跳一次，注册， 心跳，下线都需要进行同步，注册和下线需要进行长轮询推送  Consumer  启动时拉取实例，发起30s长轮询  Server 定期(60s) 检测失效(90s)的实例,失效则剔除。短时间里丢失了大量的心跳连接(15分钟内心跳低于期望值*85%)，开启自">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220917165555068.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220917165617494.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211221173154849.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220829175951270.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211221142426805.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211221142633064.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211221143113566.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211221143314919.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211221151344842.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211221141117026.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211221151455612.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211221174643029.png">
+<meta property="article:published_time" content="2022-12-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2023-02-15T12:22:05.553Z">
+<meta property="article:author" content="刘小恺(Kyle)">
+<meta property="article:tag" content="分布式">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/img/image-20220917165555068.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/schedule/面试总结/1.分布式与架构.html"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>分布式与架构 | 刘小恺(Kyle)的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle)的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+    
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+    
+
+  
+
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+    
+    
+    <div class="post-block page">
+      <header class="post-header">
+
+<h2 class="post-title" itemprop="name headline">分布式与架构</h2>
+
+<div class="post-meta">
+  
+  
+
+
+  
+  
+  <ul class="breadcrumb">
+    
+      
+      
+        
+          <li><a href="/schedule/">SCHEDULE</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li>面试总结</li>
+        
+      
+    
+      
+      
+        
+          <li><a href="/schedule/1.%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%8E%E6%9E%B6%E6%9E%84.html/">1.分布式与架构.HTML</a></li>
+          
+            
+          
+        
+      
+    
+  </ul>
+
+
+</div>
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+        
+        
+          <h2 id="微服务"><a href="#微服务" class="headerlink" title="微服务"></a>微服务</h2><h3 id="服务发现"><a href="#服务发现" class="headerlink" title="服务发现"></a>服务发现</h3><h4 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h4><ol>
+<li><p>通过appid(服务名)和Addr(IP:Port)定位实例</p>
+</li>
+<li><p>Provider  注册后定期(30s)心跳一次，注册， 心跳，下线都需要进行同步，注册和下线需要进行长轮询推送</p>
+</li>
+<li><p>Consumer  启动时拉取实例，发起30s长轮询</p>
+</li>
+<li><p>Server 定期(60s) 检测失效(90s)的实例,失效则剔除。短时间里丢失了大量的心跳连接(15分钟内心跳低于期望值*85%)，开启自我保护，保留服务不过期。</p>
+</li>
+</ol>
+<h4 id="重要步骤"><a href="#重要步骤" class="headerlink" title="重要步骤"></a>重要步骤</h4><p>1.心跳的复制(Peer to Peer)检查数据一致性(网络抖动或分区导致数据不一致)：                                                        </p>
+<p> 注册时根据当前时间生成dirtyTime, A向B同步实例心跳时:</p>
+<p>返回-404 表示 (1)B中不存在实例  (2)B中dirtyTime较小      A携带自身dirtyTime向B发起注册请求,把最新信息同步过去。</p>
+<p>返回-409 表示 (1)B中dirtyTime较大         不同意采纳A的信息而是将自身实例的信息放在消息体里返回。</p>
+<p>2.网络分区时的自我保护             </p>
+<p>当网络分区发生时，每个Discovery节点，会持续的对外提供服务,接收该分区下新实例的服务注册和发现。</p>
+<p>短时间丢失大量心跳，进入自我保护，保证健康的实例不被剔除，同时保留”好数据“与”坏数据“</p>
+<p>自我保护：每分钟的心跳数小于阈值（实例数量*2*85%），每15分钟重置心跳阈值， 在自我保护状态下， 不对任何实例进行剔除</p>
+<p>非自我保护下，随机分批逐次剔除，尽量避免单个应用被全部过期。</p>
+<p>3.客户端</p>
+<p>长轮询+服务端推送变化，让服务发现的实时性更高</p>
+<p>订阅式客户端，推送客户端关注的实例变化</p>
+<p>Eureka客户端缓存，即便所有的都失效，依旧可以调用服务</p>
+<h4 id="多注册中心"><a href="#多注册中心" class="headerlink" title="多注册中心"></a>多注册中心</h4><p>1.同一个机房内部，discovery节点通过广播进行注册信息同步。</p>
+<p>2.跨机房注册信息同步时，discovery节点会将信息推送到其他的机房slb，再由slb通过负载均衡把信息推送到机房内部节点。机房内部在进行广播同步。</p>
+<ul>
+<li>注意: 跨机房同步时，注册信息为单向同步，slb收到信息后LB到机房内部节点，内部节点只在内部广播，不会推送到其他slb。</li>
+</ul>
+<h4 id="系统架构"><a href="#系统架构" class="headerlink" title="系统架构"></a>系统架构</h4><h5 id="架构图"><a href="#架构图" class="headerlink" title="架构图"></a>架构图</h5><img src="/img/image-20220917165555068.png" alt="image-20220917165555068" style="zoom: 80%;" />
+
+<h4 id="多注册中心架构图"><a href="#多注册中心架构图" class="headerlink" title="多注册中心架构图"></a>多注册中心架构图</h4><img src="/img/image-20220917165617494.png" alt="image-20220917165617494" style="zoom: 80%;" />
+
+<h3 id="熔断模式的介绍"><a href="#熔断模式的介绍" class="headerlink" title="熔断模式的介绍"></a>熔断模式的介绍</h3><h4 id="熔断模式"><a href="#熔断模式" class="headerlink" title="熔断模式"></a>熔断模式</h4><p>该模式借鉴了电路熔断的理念，如果一条线路电压过高，保险丝会熔断，防止火灾。</p>
+<p>如果某个目标服务调用慢或者有大量超时，此时，熔断该服务的调用，对于后续调用请求，不在继续调用目标服务，直接返回，快速释放资源。如果目标服务情况好转则恢复调用。</p>
+<p>还是之前的银行柜员的例子，假定处理每个业务的时间是5分钟，当某个柜员的处理速度降低了，超过了5分钟，或者干脆去吃午饭等等原因根本不在座位上，此时熔断机制将不会允许再有客户到其窗口前排队（如果有排队的也无法正常办理业务，只能造成阻塞的发生）。</p>
+<p>下面来看看Hystrix是如何熔断的。</p>
+<h4 id="熔断器-Circuit-Breaker"><a href="#熔断器-Circuit-Breaker" class="headerlink" title="熔断器:Circuit Breaker"></a>熔断器:Circuit Breaker</h4><p>熔断器是位于线程池之前的组件。<br>用户请求某一服务之后，Hystrix会先经过熔断器，此时如果熔断器的状态是打开（跳起），则说明已经熔断，这时将直接进行降级处理，不会继续将请求发到线程池。</p>
+<p>套用银行柜员的例子，柜员相当于服务，窗口前排队的是线程池，大堂经理则可以看成是熔断器。通常的流程是：客户进门，告诉大堂经理要办什么业务，这时他会判断客户请求的窗口是否在正常处理业务，如果正常，他就会让客户到该窗口排队（也就是进入了线程池），如果不正常，他根本不会让客户去排队。</p>
+<p>熔断器相当于在线程池之前的一层屏障。</p>
+<p>下面来看一下熔断器的工作原理</p>
+<img src="/img/image-20211221173154849.png" alt="image-20211221173154849" style="zoom:50%;" />
+
+<p>每个熔断器默认维护10个bucket<br>每秒创建一个bucket<br>每个blucket记录成功,失败,超时,拒绝的次数<br>当有新的bucket被创建时，最旧的bucket会被抛弃</p>
+<h4 id="熔断算法"><a href="#熔断算法" class="headerlink" title="熔断算法"></a>熔断算法</h4><p>判断是否进行熔断的依据是：<br>根据bucket中记录的次数，计算错误率。<br>当错误率超过预设的值（默认是50%）且10秒内超过20个请求，则开启熔断。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">max(<span class="number">0</span>, (requests - K*accepts) / (requests + <span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+
+<img src="/img/image-20220829175951270.png" alt="image-20220829175951270" style="zoom:50%;" />
+
+<h4 id="熔断恢复"><a href="#熔断恢复" class="headerlink" title="熔断恢复"></a><strong>熔断恢复</strong></h4><p>对于被熔断的请求，并不是永久被切断，而是被暂停一段时间（默认是5s）之后，允许部分请求通过，若请求都是健康的（RT&lt;250ms）则对请求健康恢复（取消熔断），如果不是健康的，则继续熔断。</p>
+<p>服务调用的各种结果（成功，异常，超时，拒绝），都会上报给熔断器，计入bucket参与计算。</p>
+<h4 id="kratos熔断支持"><a href="#kratos熔断支持" class="headerlink" title="kratos熔断支持"></a>kratos熔断支持</h4><p>目前kratos支持熔断的能力，用户可以自定义熔断器，目前框架中集成的熔断有<strong>http熔断，grpc熔断，db熔断</strong>这3种，熔断在默认情况下是开启的，目前不能选择关闭熔断，但是可以通过参数调整起到关闭熔断的效果</p>
+<p>熔断在不配置的情况下，<strong>默认参数</strong>如下</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">SwitchOff</span> = <span class="literal">true</span>  //开启熔断的开关，此开关目前是无效的，也就是设置任何值，熔断器都是开启的</span><br><span class="line"><span class="attr">window</span>  =<span class="string">"3s"</span>     //统计成功数和失败数的滑动窗口周期，默认为<span class="number">3</span>s</span><br><span class="line"><span class="attr">Sleep</span>   =<span class="string">"500ms"</span>  //本意为熔断之后重新探测下游是否恢复的时间，由于Kratos并没有半开状态，所以该值也无效</span><br><span class="line"><span class="attr">Bucket</span>  = <span class="number">10</span>      //分桶的数量，该参数跟window结合决定了滑动窗口能有多平滑，window=<span class="number">3</span>s,Bucket=<span class="number">10</span>，那么每个桶能统计到的时间范围为<span class="number">300</span>ms</span><br><span class="line"><span class="attr">Ratio</span>   = <span class="number">0.5</span>     //本意为失败率，由于目前Kratos并没有使用这个参数作为熔断条件的判断，暂时无效</span><br><span class="line"><span class="attr">Request</span> = <span class="number">100</span>     //最低请求数量，在窗口周期内，请求数如果小于该数，则不会触发熔断，在大于该数值时，才会去判断失败率来决定是否需要熔断</span><br><span class="line"><span class="attr">K</span>       = <span class="number">1.5</span>     //熔断条件，K值代表的是成功数*K &gt; 总请求数时（注: 成功率[success/total] &lt; <span class="number">1</span>/k时触发熔断），才不会触发熔断，如果success*K &lt; 总请求数，则success*K的请求不会熔断，total-success*K的请求会被熔断</span><br></pre></td></tr></table></figure>
+
+<h4 id="kratos熔断机制"><a href="#kratos熔断机制" class="headerlink" title="kratos熔断机制"></a>kratos熔断机制</h4><ol>
+<li>kratos的熔断在http请求，rpc请求，db请求下强制为开启状态，如果想要关闭，可以配置熔断参数K为一个很大的值，但是不建议去关闭熔断器，本身也不应该通过该参数控制（因为SwitchOff参数无效）</li>
+<li>2.kratos的熔断默认配置如上面描述所示，如果需要调整参数，请参考kratos熔断配置进行调整</li>
+<li>kratos的熔断不会一刀切，也没有半开状态（或者说可以说只有关闭和半开两个状态）</li>
+</ol>
+<blockquote>
+<p>不会熔断的请求数为周期内已统计的成功数<em>K，其他的请求会被熔断，当前请求会不会熔断是基于概率计算的，熔断率为(total-success</em>K)/(total+1) (注: 请求放行率约等于k*success/total,成功率越低，放行率越低)</p>
+</blockquote>
+<h3 id="服务限流"><a href="#服务限流" class="headerlink" title="服务限流"></a>服务限流</h3><h4 id="限流算法的整理"><a href="#限流算法的整理" class="headerlink" title="限流算法的整理"></a>限流算法的整理</h4><p>在资源有限的情况下，遇到突发流量（如双十一）或系统 RT 剧增，为了保证系统不被拖垮引起更大规模的雪崩，必须进行限流。也就是说限流是系统的自我保护。限流本质上是根据系统处理能力，限制单位时间内处理的请求数量。</p>
+<h4 id="滑动窗口"><a href="#滑动窗口" class="headerlink" title="滑动窗口"></a>滑动窗口</h4><p>这里的窗口是一个时间窗口，比如把一分钟划分为 6 个窗口，则每个窗口的时间范围是 10 秒。通过移动窗口，统计窗口期内流量，可以实现窗口期的限流。但是滑动窗口存在精度问题，在精度范围内统计到的窗口期流量可能在限流范围内，但进一步细分就会看到仍有突增流量。</p>
+<p>滑动窗口时间范围越小，就越平滑，限流的效果越精确，但时间细分的粒度受到客观限制。</p>
+<img src="/img/image-20211221142426805.png" alt="image-20211221142426805" style="zoom: 67%;" />
+
+<h4 id="漏桶算法"><a href="#漏桶算法" class="headerlink" title="漏桶算法"></a>漏桶算法</h4><p>漏桶算法，英文名 Leaky Bucket，是网络中流量整形（Traffic Shaping）和速率限制（Rate Limiting）常用的一种算法。漏桶算法调控了访问流量，使得突发流量可以被整形、去毛刺，为系统提供稳定的访问流量。如果漏桶溢出，请求就会被丢弃。</p>
+<img src="/img/image-20211221142633064.png" alt="image-20211221142633064" style="zoom:67%;" />
+
+<p>桶以固定的速率流出流量，无论水龙头进入的流量是多少，都不改变流出速率。上图中，水龙头处存在突发流量，一共进入 30Mb 数据，分布不均匀，对系统有冲击。经过漏桶算法处理，漏桶以 3 Mbps 速率持续流出数据，为系统做了很好的缓冲。</p>
+<p>漏桶算法中，如果桶未满，可以持续接收流量；如果桶已满，流量溢出，后续的流量将无法入桶，会被丢弃。漏桶算法限制的是流出速率，无论流入是多少，都能保证后续系统的请求是平稳的。后续系统感知的流量相对固定，但可能在系统仍有能力处理更多流量的时候，也会被漏桶限制住。</p>
+<h4 id="令牌桶算法"><a href="#令牌桶算法" class="headerlink" title="令牌桶算法"></a>令牌桶算法</h4><p>令牌桶算法，英文名 token bucket，也是网络中流量整形或速率限制常用的一种算法。令牌桶算法以一个恒定的速率向桶里放入令牌，如果有新的请求进来希望进行处理，则需要先从桶里获取一个令牌，当桶里没有令牌可取时，则拒绝服务。令牌桶算法限制的是流入速率，允许一定规模的突增流量，最大速率受限于桶的容量和令牌生成速率。可以支持一定程度的突发流量，更适合具有突发特性的流量。</p>
+<p><img src="/img/image-20211221143113566.png" alt="image-20211221143113566"></p>
+<p><strong>令牌桶算法的简单描述如下：</strong></p>
+<ul>
+<li><p>每隔 1/r 秒向桶中增加一个 token；</p>
+</li>
+<li><p>桶最多只能存放 b 个 token。如果放置 token 时桶已经满了，丢弃这个 token；</p>
+</li>
+<li><p>当一个包含 n 个字节的数据包进来的时候，</p>
+<ul>
+<li>如果桶中有足够的 token，将从桶中移除 n 个 token，然后把这个数据包发送出去；</li>
+<li>如果桶中没有足够的 token，不会移除任何 token，返回拒绝服务；</li>
+</ul>
+</li>
+</ul>
+<h4 id="自适应限流"><a href="#自适应限流" class="headerlink" title="自适应限流"></a>自适应限流</h4><p>使用自适应阈值可以动态调整限流，通过运行中不断试探，最终可以在系统处理能力和限流之间找到一个动态平衡。既能最大限度利用系统处理能力，又能确保系统稳定性。目前比较简单的自定义算法是参考 TCP 拥塞算法的斜率算法。斜率算法设置一个基准值，可以结合应用的 Load、CPU 使用率、总体平均 RT、入口 QPS 和并发线程数等几个维度的监控指标评估系统负载，负载高了降低限流阈值，负载低了提高限流阈值。</p>
+<p>目前比较简单的方案是使用平均 rt (响应时间)计算斜率，公式为</p>
+<p>gradient =（RTTnoload / RTTactual）</p>
+<p>newLimit = currentLimit×gradient + queueSize</p>
+<p>其中，RTTnoload 表示无负载时的 rt，RTTactual 表示当前实际 rt。gradient 小于 1 表示负载偏高，大于 1 表示负载偏低。经过一段时间的试探，就能把系统流量控制在合理范围。</p>
+<p><img src="/img/image-20211221143314919.png" alt="image-20211221143314919"></p>
+<h4 id="B站的自适应限流"><a href="#B站的自适应限流" class="headerlink" title="B站的自适应限流"></a>B站的自适应限流</h4><p>kratos 借鉴了 Sentinel 项目的自适应限流系统，通过综合分析服务的 cpu 使用率、请求成功的 qps 和请求成功的 rt 来做自适应限流保护。</p>
+<p>####核心目标</p>
+<ul>
+<li>自动嗅探负载和 qps，减少人工配置</li>
+<li>削顶，保证超载时系统不被拖垮，并能以高水位 qps 继续运行</li>
+</ul>
+<p>#####限流规则</p>
+<p><strong>吞吐量介绍</strong></p>
+<p><img src="/img/image-20211221151344842.png" alt="image-20211221151344842"></p>
+<p><strong>计算吞吐量：利特尔法则 <code>L = λ * W</code></strong></p>
+<p>如上图所示，如果我们开一个小店，平均每分钟进店 2 个客人(λ)，每位客人从等待到完成交易需要 4 分钟(W)，那我们店里能承载的客人数量就是 2 * 4 = 8 个人</p>
+<p>同理，我们可以将 <code>λ</code> 当做 QPS， <code>W</code> 呢是每个请求需要花费的时间，那我们的系统的吞吐就是 <code>L = λ * W</code> ，所以我们可以使用利特尔法则来计算系统的吞吐量。</p>
+<h5 id="指标介绍"><a href="#指标介绍" class="headerlink" title="指标介绍"></a>指标介绍</h5><table>
+<thead>
+<tr>
+<th align="left">指标名称</th>
+<th align="left">指标含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">cpu</td>
+<td align="left">最近 1s 的 CPU 使用率均值，使用滑动平均计算，采样周期是 250ms</td>
+</tr>
+<tr>
+<td align="left">inflight</td>
+<td align="left">当前处理中正在处理的请求数量</td>
+</tr>
+<tr>
+<td align="left">pass</td>
+<td align="left">请求处理成功的量</td>
+</tr>
+<tr>
+<td align="left">rt</td>
+<td align="left">请求成功的响应耗时</td>
+</tr>
+</tbody></table>
+<h5 id="滑动窗口-1"><a href="#滑动窗口-1" class="headerlink" title="滑动窗口"></a>滑动窗口</h5><p>在自适应限流保护中，采集到的指标的时效性非常强，系统只需要采集最近一小段时间内的 qps、rt 即可，对于较老的数据，会自动丢弃。为了实现这个效果，kratos 使用了滑动窗口来保存采样数据。</p>
+<img src="/img/image-20211221141117026.png" alt="image-20211221141117026" style="zoom:50%;" />
+
+<p>如上图，展示了一个具有两个桶（bucket）的滑动窗口（rolling window）。整个滑动窗口用来保存最近 1s 的采样数据，每个小的桶用来保存 500ms 的采样数据。<br>当时间流动之后，过期的桶会自动被新桶的数据覆盖掉，在图中，在 1000-1500ms 时，bucket 1 的数据因为过期而被丢弃，之后 bucket 3 的数据填到了窗口的头部。</p>
+<h5 id="限流公式"><a href="#限流公式" class="headerlink" title="限流公式"></a>限流公式</h5><p>判断是否丢弃当前请求的算法如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cpu &gt; 800 AND (Now - PrevDrop) &lt; 1s AND (MaxPass * MinRt * windows / 1000) &lt; InFlight</span><br></pre></td></tr></table></figure>
+
+<p>MaxPass 表示最近 5s 内，单个采样窗口中最大的请求数。<br>MinRt 表示最近 5s 内，单个采样窗口中最小的平均响应时间。<br>windows 表示一秒内采样窗口的数量，默认配置中是 5s 50 个采样，那么 windows 的值为 10。</p>
+<h5 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h5><p><img src="/img/image-20211221151455612.png" alt="image-20211221151455612"></p>
+<h5 id="请求对列优化"><a href="#请求对列优化" class="headerlink" title="请求对列优化"></a>请求对列优化</h5><img src="/img/image-20211221174643029.png" alt="image-20211221174643029" style="zoom:50%;" />
+
+<p>除了自适应限流，我们还做了 Codel 队列，传统的队列都是先进先出，但是我们发现微服务可能不太适合这种做法，这是因为微服务会有超时，肯定不可能无限期的等下去，可能你的 SLP 已经设置了 800 毫秒的超时，如果这时放行的是一个老的请求，该请求的成功率就会变低，因为它可能已经排队了好长时间。</p>
+<p>所以这时我们需要一个基于处理时间丢弃的队列，当系统处于高负载的时候，实行后进先出的策略，也就是说要主动丢弃排队久的请求，并让新的请求直接通过，利用这个队列来弥补之前算法中的缓冲问题，吸收突增的流量。</p>
+<h2 id="方案"><a href="#方案" class="headerlink" title="方案"></a>方案</h2><h3 id="接口幂等性，有哪些方案？"><a href="#接口幂等性，有哪些方案？" class="headerlink" title="接口幂等性，有哪些方案？"></a>接口幂等性，有哪些方案？</h3><p><code>Select 查询</code>天然支持幂等，而<code>写操作</code> 多次执行可能会导致数据错误，下面简单列举常见的解决方案：</p>
+<ul>
+<li>表中加唯一约束， 有些表不适合添加<code>唯一约束</code>，可以单独建一张<code>防重表</code>，在<code>防重表</code>插入成功，在操作其它<code>业务表</code></li>
+<li>加悲观锁 ， <code>select * from order where order_id= 100000 for update;</code> 对操作行锁定。</li>
+<li>加乐观锁，表中增加一个<code>attribute_cc</code>自增字段，借助<code>CAS</code>机制控制并发</li>
+<li>采用 <code>分布式锁</code>，第一次请求可以成功加锁，后续请求加锁失败，认为是重复请求。</li>
+<li>token机制，client 首先请求获取token，提交时除了业务参数外还要带上这个token，server端会对这个token核销，只能核销一次。如果 server 查询不到token，则认为是重复请求。</li>
+</ul>
+<h3 id="分布式服务接口的幂等性如何设计？"><a href="#分布式服务接口的幂等性如何设计？" class="headerlink" title="分布式服务接口的幂等性如何设计？"></a><strong>分布式服务接口的幂等性如何设计？</strong></h3><p>所谓幂等性，就是说一个接口，多次发起同一个请求，你这个接口得保证结果是准确得。比如不能多扣款。不能多插入一条数据，不能将统计值多加了 1，这就是幂等性。</p>
+<p>其实保证幂等性主要是三点：</p>
+<ul>
+<li>对于每个请求必须有一个唯一的标识，举个例子：订单支付请求，肯定得包含订单 ID，一个订单 ID 最多支付一次。</li>
+<li>每次处理完请求之后，必须有一个记录标识这个请求处理过了，比如说常见得方案是再 MySQL 中记录个状态啥得，比如支付之前记录一条这个订单得支付流水，而且支付流水采用 order id 作为唯一键（unique key）。只有成功插入这个支付流水，才可以执行实际得支付扣款</li>
+<li>每次接收请求需要进行判断之前是否处理过得逻辑处理，比如说，如果有一个订单已经支付了，就已经有了一条支付流水，那么如果重复发送这个请求，则此时先插入支付流水，order id 已经存在了，唯一键约束生效，报错插入不进去得。然后你就不用再扣款了</li>
+</ul>
+<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><h3 id="一个基础的rpc框架包含哪些部分"><a href="#一个基础的rpc框架包含哪些部分" class="headerlink" title="一个基础的rpc框架包含哪些部分"></a>一个基础的rpc框架包含哪些部分</h3><ul>
+<li>客户端和服务端建立网络连接模块( <strong>server</strong>模块、<strong>client</strong>模块 )</li>
+<li>服务端<strong>处理请求模块</strong></li>
+<li><strong>传输协议</strong>模块</li>
+<li><strong>序列化</strong>和<strong>反序列</strong>模块。</li>
+<li>服务发现</li>
+</ul>
+<h3 id="设计一个RPC框架，可以从PRC包含的几个模块去考虑，对每一个模块分别进行设计。"><a href="#设计一个RPC框架，可以从PRC包含的几个模块去考虑，对每一个模块分别进行设计。" class="headerlink" title="设计一个RPC框架，可以从PRC包含的几个模块去考虑，对每一个模块分别进行设计。"></a>设计一个RPC框架，可以从PRC包含的几个模块去考虑，对每一个模块分别进行设计。</h3><ul>
+<li><p><strong>客户端</strong>和<strong>服务端如何建立网络连接</strong>？</p>
+</li>
+<li><p><strong>服务端</strong>如何<strong>处理请求</strong>？</p>
+</li>
+<li><p><strong>数据传输</strong>采用什么<strong>协议</strong>？</p>
+</li>
+<li><p><strong>数据</strong>该如何<strong>序列化</strong>和<strong>反序列化</strong>？</p>
+</li>
+<li><p>服务发现采用什么方式</p>
+</li>
+<li><p>如何设计一个rpc 框架</p>
+<ol>
+<li>注册中心：首先服务就得去[注册中心]注册吧，你是不是得有个注册中心，保留各个服务的信息，可以用zookeeper来做吧</li>
+<li>客户端服务发现：然后你的消费者需要去注册中心拿对应的服务信息吧,而且每个服务可能会存在于多台机器上</li>
+<li>动态代理：接着你就该发起一次请求了，怎么发起请求？懵逼了吧,当然是基于动态代理了! 你面向接口获取到一个动态代理，这个动态代理就是接口在本地的一个代理，然后这个代理会找到服务对应的机器地址</li>
+<li>负载均衡算法：然后找哪个机器发送请求？那肯定得有个<a href="https://cloud.tencent.com/product/clb?from=10680" target="_blank" rel="noopener">负载均衡</a>算法了，比如最简单的可以随机轮询是不是</li>
+<li>io 模型 + 发送协议：找到一台机器后，就可以跟它发送请求了     - 咋发送呢？     你可以说用netty了，nio方式     - 发送什么格式的数据？     你可以说用hessian序列化协议了，或者是别的，对吧。然后请求过去了</li>
+<li>服务端的服务代理： 那边一样的，需要针对你自己的服务生成一个动态代理，监听某个网络端口，然后代理你本地的服务代码。接收到请求的时候，就调用对应的服务代码.</li>
+</ol>
+</li>
+<li><p>grpc 为什么选择http2.0 作为 传输协议</p>
+<ul>
+<li>HTTP/2 是一个经过实践检验的标准<br>HTTP/2是先有实践再有标准，这个很重要。很多不成功的标准都是先有一大堆厂商讨论出标准后有实现，导致混乱而不可用，比如CORBA。HTTP/2的前身是Google的SPDY，没有Google的实践和推动，可能都不会有HTTP/2</li>
+<li>HTTP/2 天然支持物联网、手机、浏览器<br>实际上先用上HTTP/2的也是手机和手机浏览器。移动互联网推动了HTTP/2的发展和普及。</li>
+<li>基于HTTP/2 多语言的实现容易<br>只讨论协议本身的实现，不考虑序列化。</li>
+<li>每个流行的编程语言都会有成熟的HTTP/2 Client<br>HTTP/2 Client是经过充分测试，可靠的<br>用Client发送HTTP/2请求的难度远低于用socket发送数据包/解析数据包<br>HTTP/2支持Stream和流控<br>在业界，有很多支持stream的方案，比如基于websocket的，或者rsocket。但是这些方案都不是通用的。</li>
+</ul>
+</li>
+<li><p>选择http2.0 作为grpc传输协议的缺点</p>
+<ul>
+<li><p>rpc的元数据的传输不够高效</p>
+<p>尽管HPAC可以压缩HTTP Header，但是对于rpc来说，确定一个函数调用，可以简化为一个int，只要两端去协商过一次，后面直接查表就可以了，不需要像HPAC那样编码解码。<br>可以考虑专门对gRPC做一个优化过的HTTP/2解析器，减少一些通用的处理，感觉可以提升性能。</p>
+</li>
+<li><p>HTTP/2 里一次gRPC调用需要解码两次</p>
+<p>一次是HEADERS frame，一次是DATA frame。</p>
+<p>HTTP/2 标准本身是只有一个TCP连接，但是实际在gRPC里是会有多个TCP连接，使用时需要注意。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="领域模型相关"><a href="#领域模型相关" class="headerlink" title="领域模型相关"></a>领域模型相关</h3><p><strong>公司层面领域拆分维度</strong></p>
+<ul>
+<li>核心领域</li>
+<li>通用领域</li>
+<li>支撑领域</li>
+</ul>
+<p><strong>微服务架构和SOA巨石架构</strong></p>
+<p>微服务即是SOA(面向服务的架构)的一种具体实现， 但是微服务的职责更单一、服务即产品、可移植性更好、错误影响面更小；</p>
+<p><strong>DDD 的核心思想</strong></p>
+<p>让业务架构和系统架构行成绑定的关系</p>
+<p><strong>微服务划分原则</strong></p>
+<ul>
+<li>按照部门职能</li>
+<li>确定模块的边界和紧密程度</li>
+<li>按照服务的请求负载</li>
+<li>按照故障率和变化率</li>
+</ul>
+<p><strong>传统三层模型和DDD领域模型</strong></p>
+<p>传统三层模型(贫血模型)： 容易导致service层流水账，逻辑冗余在api方法中，难以迁移和维护</p>
+<p>DDD： 将数据处理和装载逻辑交给领域模型对象，service只做对领域对象的编排</p>
+<p>DDD主要需要考虑的点 1. 对领域的划分   2. 领域模型的装载和逻辑交给领域模型(对领域模型的处理和逻辑都在单独领域内完成)  3. service 层只负责对领域的编排，用以对外提供服务</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DTO -&gt; DO 需要在领域模型内完成， 数据装载的interface 需要在领域模型内repo中完成， 数据实际获取以及 data -&gt; DO 需要在data层完成</span><br></pre></td></tr></table></figure>
+
+<h3 id="服务端-高并发、高可用可以考虑的点"><a href="#服务端-高并发、高可用可以考虑的点" class="headerlink" title="服务端 高并发、高可用可以考虑的点"></a>服务端 高并发、高可用可以考虑的点</h3><ul>
+<li>微服务的拆分， 数据资源、计算资源、运行资源都进行拆分和隔离(根据服务等级和业务范围)，；</li>
+<li>读多服务， 可以考虑redis缓存、local 缓存、多级缓存、缓存降级等； 写多服务可以考虑优先写kv， 通过消息队列异步更新db和缓存；</li>
+<li>数据库层面可以做到分库分表(水平和垂直)，主从读写分离；</li>
+<li>索引优化， 查询优化；</li>
+<li>部署方面可以做到微服务容器的动态伸缩；</li>
+<li>服务的限流、熔断、重试、降级等机制，避免对整条调用链路的影响；</li>
+<li>多机房主备部署；</li>
+</ul>
+<h3 id="常见负载均衡算法"><a href="#常见负载均衡算法" class="headerlink" title="常见负载均衡算法"></a>常见负载均衡算法</h3><ul>
+<li><p>轮询法</p>
+</li>
+<li><p>加权轮询法</p>
+</li>
+<li><p>加权随机法</p>
+</li>
+<li><p>最小连接数法</p>
+</li>
+<li><p>随机法</p>
+</li>
+<li><p>源地址哈希法</p>
+</li>
+<li><p>最闲轮训</p>
+</li>
+<li><p>P2C</p>
+<p><strong>B站负载均衡算法</strong></p>
+<p>参考JSQ（最闲轮训）负载均衡算法带来的问题，缺乏的是服务端全局视图，因此我们目标需要综合考虑：负载+可用性。</p>
+<p>参考了《The power of two choices in randomized load balancing》的思路，我们使用 p2c 算法，随机选取的两个节点进行打分，选择更优的节点:</p>
+<ul>
+<li>选择 backend：CPU，client：成功率、inflight(处理中请求)、RT(响应时间) 作为指标，使用一个简单的线性方程进行打分。</li>
+<li>对新启动的节点使用常量惩罚值（penalty），以及使用探针方式最小化放量，进行预热；</li>
+<li>打分比较低的节点，避免进入“永久黑名单”而无法恢复，使用统计衰减的方式，让节点指标逐渐恢复到初始状态（即默认值）。</li>
+</ul>
+</li>
+</ul>
+<h3 id="reids-和zookeeper-分布式锁的区别"><a href="#reids-和zookeeper-分布式锁的区别" class="headerlink" title="reids 和zookeeper 分布式锁的区别"></a>reids 和zookeeper 分布式锁的区别</h3><p>redis 分布式锁</p>
+<ul>
+<li>优点：redis本身的读写性能很高，因此基于redis的分布式锁效率比较高</li>
+<li>缺点：锁删除失败 过期时间不好控制；非阻塞，操作失败后，需要轮询，占用cpu资源;</li>
+</ul>
+<p>zookeeper的分布式锁</p>
+<ul>
+<li>优点：不存在redis的超时、数据一致性可以保障，可靠性很高，基于watch + 回调的方式获取锁，实现简单。</li>
+<li>缺点：保证了可靠性的同时牺牲了一部分效率（但是依然很高）。性能不如redis。</li>
+</ul>
+
+        
+      </div>
+      
+      
+      
+    </div>
+    
+
+
+  
+  
+  <ul class="breadcrumb">
+    
+      
+      
+        
+          <li><a href="/schedule/">SCHEDULE</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li>面试总结</li>
+        
+      
+    
+      
+      
+        
+          <li><a href="/schedule/1.%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%8E%E6%9E%B6%E6%9E%84.html/">1.分布式与架构.HTML</a></li>
+          
+            
+          
+        
+      
+    
+  </ul>
+
+
+    
+    
+    
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%20%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">326</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">93</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#微服务"><span class="nav-text">微服务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#服务发现"><span class="nav-text">服务发现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#基本流程"><span class="nav-text">基本流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#重要步骤"><span class="nav-text">重要步骤</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#多注册中心"><span class="nav-text">多注册中心</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#系统架构"><span class="nav-text">系统架构</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#架构图"><span class="nav-text">架构图</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#多注册中心架构图"><span class="nav-text">多注册中心架构图</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#熔断模式的介绍"><span class="nav-text">熔断模式的介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#熔断模式"><span class="nav-text">熔断模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#熔断器-Circuit-Breaker"><span class="nav-text">熔断器:Circuit Breaker</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#熔断算法"><span class="nav-text">熔断算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#熔断恢复"><span class="nav-text">熔断恢复</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#kratos熔断支持"><span class="nav-text">kratos熔断支持</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#kratos熔断机制"><span class="nav-text">kratos熔断机制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#服务限流"><span class="nav-text">服务限流</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#限流算法的整理"><span class="nav-text">限流算法的整理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#滑动窗口"><span class="nav-text">滑动窗口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#漏桶算法"><span class="nav-text">漏桶算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#令牌桶算法"><span class="nav-text">令牌桶算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#自适应限流"><span class="nav-text">自适应限流</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#B站的自适应限流"><span class="nav-text">B站的自适应限流</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#指标介绍"><span class="nav-text">指标介绍</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#滑动窗口-1"><span class="nav-text">滑动窗口</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#限流公式"><span class="nav-text">限流公式</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#算法"><span class="nav-text">算法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#请求对列优化"><span class="nav-text">请求对列优化</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#方案"><span class="nav-text">方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#接口幂等性，有哪些方案？"><span class="nav-text">接口幂等性，有哪些方案？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分布式服务接口的幂等性如何设计？"><span class="nav-text">分布式服务接口的幂等性如何设计？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#架构"><span class="nav-text">架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#一个基础的rpc框架包含哪些部分"><span class="nav-text">一个基础的rpc框架包含哪些部分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设计一个RPC框架，可以从PRC包含的几个模块去考虑，对每一个模块分别进行设计。"><span class="nav-text">设计一个RPC框架，可以从PRC包含的几个模块去考虑，对每一个模块分别进行设计。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#领域模型相关"><span class="nav-text">领域模型相关</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#服务端-高并发、高可用可以考虑的点"><span class="nav-text">服务端 高并发、高可用可以考虑的点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#常见负载均衡算法"><span class="nav-text">常见负载均衡算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#reids-和zookeeper-分布式锁的区别"><span class="nav-text">reids 和zookeeper 分布式锁的区别</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

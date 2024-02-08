@@ -345,7 +345,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/03/01/02.python%E7%88%AC%E8%99%AB/%E7%88%AC%E8%99%AB%E6%89%A9%E5%B1%95%E5%8A%9F%E8%83%BD/Android%E9%80%86%E5%90%91-%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E7%A0%B4%E8%A7%A3APk/">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/06/21/12.%E5%8C%BA%E5%9D%97%E9%93%BE/Hyperledger%20fabric/5.Fabric%E6%9E%B6%E6%9E%84/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="刘小恺(Kyle)">
@@ -364,8 +364,8 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2019/03/01/02.python%E7%88%AC%E8%99%AB/%E7%88%AC%E8%99%AB%E6%89%A9%E5%B1%95%E5%8A%9F%E8%83%BD/Android%E9%80%86%E5%90%91-%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E7%A0%B4%E8%A7%A3APk/" itemprop="url">
-                  Android逆向-静态分析破解Apk
+                <a class="post-title-link" href="/2019/06/21/12.%E5%8C%BA%E5%9D%97%E9%93%BE/Hyperledger%20fabric/5.Fabric%E6%9E%B6%E6%9E%84/" itemprop="url">
+                  Fabric架构
                 </a>
               
             
@@ -391,559 +391,7 @@
                 
               
 
-              <time title="创建时间：2019-03-01 00:01:00" itemprop="dateCreated datePublished" datetime="2019-03-01T00:01:00+08:00">2019-03-01</time>
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/python%E7%88%AC%E8%99%AB/" itemprop="url" rel="index"><span itemprop="name">python爬虫</span></a></span>
-
-                
-                
-                  ，
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/python%E7%88%AC%E8%99%AB/%E7%88%AC%E8%99%AB%E6%8B%93%E5%B1%95%E5%8A%9F%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">爬虫拓展功能</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2019/03/01/02.python%E7%88%AC%E8%99%AB/%E7%88%AC%E8%99%AB%E6%89%A9%E5%B1%95%E5%8A%9F%E8%83%BD/Android%E9%80%86%E5%90%91-%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E7%A0%B4%E8%A7%A3APk/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/03/01/02.python%E7%88%AC%E8%99%AB/%E7%88%AC%E8%99%AB%E6%89%A9%E5%B1%95%E5%8A%9F%E8%83%BD/Android%E9%80%86%E5%90%91-%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E7%A0%B4%E8%A7%A3APk/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          转载: http://www.520monkey.com/
-一、前言从这篇文章开始我们开始我们的破解之路，之前的几篇文章中我们是如何讲解怎么加固我们的Apk，防止被别人破解，那么现在我们要开始破解我们的Apk,针对于之前的加密方式采用相对应的破解技术，Android中的破解其实大体上可以分为静态分析和动态分析，对于这两种方式又可以细分为Java层(smail和dex)和native层(so)。所以我们今天主要来讲解如何通过静态分析来破解我们的apk，这篇文章我们会通过破解Java层和native层的例子来讲解。
-二、准备工作第一、首先是基本知识：
-1、了解Android中的Apk文件的结构。
-2、了解Smail语法和dex文件格式
-
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2019/03/01/02.python%E7%88%AC%E8%99%AB/%E7%88%AC%E8%99%AB%E6%89%A9%E5%B1%95%E5%8A%9F%E8%83%BD/Android%E9%80%86%E5%90%91-%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90%E7%A0%B4%E8%A7%A3APk/" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/03/01/02.python%E7%88%AC%E8%99%AB/%E7%88%AC%E8%99%AB%E6%89%A9%E5%B1%95%E5%8A%9F%E8%83%BD/Android%E9%80%86%E5%90%91-%E5%8A%A8%E6%80%81%E5%88%86%E6%9E%90%E7%A0%B4%E8%A7%A3APk(%E8%B0%83%E8%AF%95so)/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="刘小恺(Kyle)">
-      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/03/01/02.python%E7%88%AC%E8%99%AB/%E7%88%AC%E8%99%AB%E6%89%A9%E5%B1%95%E5%8A%9F%E8%83%BD/Android%E9%80%86%E5%90%91-%E5%8A%A8%E6%80%81%E5%88%86%E6%9E%90%E7%A0%B4%E8%A7%A3APk(%E8%B0%83%E8%AF%95so)/" itemprop="url">
-                  Android逆向-动态分析破解Apk(调试so)
-                </a>
-              
-            
-          </h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-03-01 00:01:00" itemprop="dateCreated datePublished" datetime="2019-03-01T00:01:00+08:00">2019-03-01</time>
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/python%E7%88%AC%E8%99%AB/" itemprop="url" rel="index"><span itemprop="name">python爬虫</span></a></span>
-
-                
-                
-                  ，
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/python%E7%88%AC%E8%99%AB/%E7%88%AC%E8%99%AB%E6%8B%93%E5%B1%95%E5%8A%9F%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">爬虫拓展功能</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2019/03/01/02.python%E7%88%AC%E8%99%AB/%E7%88%AC%E8%99%AB%E6%89%A9%E5%B1%95%E5%8A%9F%E8%83%BD/Android%E9%80%86%E5%90%91-%E5%8A%A8%E6%80%81%E5%88%86%E6%9E%90%E7%A0%B4%E8%A7%A3APk(%E8%B0%83%E8%AF%95so)/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/03/01/02.python%E7%88%AC%E8%99%AB/%E7%88%AC%E8%99%AB%E6%89%A9%E5%B1%95%E5%8A%9F%E8%83%BD/Android%E9%80%86%E5%90%91-%E5%8A%A8%E6%80%81%E5%88%86%E6%9E%90%E7%A0%B4%E8%A7%A3APk(%E8%B0%83%E8%AF%95so)/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          转载: http://www.520monkey.com/
-一、知识准备**我们在介绍如何调试so文件的时候，先来看一下准备知识：
-1. native方法的定义和调用什么是NDKAndroid 平台从一开就已经支持了C/C++了。我们知道Android的SDK主要是基于Java的，所以导致了在用Android SDK进行开发的工程师们都必须使用Java语言。不过，Google从一开始就说明Android也支持JNI编程方式，也就是第三方应用完成可以通过JNI调用自己的C动态度。于是NDK就应运而生了。
-Android NDK 是一套允许您使用原生代码语言(例如C和C++) 实现部分应用的工具集。在开发某些类型应用时，这有助于您重复使
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2019/03/01/02.python%E7%88%AC%E8%99%AB/%E7%88%AC%E8%99%AB%E6%89%A9%E5%B1%95%E5%8A%9F%E8%83%BD/Android%E9%80%86%E5%90%91-%E5%8A%A8%E6%80%81%E5%88%86%E6%9E%90%E7%A0%B4%E8%A7%A3APk(%E8%B0%83%E8%AF%95so)/" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/02/27/02.python%E7%88%AC%E8%99%AB/%E7%88%AC%E8%99%AB%E6%89%A9%E5%B1%95%E5%8A%9F%E8%83%BD/Android%E5%8F%8D%E7%BC%96%E8%AF%91%E7%88%AC%E8%99%AB((%E8%A3%81%E5%88%A4%E6%96%87%E4%B9%A6app%E7%A4%BA%E4%BE%8B))/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="刘小恺(Kyle)">
-      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/02/27/02.python%E7%88%AC%E8%99%AB/%E7%88%AC%E8%99%AB%E6%89%A9%E5%B1%95%E5%8A%9F%E8%83%BD/Android%E5%8F%8D%E7%BC%96%E8%AF%91%E7%88%AC%E8%99%AB((%E8%A3%81%E5%88%A4%E6%96%87%E4%B9%A6app%E7%A4%BA%E4%BE%8B))/" itemprop="url">
-                  Android反编译尝试(裁判文书app示例)
-                </a>
-              
-            
-          </h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-02-27 00:01:00" itemprop="dateCreated datePublished" datetime="2019-02-27T00:01:00+08:00">2019-02-27</time>
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/python%E7%88%AC%E8%99%AB/" itemprop="url" rel="index"><span itemprop="name">python爬虫</span></a></span>
-
-                
-                
-                  ，
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/python%E7%88%AC%E8%99%AB/%E7%88%AC%E8%99%AB%E6%8B%93%E5%B1%95%E5%8A%9F%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">爬虫拓展功能</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2019/02/27/02.python%E7%88%AC%E8%99%AB/%E7%88%AC%E8%99%AB%E6%89%A9%E5%B1%95%E5%8A%9F%E8%83%BD/Android%E5%8F%8D%E7%BC%96%E8%AF%91%E7%88%AC%E8%99%AB((%E8%A3%81%E5%88%A4%E6%96%87%E4%B9%A6app%E7%A4%BA%E4%BE%8B))/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/02/27/02.python%E7%88%AC%E8%99%AB/%E7%88%AC%E8%99%AB%E6%89%A9%E5%B1%95%E5%8A%9F%E8%83%BD/Android%E5%8F%8D%E7%BC%96%E8%AF%91%E7%88%AC%E8%99%AB((%E8%A3%81%E5%88%A4%E6%96%87%E4%B9%A6app%E7%A4%BA%E4%BE%8B))/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          一、工具准备
-fiddler
-安卓模拟器
-android studio
-enjarify
-jd-gui
-python3
-jdk
-apktool
-adb
-SignApk.jar apk签名工具
-IDA
-
-二、 抓包查看apk的请求逻辑1）设置fiddler下载fiddler后，打开菜单栏 Tools=》Options=》HTTPS， 勾选【Decrypt HTTPS traffic】选项，对于【Ignore server certificate errors (unsafe)】选项可以不必勾选，然后点击【Actions】点击【Export Root Certificate to Desktop】这时候就会将Fiddler根证书Fidd
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2019/02/27/02.python%E7%88%AC%E8%99%AB/%E7%88%AC%E8%99%AB%E6%89%A9%E5%B1%95%E5%8A%9F%E8%83%BD/Android%E5%8F%8D%E7%BC%96%E8%AF%91%E7%88%AC%E8%99%AB((%E8%A3%81%E5%88%A4%E6%96%87%E4%B9%A6app%E7%A4%BA%E4%BE%8B))/" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/01/28/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/2.%E5%8C%BA%E5%9D%97%E9%93%BE%E5%AF%86%E7%A0%81%E5%AD%A6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="刘小恺(Kyle)">
-      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/01/28/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/2.%E5%8C%BA%E5%9D%97%E9%93%BE%E5%AF%86%E7%A0%81%E5%AD%A6/" itemprop="url">
-                  区块链密码学
-                </a>
-              
-            
-          </h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-01-28 14:00:00" itemprop="dateCreated datePublished" datetime="2019-01-28T14:00:00+08:00">2019-01-28</time>
+              <time title="创建时间：2019-06-21 14:00:00" itemprop="dateCreated datePublished" datetime="2019-06-21T14:00:00+08:00">2019-06-21</time>
             
 
             
@@ -968,7 +416,7 @@ IDA
                   ，
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/" itemprop="url" rel="index"><span itemprop="name">区块链概念</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/Hyperledger-fabric/" itemprop="url" rel="index"><span itemprop="name">Hyperledger fabric</span></a></span>
 
                 
                 
@@ -983,8 +431,8 @@ IDA
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2019/01/28/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/2.%E5%8C%BA%E5%9D%97%E9%93%BE%E5%AF%86%E7%A0%81%E5%AD%A6/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/01/28/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/2.%E5%8C%BA%E5%9D%97%E9%93%BE%E5%AF%86%E7%A0%81%E5%AD%A6/" itemprop="commentCount"></span>
+                <a href="/2019/06/21/12.%E5%8C%BA%E5%9D%97%E9%93%BE/Hyperledger%20fabric/5.Fabric%E6%9E%B6%E6%9E%84/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/06/21/12.%E5%8C%BA%E5%9D%97%E9%93%BE/Hyperledger%20fabric/5.Fabric%E6%9E%B6%E6%9E%84/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1014,14 +462,35 @@ IDA
       
         
           
-          密码学算法Hash算法定义
-Hash（哈希或散列）算法，又常被称为指纹（fingerprint）或摘要（digest）算法，是非常基础也非常重要的一类算法。可以将任意长度的二进制明文串映射为较短的（通常是固定长度的）二进制串（Hash 值），并且不同的明文很难映射为相同的 Hash 值，且算法不可逆，例如: MD5、SHA-1、SHA-2、SHA-256；
-比如判断两个字符串是否相等，只需要判断两字符串的hash值是否相等就可以基本断定两字符串是否相等；
-Hash 算法并不是一种加密算法，不能用于对信息的保护。但 Hash 算法可被应用到对登录口令的保存上。例如网站登录时需要验证用户名和密码，如果网站后台直接保存用户的口令原文，一旦
+          Fabric的交易流程Fabric 节点的主要分类记账节点、背书节点、排序节点
+
+交易七步曲
+Propose
+客户端提交交易提案，及调用了链码的请求
+
+
+Execute
+endorse节点运行仿真结果，产生读写集，并签名返回给客户端
+
+
+Proposal
+客户端接收到了endorse节点的运行结果，根据背书策略，如果背书通过，产生proposal给order节点打包区块
+
+
+Order Trasantion
+Order节点根据一定规则将交易打包进区块，此处会应用一定的共识策略 
+
+
+Deliver
+排序节点将打包好的区块分发给commiter节点
+
+
+Validate
+Commiter节点收到区块后，对每一个交易进行验证，如果验证通
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2019/01/28/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/2.%E5%8C%BA%E5%9D%97%E9%93%BE%E5%AF%86%E7%A0%81%E5%AD%A6/" rel="contents">
+            <a class="btn" href="/2019/06/21/12.%E5%8C%BA%E5%9D%97%E9%93%BE/Hyperledger%20fabric/5.Fabric%E6%9E%B6%E6%9E%84/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1077,7 +546,7 @@ Hash 算法并不是一种加密算法，不能用于对信息的保护。但 Ha
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/01/28/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/4.%E4%BB%A5%E5%A4%AA%E5%9D%8A%E6%8A%80%E6%9C%AF%E6%A0%88/">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/06/11/12.%E5%8C%BA%E5%9D%97%E9%93%BE/Hyperledger%20fabric/4.Fabric%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6%E7%BC%96%E5%86%99/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="刘小恺(Kyle)">
@@ -1096,8 +565,8 @@ Hash 算法并不是一种加密算法，不能用于对信息的保护。但 Ha
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2019/01/28/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/4.%E4%BB%A5%E5%A4%AA%E5%9D%8A%E6%8A%80%E6%9C%AF%E6%A0%88/" itemprop="url">
-                  以太坊技术栈
+                <a class="post-title-link" href="/2019/06/11/12.%E5%8C%BA%E5%9D%97%E9%93%BE/Hyperledger%20fabric/4.Fabric%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6%E7%BC%96%E5%86%99/" itemprop="url">
+                  Fabric 智能合约编写
                 </a>
               
             
@@ -1123,7 +592,7 @@ Hash 算法并不是一种加密算法，不能用于对信息的保护。但 Ha
                 
               
 
-              <time title="创建时间：2019-01-28 14:00:00" itemprop="dateCreated datePublished" datetime="2019-01-28T14:00:00+08:00">2019-01-28</time>
+              <time title="创建时间：2019-06-11 20:22:00" itemprop="dateCreated datePublished" datetime="2019-06-11T20:22:00+08:00">2019-06-11</time>
             
 
             
@@ -1148,7 +617,7 @@ Hash 算法并不是一种加密算法，不能用于对信息的保护。但 Ha
                   ，
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/" itemprop="url" rel="index"><span itemprop="name">区块链概念</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/Hyperledger-fabric/" itemprop="url" rel="index"><span itemprop="name">Hyperledger fabric</span></a></span>
 
                 
                 
@@ -1163,8 +632,8 @@ Hash 算法并不是一种加密算法，不能用于对信息的保护。但 Ha
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2019/01/28/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/4.%E4%BB%A5%E5%A4%AA%E5%9D%8A%E6%8A%80%E6%9C%AF%E6%A0%88/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/01/28/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/4.%E4%BB%A5%E5%A4%AA%E5%9D%8A%E6%8A%80%E6%9C%AF%E6%A0%88/" itemprop="commentCount"></span>
+                <a href="/2019/06/11/12.%E5%8C%BA%E5%9D%97%E9%93%BE/Hyperledger%20fabric/4.Fabric%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6%E7%BC%96%E5%86%99/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/06/11/12.%E5%8C%BA%E5%9D%97%E9%93%BE/Hyperledger%20fabric/4.Fabric%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6%E7%BC%96%E5%86%99/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1194,13 +663,22 @@ Hash 算法并不是一种加密算法，不能用于对信息的保护。但 Ha
       
         
           
-          以太坊的介绍以太坊简介以太坊（Ethereum）项目的最初目标，是打造一个运行智能合约的平台（Platform for Smart Contract）。该平台支持图灵完备的应用，按照智能合约的约定逻辑自动执行，理想情况下将不存在故障停机、审查、欺诈，以及第三方干预等问题。
-以太坊平台目前支持 Golang、C++、Python 等多种语言实现的客户端。由于核心实现上基于比特币网络的核心思想进行了拓展，因此在很多设计特性上都与比特币网络十分类似。
-基于以太坊项目，以太坊团队目前运营了一条公开的区块链平台——以太坊网络。智能合约开发者使用官方提供的工具和以太坊专用应用开发语言 Solidity，可以很容易开发出运行在以太坊网络上的“去中
+          Chaincode 介绍chaincode作用Fabric的Chaincode是一段运行在容器中的程序。Chaincode是客户端程序和Fabric之间的桥梁。
+通过Chaincode客户端程序可以发起交易，查询交易。
+chaincode 运行环境Chaincode是运行在Dokcer容器中，因此相对来说安全。
+支持语言目前支持 java,node，go,go是最稳定的。其他还在完善。
+chaincode 运行和使用步骤
+创建代码目录
+mkdir -p  {path}
+
+存放编写好的chaincode源代码
+
+部署chaincode
+1peer chaincode install -n &#123;chaincodeId&#125;
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2019/01/28/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/4.%E4%BB%A5%E5%A4%AA%E5%9D%8A%E6%8A%80%E6%9C%AF%E6%A0%88/" rel="contents">
+            <a class="btn" href="/2019/06/11/12.%E5%8C%BA%E5%9D%97%E9%93%BE/Hyperledger%20fabric/4.Fabric%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6%E7%BC%96%E5%86%99/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1256,7 +734,7 @@ Hash 算法并不是一种加密算法，不能用于对信息的保护。但 Ha
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/01/28/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/3.%E6%AF%94%E7%89%B9%E5%B8%81%E6%8A%80%E6%9C%AF%E6%A0%88/">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/05/27/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/oauth2%E5%8E%9F%E7%90%86%E5%8F%8A%E5%BA%94%E7%94%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="刘小恺(Kyle)">
@@ -1275,8 +753,8 @@ Hash 算法并不是一种加密算法，不能用于对信息的保护。但 Ha
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2019/01/28/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/3.%E6%AF%94%E7%89%B9%E5%B8%81%E6%8A%80%E6%9C%AF%E6%A0%88/" itemprop="url">
-                  比特币技术栈
+                <a class="post-title-link" href="/2019/05/27/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/oauth2%E5%8E%9F%E7%90%86%E5%8F%8A%E5%BA%94%E7%94%A8/" itemprop="url">
+                  oauth2原理及应用
                 </a>
               
             
@@ -1302,725 +780,7 @@ Hash 算法并不是一种加密算法，不能用于对信息的保护。但 Ha
                 
               
 
-              <time title="创建时间：2019-01-28 14:00:00" itemprop="dateCreated datePublished" datetime="2019-01-28T14:00:00+08:00">2019-01-28</time>
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/" itemprop="url" rel="index"><span itemprop="name">区块链</span></a></span>
-
-                
-                
-                  ，
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/" itemprop="url" rel="index"><span itemprop="name">区块链概念</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2019/01/28/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/3.%E6%AF%94%E7%89%B9%E5%B8%81%E6%8A%80%E6%9C%AF%E6%A0%88/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/01/28/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/3.%E6%AF%94%E7%89%B9%E5%B8%81%E6%8A%80%E6%9C%AF%E6%A0%88/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          比特币设计原理比特币网络是一个分布式的点对点网络，网络中的矿工通过“挖矿”来完成对交易记录的记账过程，维护网络的正常运行。
-区块链网络提供一个公共可见的记账本，通过共识机制所有节点共同维护同一份账本，该记账本并非记录每个账户的余额，而是用来记录发生过的交易的历史信息。该设计可以避免重放攻击，即某个合法交易被多次重新发送造成攻击。
-其交易是通过销毁“未被花费的交易输出”(即UTXO)， 和创建新的UTXO来实现资金的流转；
-比特币可以理解为:  BTC = UTXO  +  共识机制 +  区块链账本
-比特币交易比特币交易系统—状态转移系统比特币中没有账户的概念。因此，每次发生交易，用户需要将交易记录写到比特币网络账本中，等网络确认后
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2019/01/28/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/3.%E6%AF%94%E7%89%B9%E5%B8%81%E6%8A%80%E6%9C%AF%E6%A0%88/" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/01/19/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D%E7%9A%84%E7%97%9B%E7%82%B9/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="刘小恺(Kyle)">
-      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/01/19/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D%E7%9A%84%E7%97%9B%E7%82%B9/" itemprop="url">
-                  供应链金融的痛点
-                </a>
-              
-            
-          </h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-01-19 10:00:00" itemprop="dateCreated datePublished" datetime="2019-01-19T10:00:00+08:00">2019-01-19</time>
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/" itemprop="url" rel="index"><span itemprop="name">区块链</span></a></span>
-
-                
-                
-                  ，
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D/" itemprop="url" rel="index"><span itemprop="name">供应链金融</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2019/01/19/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D%E7%9A%84%E7%97%9B%E7%82%B9/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/01/19/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D%E7%9A%84%E7%97%9B%E7%82%B9/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          供应链的介绍什么是供应链金融？
-供应链金融是指将供应链上的核心企业以及与其相关的上下游企业看做一个整体，以核心企业为依托，以真实的贸易为前提，运用自偿性贸易融资的方式，对供应链上下游企业提供的综合性金融产品服务。
-根据融资担保品的不同，金融机构将供应链金融分为应收账款类、预付类和存货类融资，其中应收账款类的规模尤为巨大。
-供应链金融痛点1.  供应链上的中小企业融资难供应链上的中小企业融资难，成本高。由于银行依赖的是核心企业的控货能力和调节销售能力，出于风控的考虑，银行仅愿意对核心企业有 直接，应付账款义务的上游供应商(仅限于一级供应商)提供保理服务，或者对其下游经销商（一级经销商），提供预付款或者存货融资。
-这就导致有巨大融资需求
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2019/01/19/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D%E7%9A%84%E7%97%9B%E7%82%B9/" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/01/12/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D%E4%B8%89%E7%A7%8D%E6%A8%A1%E5%BC%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="刘小恺(Kyle)">
-      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/01/12/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D%E4%B8%89%E7%A7%8D%E6%A8%A1%E5%BC%8F/" itemprop="url">
-                  供应链金融三种模式
-                </a>
-              
-            
-          </h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-01-12 10:00:00" itemprop="dateCreated datePublished" datetime="2019-01-12T10:00:00+08:00">2019-01-12</time>
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/" itemprop="url" rel="index"><span itemprop="name">区块链</span></a></span>
-
-                
-                
-                  ，
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D/" itemprop="url" rel="index"><span itemprop="name">供应链金融</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2019/01/12/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D%E4%B8%89%E7%A7%8D%E6%A8%A1%E5%BC%8F/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/01/12/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D%E4%B8%89%E7%A7%8D%E6%A8%A1%E5%BC%8F/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          什么是供应链金融供应链金融其本质是对供应链结构特点、交易细节的把握，将核心企业和上下游企业联系在一起提供灵活运用的金融产品和服务的一种融资模式。也就是把资金作为供应链的一个溶剂，增加其流动性。
-供应链金融促进供应链的发展体现在资金注入和信用注入两方面：一方面解决相对弱势的上、下游配套中小企业融资难和供应链地位失衡的问题；另一方面，将银行信用融入上、下游配套企业，实现其商业信用增级，促进配套企业与核心企业建立起长期战略协同关系，从而提升整个供应链的竞争能力。
-传统融资模式中银行与供应链成员的关系银行围绕某一家核心企业，从原材料采购，到最终产品，最后由销售网络把产品送到消费者手中这一条供应链，将供应商、制造商、分销商、零售商直到最终用户
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2019/01/12/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D/%E4%BE%9B%E5%BA%94%E9%93%BE%E9%87%91%E8%9E%8D%E4%B8%89%E7%A7%8D%E6%A8%A1%E5%BC%8F/" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/01/08/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/1.%E5%8C%BA%E5%9D%97%E9%93%BE%E4%BB%8B%E7%BB%8D/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="刘小恺(Kyle)">
-      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/01/08/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/1.%E5%8C%BA%E5%9D%97%E9%93%BE%E4%BB%8B%E7%BB%8D/" itemprop="url">
-                  区块链简介
-                </a>
-              
-            
-          </h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-01-08 14:00:00" itemprop="dateCreated datePublished" datetime="2019-01-08T14:00:00+08:00">2019-01-08</time>
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/" itemprop="url" rel="index"><span itemprop="name">区块链</span></a></span>
-
-                
-                
-                  ，
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/" itemprop="url" rel="index"><span itemprop="name">区块链概念</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2019/01/08/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/1.%E5%8C%BA%E5%9D%97%E9%93%BE%E4%BB%8B%E7%BB%8D/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/01/08/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/1.%E5%8C%BA%E5%9D%97%E9%93%BE%E4%BB%8B%E7%BB%8D/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          区块链介绍区块链的历史上世纪 80 年代和 90 年代的匿名电子现金协议主要使用了一种被称为“乔姆盲签（Chaumian Blinding）”的加密技术，这种技术为这些新货币提供了很高的隐私保护，但是由于他们的基础协议在很大程序上需要依赖于一个中央中介，因此未能获得支持。1998 年，戴伟（Wei Dai）的 b-money 首次引入了通过解决计算难题和去中心化的共识来创造货币的思想，但是该建议并未给出实现去中心化的共识的具体方法。2005 年，芬尼（Hal Finney）引入了“可重复的工作证明”（reusable proofs of work）概念，它同时使用 b-money 的思想和 Adam Back 提出的计算困难的哈希现
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2019/01/08/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/1.%E5%8C%BA%E5%9D%97%E9%93%BE%E4%BB%8B%E7%BB%8D/" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/01/05/11.Golang/Golang%E7%89%B9%E6%80%A7/golang%20%E5%B8%B8%E8%AF%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="刘小恺(Kyle)">
-      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/01/05/11.Golang/Golang%E7%89%B9%E6%80%A7/golang%20%E5%B8%B8%E8%AF%86/" itemprop="url">
-                  golang 常识
-                </a>
-              
-            
-          </h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2019-01-05 10:45:00" itemprop="dateCreated datePublished" datetime="2019-01-05T10:45:00+08:00">2019-01-05</time>
+              <time title="创建时间：2019-05-27 10:42:00" itemprop="dateCreated datePublished" datetime="2019-05-27T10:42:00+08:00">2019-05-27</time>
             
 
             
@@ -2045,7 +805,7 @@ Hash 算法并不是一种加密算法，不能用于对信息的保护。但 Ha
                   ，
                 
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Golang/Golang%E7%89%B9%E6%80%A7/" itemprop="url" rel="index"><span itemprop="name">Golang特性</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/" itemprop="url" rel="index"><span itemprop="name">Golang工具包</span></a></span>
 
                 
                 
@@ -2060,8 +820,8 @@ Hash 算法并不是一种加密算法，不能用于对信息的保护。但 Ha
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2019/01/05/11.Golang/Golang%E7%89%B9%E6%80%A7/golang%20%E5%B8%B8%E8%AF%86/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/01/05/11.Golang/Golang%E7%89%B9%E6%80%A7/golang%20%E5%B8%B8%E8%AF%86/" itemprop="commentCount"></span>
+                <a href="/2019/05/27/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/oauth2%E5%8E%9F%E7%90%86%E5%8F%8A%E5%BA%94%E7%94%A8/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/05/27/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/oauth2%E5%8E%9F%E7%90%86%E5%8F%8A%E5%BA%94%E7%94%A8/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -2091,13 +851,1290 @@ Hash 算法并不是一种加密算法，不能用于对信息的保护。但 Ha
       
         
           
-          golang  基础常识recover能处理所有的异常吗recover能处理程序主动触发的panic以及空指针访问、异常地址访问等错误，因此可以认为是能处理所有异常了。
-golang中常量是怎么实现的从汇编中看是对字符串常量加了一个标号，同时设置为SRODATA，也就是只读，对数字常量直接在代码中作为立即数使用了
-golang的make和new的区别是什么 new有点像c++里面的new,用来初始化各种type，然后返回其指针。 只不过由于没有构造函数的存在，所以全部用零值来填充，比较特殊的是slice,map,channel， 它们的零值都是nil。另外由于golang直接可以用&amp;struct{} 形式来初始化，所以平时用
+          OAuth2 的简单解释OAuth2 是目前比较流行的授权机制，用来授权第三方应用来使用用户的一些数据
+通过OAuth2可以比较简单的实现跨平台的资源共享，下面简单介绍一下OAuth2具体解决了哪方面的问题；
+一个关于小区送快递的场景在一个大型的居民小区，小区入口处的门有密码锁；
+
+进出门的时候，需要业主输入密码下能进入；
+
+但是小区经常会有外卖和快递员出入，快递员需要在有快件派送的时候有权限进入小区，现在必须有一种办法可以让快递员在没有账号密码的情况下通过门禁系统，进入小区
+
+如果业主将密码告诉了快递员， 那快递员就拥有了和业主一样的权限，快递员可以用密码反反复复出入小区, 好像并不能这样设计。
+小区授权机制设计对于以上问题，可以
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2019/01/05/11.Golang/Golang%E7%89%B9%E6%80%A7/golang%20%E5%B8%B8%E8%AF%86/" rel="contents">
+            <a class="btn" href="/2019/05/27/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/oauth2%E5%8E%9F%E7%90%86%E5%8F%8A%E5%BA%94%E7%94%A8/" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/05/22/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/go-micro%20%E6%A1%86%E6%9E%B6%E4%BD%BF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/05/22/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/go-micro%20%E6%A1%86%E6%9E%B6%E4%BD%BF%E7%94%A8/" itemprop="url">
+                  go-micro 框架使用
+                </a>
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-05-22 15:41:00" itemprop="dateCreated datePublished" datetime="2019-05-22T15:41:00+08:00">2019-05-22</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Golang/" itemprop="url" rel="index"><span itemprop="name">Golang</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/" itemprop="url" rel="index"><span itemprop="name">Golang工具包</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/05/22/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/go-micro%20%E6%A1%86%E6%9E%B6%E4%BD%BF%E7%94%A8/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/05/22/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/go-micro%20%E6%A1%86%E6%9E%B6%E4%BD%BF%E7%94%A8/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          Micro介绍什么是MicroMicro是一个着眼于分布式系统开发的微服务生态系统。
+Micro由开源的库与工具组成，旨在辅助微服务开发。
+Micro开源库
+go-micro - 基于Go语言的可插拔RPC微服务开发框架；包含服务发现、RPC客户/服务端、广播/订阅机制等等。
+go-plugins - go-micro的插件, 其包含etcd、kubernetes、nats、rabbitmq、grpc等等。
+micro - 微服务工具集包含传统的入口点（entry point）；API 网关、CLI、Slack Bot、代理及Web UI。
+文档位置: https://micro.mu/docs/
+
+
+下面主要介绍使用go-micr
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/05/22/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/go-micro%20%E6%A1%86%E6%9E%B6%E4%BD%BF%E7%94%A8/" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/05/20/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/xorm%E4%BD%BF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/05/20/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/xorm%E4%BD%BF%E7%94%A8/" itemprop="url">
+                  Go-xorm 使用
+                </a>
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-05-20 10:45:00" itemprop="dateCreated datePublished" datetime="2019-05-20T10:45:00+08:00">2019-05-20</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Golang/" itemprop="url" rel="index"><span itemprop="name">Golang</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/" itemprop="url" rel="index"><span itemprop="name">Golang工具包</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/05/20/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/xorm%E4%BD%BF%E7%94%A8/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/05/20/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/xorm%E4%BD%BF%E7%94%A8/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          Xorm 使用创建引擎
+创建引擎
+driverName, dataSourceName和database/sql接口相同
+
+
+第一种方法
+1234567891011import (    _ "github.com/go-sql-driver/mysql"    "github.com/go-xorm/xorm")var engine *xorm.Enginefunc main() &#123;    var err error    engine, err = xorm.NewEngine("mysql", "root:123@/test?charset=utf8")&#125;
+
+第二种方法
+1234567891011impor
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/05/20/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/xorm%E4%BD%BF%E7%94%A8/" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/04/29/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/%E4%BD%BF%E7%94%A8%20godoc%20%E7%94%9F%E6%88%90%E6%96%87%E6%A1%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/04/29/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/%E4%BD%BF%E7%94%A8%20godoc%20%E7%94%9F%E6%88%90%E6%96%87%E6%A1%A3/" itemprop="url">
+                  使用 godoc 生成文档
+                </a>
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-04-29 13:45:00" itemprop="dateCreated datePublished" datetime="2019-04-29T13:45:00+08:00">2019-04-29</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Golang/" itemprop="url" rel="index"><span itemprop="name">Golang</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/" itemprop="url" rel="index"><span itemprop="name">Golang工具包</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/04/29/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/%E4%BD%BF%E7%94%A8%20godoc%20%E7%94%9F%E6%88%90%E6%96%87%E6%A1%A3/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/04/29/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/%E4%BD%BF%E7%94%A8%20godoc%20%E7%94%9F%E6%88%90%E6%96%87%E6%A1%A3/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          代码注释规范godoc 支持package、const、 var 和func 这些代码生成文档，而且只会对首字母大写自动生成，而小写的私有方法不会被生成到文档，下面介绍下各种注释的使用方式
+Package
+在package name 代码上面，紧挨着代码进行注释
+注释内容中间不能有空行
+如果一个包中有多个包注释，就会把多个包的注释放在一起，并按照文件名的首字母顺序排序
+注释的格式为 package name [summery]     （summery可以是多行）
+注释最前面一句话会模块的summary会出现在package index中，第一句话以及之后的内容会出现在OverView中
+
+注释代码
+1234/*A web fram
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/04/29/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/%E4%BD%BF%E7%94%A8%20godoc%20%E7%94%9F%E6%88%90%E6%96%87%E6%A1%A3/" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/04/29/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/swagger%E4%BB%8E%E6%BA%90%E7%A0%81%E7%94%9F%E6%88%90spec/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/04/29/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/swagger%E4%BB%8E%E6%BA%90%E7%A0%81%E7%94%9F%E6%88%90spec/" itemprop="url">
+                  swagger从源码生成spec
+                </a>
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-04-29 13:45:00" itemprop="dateCreated datePublished" datetime="2019-04-29T13:45:00+08:00">2019-04-29</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Golang/" itemprop="url" rel="index"><span itemprop="name">Golang</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/" itemprop="url" rel="index"><span itemprop="name">Golang工具包</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/04/29/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/swagger%E4%BB%8E%E6%BA%90%E7%A0%81%E7%94%9F%E6%88%90spec/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/04/29/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/swagger%E4%BB%8E%E6%BA%90%E7%A0%81%E7%94%9F%E6%88%90spec/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          从源码生成spec文档spec 生成命令12345678910111213141516171819Usage:  swagger [OPTIONS] generate spec [spec-OPTIONS]generate a swagger spec document from a go applicationApplication Options:  -q, --quiet               silence logs  -o, --output&#x3D;LOG-FILE     redirect logs to fileHelp Options:  -h, --help                Show thi
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/04/29/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/swagger%E4%BB%8E%E6%BA%90%E7%A0%81%E7%94%9F%E6%88%90spec/" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/04/29/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/swagger%20spec%20%E7%9A%84%E7%BC%96%E5%86%99%E8%A7%84%E8%8C%83/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/04/29/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/swagger%20spec%20%E7%9A%84%E7%BC%96%E5%86%99%E8%A7%84%E8%8C%83/" itemprop="url">
+                  swagger spec 的编写规范
+                </a>
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-04-29 13:45:00" itemprop="dateCreated datePublished" datetime="2019-04-29T13:45:00+08:00">2019-04-29</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Golang/" itemprop="url" rel="index"><span itemprop="name">Golang</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/" itemprop="url" rel="index"><span itemprop="name">Golang工具包</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/04/29/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/swagger%20spec%20%E7%9A%84%E7%BC%96%E5%86%99%E8%A7%84%E8%8C%83/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/04/29/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/swagger%20spec%20%E7%9A%84%E7%BC%96%E5%86%99%E8%A7%84%E8%8C%83/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          一、Swagger简介什么是swaggerSwagger是一个简单但功能强大的API表达工具。它具有地球上最大的API工具生态系统，数以千计的开发人员，使用几乎所有的现代编程语言，都在支持和使用Swagger。使用Swagger生成API，我们可以得到交互式文档，自动生成代码的SDK以及API的发现特性等。
+Go swagger文档配置文件示例123456789101112131415161718192021222324252627282930313233343536373839404142434445464748swagger: "2.0"info:  description: From the todo list tutoria
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/04/29/11.Golang/Golang%E5%B7%A5%E5%85%B7%E5%8C%85/swagger%20spec%20%E7%9A%84%E7%BC%96%E5%86%99%E8%A7%84%E8%8C%83/" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/04/12/12.%E5%8C%BA%E5%9D%97%E9%93%BE/Hyperledger%20fabric/3.Fabric%20%E7%A4%BA%E4%BE%8B%E5%BA%94%E7%94%A8%E6%90%AD%E5%BB%BA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/04/12/12.%E5%8C%BA%E5%9D%97%E9%93%BE/Hyperledger%20fabric/3.Fabric%20%E7%A4%BA%E4%BE%8B%E5%BA%94%E7%94%A8%E6%90%AD%E5%BB%BA/" itemprop="url">
+                  Fabric 示例应用搭建
+                </a>
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-04-12 15:40:00" itemprop="dateCreated datePublished" datetime="2019-04-12T15:40:00+08:00">2019-04-12</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/" itemprop="url" rel="index"><span itemprop="name">区块链</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/Hyperledger-fabric/" itemprop="url" rel="index"><span itemprop="name">Hyperledger fabric</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/04/12/12.%E5%8C%BA%E5%9D%97%E9%93%BE/Hyperledger%20fabric/3.Fabric%20%E7%A4%BA%E4%BE%8B%E5%BA%94%E7%94%A8%E6%90%AD%E5%BB%BA/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/04/12/12.%E5%8C%BA%E5%9D%97%E9%93%BE/Hyperledger%20fabric/3.Fabric%20%E7%A4%BA%E4%BE%8B%E5%BA%94%E7%94%A8%E6%90%AD%E5%BB%BA/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          生成MSP身份文件配置crypto-config文件crypto-config.yaml文件：
+1234567891011121314151617181920212223242526272829OrdererOrgs:  - Name: Orderer    Domain: example.com    Specs:      - Hostname: ordererPeerOrgs:  - Name: Org1    Domain: org1.example.com    CA:       Hostname: ca # implicitly ca.org1.example.com    Template:      Count: 
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/04/12/12.%E5%8C%BA%E5%9D%97%E9%93%BE/Hyperledger%20fabric/3.Fabric%20%E7%A4%BA%E4%BE%8B%E5%BA%94%E7%94%A8%E6%90%AD%E5%BB%BA/" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2019/04/03/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/Ca%20%E4%B8%8E%20MSP%20%E7%9A%84%E4%BB%8B%E7%BB%8D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/04/03/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/Ca%20%E4%B8%8E%20MSP%20%E7%9A%84%E4%BB%8B%E7%BB%8D/" itemprop="url">
+                  Ca 与 MSP 的介绍
+                </a>
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-04-03 20:00:00" itemprop="dateCreated datePublished" datetime="2019-04-03T20:00:00+08:00">2019-04-03</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/" itemprop="url" rel="index"><span itemprop="name">区块链</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/" itemprop="url" rel="index"><span itemprop="name">区块链概念</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/04/03/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/Ca%20%E4%B8%8E%20MSP%20%E7%9A%84%E4%BB%8B%E7%BB%8D/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/04/03/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/Ca%20%E4%B8%8E%20MSP%20%E7%9A%84%E4%BB%8B%E7%BB%8D/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          关于加密的介绍对称加密（共享密钥加密）在对称加密算法中，加密使用的密钥和解密使用的密钥是相同的。也就是说，加密和解密都是使用的同一个密钥。因此对称加密算法要保证安全性的话，密钥要做好保密，只能让使用的人知道，不能对外公开。这个和上面的公钥密码体制有所不同，公钥密码体制中加密是用公钥，解密使用私钥，而对称加密算法中，加密和解密都是使用同一个密钥，不区分公钥和私钥。
+非对称加密（公开密钥加密 ）在非对称加密算法中，加密使用的密钥和解密使用的密钥是不相同的。也就是说加密使用的密钥和解密使用的密钥不同，因此它是一个非对称加密算法。
+数字签名类似在纸质合同上进行签名以确认合同内容和证明身份，数字签名既可以证实某数字内容的完整性，又可以确认其来
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/04/03/12.%E5%8C%BA%E5%9D%97%E9%93%BE/%E5%8C%BA%E5%9D%97%E9%93%BE%E6%A6%82%E5%BF%B5/Ca%20%E4%B8%8E%20MSP%20%E7%9A%84%E4%BB%8B%E7%BB%8D/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2142,7 +2179,7 @@ golang的make和new的区别是什么 new有点像c++里面的new,用来初始�
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/12/">&lt;上一页&gt;</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><span class="page-number current">13</span><a class="page-number" href="/page/14/">14</a><span class="space">&hellip;</span><a class="page-number" href="/page/31/">31</a><a class="extend next" rel="next" href="/page/14/">&lt;下一页&gt;</a>
+    <a class="extend prev" rel="prev" href="/page/12/">&lt;上一页&gt;</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><span class="page-number current">13</span><a class="page-number" href="/page/14/">14</a><span class="space">&hellip;</span><a class="page-number" href="/page/33/">33</a><a class="extend next" rel="next" href="/page/14/">&lt;下一页&gt;</a>
   </nav>
 
 
@@ -2189,7 +2226,7 @@ golang的make和new的区别是什么 new有点像c++里面的new,用来初始�
                 
                   <a href="/archives/%20%7C%7C%20archive">
                 
-                    <span class="site-state-item-count">310</span>
+                    <span class="site-state-item-count">326</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -2368,7 +2405,13 @@ golang的make和new的区别是什么 new有点像c++里面的new,用来初始�
                     
                       
                     
-                    <span class="site-state-item-count">83</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -2565,7 +2608,9 @@ golang的make和new的区别是什么 new有点像c++里面的new,用来初始�
                     
                       
                     
-                    <span class="site-state-item-count">92</span>
+                      
+                    
+                    <span class="site-state-item-count">93</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -2626,7 +2671,7 @@ golang的make和new的区别是什么 new有点像c++里面的new,用来初始�
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>

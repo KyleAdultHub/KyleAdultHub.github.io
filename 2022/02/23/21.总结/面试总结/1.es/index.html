@@ -128,7 +128,7 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223161501064.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20211222114227314.png">
 <meta property="article:published_time" content="2022-02-22T16:00:00.000Z">
-<meta property="article:modified_time" content="2023-01-29T08:46:09.367Z">
+<meta property="article:modified_time" content="2024-02-08T12:23:49.936Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="elasticsearch">
 <meta name="twitter:card" content="summary">
@@ -547,7 +547,7 @@
 </ol>
 <h2 id="Es-数据存储原理"><a href="#Es-数据存储原理" class="headerlink" title="Es 数据存储原理"></a>Es 数据存储原理</h2><h4 id="写入流程总结"><a href="#写入流程总结" class="headerlink" title="写入流程总结"></a><strong>写入流程总结</strong></h4><img src="/img/image-20220223153823350.png" alt="image-20220223153823350" style="zoom: 67%;" />
 
-<p>translog 其实也是先写入 os cache 的，默认每隔 5 秒刷一次到磁盘中去，所以默认写translog也不能保证数据不丢失，极端情况会丢失5s的数据；</p>
+<p>t<strong>ranslog 其实也是先写入 os cache 的，默认每隔 5 秒刷一次到磁盘中去</strong>，所以默认写translog也不能保证数据不丢失，极端情况会丢失5s的数据；</p>
 <p>整体流程：</p>
 <ol>
 <li>数据写入buffer缓冲和translog日志文件中。<br>当你写一条数据document的时候，一方面写入到mem buffer缓冲中，一方面同时写入到translog日志文件中。</li>
@@ -659,6 +659,12 @@
 <td>记录了segment中删除的doc</td>
 </tr>
 </tbody></table>
+<h3 id="es-索引-REINDEX"><a href="#es-索引-REINDEX" class="headerlink" title="es 索引 REINDEX"></a>es 索引 REINDEX</h3><p><strong>应用背景：</strong></p>
+<p>1、当你的数据量过大，而你的索引最初创建的分片数量不足，导致数据入库较慢的情况，此时需要扩大分片的数量，此时可以尝试使用Reindex。</p>
+<p>2、当数据的mapping需要修改，但是大量的数据已经导入到索引中了，重新导入数据到新的索引太耗时；但是在ES中，一个字段的mapping在定义并且导入数据之后是不能再修改的，</p>
+<p>所以这种情况下也可以考虑尝试使用Reindex。</p>
+<p><strong>如何进行reindex：</strong></p>
+<p>ES提供了_reindex这个API。相对于我们重新导入数据肯定会快不少，实测速度大概是bulk导入数据的5-10倍。</p>
 <h2 id="Lucene-数据结构"><a href="#Lucene-数据结构" class="headerlink" title="Lucene 数据结构"></a>Lucene 数据结构</h2><h3 id="Lucene的数据类型"><a href="#Lucene的数据类型" class="headerlink" title="Lucene的数据类型"></a><strong>Lucene的数据类型</strong></h3><p>Index：索引，由很多的Document组成。<br>Document：由很多的Field组成，是Index和Search的最小单位。<br>Field：由很多的Term组成，包括Field Name和Field Value。<br>Term：由很多的字节组成。一般将Text类型的Field Value分词之后的每个最小单元叫做Term。</p>
 <h3 id="各种查询结构总结："><a href="#各种查询结构总结：" class="headerlink" title="各种查询结构总结："></a>各种查询结构总结：</h3><ol>
 <li>FST(有穷状态装换器)：保存字符穿类型term字典索引，可以在FST上实现单Term、Term范围、Term前缀和通配符查询等。</li>
@@ -728,7 +734,78 @@
 <ul>
 <li>只有在调用runOptimize()方法才会发生转换，会分别和ArrayContainer、BitmapContainer比较空间占用大小，然后选择是否转换</li>
 </ul>
-<h2 id="ES-reindex"><a href="#ES-reindex" class="headerlink" title="ES reindex"></a>ES reindex</h2>
+<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><h3 id="ES-的一些优化手段"><a href="#ES-的一些优化手段" class="headerlink" title="ES 的一些优化手段"></a>ES 的一些优化手段</h3><h4 id="设计调优"><a href="#设计调优" class="headerlink" title="设计调优"></a>设计调优</h4><ol>
+<li>使用别名进行索引管理；</li>
+<li>根据业务增量需求，采取基于日期模板创建索引， 通过 roll over API 滚动索引</li>
+<li>每天凌晨定时对索引做force_merge操作，以释放空间；</li>
+<li>采取冷热分离机制，热数据存储到SSD，提高检索效率；冷数据定期进行<a href="https://www.zhihu.com/search?q=shrink&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22%3A%22answer%22%2C%22sourceId%22%3A2551351778%7D" target="_blank" rel="noopener">shrink</a>操作，以缩减存储； </li>
+<li>仅针对需要分词的字段，合理的设置<a href="https://www.zhihu.com/search?q=%E5%88%86%E8%AF%8D%E5%99%A8&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22%3A%22answer%22%2C%22sourceId%22%3A2551351778%7D" target="_blank" rel="noopener">分词器</a>； </li>
+<li>Mapping阶段充分结合各个字段的属性，是否需要检索、是否需要存储等。</li>
+</ol>
+<h4 id="写入调优"><a href="#写入调优" class="headerlink" title="写入调优"></a>写入调优</h4><ol>
+<li>写入前副本数设置为0；</li>
+<li>写入前关闭<a href="https://www.zhihu.com/search?q=refresh_interval&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22%3A%22answer%22%2C%22sourceId%22%3A2551351778%7D" target="_blank" rel="noopener">refresh_interval</a>设置为-1，禁用刷新机制；</li>
+<li>写入过程中：采取bulk批量写入；</li>
+<li>写入后恢复副本数和<a href="https://www.zhihu.com/search?q=%E5%88%B7%E6%96%B0%E9%97%B4%E9%9A%94&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22%3A%22answer%22%2C%22sourceId%22%3A2551351778%7D" target="_blank" rel="noopener">刷新间隔</a>；</li>
+<li>尽量使用自动生成的id。</li>
+</ol>
+<h4 id="查询调优"><a href="#查询调优" class="headerlink" title="查询调优"></a><strong>查询调优</strong></h4><ol>
+<li>禁用wildcard；（<a href="https://www.zhihu.com/search?q=%E9%80%9A%E9%85%8D%E7%AC%A6&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22%3A%22answer%22%2C%22sourceId%22%3A2551351778%7D" target="_blank" rel="noopener">通配符</a>模式，类似于%like%）</li>
+<li>禁用批量terms（成百上千的场景）；</li>
+<li>充分利用倒排索引机制，能keyword类型尽量keyword；</li>
+<li>数据量大时候，可以先基于时间敲定索引再检索；</li>
+<li>设置合理的路由机制。</li>
+</ol>
+<h4 id="linux-部署调优"><a href="#linux-部署调优" class="headerlink" title="linux 部署调优"></a>linux 部署调优</h4><ol>
+<li>关闭缓存swap;</li>
+</ol>
+<blockquote>
+<p> 原因：大多数<a href="https://www.zhihu.com/search?q=%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22%3A%22answer%22%2C%22sourceId%22%3A2551351778%7D" target="_blank" rel="noopener">操作系统</a>会将内存使用到文件系统缓存，会将应用程序未用到的内存交换出去。会导致<a href="https://www.zhihu.com/search?q=jvm&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22%3A%22answer%22%2C%22sourceId%22%3A2551351778%7D" target="_blank" rel="noopener">jvm</a>的堆内存交换到磁盘上。交换会导致性能问题。会导致内存<a href="https://www.zhihu.com/search?q=%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22%3A%22answer%22%2C%22sourceId%22%3A2551351778%7D" target="_blank" rel="noopener">垃圾回收</a>延长。会导致集群节点响应时间变慢，或者从集群中断开。</p>
+</blockquote>
+<ol start="2">
+<li>堆内存设置为：Min（节点内存/2, 32GB）;</li>
+<li>设置最大文件句柄数；</li>
+<li>调整<a href="https://www.zhihu.com/search?q=%E7%BA%BF%E7%A8%8B%E6%B1%A0&search_source=Entity&hybrid_search_source=Entity&hybrid_search_extra=%7B%22sourceType%22%3A%22answer%22%2C%22sourceId%22%3A2551351778%7D" target="_blank" rel="noopener">线程池</a>和队列大小</li>
+<li>磁盘存储 raid 方式</li>
+</ol>
+<h3 id="Es-mapping-的作用"><a href="#Es-mapping-的作用" class="headerlink" title="Es  mapping 的作用"></a>Es  mapping 的作用</h3><p> Mapping 类似于数据库中的表结构定义schema，它的主要作用是：用来定义索引中的字段的名称、定义字段的数据类型、定义字段类型的一些其它参数，比如字符串、数字、布尔字段，倒排索引的相关配置，设置某个字段为不被索引、记录 position 等。每一种数据类型都有对应的使用场景，并且每个文档都有映射，但是在大多数使用场景中，我们并不需要显示的创建映射，因为ES中实现了动态映射。</p>
+<p><strong>mapping 常用参数：text类型为例</strong></p>
+<ul>
+<li>analyzer：指明该字段用于索引时和搜索时的分析字符串的分词器（使用search_analyzer可覆盖它）。 默认为索引分析器或标准分词器</li>
+<li>fielddata：指明该字段是否可以使用内存中的fielddata进行排序，聚合或脚本编写？默认值为false，可取值true或false。（排序，分组需要指定为true）</li>
+<li>fields：【多数类型】text类型字段会被分词搜索，不能用于排序，而当字段既要能通过分词搜索，又要能够排序，就要设置fields为keyword类型进行聚合排序。</li>
+<li>index：【是否被索引】设置该字段是否可以用于搜索。默认为true，表示可以用于搜索</li>
+<li>search_analyzer：设置在搜索时，用于分析该字段的分析器，默认是【analyzer】参数的值。</li>
+<li>index_options：【索引选项】用于控制在索引过程中哪些信息会被写入到倒排索引中。<ul>
+<li>docs：只索引文档号到倒排索引中，但是并不会存储；</li>
+<li>freqs：文档号和关键词的出现频率会被索引，词频用于给文档进行评分，重复词的评分会高于单个次评分；</li>
+<li>positions：文档号、词频和关键词 term 的相对位置会被索引，相对位置可用于编辑距离计算和短语查询(不分词那种)；</li>
+<li>offsets：文档号、词频、关键词 term 的相对位置和该词的起始字符串偏移量。</li>
+</ul>
+</li>
+</ul>
+<h3 id="elasticsearch-master-选举的流程"><a href="#elasticsearch-master-选举的流程" class="headerlink" title="elasticsearch  master 选举的流程"></a>elasticsearch  master 选举的流程</h3><ol>
+<li>Elasticsearch 的选主是 ZenDiscovery 模块负责的， 主要包含 Ping（节点之间通过这个 RPC来发现彼此） 和 Unicast（单播模块包含一个主机列表以控制哪些节点需要ping 通） 这两部分；</li>
+<li>当备选master节点发现没有活跃的Master节点的时候， 进行选择；</li>
+<li>对所有可以成为 master 的节点（ node.master: true ）根据 nodeId 字典排序，每次选举每个节点都把自己所知道节点排一次序，然后选出第一个（第 0 位）节点，暂且认为它是 master 节点。</li>
+<li>如果对某个节点的投票数达到一定的值（可以成为 master 节点数 n/2+1， 改参数是可配置的：discovery.zen.minimum_master_nodes） 并且该节点自己也选举自己， 那这个节点就是 master。否则重新选举一直到满足上述条件。</li>
+<li>补充： master 节点的职责主要包括集群、节点和索引的管理， 不负责文档级别的管理； data节点可以关闭 http 功能。</li>
+</ol>
+<h3 id="Term-和Match-的区别"><a href="#Term-和Match-的区别" class="headerlink" title="Term 和Match 的区别"></a>Term 和Match 的区别</h3><ul>
+<li>term： 不会对搜索词进行分词，只会和doc的内容进行精准匹配，一般是keyword类型字段使用该搜索方式</li>
+<li>match：会对搜索词进行分词， 搜索包含分词后内容的doc</li>
+</ul>
+<h3 id="ES为什么不使用B-树作为索引"><a href="#ES为什么不使用B-树作为索引" class="headerlink" title="ES为什么不使用B+树作为索引"></a>ES为什么不使用B+树作为索引</h3><ul>
+<li>全文索引的文本字段通常会比较长，索引值本身会占用较大空间，从而会加大 B+ 树的深度，影响查询效率。</li>
+<li>全文索引往往需要全文搜索，不遵循最左匹配原则，使用 B+ 树可能导致索引失效。</li>
+</ul>
+<h3 id="ES-怎么实现拼写纠错"><a href="#ES-怎么实现拼写纠错" class="headerlink" title="ES 怎么实现拼写纠错"></a>ES 怎么实现拼写纠错</h3><p>通过fuzzy查询实现</p>
+<h3 id="ES-如何避免脑裂的"><a href="#ES-如何避免脑裂的" class="headerlink" title="ES 如何避免脑裂的"></a>ES 如何避免脑裂的</h3><p>discovery.zen.minimum_master_nodes:1</p>
+<p>该参数的意思是，当具备成为主节点的从节点的个数满足这个数字且都认为主节点挂了则会进行选举产生新的主节点。</p>
+<p>例如：es集群有三个从节点有资格成为主节点，这时这三个节点都认为主节点挂了则会进行选举，此时如果这个参数的值是4则不会进行选举。</p>
+<p>我们可以适当的把这个值改大，减少出现脑裂的概率，官方给出的建议是(n/2)+1,n为有资格成为主节点的节点数node.master=true。</p>
+<p>当然elasticsearch 会通过阉割n个master备选阶段的选举权利， 来满足新出master节点的条件</p>
+
       
     </div>
 
@@ -882,7 +959,7 @@
                 
                   <a href="/archives/%20%7C%7C%20archive">
                 
-                    <span class="site-state-item-count">310</span>
+                    <span class="site-state-item-count">326</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -1061,7 +1138,13 @@
                     
                       
                     
-                    <span class="site-state-item-count">83</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -1258,7 +1341,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">92</span>
+                      
+                    
+                    <span class="site-state-item-count">93</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -1308,7 +1393,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Es分布式原理"><span class="nav-text">Es分布式原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ES分布式集群特点"><span class="nav-text">ES分布式集群特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES-集群架构"><span class="nav-text">ES 集群架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Es分布式数据存储形式"><span class="nav-text">Es分布式数据存储形式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES分片Shard的特点"><span class="nav-text">ES分片Shard的特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何路由一个文档到一个分片中"><span class="nav-text">如何路由一个文档到一个分片中</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分片全文检索过程"><span class="nav-text">分片全文检索过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Es-数据存储原理"><span class="nav-text">Es 数据存储原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#写入流程总结"><span class="nav-text">写入流程总结</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Segment段合并"><span class="nav-text">Segment段合并</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-数据删除"><span class="nav-text">LUCENE 数据删除</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-数据更新"><span class="nav-text">LUCENE 数据更新</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ES如何处理冲突-比如并发修改同一docId"><span class="nav-text">*ES如何处理冲突 ( 比如并发修改同一docId ) *</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-内文件构成"><span class="nav-text">LUCENE 内文件构成</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lucene-数据结构"><span class="nav-text">Lucene 数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Lucene的数据类型"><span class="nav-text">Lucene的数据类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#各种查询结构总结："><span class="nav-text">各种查询结构总结：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何实现返回结果进行排序聚合"><span class="nav-text">如何实现返回结果进行排序聚合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Roaring-Bitmap-数据结构"><span class="nav-text">Roaring Bitmap 数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#三种Container"><span class="nav-text">三种Container</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RoaringBitmap的优化策略"><span class="nav-text">RoaringBitmap的优化策略</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ES-reindex"><span class="nav-text">ES reindex</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Es分布式原理"><span class="nav-text">Es分布式原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ES分布式集群特点"><span class="nav-text">ES分布式集群特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES-集群架构"><span class="nav-text">ES 集群架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Es分布式数据存储形式"><span class="nav-text">Es分布式数据存储形式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES分片Shard的特点"><span class="nav-text">ES分片Shard的特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何路由一个文档到一个分片中"><span class="nav-text">如何路由一个文档到一个分片中</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分片全文检索过程"><span class="nav-text">分片全文检索过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Es-数据存储原理"><span class="nav-text">Es 数据存储原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#写入流程总结"><span class="nav-text">写入流程总结</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Segment段合并"><span class="nav-text">Segment段合并</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-数据删除"><span class="nav-text">LUCENE 数据删除</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-数据更新"><span class="nav-text">LUCENE 数据更新</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ES如何处理冲突-比如并发修改同一docId"><span class="nav-text">*ES如何处理冲突 ( 比如并发修改同一docId ) *</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LUCENE-内文件构成"><span class="nav-text">LUCENE 内文件构成</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#es-索引-REINDEX"><span class="nav-text">es 索引 REINDEX</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Lucene-数据结构"><span class="nav-text">Lucene 数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Lucene的数据类型"><span class="nav-text">Lucene的数据类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#各种查询结构总结："><span class="nav-text">各种查询结构总结：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何实现返回结果进行排序聚合"><span class="nav-text">如何实现返回结果进行排序聚合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Roaring-Bitmap-数据结构"><span class="nav-text">Roaring Bitmap 数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#三种Container"><span class="nav-text">三种Container</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RoaringBitmap的优化策略"><span class="nav-text">RoaringBitmap的优化策略</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常见问题"><span class="nav-text">常见问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ES-的一些优化手段"><span class="nav-text">ES 的一些优化手段</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#设计调优"><span class="nav-text">设计调优</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#写入调优"><span class="nav-text">写入调优</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#查询调优"><span class="nav-text">查询调优</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#linux-部署调优"><span class="nav-text">linux 部署调优</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Es-mapping-的作用"><span class="nav-text">Es  mapping 的作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#elasticsearch-master-选举的流程"><span class="nav-text">elasticsearch  master 选举的流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Term-和Match-的区别"><span class="nav-text">Term 和Match 的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES为什么不使用B-树作为索引"><span class="nav-text">ES为什么不使用B+树作为索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES-怎么实现拼写纠错"><span class="nav-text">ES 怎么实现拼写纠错</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ES-如何避免脑裂的"><span class="nav-text">ES 如何避免脑裂的</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -1335,7 +1420,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>

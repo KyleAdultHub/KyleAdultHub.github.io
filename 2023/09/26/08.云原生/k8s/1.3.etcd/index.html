@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Etcd介绍Etcd是CoreOS基于Raft开发的分布式key-value存储，可用于服务发现、共享配置以及一致性保障（如数据库选主、分布式锁等）。  在分布式系统中，如何管理节点间的状态一直是一个难题，etcd像是专门为集群环境的服务发现和注册而设计，它提供了数据TTL失效、数据监听、分布式锁原子操作等功能，可以方便的跟踪并管理集群节点的状态。   键值对存储：将数据存储在分层组织的目录中，如">
+<meta property="og:type" content="article">
+<meta property="og:title" content="etcd">
+<meta property="og:url" content="http://blog.kyleliu.cn/2023/09/26/08.%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/1.3.etcd/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle)的云笔记">
+<meta property="og:description" content="Etcd介绍Etcd是CoreOS基于Raft开发的分布式key-value存储，可用于服务发现、共享配置以及一致性保障（如数据库选主、分布式锁等）。  在分布式系统中，如何管理节点间的状态一直是一个难题，etcd像是专门为集群环境的服务发现和注册而设计，它提供了数据TTL失效、数据监听、分布式锁原子操作等功能，可以方便的跟踪并管理集群节点的状态。   键值对存储：将数据存储在分层组织的目录中，如">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/09/26/img/etcd/image-20231002113043979.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/09/26/img/etcd/image-20231002114332028.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/09/26/img/etcd/image-20231004094024778.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/09/26/img/etcd/image-20231004081814873.png">
+<meta property="article:published_time" content="2023-09-25T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-01-06T14:00:13.167Z">
+<meta property="article:author" content="刘小恺(Kyle)">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/2023/09/26/img/etcd/image-20231002113043979.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2023/09/26/08.云原生/k8s/1.3.etcd/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>etcd | 刘小恺(Kyle)的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle)的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2023/09/26/08.%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/1.3.etcd/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">etcd
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2023-09-26 00:00:00" itemprop="dateCreated datePublished" datetime="2023-09-26T00:00:00+08:00">2023-09-26</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/" itemprop="url" rel="index"><span itemprop="name">云原生</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/09/26/08.%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/1.3.etcd/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2023/09/26/08.%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/1.3.etcd/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="Etcd"><a href="#Etcd" class="headerlink" title="Etcd"></a>Etcd</h2><h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>Etcd是CoreOS<strong>基于Raft</strong>开发的<strong>分布式key-value存储</strong>，可用于服务发现、共享配置以及一致性保障（如数据库选主、分布式锁等）。 </p>
+<p>在分布式系统中，如何管理节点间的状态一直是一个难题，etcd像是专门为集群环境的服务发现和注册而设计，它提供了数据TTL失效、数据监听、分布式锁原子操作等功能，可以方便的跟踪并管理集群节点的状态。 </p>
+<ul>
+<li>键值对存储：将数据存储在分层组织的目录中，如同在标准文件系统中 </li>
+<li>监测变更：监测特定的键或目录以进行更改，并对值的更改做出反应 </li>
+<li>简单: curl可访问的用户的API（HTTP+JSON） </li>
+<li>安全: 可选的SSL客户端证书认证 </li>
+<li>快速: 单实例每秒1000次写操作，2000+次读操作 </li>
+<li>可靠: 使用Raft算法保证一致性</li>
+</ul>
+<h3 id="主要功能"><a href="#主要功能" class="headerlink" title="主要功能"></a>主要功能</h3><ul>
+<li>基本的key-value存储 </li>
+<li>监听机制 </li>
+<li>key的过期及续约机制，用于监控和服务发现 </li>
+<li>原子Compare And Swap和Compare And Delete，用于分布式锁和leader选举</li>
+</ul>
+<h2 id="etcd-使用的介绍"><a href="#etcd-使用的介绍" class="headerlink" title="etcd 使用的介绍"></a>etcd 使用的介绍</h2><h3 id="etcd-的启动参数讲解"><a href="#etcd-的启动参数讲解" class="headerlink" title="etcd 的启动参数讲解"></a>etcd 的启动参数讲解</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">etcd --listen-client-urls 'http://localhost:12379' \</span><br><span class="line"> --advertise-client-urls 'http://localhost:12379' \</span><br><span class="line"> --listen-peer-urls 'http://localhost:12380' \</span><br><span class="line"> --initial-advertise-peer-urls 'http://localhost:12380' \</span><br><span class="line"> --initial-cluster 'default=http://localhost:12380'</span><br><span class="line"> </span><br><span class="line"><span class="meta"> #</span><span class="bash"> listen-client-urls   监听客户端连接的 URL 列表。当用户通过 etcdctl 或者 API 发起请求时，就会使用这些 URL 进行通信。</span></span><br><span class="line"><span class="meta"> #</span><span class="bash"> advertise-client-urls   告诉客户端自己的地址，以便它们能够正确地连接到该节点。</span></span><br><span class="line"><span class="meta"> #</span><span class="bash"> listen-peer-urls    监听同伴（peer）节点连接的 URL 列表。</span></span><br><span class="line"><span class="meta"> #</span><span class="bash"> initial-advertise-peer-urls  告诉其他同伴节点自己的地址，用于新节点加入时进行发现。</span></span><br><span class="line"><span class="meta"> #</span><span class="bash"> initial-cluster  用于指定初始的同伴节点列表。</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="ETCD-常用命令"><a href="#ETCD-常用命令" class="headerlink" title="ETCD 常用命令"></a>ETCD 常用命令</h3><h4 id="查看集群成员列表"><a href="#查看集群成员列表" class="headerlink" title="查看集群成员列表"></a>查看集群成员列表</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">etcdctl member list --write-out=table</span><br><span class="line"><span class="meta">#</span><span class="bash"> --endpoints 指定server节点</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="读写数据"><a href="#读写数据" class="headerlink" title="读写数据"></a>读写数据</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 写入数据</span></span><br><span class="line">etcdctl --endpoints=localhost:12379  put  /a  b</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 读取数据</span></span><br><span class="line">etcdctl --endpoints=localhost:12379  get  /a</span><br><span class="line"><span class="meta">#</span><span class="bash"> --prefix 按照前缀查询</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> --keys-only 只显示键值</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> -w 指定输出格式  json</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> --debug 输出debug 信息</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 监听key</span></span><br><span class="line">etcdctl --endpoints=localhost:12379  watch  /a</span><br><span class="line"><span class="meta">#</span><span class="bash"> --prefix 按照前缀查询</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="ETCD-V3-存储架构"><a href="#ETCD-V3-存储架构" class="headerlink" title="ETCD  V3  存储架构"></a>ETCD  V3  存储架构</h2><p><img src="../../../img/etcd/image-20231002113043979.png" alt="image-20231002113043979"></p>
+<p>Etcd v3 将 watch 和 store 拆开实现，我们先分析下 store 的实现。etcd v3 store 分为两部分: </p>
+<ul>
+<li>一部分是内存中的索引，kvindex，是基于Google开源的一个Golang的btree实现的</li>
+<li>另外一部分是后端存储。按照它的设计，backend可以对接多种存储，当前使用的boltdb。是一个单机的支持事务的kv存储，etcd 的事务是基于boltdb的事务实现的。</li>
+</ul>
+<p>etcd 在每次修改 key 时会生成一个全局递增的版本号（revision）。</p>
+<ul>
+<li>然后通过数据结构 B-tree 保存用户 key 与版本号之间的关系；</li>
+<li>再以版本号作为 boltdb key，以用户的 key-value 等信息作为 boltdb value，保存到 boltdb。也就是说 etcd 会在boltdb中把每个版本都保存下，从而实现了多版本机制。</li>
+</ul>
+<p><strong>reversion的结构</strong></p>
+<p>reversion主要由两部分组成，第一部分main rev，每次事务进行加一，第二部分sub rev，同一个事务中的每次操作加一。</p>
+<p>etcd 提供了命令和设置选项来控制compact来进行版本压缩，同时支持put操作的参数来精确控制某个key的历史版本数。</p>
+<p>内存kvindex保存的就是key和reversion之间的映射关系，用来加速查询。</p>
+<h2 id="ETCD-V3-写入完整流程"><a href="#ETCD-V3-写入完整流程" class="headerlink" title="ETCD  V3  写入完整流程"></a>ETCD  V3  写入完整流程</h2><h3 id="写入流程"><a href="#写入流程" class="headerlink" title="写入流程"></a>写入流程</h3><p><img src="../../../img/etcd/image-20231002114332028.png" alt="image-20231002114332028"></p>
+<ol>
+<li>配额、限速、鉴权、包的检查</li>
+<li>请求发送到kvserver 核心处理组件</li>
+<li>请求包装成propose，发送到一致性模块，进行暂存，标记raftlog数据为unstable</li>
+<li>将请求发送给所有follower进行数据同步， 并写入到WAL 日志</li>
+<li>收到半数写入成功后，将 mem中的raftlog unstable的数据变为commited, 更新matchIndex(可以理解为commitIndex)</li>
+<li>数据写入到多版本控制模块， 并更新mem中的 raftlog commited数据为apply， 更新applyIndex</li>
+</ol>
+<h3 id="为什么Committed-Index-和applyindex-不需要存储"><a href="#为什么Committed-Index-和applyindex-不需要存储" class="headerlink" title="为什么Committed Index 和applyindex 不需要存储"></a>为什么Committed Index 和applyindex 不需要存储</h3><p>这个和日志复制的机制有关系。首先对于选举，PK的条件不是拼这两个索引值的大小，PK的是最后一条日志的任期号和日志的长度。Leader当选后进行第一次日志复制时，会和Follower进行若干次日志的匹配过程，最终可以得到Leader和各自Follower的日志匹配的matchIndex值。处于majority节点列表的matchIndex的最小值就是当前Leader的commitIndex。所以commitIndex值是完全可以动态计算出来的。</p>
+<p>如果所有的日志都保留不截断的话，服务器重启时applyIndex应该等于零。然后重放一下所有的已经提交的日志就可以得到当前的状态机。如果日志截断有快照的话，applyIndex应该正好是日志序列的头部位置，这个位置一般是存储在快照元信息里面的，它是持久化在磁盘中的。</p>
+<h2 id="ETCD-Watch机制"><a href="#ETCD-Watch机制" class="headerlink" title="ETCD Watch机制"></a>ETCD Watch机制</h2><p>etcd v3 的watch机制支持watch某个固定的key，也支持watch一个范围（可以用于模拟目录的结构的watch），所以 watchGroup 包含两种watcher，一种是 key watchers，数据结构是每个key对应一组watcher，另外一种是 range watchers, 数据结构是一个 IntervalTree，方便通过区间查找到对应的watcher。</p>
+<p>同时，每个 WatchableStore 包含两种 watcherGroup，一种是synced，一种是unsynced，前者表示该group的watcher数据都已经同步完毕，在等待新的变更，后者表示该group的watcher数据同步落后于当前最新变更，还在追赶。</p>
+<p>当 etcd 收到客户端的watch请求，如果请求携带了revision参数，则比较请求的revision和store当前的revision，如果大于当前revision，则放入synced组中，否则放入unsynced组。同时 etcd 会启动一个后台的goroutine持续同步unsynced的watcher，然后将其迁移到synced组。</p>
+<p>也就是这种机制下，etcd v3 支持从任意版本开始watch，没有v2的1000条历史event表限制的问题（当然这是指没有compact的情况下）</p>
+<h2 id="etcd-相关参数"><a href="#etcd-相关参数" class="headerlink" title="etcd 相关参数"></a>etcd 相关参数</h2><h3 id="成员相关参数"><a href="#成员相关参数" class="headerlink" title="成员相关参数"></a>成员相关参数</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">--name 'default'</span><br><span class="line"><span class="meta">#</span><span class="bash"> Human-readable name <span class="keyword">for</span> this member.</span></span><br><span class="line">--data-dir '$&#123;name&#125;.etcd' </span><br><span class="line"><span class="meta">#</span><span class="bash"> Path to the data directory.  数据存储目录</span></span><br><span class="line">--listen-peer-urls 'http://localhost:2380' </span><br><span class="line"><span class="meta">#</span><span class="bash"> List of URLs to listen on <span class="keyword">for</span> peer traffic.  本节点与其他节点进行数据交换(选举，数据同步)的监听地址</span></span><br><span class="line">--listen-client-urls 'http://localhost:2379'</span><br><span class="line"><span class="meta">#</span><span class="bash"> List of URLs to listen on <span class="keyword">for</span> client traffic.  监听地址，地址写法是 scheme://IP:port</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="集群相关参数"><a href="#集群相关参数" class="headerlink" title="集群相关参数"></a>集群相关参数</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">--initial-advertise-peer-urls 'http://localhost:2380'</span><br><span class="line"><span class="meta">#</span><span class="bash"> List of this member<span class="string">'s peer URLs to advertise to the rest of the cluster. 告知其他集群节点访问哪个URL,initial-advertise-peer-urlsl将是istener-peer-urls的子集</span></span></span><br><span class="line">--initial-cluster 'default=http://localhost:2380'</span><br><span class="line"><span class="meta">#</span><span class="bash"> Initial cluster configuration <span class="keyword">for</span> bootstrapping.  此处default为节点的--name指定的名字；localhost:2380为--initial-advertise-peer-urls指定的值。</span></span><br><span class="line">--initial-cluster-state 'new'</span><br><span class="line"><span class="meta">#</span><span class="bash"> Initial cluster state (<span class="string">'new'</span> or <span class="string">'existing'</span>). 设置new为初始静态或DNS引导期间出现的所有成员。如果将此选项设置为existing，则etcd将尝试加入现有群集。</span></span><br><span class="line">--initial-cluster-token 'etcd-cluster'</span><br><span class="line"><span class="meta">#</span><span class="bash"> Initial cluster token <span class="keyword">for</span> the etcd cluster during bootstrap.  集群唯一标识，相同标识的节点将视为在一个集群内</span></span><br><span class="line">--advertise-client-urls 'http://localhost:2379'</span><br><span class="line"><span class="meta">#</span><span class="bash"> List of this member<span class="string">'s client URLs to advertise to the public.  用于通知其他ETCD节点，客户端接入本节点的监听地址，一般来说advertise-client-urls是listen-client-urls子集</span></span></span><br></pre></td></tr></table></figure>
+
+<h3 id="安全相关参数"><a href="#安全相关参数" class="headerlink" title="安全相关参数"></a>安全相关参数</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">--cert-file ''</span><br><span class="line"><span class="meta">#</span><span class="bash"> Path to the client server TLS cert file.  客户端服务器TLS证书文件的路径。</span></span><br><span class="line">--key-file ''</span><br><span class="line"><span class="meta">#</span><span class="bash"> Path to the client server TLS key file.  客户端服务器TLS密钥文件的路径</span></span><br><span class="line">--client-crl-file ''</span><br><span class="line"><span class="meta">#</span><span class="bash"> Path to the client certificate revocation list file.  客户端证书吊销列表文件的路径</span></span><br><span class="line">--trusted-ca-file ''</span><br><span class="line"><span class="meta">#</span><span class="bash"> Path to the client server TLS trusted CA cert file.  客户端服务器的路径TLS可信CA证书文件</span></span><br><span class="line">--peer-cert-file ''</span><br><span class="line"><span class="meta">#</span><span class="bash"> Path to the peer server TLS cert file.  对等服务器TLS证书文件的路径。</span></span><br><span class="line">--peer-key-file ''</span><br><span class="line"><span class="meta">#</span><span class="bash"> Path to the peer server TLS key file.  对等服务器TLS密钥文件的路径。</span></span><br><span class="line">--peer-trusted-ca-file ''</span><br><span class="line"><span class="meta">#</span><span class="bash"> Path to the peer server TLS trusted CA file.  对等服务器TLS可信CA文件的路径</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="灾备"><a href="#灾备" class="headerlink" title="灾备"></a>灾备</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 创建Snapshot</span></span><br><span class="line">etcdctl --endpoints https://127.0.0.1:3379 --cert /tmp/etcd-certs/certs/127.0.0.1.pem --</span><br><span class="line">key /tmp/etcd-certs/certs/127.0.0.1-key.pem --cacert /tmp/etcd-certs/certs/ca.pem</span><br><span class="line">snapshot save snapshot.db</span><br><span class="line"><span class="meta">#</span><span class="bash"> 恢复数据到数据目录</span></span><br><span class="line">etcdctl snapshot restore snapshot.db \</span><br><span class="line">--name infra2 \</span><br><span class="line">--data-dir=/tmp/etcd/infra2 \</span><br><span class="line">--initial-cluster </span><br><span class="line">infra0=http://127.0.0.1:3380,infra1=http://127.0.0.1:4380,infra2=http://127.0.0.1:5380 \</span><br><span class="line">--initial-cluster-token etcd-cluster-1 \</span><br><span class="line">--initial-advertise-peer-urls http://127.0.0.1:5380</span><br></pre></td></tr></table></figure>
+
+<h3 id="Alarm-amp-Disarm-Alarm"><a href="#Alarm-amp-Disarm-Alarm" class="headerlink" title="Alarm &amp; Disarm Alarm"></a><strong>Alarm &amp; Disarm Alarm</strong></h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 查看endpoint状态</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> ETCDCTL_API=3 etcdctl --write-out=table endpoint status</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看alarm</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> ETCDCTL_API=3 etcdctl alarm list</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 清理alarm</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> ETCDCTL_API=3 etcdctl alarm disarm</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="碎片清理"><a href="#碎片清理" class="headerlink" title="碎片清理"></a>碎片清理</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 方法一 自动清理</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> keep one hour of <span class="built_in">history</span></span></span><br><span class="line"><span class="meta">$</span><span class="bash"> etcd --auto-compaction-retention=1</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 方法二 手动清理</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> compact up to revision 3</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> etcdctl compact 3</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> clean up disk fragment  碎片整理过程会将此存储空间释放回文件系统。</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> etcdctl defrag </span></span><br><span class="line">Finished defragmenting etcd member[127.0.0.1:2379]</span><br></pre></td></tr></table></figure>
+
+<h2 id="etcd-集群高可用实践"><a href="#etcd-集群高可用实践" class="headerlink" title="etcd 集群高可用实践"></a>etcd 集群高可用实践</h2><h3 id="最合适的peer个数"><a href="#最合适的peer个数" class="headerlink" title="最合适的peer个数"></a>最合适的peer个数</h3><ul>
+<li>通常为5个， 可以允许2个节点挂掉不影响正常运行</li>
+<li>还需要考虑是否为多读少写， 因为所有写都经过leader</li>
+</ul>
+<h3 id="apiserver和etcd-部署"><a href="#apiserver和etcd-部署" class="headerlink" title="apiserver和etcd 部署"></a>apiserver和etcd 部署</h3><ul>
+<li>apiserver和etcd 部署在同一节点</li>
+<li>apiserver和etcd之间的通讯基于gRPC</li>
+</ul>
+<h3 id="存储的规划"><a href="#存储的规划" class="headerlink" title="存储的规划"></a>存储的规划</h3><ul>
+<li>最佳实践： Local SSD  + auto compact(etcd 支持使用–auto-compact自动合并版本)</li>
+</ul>
+<h3 id="事件分离"><a href="#事件分离" class="headerlink" title="事件分离"></a>事件分离</h3><ul>
+<li><p>对于大规模集群，大量的事件会对etcd造成压力， 可以将一些特定事件流量转到 extra etcd</p>
+</li>
+<li><p>API server 启动脚本中指定etcd servers集群</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/bin/kube-apiserver --etcd_servers=https://localhost:4001 --etcd-cafile=/etc/ssl/kubernetes/ca.crt --storage-backend=etcd3 --etcd-servers-overrides=/events#https://localhost:4002</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="减少网络延迟"><a href="#减少网络延迟" class="headerlink" title="减少网络延迟"></a>减少网络延迟</h3><ul>
+<li>数据中心内的RTT大概是数毫秒，国内的典型RTT约为50ms，两大洲之间的RTT可能慢至400ms。因此建议etcd集群尽量同地域部署。</li>
+<li>当客户端到Leader的并发连接数量过多，可能会导致其他Follower节点发往Leader的请求因为网络拥塞而被延迟处理。</li>
+<li>可以在节点上通过流量控制工具（Traffic Control）提高etcd成员之间发送数据的优先级来避免。</li>
+</ul>
+<h3 id="减少磁盘IO延迟"><a href="#减少磁盘IO延迟" class="headerlink" title="减少磁盘IO延迟"></a>减少磁盘IO延迟</h3><ul>
+<li>对于磁盘延迟，典型的旋转磁盘写延迟约为10毫秒。对于SSD（Solid State Drives，固态硬盘），延迟通常低于1毫秒。HDD（Hard Disk Drive，硬盘驱动器）或者网盘在大量数据读写操作的情况下延时会不稳定。因此强烈建议使用SSD。</li>
+<li>同时为了降低其他应用程序的I/O操作对etcd的干扰，建议将etcd的数据存放在单独的磁盘内。</li>
+<li>如果不可避免地，etcd和其他的业务共享存储磁盘，那么就需要通过下面ionice命令对etcd服务设置更高的磁盘I/O优先级，尽可能避免其他进程的影响。</li>
+</ul>
+<h3 id="合理的日志文件大小"><a href="#合理的日志文件大小" class="headerlink" title="合理的日志文件大小"></a>合理的日志文件大小</h3><ul>
+<li><p>etcd以日志的形式保存数据，无论是数据创建还是修改，它都将操作追加到日志文件，因此日志文件大小会随着数据修改次数而线性增长。</p>
+<p>当Kubernetes集群规模较大时，其对etcd集群中的数据更改也会很频繁，集群日记文件会迅速增长。</p>
+<p>为了有效降低日志文件大小，etcd会以固定周期创建快照保存系统的当前状态，并移除旧日志文件。另外当修改次数累积到一定的数量（默认是10000，通过参数“–snapshot-count”指定），etcd也会创建快照文件。</p>
+<p>如果etcd的内存使用和磁盘使用过高，可以先分析是否数据写入频度过大导致快照频度过高，确认后可通过调低快照触发的阈值来降低其对内存和磁盘的使用。</p>
+</li>
+</ul>
+<h3 id="合理的存储配额"><a href="#合理的存储配额" class="headerlink" title="合理的存储配额"></a>合理的存储配额</h3><p>存储空间的配额用于控制etcd数据空间的大小。合理的存储配额可保证集群操作的可靠性。如果没有存储配额，也就是etcd可以利用整个磁盘空间，etcd的性能会因为存储空间的持续增长而严重下降，甚至有耗完集群磁盘空间导致不可预测集群行为的风险。如果设置的存储配额太小，一旦其中一个节点的后台数据库的存储空间超出了存储配额，etcd就会触发集群范围的告警，并将集群置于只接受读和删除请求的维护模式。只有在释放足够的空间、消除后端数据库的碎片和清除存储配额告警之后，集群才能恢复正常操作。</p>
+<h3 id="自动压缩历史版本"><a href="#自动压缩历史版本" class="headerlink" title="自动压缩历史版本"></a><strong>自动压缩历史版本</strong></h3><ul>
+<li>etcd会为每个键都保存了历史版本。为了避免出现性能问题或存储空间消耗完导致写不进去的问题，这些历史版本需要进行周期性地压缩。压缩历史版本就是丢弃该键给定版本之前的所有信息，节省出来的空间可以用于后续的写操作。etcd支持自动压缩历史版本。在启动参数中指定参数“–auto-compaction”，其值以小时为单位。也就是etcd会自动压缩该值设置的时间窗口之前的历史版本。</li>
+</ul>
+<h3 id="定期消除碎片化"><a href="#定期消除碎片化" class="headerlink" title="定期消除碎片化"></a>定期消除碎片化</h3><p>压缩历史版本，相当于离散地抹去etcd存储空间某些数据，etcd存储空间中将会出现碎片。这些碎片无法被后台存储使用，却仍占据节点的存储空间。因此定期消除存储碎片，将释放碎片化的存储空间，重新调整整个存储空间。</p>
+<h3 id="备份方案"><a href="#备份方案" class="headerlink" title="备份方案"></a>备份方案</h3><ul>
+<li><p>etcd备份： 通过  etcdctl snapshot save， 备份的时间间隔需要考虑， 时间过长， 会导致数据丢失过多， 时间间隔太短， 会造成etcd频繁对数据上锁， 会对etcd造成影响</p>
+</li>
+<li><p>如何确保备份的时效性， 同时防止磁盘爆掉： 通过 snapshot + 备份wal log ， 来用snapshot进行恢复， wallog进行回放。</p>
+<p>etcd的默认工作目录下会生成两个子目录：wal和snap。wal是用于存放预写式日志，其最大的作用是记录整个数据变化的全部历程。所有数据的修改在提交前，都要先写入wal中。snap是用于存放快照数据。为防止wal文件过多，etcd会定期（当wal中数据超过10000条记录时，由参数“–snapshot-count”设置）创建快照。当快照生成后，wal中数据就可以被删除了。如果数据遭到破坏或错误修改需要回滚到之前某个状态时，方法就有两个：一是从快照中恢复数据主体，但是未被拍入快照的数据会丢失；而是执行所有WAL中记录的修改操作，从最原始的数据恢复到数据损坏之前的状态，但恢复的时间较长。</p>
+</li>
+</ul>
+<h2 id="数据备份方案实践"><a href="#数据备份方案实践" class="headerlink" title="数据备份方案实践"></a>数据备份方案实践</h2><p>官方推荐etcd集群的备份方式是定期创建快照。和etcd内部定期创建快照的目的不同，该备份方式依赖外部程序定期创建快照，并将快照上传到网络存储设备以实现etcd数据的冗余备份。上传到网络设备的数据，都应进行了加密。即使当所有etcd实例都丢失了数据，也能允许etcd集群从一个已知的良好状态的时间点在任一地方进行恢复。根据集群对etcd备份粒度的要求，可适当调节备份的周期。在生产环境中实测，拍摄快照通常会影响集群当时的性能，因此不建议频繁创建快照。但是备份周期太长，就可能导致大量数据的丢失。</p>
+<p>这里可以使用增量备份的方式。如图3-8所示，备份程序每30分钟触发一次快照的拍摄。紧接着它从快照结束的版本（Revision）开始，监听etcd集群的事件，并每10秒钟将事件保存到文件中，并将快照和事件文件上传到网络存储设备中。30分钟的快照周期对集群性能影响甚微。当大灾难来临时，也至多丢失10秒的数据。至于数据修复，首先把数据从网络存储设备中下载下来，然后从快照中恢复大块数据，并在此基础上依次应用存储的所有事件。这样就可以将集群数据恢复到灾难发生前。</p>
+<p><img src="../../../img/etcd/image-20231004094024778.png" alt="image-20231004094024778"></p>
+<h2 id="心跳周期和选举超时时间的优化"><a href="#心跳周期和选举超时时间的优化" class="headerlink" title="心跳周期和选举超时时间的优化"></a>心跳周期和选举超时时间的优化</h2><p>当网络延迟和磁盘延迟固定的情况下，可以优化etcd运行参数来提升集群的工作效率。</p>
+<p>etcd基于Raft协议进行Leader选举，当Leader选定以后才能开始数据读写操作，因此频繁的Leader选举会导致数据读写性能显著降低。可以通过调整心跳周期（Heatbeat Interval）和选举超时时间（Election Timeout），来降低Leader选举的可能性。</p>
+<p>心跳周期是控制Leader以何种频度向Follower发起心跳通知。心跳通知除表明Leader活跃状态之外，还带有待写入数据信息，Follower依据心跳信息进行数据写入，默认心跳周期是100ms。选举超时时间定义了当Follower多久没有收到Leader心跳，则重新发起选举，该参数的默认设置是1000ms。</p>
+<p>如果etcd集群的不同实例部署在延迟较低的相同数据中心，通常使用默认配置即可。如果不同实例部署在多数据中心或者网络延迟较高的集群环境，则需要对心跳周期和选举超时时间进行调整。建议心跳周期参数推荐设置为接近etcd多个成员之间平均数据往返周期的最大值，一般是平均RTT的0.55-1.5倍。如果心跳周期设置得过低，etcd会发送很多不必要的心跳信息，从而增加CPU和网络的负担。如果设置得过高，则会导致选举频繁超时。选举超时时间也需要根据etcd成员之间的平均RTT时间来设置。选举超时时间最少设置为etcd成员之间RTT时间的10倍，以便对网络波动。</p>
+<p>心跳间隔和选举超时时间的值必须对同一个etcd集群的所有节点都生效，如果各个节点配置不同，就会导致集群成员之间协商结果不可预知而不稳定。</p>
+<h2 id="etcd-高可用解决方案"><a href="#etcd-高可用解决方案" class="headerlink" title="etcd 高可用解决方案"></a>etcd 高可用解决方案</h2><p>etcd-operator: coreos开源的，基于kubernetes CRD完成etcd集群配置。Archived</p>
+<p><a href="https://github.com/coreos/etcd-operator" target="_blank" rel="noopener">https://github.com/coreos/etcd-operator</a></p>
+<p>Etcd statefulset Helm chart: Bitnami(powered by vmware) </p>
+<p><a href="https://bitnami.com/stack/etcd/helm" target="_blank" rel="noopener">https://bitnami.com/stack/etcd/helm</a></p>
+<p><a href="https://github.com/bitnami/charts/blob/master/bitnami/etcd" target="_blank" rel="noopener">https://github.com/bitnami/charts/blob/master/bitnami/etcd</a></p>
+<h2 id="kubenetes-如何使用etcd"><a href="#kubenetes-如何使用etcd" class="headerlink" title="kubenetes 如何使用etcd"></a>kubenetes 如何使用etcd</h2><h3 id="api-server-操作etcd-的参数"><a href="#api-server-操作etcd-的参数" class="headerlink" title="api server 操作etcd 的参数"></a>api server 操作etcd 的参数</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># API server 启动脚本中指定etcd servers集群</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line"><span class="attr">containers:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">command:</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">kube-apiserver</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">--advertise-address=192.168.34.2</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">--enable-bootstrap-token-auth=true</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">--etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">--etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">--etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">--etcd-servers=https://127.0.0.1:2379</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Kubernets对象在etcd中的存储路径"><a href="#Kubernets对象在etcd中的存储路径" class="headerlink" title="Kubernets对象在etcd中的存储路径"></a><strong>Kubernets对象在etcd中的存储路径</strong></h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ectl get --prefix --keys-only /</span><br><span class="line">/registry/namespaces/calico-apiserver</span><br><span class="line">/registry/networkpolicies/calico-apiserver/allow-apiserver</span><br><span class="line">/registry/operator.tigera.io/tigerastatuses/apiserver</span><br><span class="line">/registry/pods/calico-apiserver/calico-apiserver-77dffffcdf-g2tcx</span><br><span class="line">/registry/pods/default/toolbox-68f79dd5f8-4664n</span><br></pre></td></tr></table></figure>
+
+<h3 id="etcd在集群中所处的位置"><a href="#etcd在集群中所处的位置" class="headerlink" title="etcd在集群中所处的位置"></a><strong>etcd在集群中所处的位置</strong></h3><p><img src="../../../img/etcd/image-20231004081814873.png" alt="image-20231004081814873"></p>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/k8s/" rel="tag"><i class="fa fa-tag"></i> k8s</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2023/09/18/08.%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/1.2.%E6%B7%B1%E5%BA%A6%E7%90%86%E8%A7%A3Kubernetes/" rel="next" title="深度理解kubenetes">
+                <i class="fa fa-chevron-left"></i> 深度理解kubenetes
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2023/10/08/08.%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/1.4.%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2%E7%BB%84%E4%BB%B6%20%20APIServer/" rel="prev" title="APIServer">
+                APIServer <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%20%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">326</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">93</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Etcd"><span class="nav-text">Etcd</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#介绍"><span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#主要功能"><span class="nav-text">主要功能</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#etcd-使用的介绍"><span class="nav-text">etcd 使用的介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#etcd-的启动参数讲解"><span class="nav-text">etcd 的启动参数讲解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ETCD-常用命令"><span class="nav-text">ETCD 常用命令</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#查看集群成员列表"><span class="nav-text">查看集群成员列表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#读写数据"><span class="nav-text">读写数据</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ETCD-V3-存储架构"><span class="nav-text">ETCD  V3  存储架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ETCD-V3-写入完整流程"><span class="nav-text">ETCD  V3  写入完整流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#写入流程"><span class="nav-text">写入流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么Committed-Index-和applyindex-不需要存储"><span class="nav-text">为什么Committed Index 和applyindex 不需要存储</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ETCD-Watch机制"><span class="nav-text">ETCD Watch机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#etcd-相关参数"><span class="nav-text">etcd 相关参数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#成员相关参数"><span class="nav-text">成员相关参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#集群相关参数"><span class="nav-text">集群相关参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安全相关参数"><span class="nav-text">安全相关参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#灾备"><span class="nav-text">灾备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Alarm-amp-Disarm-Alarm"><span class="nav-text">Alarm &amp; Disarm Alarm</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#碎片清理"><span class="nav-text">碎片清理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#etcd-集群高可用实践"><span class="nav-text">etcd 集群高可用实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#最合适的peer个数"><span class="nav-text">最合适的peer个数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#apiserver和etcd-部署"><span class="nav-text">apiserver和etcd 部署</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#存储的规划"><span class="nav-text">存储的规划</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事件分离"><span class="nav-text">事件分离</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#减少网络延迟"><span class="nav-text">减少网络延迟</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#减少磁盘IO延迟"><span class="nav-text">减少磁盘IO延迟</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#合理的日志文件大小"><span class="nav-text">合理的日志文件大小</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#合理的存储配额"><span class="nav-text">合理的存储配额</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自动压缩历史版本"><span class="nav-text">自动压缩历史版本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#定期消除碎片化"><span class="nav-text">定期消除碎片化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#备份方案"><span class="nav-text">备份方案</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据备份方案实践"><span class="nav-text">数据备份方案实践</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#心跳周期和选举超时时间的优化"><span class="nav-text">心跳周期和选举超时时间的优化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#etcd-高可用解决方案"><span class="nav-text">etcd 高可用解决方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kubenetes-如何使用etcd"><span class="nav-text">kubenetes 如何使用etcd</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#api-server-操作etcd-的参数"><span class="nav-text">api server 操作etcd 的参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubernets对象在etcd中的存储路径"><span class="nav-text">Kubernets对象在etcd中的存储路径</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#etcd在集群中所处的位置"><span class="nav-text">etcd在集群中所处的位置</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

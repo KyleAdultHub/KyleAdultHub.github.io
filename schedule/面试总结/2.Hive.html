@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Hive架构Hive 的数据模型 db：在hdfs中表现为${hive.metastore.warehouse.dir}目录下一个文件夹  table：在hdfs中表现所属db目录下一个文件夹  external table：外部表, 与table类似，不过其数据存放位置可以在任意指定路径  普通表: 删除表后, hdfs上的文件都删了 External外部表: 删除后, hdfs上的文件没有删除">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Hive 面试题整理">
+<meta property="og:url" content="http://blog.kyleliu.cn/schedule/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/2.Hive.html">
+<meta property="og:site_name" content="刘小恺(Kyle)的云笔记">
+<meta property="og:description" content="Hive架构Hive 的数据模型 db：在hdfs中表现为${hive.metastore.warehouse.dir}目录下一个文件夹  table：在hdfs中表现所属db目录下一个文件夹  external table：外部表, 与table类似，不过其数据存放位置可以在任意指定路径  普通表: 删除表后, hdfs上的文件都删了 External外部表: 删除后, hdfs上的文件没有删除">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/1588041374336.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20200807112523842.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20200807112546413.png">
+<meta property="og:image" content="https://images2015.cnblogs.com/blog/548357/201608/548357-20160815133717531-1908588787.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20200807114425368.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20200807114358436.png">
+<meta property="article:published_time" content="2020-06-13T03:00:00.000Z">
+<meta property="article:modified_time" content="2023-02-15T06:22:02.926Z">
+<meta property="article:author" content="刘小恺(Kyle)">
+<meta property="article:tag" content="面试">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/img/1588041374336.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/schedule/面试总结/2.Hive.html"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Hive 面试题整理 | 刘小恺(Kyle)的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle)的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+    
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+    
+
+  
+
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+    
+    
+    <div class="post-block page">
+      <header class="post-header">
+
+<h2 class="post-title" itemprop="name headline">Hive 面试题整理</h2>
+
+<div class="post-meta">
+  
+  
+
+
+  
+  
+  <ul class="breadcrumb">
+    
+      
+      
+        
+          <li><a href="/schedule/">SCHEDULE</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li>面试总结</li>
+        
+      
+    
+      
+      
+        
+          <li><a href="/schedule/2.Hive.html/">2.HIVE.HTML</a></li>
+          
+            
+          
+        
+      
+    
+  </ul>
+
+
+</div>
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+        
+        
+          <h2 id="Hive架构"><a href="#Hive架构" class="headerlink" title="Hive架构"></a>Hive架构</h2><h3 id="Hive-的数据模型"><a href="#Hive-的数据模型" class="headerlink" title="Hive 的数据模型"></a>Hive 的数据模型</h3><ul>
+<li><p>db：在hdfs中表现为${hive.metastore.warehouse.dir}目录下一个文件夹</p>
+</li>
+<li><p>table：在hdfs中表现所属db目录下一个文件夹</p>
+</li>
+<li><p>external table：外部表, 与table类似，不过其数据存放位置可以在任意指定路径</p>
+<blockquote>
+<p>普通表: 删除表后, hdfs上的文件都删了</p>
+<p>External外部表: 删除后, hdfs上的文件没有删除, 只是把文件删除了</p>
+</blockquote>
+</li>
+<li><p>partition：在hdfs中表现为table目录下的子目录</p>
+</li>
+<li><p>bucket：桶, 在hdfs中表现为同一个表目录下根据hash散列之后的多个文件, 会根据不同的文件把数据放到不同的文件中 </p>
+</li>
+</ul>
+<h3 id="Hive-架构图"><a href="#Hive-架构图" class="headerlink" title="Hive 架构图"></a>Hive 架构图</h3><p><img src="/img/1588041374336.png" alt="1588041374336"></p>
+<ul>
+<li><p>用户接口: CLI、JDBC/ODBC、WebGUI</p>
+<p>CLI为shell命令行；JDBC/ODBC是Hive的JAVA实现，与传统数据库JDBC类似；WebGUI是通过浏览器访问Hive。</p>
+</li>
+<li><p>元数据存储：一般存储在关系型数据库中如 mysql；</p>
+<p>Hive 将元数据存储在数据库中。Hive 中的元数据包括表的名字，表的列和分区及其属性，表的属性（是否为外部表等），表的数据所在目录等。</p>
+</li>
+<li><p>解释器、编译器、优化器、执行器</p>
+<p>解释器、编译器、优化器完成 HQL 查询语句从词法分析、语法分析、编译、优化以及查询计划的生成。生成的查询计划存储在 HDFS 中，并在随后有 MapReduce 调用执行。</p>
+</li>
+</ul>
+<h3 id="hive和传统数据库区别"><a href="#hive和传统数据库区别" class="headerlink" title="hive和传统数据库区别"></a>hive和传统数据库区别</h3><ol>
+<li>需要注意的是传统数据库对表数据检验是 schema on write（写时模式）而 Hive 在 load时不检查数据是否符合 schema 的，hive 遵循的是 schema on read（读时模式），只有在读的时候 hive 才检查、解析具体的数据字段、schema。读时模式的优势是 load data 非常迅速，因为它不需要读取数据进行解析，仅仅进行文件的复制或者移动。写时模式的优势是提升了查询性能，因为预先解析之后可以对列建立索引并压缩，但这样会花费较多的加载时间。即使为内部表在数据加载时也不解析数据格式，如果数据和模式不匹配，只能在查询时出现 null 才知道不匹配的行。</li>
+<li>hive 具有复杂的数据结构（数组，映射，结构体）</li>
+<li>hive 不支持实时数据处理，对索引的支持较弱。</li>
+<li>hive 不支持行级的插入。</li>
+<li>延迟高，数据量大，多存储在 hdfs 上。</li>
+<li>执行为 mapreducer。</li>
+<li>hive 不支持行级操作也不支持事务。</li>
+</ol>
+<h3 id="Hive-SQl-语句执行过程"><a href="#Hive-SQl-语句执行过程" class="headerlink" title="Hive SQl 语句执行过程"></a>Hive SQl 语句执行过程</h3><p>Hql写出来以后只是一些字符串的拼接，所以要经过一系列的解析处理，才能最终变成集群上的执行的作业</p>
+<ol>
+<li>Parser：将sql解析为AST（抽象语法树），会进行语法校验，AST本质还是字符串</li>
+<li>Analyzer：语法解析，生成QB（query block）</li>
+<li>Logicl Plan：逻辑执行计划解析，生成一堆Opertator Tree</li>
+<li>Logical optimizer:进行逻辑执行计划优化，生成一堆优化后的Opertator Tree</li>
+<li>Phsical plan：物理执行计划解析，生成tasktree</li>
+<li>Phsical Optimizer：进行物理执行计划优化，生成优化后的tasktree，该任务即是集群上的执行的作业</li>
+</ol>
+<ul>
+<li>结论：经过以上的六步，普通的字符串sql被解析映射成了集群上的执行任务，最重要的两步是 逻辑执行计划优化和物理执行计划优化（图中红线圈画）</li>
+</ul>
+<h2 id="Hive基本操作"><a href="#Hive基本操作" class="headerlink" title="Hive基本操作"></a>Hive基本操作</h2><h3 id="创建表"><a href="#创建表" class="headerlink" title="创建表"></a>创建表</h3><p><strong>建表语句</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> [<span class="keyword">EXTERNAL</span>] <span class="keyword">TABLE</span> [<span class="keyword">IF</span> <span class="keyword">NOT</span> <span class="keyword">EXISTS</span>] table_name </span><br><span class="line">   [(col_name data_type [<span class="keyword">COMMENT</span> col_comment], ...)] </span><br><span class="line">   [<span class="keyword">COMMENT</span> table_comment] </span><br><span class="line">   [PARTITIONED <span class="keyword">BY</span> (col_name data_type [<span class="keyword">COMMENT</span> col_comment], ...)] </span><br><span class="line">   [CLUSTERED <span class="keyword">BY</span> (col_name, col_name, ...) </span><br><span class="line">   [SORTED <span class="keyword">BY</span> (col_name [<span class="keyword">ASC</span>|<span class="keyword">DESC</span>], ...)] <span class="keyword">INTO</span> num_buckets BUCKETS] </span><br><span class="line">   [<span class="keyword">ROW</span> <span class="keyword">FORMAT</span> row_format] </span><br><span class="line">   [<span class="keyword">STORED</span> <span class="keyword">AS</span> file_format] </span><br><span class="line">   [LOCATION hdfs_path]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>CREATE TABLE 创建一个指定名字的表。如果相同名字的表已经存在，则抛出异常；用户可以用 IF NOT EXISTS 选项来忽略这个异常。</p>
+</li>
+<li><p>EXTERNAL关键字可以让用户创建一个外部表，在建表的同时指定一个指向实际数据的路径（LOCATION）</p>
+</li>
+<li><p>LIKE 允许用户复制现有的表结构，但是不复制数据。</p>
+</li>
+<li><p>ROW FORMAT DELIMITED [FIELDS TERMINATED BY char][COLLECTION ITEMS TERMINATED BY char] [MAP KEYS TERMINATED BY char][LINES TERMINATED BY char] | SERDE serde_name [WITH SERDEPROPERTIES (property_name=property_value, property_name=property_value, …)]</p>
+</li>
+<li><p>STORED AS    SEQUENCEFILE|TEXTFILE|RCFILE     如果文件数据是纯文本，可以使用 STORED AS TEXTFILE(默认)。如果数据需要压缩，使用 STORED AS SEQUENCEFILE。</p>
+</li>
+<li><p>CLUSTERED BY      对于每一个表（table）或者分区， Hive可以进一步组织成桶，也就是说桶是更为细粒度的数据范围划分。Hive也是 针对某一列进行桶的组织。Hive采用对列值哈希，然后除以桶的个数求余的方式决定该条记录存放在哪个桶当中。 </p>
+<p>把表（或者分区）组织成桶（Bucket）有两个理由：</p>
+<p>（1）获得更高的查询处理效率。桶为表加上了额外的结构，Hive 在处理有些查询时能利用这个结构。具体而言，连接两个在（包含连接列的）相同列上划分了桶的表，可以使用 Map 端连接 （Map-side join）高效的实现。比如JOIN操作。对于JOIN操作两个表有一个相同的列，如果对这两个表都进行了桶操作。那么将保存相同列值的桶进行JOIN操作就可以，可以大大较少JOIN的数据量。</p>
+<p>（2）使取样（sampling）更高效。在处理大规模数据集时，在开发和修改查询的阶段，如果能在数据集的一小部分数据上试运行查询，会带来很多方便。</p>
+</li>
+</ul>
+<blockquote>
+<p>备注: hive 的join操作只支持等值连接</p>
+</blockquote>
+<p><strong>建表示例</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> student(<span class="keyword">id</span> <span class="built_in">int</span>, age <span class="built_in">int</span>, <span class="keyword">name</span> <span class="keyword">string</span>) partitioned <span class="keyword">by</span>(stat_date <span class="keyword">string</span>)  clustered <span class="keyword">by</span>(<span class="keyword">id</span>) sorted <span class="keyword">by</span>(age) <span class="keyword">into</span> <span class="number">2</span> buckets <span class="keyword">row</span> <span class="keyword">format</span> <span class="keyword">delimited</span> <span class="keyword">fields</span> <span class="keyword">terminated</span> <span class="keyword">by</span><span class="string">','</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>增加分区示例</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> student_p <span class="keyword">add</span> <span class="keyword">partition</span>(part=<span class="string">'a'</span>) <span class="keyword">partition</span>(part=<span class="string">'b'</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="数据查询"><a href="#数据查询" class="headerlink" title="数据查询"></a>数据查询</h3><p><strong>查询语句</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> [<span class="keyword">ALL</span> | <span class="keyword">DISTINCT</span>] select_expr, select_expr, ... </span><br><span class="line"><span class="keyword">FROM</span> table_reference</span><br><span class="line">[<span class="keyword">WHERE</span> where_condition] </span><br><span class="line">[<span class="keyword">GROUP</span> <span class="keyword">BY</span> col_list [<span class="keyword">HAVING</span> condition]] </span><br><span class="line">[ [CLUSTER <span class="keyword">BY</span> col_list] | [<span class="keyword">DISTRIBUTE</span> <span class="keyword">BY</span> col_list] [<span class="keyword">SORT</span> <span class="keyword">BY</span>| <span class="keyword">ORDER</span> <span class="keyword">BY</span> col_list] ] </span><br><span class="line">[<span class="keyword">LIMIT</span> <span class="built_in">number</span>]</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>order by 会对输入做全局排序，因此只有一个reducer，会导致当输入规模较大时，需要较长的计算时间。</li>
+<li>sort by不是全局排序，其在数据进入reducer前完成排序。因此，如果用sort by进行排序，并且设置mapred.reduce.tasks&gt;1，则sort by只保证每个reducer的输出有序，不保证全局有序。</li>
+<li>根据distribute by指定的字段内容将数据分到同一个reducer。</li>
+<li>Cluster by 除了具有Distribute by的功能外，还会对该字段进行排序。因此，常常认为cluster by = distribute by + sort by</li>
+</ol>
+<p><strong>查询示例</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">set</span> mapred.reduce.tasks=<span class="number">4</span>;</span><br><span class="line"><span class="keyword">select</span> <span class="keyword">id</span>, age, <span class="keyword">name</span> <span class="keyword">from</span> stuent <span class="keyword">distribute</span> <span class="keyword">by</span> age <span class="keyword">sort</span> <span class="keyword">by</span> age <span class="keyword">desc</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Hive-Join操作"><a href="#Hive-Join操作" class="headerlink" title="Hive Join操作"></a>Hive Join操作</h3><p><strong>1. 语法结构</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">table1 JOIN table2 [join_condition]</span><br><span class="line">  | table1 &#123;LEFT|RIGHT|FULL&#125; [OUTER] JOIN table2 join_condition</span><br><span class="line">  | table1 LEFT SEMI JOIN table2 join_condition</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>备注: </p>
+<p>Hive 支持等值连接（equality joins）、外连接（outer joins）和（left/right joins）。Hive <strong>不支持非等值的连接</strong>，因为非等值连接非常难转化到 map/reduce 任务。另外，Hive 支持多于 2 个表的连接。</p>
+<p>left semi join 是 IN/EXISTS 的高效实现</p>
+</blockquote>
+<p><strong>等值join</strong></p>
+<ol>
+<li><p><strong>等值join</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> a.* <span class="keyword">FROM</span> a <span class="keyword">JOIN</span> b <span class="keyword">ON</span> (a.id = b.id)；</span><br><span class="line"><span class="keyword">SELECT</span> a.* <span class="keyword">FROM</span> a <span class="keyword">JOIN</span> b <span class="keyword">ON</span> (a.id = b.id <span class="keyword">AND</span> a.department = b.department)；</span><br><span class="line"><span class="comment"># 是正确的，然而:</span></span><br><span class="line"><span class="keyword">SELECT</span> a.* <span class="keyword">FROM</span> a <span class="keyword">JOIN</span> b <span class="keyword">ON</span> (a.id&gt;b.id)</span><br><span class="line"><span class="comment"># 是错误的。</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>可以多于两张表</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> a.val, b.val, c.val <span class="keyword">FROM</span> a <span class="keyword">JOIN</span> b <span class="keyword">ON</span> (a.key = b.key1) <span class="keyword">JOIN</span> c <span class="keyword">ON</span> (c.key = b.key2);</span><br><span class="line"><span class="comment"># 如果join中多个表的 join key 是同一个，则 join 会被转化为单个 map/reduce 任务，例如：</span></span><br><span class="line"><span class="keyword">SELECT</span> a.val, b.val, c.val <span class="keyword">FROM</span> a <span class="keyword">JOIN</span> b</span><br><span class="line"><span class="keyword">ON</span> (a.key = b.key1) <span class="keyword">JOIN</span> c</span><br><span class="line"><span class="keyword">ON</span> (c.key = b.key1)</span><br><span class="line"><span class="comment"># 被转化为单个 map/reduce 任务，因为 join 中只使用了 b.key1 作为 join key。</span></span><br><span class="line"><span class="keyword">SELECT</span> a.val, b.val, c.val <span class="keyword">FROM</span> a <span class="keyword">JOIN</span> b <span class="keyword">ON</span> (a.key = b.key1)</span><br><span class="line"><span class="keyword">JOIN</span> c <span class="keyword">ON</span> (c.key = b.key2)</span><br><span class="line"><span class="comment"># 而这一 join 被转化为 2 个 map/reduce 任务。因为 b.key1 用于第一次 join 条件，而 b.key2 用于第二次 join。</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>join时，每次map/reduce任务的逻辑</strong></p>
+<p>reducer 会缓存 join 序列中除了最后一个表的所有表的记录，再通过最后一个表将结果序列化到文件系统。这一实现有助于在 reduce 端减少内存的使用量。实践中，应该把最大的那个表写在最后（否则会因为缓存浪费大量内存）。例如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> a.val, b.val, c.val <span class="keyword">FROM</span> a</span><br><span class="line"><span class="keyword">JOIN</span> b <span class="keyword">ON</span> (a.key = b.key1) <span class="keyword">JOIN</span> c <span class="keyword">ON</span> (c.key = b.key1)</span><br></pre></td></tr></table></figure>
+
+<p>所有表都使用同一个 join key（使用 1 次 map/reduce 任务计算）。Reduce 端会缓存 a 表和 b 表的记    录，然后每次取得一个 c 表的记录就计算一次 join 结果，类似的还有：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> a.val, b.val, c.val <span class="keyword">FROM</span> a</span><br><span class="line"><span class="keyword">JOIN</span> b <span class="keyword">ON</span> (a.key = b.key1) <span class="keyword">JOIN</span> c <span class="keyword">ON</span> (c.key = b.key2)</span><br></pre></td></tr></table></figure>
+
+<p>这里用了 2 次 map/reduce 任务。第一次缓存 a 表，用 b 表序列化；第二次缓存第一次 map/reduce 任务的结果，然后用 c 表序列化。</p>
+</li>
+<li><p><strong>LEFT，RIGHT 和 FULL OUTER 关键字用于处理 join 中空记录的情况</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> a.val, b.val <span class="keyword">FROM</span> </span><br><span class="line">a <span class="keyword">LEFT</span> <span class="keyword">OUTER</span>  <span class="keyword">JOIN</span> b <span class="keyword">ON</span> (a.key=b.key)</span><br></pre></td></tr></table></figure>
+
+<p>对应所有 a 表中的记录都有一条记录输出。输出的结果应该是 a.val, b.val，当 a.key=b.key 时，而当 b.key 中找不到等值的 a.key 记录时也会输出:a.val, NULL</p>
+<p>所以 a 表中的所有记录都被保留了，a RIGHT OUTER JOIN b”会保留所有 b 表的记录。</p>
+<p>Join 发生在 WHERE 子句之前。如果你想限制 join 的输出，应该在 WHERE 子句中写过滤条件——或是在 join 子句中写。这里面一个容易混淆的问题是表分区的情况：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> a.val, b.val <span class="keyword">FROM</span> a</span><br><span class="line"><span class="keyword">LEFT</span> <span class="keyword">OUTER</span> <span class="keyword">JOIN</span> b <span class="keyword">ON</span> (a.key=b.key)</span><br><span class="line"><span class="keyword">WHERE</span> a.ds=<span class="string">'2009-07-07'</span> <span class="keyword">AND</span> b.ds=<span class="string">'2009-07-07'</span></span><br></pre></td></tr></table></figure>
+
+<p>会 join a 表到 b 表（OUTER JOIN），列出 a.val 和 b.val 的记录。WHERE 从句中可以使用其他列作为过滤条件。但是，如前所述，如果 b 表中找不到对应 a 表的记录，b 表的所有列都会列出 NULL，<strong>包括 ds 列</strong>。也就是说，join 会过滤 b 表中不能找到匹配 a 表 join key 的所有记录。这样的话，LEFT OUTER 就使得查询结果与 WHERE 子句无关了。解决的办法是在 OUTER JOIN 时使用以下语法：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> a.val, b.val <span class="keyword">FROM</span> a <span class="keyword">LEFT</span> <span class="keyword">OUTER</span> <span class="keyword">JOIN</span> b</span><br><span class="line"><span class="keyword">ON</span> (a.key=b.key <span class="keyword">AND</span></span><br><span class="line">    b.ds=<span class="string">'2009-07-07'</span> <span class="keyword">AND</span></span><br><span class="line">    a.ds=<span class="string">'2009-07-07'</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这一查询的结果是预先在 join 阶段过滤过的，所以不会存在上述问题。这一逻辑也可以应用于 RIGHT 和 FULL 类型的 join 中。</p>
+</li>
+<li><p><strong>Join 是不能交换位置的。</strong></p>
+<p>无论是 LEFT 还是 RIGHT join，都是左连接的。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> a.val1, a.val2, b.val, c.valFROM a</span><br><span class="line"><span class="keyword">JOIN</span> b <span class="keyword">ON</span> (a.key = b.key)</span><br><span class="line"><span class="keyword">LEFT</span> <span class="keyword">OUTER</span> <span class="keyword">JOIN</span> c <span class="keyword">ON</span> (a.key = c.key)</span><br></pre></td></tr></table></figure>
+
+<p>先 join a 表到 b 表，丢弃掉所有 join key 中不匹配的记录，然后用这一中间结果和 c 表做 join。这一表述有一个不太明显的问题，就是当一个 key 在 a 表和 c 表都存在，但是 b 表中不存在的时候：整个记录在第一次 join，即 a JOIN b 的时候都被丢掉了（包括a.val1，a.val2和a.key），然后我们再和 c 表 join 的时候，如果 c.key 与 a.key 或 b.key 相等，就会得到这样的结果：NULL, NULL, NULL, c.val</p>
+</li>
+</ol>
+<h2 id="Hive-表"><a href="#Hive-表" class="headerlink" title="Hive 表"></a>Hive 表</h2><h3 id="hive-内部表和外部表区别"><a href="#hive-内部表和外部表区别" class="headerlink" title="hive 内部表和外部表区别"></a>hive 内部表和外部表区别</h3><ul>
+<li>Hive 创建内部表时，会将数据移动到数据仓库指向的路径，hive 管理数据的声明周期，若创建外部表，仅记录数据所在的路径，不会对数据的位置做任何改变。</li>
+<li>在删除表的时候，内部表的元数据和数据会被一起删除， 外部表只会删除外部表的元数据， 不删除数据，这样外部表相对来说更安全一些，数据组织也更加灵活，方便共享源数据。；</li>
+<li>对于一些 hive 操作不适应于外部表，比如单个查询语句创建表并向表中插入数据。</li>
+<li>创建外部表时甚至不需要知道外部数据是否存在，可以把创建数据推迟到创建表之后才进行。</li>
+</ul>
+<h2 id="Hive分区"><a href="#Hive分区" class="headerlink" title="Hive分区"></a>Hive分区</h2><h3 id="hive-分区的了解"><a href="#hive-分区的了解" class="headerlink" title="hive 分区的了解"></a>hive 分区的了解</h3><p>是对 hive 表的一种组织形式，可以加快查询，是一种对表进行粗略划分的机制。使用分区时，在表目录下会有相应的子目录，当查询时若添加了分区谓词，该查询会定位到相应的子目录中进行查询，避免全表扫描，比如日志文件分析，将日志按天存储。分区并不会影响大范围的查询。</p>
+<p>外部表也可以分区，具有很好的灵活性，例如<br>这种灵活性有一个有趣的优点是我们可以使用像 Amazon S3 这样的廉价的存储设备存储旧的数据，同时保持较新的数据到 HDFS 中。例如，每天我们可以使用如下的处理过程将一个月前的旧数据转移到 S3 中。</p>
+<h3 id="使用hive分区的注意事项"><a href="#使用hive分区的注意事项" class="headerlink" title="使用hive分区的注意事项"></a>使用hive分区的注意事项</h3><ol>
+<li>当分区过多且数据很大时，可以使用严格模式，避免触发一个大的 mapreducer 任务。当分区数量过多且数据量较大时，执行宽范围的数据扫描会触发一个很大的 mapreducer 任务，在严格模式下，当 where 中没有分区过滤条件时会禁止执行。</li>
+<li>hive 如果有过多的分区，由于底层是存储在 HDFS 上，HDFS适用于存储大文件而非小文件，因此过多的分区会增加 namenode 负担。</li>
+<li>hive 会转化成 mapreducer，mapreducer 会转化为多个 task，过多的小文件的话，每个文件一个task，每个task 一个 jvm实例，jvm 开启与销毁会降低系统效率。</li>
+</ol>
+<h2 id="Hive-分桶"><a href="#Hive-分桶" class="headerlink" title="Hive 分桶"></a>Hive 分桶</h2><h3 id="Hive-分桶的理由"><a href="#Hive-分桶的理由" class="headerlink" title="Hive 分桶的理由"></a>Hive 分桶的理由</h3><ol>
+<li>取样更高效。具体划分桶是将值进行hash，然后除以桶的个数取余，任何一个桶内部是一个随机划分的用户集合。在处理大规模数据集时，在开发和修改查询的阶段，如果能在数据集的一小部分上试运行查询，会方便很多。</li>
+<li>获得更高的查询处理效率。桶为表加上了额外的结构，Hive 在处理有些查询时能利用这个结构。具体而言，连接两个在（包含连接列的）相同列上划分了桶的表，可以使用 Map 端连接（Map-side join）高效的实现。处理左边表的某个桶的 mapper 就知道右边表内相匹配的行在对应的桶，这样 mapper 直接就可以在对应的右边表的桶获取数据进行 join。并不一定要求两个表必须有相同的桶的个数，倍数也行。</li>
+</ol>
+<h2 id="Hive-锁机制"><a href="#Hive-锁机制" class="headerlink" title="Hive 锁机制"></a>Hive 锁机制</h2><h3 id="锁机制"><a href="#锁机制" class="headerlink" title="锁机制"></a>锁机制</h3><p>Hive 内部定义了两种类型的锁：</p>
+<ul>
+<li>共享锁(Share)</li>
+<li>互斥锁(Exclusive)</li>
+</ul>
+<p>不同锁之间的兼容性入下面表格：</p>
+<p><img src="/img/image-20200807112523842.png" alt="image-20200807112523842"></p>
+<p>锁的基本机制是：</p>
+<ul>
+<li>元信息和数据的变更需要互斥锁</li>
+<li>数据的读取需要共享锁</li>
+</ul>
+<p>根据这个机制，Hive 的一些场景操作对应的锁级别如下：</p>
+<p><img src="/img/image-20200807112546413.png" alt="image-20200807112546413"></p>
+<p>Hive 锁在 zookeeper 上会对应 ephemeral 的节点，避免释放锁失败导致死锁</p>
+<h3 id="调试锁"><a href="#调试锁" class="headerlink" title="调试锁"></a>调试锁</h3><p>可以通过下面命令查看某个表或者分区的锁</p>
+<ul>
+<li>SHOW LOCKS ;</li>
+<li>SHOW LOCKS EXTENDED;</li>
+<li>SHOW LOCKS PARTITION ();</li>
+<li>SHOW LOCKS PARTITION () EXTENDED;</li>
+</ul>
+<h3 id="关闭锁机制"><a href="#关闭锁机制" class="headerlink" title="关闭锁机制"></a>关闭锁机制</h3><p>可以通过设置 <code>hive.support.concurrency=fasle</code> 来解决</p>
+<p>关闭锁机制会造成下面影响：</p>
+<ul>
+<li>并发读写同一份数据时，读操作可能会随机失败</li>
+<li>并发写操作的结果在随机出现，后完成的任务覆盖之前完成任务的结果</li>
+<li>SHOW LOCKS， UNLOCK TABLE 会报错</li>
+</ul>
+<h1 id="HIVE-SQL优化"><a href="#HIVE-SQL优化" class="headerlink" title="HIVE SQL优化"></a>HIVE SQL优化</h1><h3 id="优化思路"><a href="#优化思路" class="headerlink" title="优化思路"></a>优化思路</h3><ul>
+<li>尽早尽量过滤数据，减少每个阶段的数据量</li>
+<li>减少job数</li>
+<li>解决数据倾斜问题</li>
+</ul>
+<h3 id="Hive-SQL-优化手段"><a href="#Hive-SQL-优化手段" class="headerlink" title="Hive SQL 优化手段"></a>Hive SQL 优化手段</h3><p><strong>1.列裁剪：</strong></p>
+<p>例如某表有a,b,c,d,e五个字段，但是我们只需要a和b，那么请用select a,b from table 而不是select * from table</p>
+<p><strong>2.分区裁剪：</strong></p>
+<p>在查询的过程中减少不必要的分区，即尽量指定分区</p>
+<p><strong>3.利用hive的优化机制减少job数：</strong></p>
+<p>不论是外关联outer join还是内关联inner join，如果join的key相同，不管有多少表，都会合并为一个MapReduce任务：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> a.val,b.val,c.val <span class="keyword">from</span> a <span class="keyword">JOIN</span> b <span class="keyword">ON</span> (a.key = b.key1) <span class="keyword">JOIN</span> c <span class="keyword">ON</span> (c.key2 = b.key1)    <span class="comment">----一个job</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">select</span> a.val,b.val,c.val <span class="keyword">from</span> a <span class="keyword">JOIN</span> b <span class="keyword">ON</span> (a.key = b.key1) <span class="keyword">JOIN</span> c <span class="keyword">ON</span> (c.key2 = b.key2)    <span class="comment">----两个job</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>4.善用multi-insert:</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#查询了两次a</span></span><br><span class="line"><span class="keyword">insert</span> overwrite <span class="keyword">table</span> tmp1</span><br><span class="line"><span class="keyword">select</span> ... <span class="keyword">from</span> a <span class="keyword">where</span> 条件<span class="number">1</span>;</span><br><span class="line"><span class="keyword">insert</span> overwrite <span class="keyword">table</span> tmp2</span><br><span class="line"><span class="keyword">select</span> ... <span class="keyword">from</span> a <span class="keyword">where</span> 条件<span class="number">2</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">#查询了一次a</span></span><br><span class="line">from a</span><br><span class="line"><span class="keyword">insert</span> overwrite <span class="keyword">table</span> tmp1</span><br><span class="line"><span class="keyword">select</span> ... <span class="keyword">where</span> 条件<span class="number">1</span></span><br><span class="line"><span class="keyword">insert</span> overwrite <span class="keyword">table</span> tmp2</span><br><span class="line"><span class="keyword">select</span> ... <span class="keyword">where</span> 条件<span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>5.善用union all:</strong></p>
+<p>不同表的union all相当于multi inputs，同一表的union all相当于map一次输出多条</p>
+<p><strong>6.避免笛卡尔积：关联的时候一定要写关联条件</strong></p>
+<p><strong>7.join前过滤掉不需要的数据</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#hive0.12之前，会先把a全部数据和b的全部数据进行了关联，然后再筛选条件，0.12之后做了优化</span></span><br><span class="line">1. <span class="keyword">select</span> a.val,b.val <span class="keyword">from</span> a <span class="keyword">LEFT</span> <span class="keyword">OUTER</span> <span class="keyword">JOIN</span> b <span class="keyword">ON</span> (a.key=b.key)<span class="keyword">where</span> a.dt=<span class="string">'2020-05-07'</span> <span class="keyword">and</span> b.dt=<span class="string">'2020-05-07'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#优化后的方案</span></span><br><span class="line"><span class="number">2.</span><span class="keyword">select</span> x.val,y.val <span class="keyword">from</span> </span><br><span class="line">(<span class="keyword">select</span> <span class="keyword">key</span>, val <span class="keyword">from</span> a <span class="keyword">where</span> a.dt=<span class="string">'2020-05-07'</span>) x</span><br><span class="line"><span class="keyword">LEFT</span> <span class="keyword">OUTER</span> <span class="keyword">JOIN</span></span><br><span class="line">(<span class="keyword">select</span> <span class="keyword">key</span>, val <span class="keyword">from</span> b <span class="keyword">where</span> b.dt=<span class="string">'2020-05-07'</span>) y</span><br><span class="line"><span class="keyword">ON</span> x.key=y.key</span><br></pre></td></tr></table></figure>
+
+<p><strong>8.小表放前大表放后</strong></p>
+<p>在编写带有join的代码语句时，应该将条目少的表/子查询放在join操作符的前面</p>
+<p>因为在Reduce阶段，位于join操作符左边的表会先被加载到内存，载入条目较少的表可以有效的防止内存溢出(OOM)。所以对于同一个key来说，对应的value值小的放前面，大的放后面</p>
+<p><strong>9.在map阶段进行join</strong></p>
+<p>join阶段有两种，一种是在map阶段进行的，一种是在reduce阶段进行的。当小表和大表进行join时，尽量采用mapjoin，即在map端完成，尽早结合数据，使reduce端接收数据量减少。同时可以避免小表与大表join产生的数据倾斜。</p>
+<p>如果一个表特别小，推荐用mapjoin；如果不是，我们一般用reduce join</p>
+<p>MAPJOIN写法：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="comment">/*+ MAPJOIN(b) */</span> a.value,b.value <span class="keyword">from</span> a <span class="keyword">join</span> b <span class="keyword">on</span> a.key=b.key</span><br></pre></td></tr></table></figure>
+
+<p><strong>10.hive0.13之前实现IN和EXISTS</strong></p>
+<p>LEFT SEMI JOIN是IN和EXISTS的一种高效实现，在hive0.13之前是不支持IN和EXISTS的</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1.select a.key,a.value <span class="keyword">from</span> a <span class="keyword">where</span> a.key <span class="keyword">in</span> (<span class="keyword">select</span> b.key <span class="keyword">from</span> b)（hive0<span class="number">.13</span>前不支持）</span><br><span class="line"></span><br><span class="line"><span class="number">2.</span><span class="keyword">select</span> a.key,a.value <span class="keyword">from</span> a <span class="keyword">left</span> <span class="keyword">outer</span> <span class="keyword">join</span> b <span class="keyword">on</span> a.key=b.key <span class="keyword">where</span> b.key <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">null</span></span><br><span class="line"></span><br><span class="line"><span class="number">3.</span><span class="keyword">select</span> a.key,a.value <span class="keyword">from</span> a <span class="keyword">left</span> <span class="keyword">semi</span> <span class="keyword">join</span> b <span class="keyword">on</span> a.key=b.key</span><br><span class="line"></span><br><span class="line"><span class="number">4.</span><span class="keyword">select</span> a.key,a.value <span class="keyword">from</span> a <span class="keyword">JOIN</span> b <span class="keyword">ON</span> (a.key=b.key)</span><br></pre></td></tr></table></figure>
+
+<p> <strong>LEFT SEMI JOIN产生的数据不会重复。</strong></p>
+<p><strong>11.使用动态分区</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">set</span> hive.exec.dynamic.partition=<span class="literal">true</span>;</span><br><span class="line"><span class="keyword">set</span> hive.exec.dynamic.partition.mode=nonstrict;</span><br><span class="line"></span><br><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> my_table(</span><br><span class="line"><span class="keyword">id</span> <span class="built_in">bigint</span></span><br><span class="line">) partitioned <span class="keyword">by</span>(dt <span class="keyword">string</span>)</span><br><span class="line"><span class="keyword">STORED</span> <span class="keyword">AS</span> TEXTFILE;</span><br><span class="line"></span><br><span class="line"><span class="keyword">insert</span> overwrite <span class="keyword">table</span> my_table <span class="keyword">partition</span>(dt)</span><br><span class="line"><span class="keyword">select</span> <span class="keyword">id</span>,dt <span class="keyword">from</span> tmp_table</span><br></pre></td></tr></table></figure>
+
+<p><strong>12.union all优化</strong></p>
+<p>hive0.13之前不支持union all直接放外层，必须外层套一个查询，例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">select key,value from a</span><br><span class="line">union all</span><br><span class="line">select key,value from b</span><br></pre></td></tr></table></figure>
+
+<p>是不支持的。</p>
+<p>hive对union all的优化只局限于非嵌套查询。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span>(</span><br><span class="line"><span class="keyword">select</span> <span class="keyword">key</span>,<span class="keyword">value</span> <span class="keyword">from</span> a <span class="keyword">group</span> <span class="keyword">by</span> <span class="keyword">key</span>,<span class="keyword">value</span></span><br><span class="line"><span class="keyword">union</span> <span class="keyword">all</span></span><br><span class="line"><span class="keyword">select</span> <span class="keyword">key</span>,<span class="keyword">value</span> <span class="keyword">from</span> b <span class="keyword">group</span> <span class="keyword">by</span> <span class="keyword">key</span>,<span class="keyword">value</span></span><br><span class="line">)</span><br><span class="line"><span class="comment">---- 三个job</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">select</span> <span class="keyword">key</span>,<span class="keyword">value</span> <span class="keyword">from</span>(</span><br><span class="line"><span class="keyword">select</span> <span class="keyword">key</span>,<span class="keyword">value</span> <span class="keyword">from</span> a <span class="keyword">union</span> <span class="keyword">all</span></span><br><span class="line"><span class="keyword">select</span> <span class="keyword">key</span>,<span class="keyword">value</span> <span class="keyword">from</span> b</span><br><span class="line">) <span class="keyword">as</span> tmp</span><br><span class="line"><span class="keyword">group</span> <span class="keyword">by</span> tmp.key,tmp.value</span><br><span class="line"><span class="comment">---- 一个job，用于小表</span></span><br></pre></td></tr></table></figure>
+
+<p>不同表太多的union all，不推荐使用。可以写在中间表的不同分区里，然后再进行union all</p>
+<p><strong>13.尽量避免使用distinct</strong></p>
+<p>尽量避免使用distinct进行重排，特别是大表，容易产生数据倾斜(key一样在一个reduce处理)。使用group by替代</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">distinct</span> <span class="keyword">key</span> <span class="keyword">from</span> a</span><br><span class="line"></span><br><span class="line"><span class="keyword">select</span> <span class="keyword">key</span> <span class="keyword">from</span> a <span class="keyword">group</span> <span class="keyword">by</span> <span class="keyword">key</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>14.排序优化</strong></p>
+<p>只有order by产生的结果是全局有序的，可以根据实际场景进行选择排序</p>
+<ul>
+<li>order by实现全局排序，一个reduce实现，由于不能并发执行，所以效率低</li>
+<li>sort by实现部分有序，单个reduce的输出结果是有序的，效率高，通常与distribute by一起使用(distribute by 关键词可以指定map到reduce的key分发)</li>
+<li>cluster by col1等价于distribute by col1 sort by col1，但不能指定排序规则</li>
+</ul>
+<p><strong>15.使用explain dependency查看sql实际扫描多少分区</strong></p>
+<h3 id="Hive-分析函数和窗口函数"><a href="#Hive-分析函数和窗口函数" class="headerlink" title="Hive 分析函数和窗口函数"></a>Hive 分析函数和窗口函数</h3><h4 id="1-分析函数：用于等级、百分点、n分片等"><a href="#1-分析函数：用于等级、百分点、n分片等" class="headerlink" title="1. 分析函数：用于等级、百分点、n分片等"></a>1. 分析函数：用于等级、百分点、n分片等</h4><h5 id="Ntile-是Hive很强大的一个分析函数。"><a href="#Ntile-是Hive很强大的一个分析函数。" class="headerlink" title="Ntile 是Hive很强大的一个分析函数。"></a><strong>Ntile 是Hive很强大的一个分析函数。</strong></h5><ul>
+<li><p>可以看成是：它把有序的数据集合 <strong>平均分配</strong> 到 <strong>指定的数量</strong>（num）个桶中, 将桶号分配给每一行。如果不能平均分配，则优先分配较小编号的桶，并且各个桶中能放的行数最多相差1。</p>
+</li>
+<li><p>语法是：</p>
+<p> ntile (num)  over ([partition_clause]  order_by_clause)  as <strong>your_bucket_num</strong></p>
+</li>
+<li><p>然后可以根据桶号，选取前或后 n分之几的数据。</p>
+</li>
+</ul>
+<p><strong>例子：</strong></p>
+<p>  给了用户和每个用户对应的消费信息表， 计算花费前50%的用户的平均消费；</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 把用户和消费表，按消费下降顺序平均分成2份</span></span><br><span class="line"><span class="keyword">drop</span> <span class="keyword">table</span> <span class="keyword">if</span> <span class="keyword">exists</span> test_by_payment_ntile;</span><br><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> test_by_payment_ntile <span class="keyword">as</span></span><br><span class="line"><span class="keyword">select</span> </span><br><span class="line">      nick, </span><br><span class="line">      payment ,</span><br><span class="line">      NTILE(<span class="number">2</span>) <span class="keyword">OVER</span>(<span class="keyword">ORDER</span> <span class="keyword">BY</span> payment <span class="keyword">desc</span>) <span class="keyword">AS</span> rn </span><br><span class="line"><span class="keyword">from</span> test_nick_payment;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 分别对每一份计算平均值，就可以得到消费靠前50%和后50%的平均消费</span></span><br><span class="line"><span class="keyword">select</span> </span><br><span class="line">   <span class="string">'avg_payment'</span> <span class="keyword">as</span> inf,</span><br><span class="line">   t1.avg_payment_up_50 <span class="keyword">as</span> avg_payment_up_50,</span><br><span class="line">   t2.avg_payment_down_50 <span class="keyword">as</span> avg_payment_down_50</span><br><span class="line"><span class="keyword">from</span></span><br><span class="line"> (<span class="keyword">select</span></span><br><span class="line">         <span class="keyword">avg</span>(payment) <span class="keyword">as</span> avg_payment_up_50 </span><br><span class="line">  <span class="keyword">from</span> test_by_payment_ntile </span><br><span class="line">  <span class="keyword">where</span> rn=<span class="number">1</span></span><br><span class="line">)t1</span><br><span class="line">   <span class="keyword">join</span></span><br><span class="line">(<span class="keyword">select</span> </span><br><span class="line">          <span class="keyword">avg</span>(payment) <span class="keyword">as</span> avg_payment_down_50 </span><br><span class="line"> <span class="keyword">from</span> test_by_payment_ntile </span><br><span class="line"> <span class="keyword">where</span> rn=<span class="number">2</span></span><br><span class="line">)t2</span><br><span class="line"><span class="keyword">on</span> (t1.dp_id=t2.dp_id);</span><br></pre></td></tr></table></figure>
+
+<h5 id="Rank，Dense-Rank-Row-Number"><a href="#Rank，Dense-Rank-Row-Number" class="headerlink" title="Rank，Dense_Rank, Row_Number"></a>Rank，Dense_Rank, Row_Number</h5><p>SQL很熟悉的3个组内排序函数了。语法一样：</p>
+<p>R()  over  (partion  by  col1…  order  by  col2…  desc/asc)</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> </span><br><span class="line">   class1,</span><br><span class="line">   score,</span><br><span class="line">   <span class="keyword">rank</span>() <span class="keyword">over</span>(<span class="keyword">partition</span> <span class="keyword">by</span> class1 <span class="keyword">order</span> <span class="keyword">by</span> score <span class="keyword">desc</span>) rk1,</span><br><span class="line">   <span class="keyword">dense_rank</span>() <span class="keyword">over</span>(<span class="keyword">partition</span> <span class="keyword">by</span> class1 <span class="keyword">order</span> <span class="keyword">by</span> score <span class="keyword">desc</span>) rk2,</span><br><span class="line">   row_number() <span class="keyword">over</span>(<span class="keyword">partition</span> <span class="keyword">by</span> class1 <span class="keyword">order</span> <span class="keyword">by</span> score <span class="keyword">desc</span>) rk3</span><br><span class="line"><span class="keyword">from</span> zyy_test1;</span><br></pre></td></tr></table></figure>
+
+<p>如上图所示，rank  会对相同数值，输出相同的序号，而且下一个序号不间断；</p>
+<p>​    dense_rank  会对相同数值，输出相同的序号，但下一个序号，间断</p>
+<p>​    row_number 会对所有数值输出不同的序号，序号唯一连续；</p>
+<h4 id="2-窗口函数-Lag-Lead-First-value-Last-value"><a href="#2-窗口函数-Lag-Lead-First-value-Last-value" class="headerlink" title="2. 窗口函数 Lag, Lead, First_value,Last_value"></a>2. 窗口函数 Lag, Lead, First_value,Last_value</h4><h5 id="Lag-Lead"><a href="#Lag-Lead" class="headerlink" title="Lag, Lead"></a>Lag, Lead</h5><p>LAG(col,n,DEFAULT) 用于统计窗口内往上第n行值</p>
+<p>LEAD(col,n,DEFAULT) 用于统计窗口内往下第n行值, 与LAG相反</p>
+<p>– 组内排序后，向后或向前偏移<br>– 如果省略掉第三个参数，默认为NULL，否则补上。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span></span><br><span class="line">    dp_id,</span><br><span class="line">    mt,</span><br><span class="line">    payment,</span><br><span class="line">    LAG(mt,<span class="number">2</span>) <span class="keyword">over</span>(<span class="keyword">partition</span> <span class="keyword">by</span> dp_id <span class="keyword">order</span> <span class="keyword">by</span> mt) mt_new</span><br><span class="line"><span class="keyword">from</span> test2;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://images2015.cnblogs.com/blog/548357/201608/548357-20160815133717531-1908588787.png" alt="img"></p>
+<p>– 组内排序后，向后或向前偏移<br>– 如果省略掉第三个参数，默认为NULL，否则补上。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span></span><br><span class="line">   dp_id,</span><br><span class="line">   mt,</span><br><span class="line">   payment,</span><br><span class="line">   <span class="keyword">LEAD</span>(mt,<span class="number">2</span>,<span class="string">'1111-11'</span>) <span class="keyword">over</span>(<span class="keyword">partition</span> <span class="keyword">by</span> dp_id <span class="keyword">order</span> <span class="keyword">by</span> mt) mt_new</span><br><span class="line"><span class="keyword">from</span> test2;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/image-20200807114425368.png" alt="image-20200807114425368"></p>
+<h5 id="FIRST-VALUE-LAST-VALUE"><a href="#FIRST-VALUE-LAST-VALUE" class="headerlink" title="FIRST_VALUE, LAST_VALUE"></a>FIRST_VALUE, LAST_VALUE</h5><p>first_value:  取分组内排序后，截止到当前行，第一个值</p>
+<p>last_value:  取分组内排序后，截止到当前行，最后一个值</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- FIRST_VALUE      获得组内当前行往前的首个值</span></span><br><span class="line"><span class="comment">-- LAST_VALUE       获得组内当前行往前的最后一个值</span></span><br><span class="line"><span class="comment">-- FIRST_VALUE(DESC) 获得组内全局的最后一个值</span></span><br><span class="line"><span class="keyword">select</span></span><br><span class="line">   dp_id,</span><br><span class="line">   mt,</span><br><span class="line">   payment,</span><br><span class="line">   <span class="keyword">FIRST_VALUE</span>(payment) <span class="keyword">over</span>(<span class="keyword">partition</span> <span class="keyword">by</span> dp_id <span class="keyword">order</span> <span class="keyword">by</span> mt) payment_g_first,</span><br><span class="line">   <span class="keyword">LAST_VALUE</span>(payment) <span class="keyword">over</span>(<span class="keyword">partition</span> <span class="keyword">by</span> dp_id <span class="keyword">order</span> <span class="keyword">by</span> mt) payment_g_last,</span><br><span class="line">  <span class="keyword">FIRST_VALUE</span>(payment) <span class="keyword">over</span>(<span class="keyword">partition</span> <span class="keyword">by</span> dp_id <span class="keyword">order</span> <span class="keyword">by</span> mt <span class="keyword">desc</span>) payment_g_last_global</span><br><span class="line"><span class="keyword">from</span> test2</span><br><span class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> dp_id,mt;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/image-20200807114358436.png" alt="image-20200807114358436"></p>
+<h2 id="Hive-存储格式"><a href="#Hive-存储格式" class="headerlink" title="Hive 存储格式"></a>Hive 存储格式</h2><h3 id="TextFile、SequenceFile、RCfile-、ORCfile各有什么区别"><a href="#TextFile、SequenceFile、RCfile-、ORCfile各有什么区别" class="headerlink" title="TextFile、SequenceFile、RCfile 、ORCfile各有什么区别"></a>TextFile、SequenceFile、RCfile 、ORCfile各有什么区别</h3><p>1、TextFile</p>
+<p>默认格式，<strong>存储方式为行存储，数据不做压缩，磁盘开销大，数据解析开销大</strong>。可结合Gzip、Bzip2使用(系统自动检查，执行查询时自动解压)，但使用这种方式，压缩后的文件不支持split，Hive不会对数据进行切分，从而无法对数据进行并行操作。并且在反序列化过程中，必须逐个字符判断是不是分隔符和行结束符，因此反序列化开销会比SequenceFile高几十倍。</p>
+<p>2、SequenceFile</p>
+<p>SequenceFile是Hadoop API提供的一种二进制文件支持，<strong>存储方式为行存储，其具有使用方便、可分割、可压缩的特点</strong>。</p>
+<p>SequenceFile支持三种压缩选择：NONE，RECORD，BLOCK。Record压缩率低，一般建议使用BLOCK压缩。</p>
+<p>优势是文件和hadoop api中的MapFile是相互兼容的</p>
+<p>3、RCFile</p>
+<p>存储方式：<strong>数据按行分块，每块按列存储</strong>。<strong>结合了行存储和列存储的优点</strong>：</p>
+<p>首先，RCFile 保证同一行的数据位于同一节点，因此元组重构的开销很低；</p>
+<p>其次，像列存储一样，RCFile 能够利用列维度的数据压缩，并且能跳过不必要的列读取；</p>
+<p>4、ORCFile</p>
+<p>存储方式：数据按行分块 每块按照列存储。</p>
+<p>压缩快、快速列存取。</p>
+<p>效率比rcfile高，是rcfile的改良版本。</p>
+<p>5、Parquet</p>
+<p>总结：</p>
+<p><strong>相比TEXTFILE和SEQUENCEFILE，RCFILE由于列式存储方式，数据加载时性能消耗较大，但是具有较好的压缩比和查询响应</strong>。</p>
+<p><strong>数据仓库的特点是一次写入、多次读取，因此，整体来看，RCFILE相比其余两种格式具有较明显的优势</strong>。 </p>
+
+        
+      </div>
+      
+      
+      
+    </div>
+    
+
+
+  
+  
+  <ul class="breadcrumb">
+    
+      
+      
+        
+          <li><a href="/schedule/">SCHEDULE</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li>面试总结</li>
+        
+      
+    
+      
+      
+        
+          <li><a href="/schedule/2.Hive.html/">2.HIVE.HTML</a></li>
+          
+            
+          
+        
+      
+    
+  </ul>
+
+
+    
+    
+    
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%20%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">326</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">93</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive架构"><span class="nav-text">Hive架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-的数据模型"><span class="nav-text">Hive 的数据模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-架构图"><span class="nav-text">Hive 架构图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hive和传统数据库区别"><span class="nav-text">hive和传统数据库区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-SQl-语句执行过程"><span class="nav-text">Hive SQl 语句执行过程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive基本操作"><span class="nav-text">Hive基本操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建表"><span class="nav-text">创建表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据查询"><span class="nav-text">数据查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-Join操作"><span class="nav-text">Hive Join操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive-表"><span class="nav-text">Hive 表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#hive-内部表和外部表区别"><span class="nav-text">hive 内部表和外部表区别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive分区"><span class="nav-text">Hive分区</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#hive-分区的了解"><span class="nav-text">hive 分区的了解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用hive分区的注意事项"><span class="nav-text">使用hive分区的注意事项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive-分桶"><span class="nav-text">Hive 分桶</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-分桶的理由"><span class="nav-text">Hive 分桶的理由</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive-锁机制"><span class="nav-text">Hive 锁机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#锁机制"><span class="nav-text">锁机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#调试锁"><span class="nav-text">调试锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关闭锁机制"><span class="nav-text">关闭锁机制</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#HIVE-SQL优化"><span class="nav-text">HIVE SQL优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#优化思路"><span class="nav-text">优化思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-SQL-优化手段"><span class="nav-text">Hive SQL 优化手段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive-分析函数和窗口函数"><span class="nav-text">Hive 分析函数和窗口函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-分析函数：用于等级、百分点、n分片等"><span class="nav-text">1. 分析函数：用于等级、百分点、n分片等</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Ntile-是Hive很强大的一个分析函数。"><span class="nav-text">Ntile 是Hive很强大的一个分析函数。</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Rank，Dense-Rank-Row-Number"><span class="nav-text">Rank，Dense_Rank, Row_Number</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-窗口函数-Lag-Lead-First-value-Last-value"><span class="nav-text">2. 窗口函数 Lag, Lead, First_value,Last_value</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Lag-Lead"><span class="nav-text">Lag, Lead</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#FIRST-VALUE-LAST-VALUE"><span class="nav-text">FIRST_VALUE, LAST_VALUE</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive-存储格式"><span class="nav-text">Hive 存储格式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TextFile、SequenceFile、RCfile-、ORCfile各有什么区别"><span class="nav-text">TextFile、SequenceFile、RCfile 、ORCfile各有什么区别</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

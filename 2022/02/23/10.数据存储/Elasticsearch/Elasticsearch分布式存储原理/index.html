@@ -143,7 +143,7 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223165935798.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220223172931852.png">
 <meta property="article:published_time" content="2022-02-22T16:00:00.000Z">
-<meta property="article:modified_time" content="2023-01-06T09:24:09.639Z">
+<meta property="article:modified_time" content="2023-02-20T06:50:32.269Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="elasticsearch">
 <meta name="twitter:card" content="summary">
@@ -901,7 +901,9 @@
 <li>7、对应not_anaylized的string字段，使用的是SORTED_SET类型，number的类型是SORTED_NUMERIC类型</li>
 </ul>
 <p>其中SORTED_SET 的 SORTED_SINGLE_VALUED类型包括了两类数据 ： binary + numeric， binary是按ord排序的term的列表，numeric是doc到ord的映射。</p>
-<h4 id="Fielddata-内存"><a href="#Fielddata-内存" class="headerlink" title="Fielddata (内存)"></a><strong>Fielddata</strong> (内存)</h4><p><code>(非磁盘Field Data 文件，该结构为Fied Data 映射的内存结构)</code></p>
+<h4 id="Fielddata-内存"><a href="#Fielddata-内存" class="headerlink" title="Fielddata (内存)"></a><strong>Fielddata</strong> (内存)</h4><p>在ES中，text类型的字段使用一种叫做fielddata的查询时内存数据结构。当字段被排序，聚合或者通过脚本访问时这种数据结构会被创建。它是通过从磁盘读取每个段的整个反向索引来构建的，然后存存储在java的堆内存中。</p>
+<p>fileddata默认是不开启的。Fielddata可能会消耗大量的堆空间，尤其是在加载高基数文本字段时。一旦fielddata已加载到堆中，它将在该段的生命周期内保留。此外，加载fielddata是一个昂贵的过程，可能会导致用户遇到延迟命中。</p>
+<p><code>(非磁盘Field Data 文件，该结构为Fied Data 映射的内存结构)</code></p>
 <p>Doc values 是不支持 analyzed 字符串字段的，然而，这些字段仍然可以使用聚合和排序</p>
 <p>当ES进行排序、统计时，ES把涉及到的字段数据全部读取到内存(JVM Heap)中进行操作。<strong>与 doc values 不同，fielddata 构建和管理 100% 在内存中，常驻于 JVM 内存堆。</strong></p>
 <p>Fielddata默认是不启用的，因为text字段比较长，一般只做关键字分词和搜索，很少拿它来进行全文匹配和聚合还有排序，因为大多数这种情况是无意义的，一旦启用将会把text都加载到内存中，那将带来很大的内存压力。</p>
@@ -1069,7 +1071,7 @@
                 
                   <a href="/archives/%20%7C%7C%20archive">
                 
-                    <span class="site-state-item-count">310</span>
+                    <span class="site-state-item-count">326</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -1248,7 +1250,13 @@
                     
                       
                     
-                    <span class="site-state-item-count">83</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -1445,7 +1453,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">92</span>
+                      
+                    
+                    <span class="site-state-item-count">93</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -1522,7 +1532,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>

@@ -1,0 +1,1793 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="1. docker工作原理当我们的程序运行时，它们在计算机中表示为进程。docker容器可以运行各种程序。容器技术的核心功能是通过约束和修改流程的动态表示来为流程创建“边界”。 Docker容器启动的进程仍然在主机中运行，这与主机中运行的其他进程没有什么不同，只是Docker容器会向这些进程添加各种Namespace参数，以将它们与主机中的其他进程隔离，并且不会感知其他进程的存在。 对于大多数Li">
+<meta property="og:type" content="website">
+<meta property="og:title" content="docker">
+<meta property="og:url" content="http://blog.kyleliu.cn/schedule/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.docker.html">
+<meta property="og:site_name" content="刘小恺(Kyle)的云笔记">
+<meta property="og:description" content="1. docker工作原理当我们的程序运行时，它们在计算机中表示为进程。docker容器可以运行各种程序。容器技术的核心功能是通过约束和修改流程的动态表示来为流程创建“边界”。 Docker容器启动的进程仍然在主机中运行，这与主机中运行的其他进程没有什么不同，只是Docker容器会向这些进程添加各种Namespace参数，以将它们与主机中的其他进程隔离，并且不会感知其他进程的存在。 对于大多数Li">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20221212155344389.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20221212161734964.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20221212162618226.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20221212163700397.png">
+<meta property="article:published_time" content="2022-12-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-12-28T10:19:54.801Z">
+<meta property="article:author" content="刘小恺(Kyle)">
+<meta property="article:tag" content="Docker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/img/image-20221212155344389.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/schedule/面试总结/1.docker.html"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>docker | 刘小恺(Kyle)的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle)的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+    
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+    
+
+  
+
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+    
+    
+    <div class="post-block page">
+      <header class="post-header">
+
+<h2 class="post-title" itemprop="name headline">docker</h2>
+
+<div class="post-meta">
+  
+  
+
+
+  
+  
+  <ul class="breadcrumb">
+    
+      
+      
+        
+          <li><a href="/schedule/">SCHEDULE</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li>面试总结</li>
+        
+      
+    
+      
+      
+        
+          <li><a href="/schedule/1.docker.html/">1.DOCKER.HTML</a></li>
+          
+            
+          
+        
+      
+    
+  </ul>
+
+
+</div>
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+        
+        
+          <h2 id="1-docker工作原理"><a href="#1-docker工作原理" class="headerlink" title="1. docker工作原理"></a>1. docker工作原理</h2><p>当我们的程序运行时，它们在计算机中表示为进程。docker容器可以运行各种程序。容器技术的核心功能是通过约束和修改流程的动态表示来为流程创建“边界”。</p>
+<p>Docker容器启动的进程仍然在主机中运行，这与主机中运行的其他进程没有什么不同，只是Docker容器会向这些进程添加各种Namespace参数，以将它们与主机中的其他进程隔离，并且不会感知其他进程的存在。</p>
+<p>对于大多数Linux容器（如Docker），Cgroups技术用于资源限制，而Namespace技术用于隔离。</p>
+<p><strong>容器是一个特殊的过程：</strong></p>
+<p>当docker容器创建进程时，它指定进程需要启用的一组命名空间参数。这样，容器只能“查看”受当前命名空间限制的资源、文件、设备、状态或配置。对于主机和其他无关程序来说，它是完全不可见的。</p>
+<p>在容器中启动的进程仍在主机中运行，但Docker容器将向这些进程添加各种命名空间参数，以便这些进程与主机中的其他进程隔离，不会察觉到其他进程的存在。</p>
+<h2 id="2-docker容器核心技术"><a href="#2-docker容器核心技术" class="headerlink" title="2.  docker容器核心技术"></a>2.  docker容器核心技术</h2><p><strong>Docker的核心技术包含以下几点：</strong></p>
+<ul>
+<li>Linux namespace</li>
+<li>Linux cgroup</li>
+<li>rootfs</li>
+<li>镜像分层</li>
+<li>网络</li>
+<li>Libnetwork</li>
+<li>存储驱动</li>
+</ul>
+<p>下面我会依次介绍这些技术的原理。</p>
+<blockquote>
+<p>注：<em>本篇基于linux的docker来阐述。其他操作系统的docker容器实现原理不尽相同，各位可回想一下在win10下安装docker时，是不是要求必须启动hyper-V服务了？这个是win10自带的虚拟化服务，也就是说docker在win10下采用了虚拟化技术，并且借助创建MobyLinuxVM虚拟机来实现win10下的容器化</em>。</p>
+</blockquote>
+<h3 id="2-1-隔离：Namespace"><a href="#2-1-隔离：Namespace" class="headerlink" title="2.1 隔离：Namespace"></a>2.1 隔离：Namespace</h3><p>命名空间（namespaces）是 Linux 为我们提供的用于分离进程树、网络接口、挂载点以及进程间通信等资源的方法。在日常使用 Linux 或者 macOS 时，我们并没有运行多个完全分离的服务器的需要，但是如果我们在服务器上启动了多个服务，这些服务其实会相互影响的，每一个服务都能看到其他服务的进程，也可以访问宿主机器上的任意文件，这是很多时候我们都不愿意看到的，我们更希望运行在同一台机器上的不同服务能做到完全隔离，就像运行在多台不同的机器上一样。</p>
+<p>Linux 的命名空间机制提供了以下七种不同的命名空间，包括 CLONE_NEWCGROUP、CLONE_NEWIPC、CLONE_NEWNET、CLONE_NEWNS、CLONE_NEWPID、CLONE_NEWUSER 和 CLONE_NEWUTS，通过这七个选项我们能在创建新的进程时设置新进程应该在哪些资源上与宿主机器进行隔离。</p>
+<p>这里我们先观察一下已经搭建好的集群容器的情况：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kubectl get pod -o wide</span></span><br><span class="line">NAME                                READY   STATUS    RESTARTS   AGE     IP            NODE        </span><br><span class="line">business-manager-666f454f7f-bg2bt   1/1     Running   0          27s     172.30.76.4   192.168.0.21</span><br><span class="line">business-manager-666f454f7f-kvn5z   1/1     Running   0          27s     172.30.76.5   192.168.0.21</span><br><span class="line">business-manager-666f454f7f-ncjp7   1/1     Running   0          27s     172.30.9.4    192.168.0.22</span><br><span class="line">data-product-6664c6dcb9-p5xkw       1/1     Running   0          7m17s   172.30.9.3    192.168.0.22</span><br></pre></td></tr></table></figure>
+
+<p>接下来我们进入其他一个容器执行ps，查看容器里都有些什么进程：</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kubectl exec -ti business-manager-666f454f7f-ncjp7 sh</span></span><br><span class="line">$ ps -efj</span><br><span class="line">UID         PID   PPID   PGID    SID  C STIME TTY          TIME <span class="keyword">CMD</span></span><br><span class="line"><span class="bash">root          1      0      1      1  0 14:47 ?        00:00:03 ./business-manager -conf /business-manager/config/config.json</span></span><br><span class="line">root         <span class="number">22</span>      <span class="number">0</span>     <span class="number">22</span>     <span class="number">22</span>  <span class="number">0</span> <span class="number">15</span>:<span class="number">25</span> pts/<span class="number">0</span>    <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span> sh</span><br><span class="line">root         <span class="number">28</span>     <span class="number">22</span>     <span class="number">28</span>     <span class="number">22</span>  <span class="number">0</span> <span class="number">15</span>:<span class="number">29</span> pts/<span class="number">0</span>    <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span> ps -efj</span><br></pre></td></tr></table></figure>
+
+<p>进入docker 容器内部，ps查看所有的进程，pid=1的是我们的应用程序，pid=22和28的分别是我们这一步操作执行的sh程序和ps程序。了解linux系统的同学应该知道，pid=1的不是内核的init进程吗。那么init进程哪去了呢？<br>其实上面显示的1号进程，是docker容器的障眼法，这个business-manager进程就是跑在宿主机上的一个特殊的进程，我们查看下宿主机的真实进程情况：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ps -efj | grep business-manager</span></span><br><span class="line">root      38156  38138  38156  38156  0 14:47 ?        00:00:03 ./business-manager -conf /business-manager/config/config.json</span><br><span class="line">root      47393   3471  47392   3471  0 15:34 pts/2    00:00:00 grep --color=auto business-manager</span><br></pre></td></tr></table></figure>
+
+<p>上面这个pid=33156的才是宿主机上对应business-manager容器的真实进程。</p>
+<p>在当前的宿主机器上，可能就存在由上述的不同进程构成的进程树：</p>
+<img src="/img/image-20221212155344389.png" alt="image-20221212155344389" style="zoom:50%;" />
+
+<p>这就是在使用 clone 创建新进程时传入 CLONE_NEWPID 实现的，也就是使用 Linux 的命名空间实现进程的隔离，Docker 容器内部的任意进程都对宿主机器的进程一无所知。</p>
+<p><strong>容器（指容器里的应用），是linux系统里的一个特殊进程，docker通过linux namespace技术对应用进程进行了隔离</strong>，使的应用只能看到指定的有限的系统信息，这就使应用“以为”自己在一个独立的操作系统环境下。</p>
+<p>Linux namespace，跟K8S、C++的namespace的功能是类似的，目的都是将一组资源限定在一个有限的可见范围内。Linux namespace支持以下几项资源隔离：</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>宏定义</th>
+<th>隔离内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Cgroup</td>
+<td>CLONE_NEWCGROUP</td>
+<td>资源限制Cgroup root directory (since Linux 4.6)</td>
+</tr>
+<tr>
+<td>IPC</td>
+<td>CLONE_NEWIPC</td>
+<td>IPC资源System V IPC, POSIX message queues (since Linux 2.6.19)</td>
+</tr>
+<tr>
+<td>Network</td>
+<td>CLONE_NEWNET</td>
+<td>网络Network devices, stacks, ports, etc. (since Linux 2.6.24)</td>
+</tr>
+<tr>
+<td>Mount</td>
+<td>CLONE_NEWNS</td>
+<td>文件系统Mount points (since Linux 2.4.19)</td>
+</tr>
+<tr>
+<td>PID</td>
+<td>CLONE_NEWPID</td>
+<td>进程号Process IDs (since Linux 2.6.24)</td>
+</tr>
+<tr>
+<td>User</td>
+<td>CLONE_NEWUSER</td>
+<td>用户User and group IDs (started in Linux 2.6.23 and completed in Linux 3.8)</td>
+</tr>
+<tr>
+<td>UTS</td>
+<td>CLONE_NEWUTS</td>
+<td>主机名Hostname and NIS domain name (since Linux 2.6.19)</td>
+</tr>
+<tr>
+<td>这些隔离属性，基本涵盖了一个小型操作系统的运行要素，包含主机名、网络、文件系统等。</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>要使用上述namespace很容易，在调用内核api clone()函数创建新的进程时，加上上述参数即可。这正是Docker在创建容器（现在大家知道了，就是创建我们的应用程序进程）时所要做的事情。</td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="2-2-限制：Cgroup"><a href="#2-2-限制：Cgroup" class="headerlink" title="2.2 限制：Cgroup"></a>2.2 限制：Cgroup</h3><p>Linux的Cgroup机制，是Docker利用的又一大利器。上一节我们知道，容器其实就是宿主机里的一个被框进来的进程，它不能看到外面，但它与宿主机上其他的进程共享了内核资源，所以接下来我们需要对它所能使用的资源作限制，这就是Cgroup机制所提供的。<br>Cgroup的使用，比较简单粗暴，它利用一组目录和文件的组合，来实现配置和控制。这些目录和文件在/sys/fs/cgroup目录下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> <span class="built_in">cd</span> /sys/fs/cgroup/</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> ls</span></span><br><span class="line">blkio  cpu  cpuacct  cpu,cpuacct  cpuset  devices  freezer  hugetlb  memory  net_cls  net_cls,net_prio  net_prio  perf_event  pids  systemd</span><br></pre></td></tr></table></figure>
+
+<p>上述文件夹各自对一些资源进行控制。要使用cgroup很简单，在对应目录下创建一个新的文件夹，cgroup会自动为我们生成相关的一些配置文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> <span class="built_in">cd</span> cpu</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> mkdir JoTest</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> <span class="built_in">cd</span> JoTest/</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> ls</span></span><br><span class="line">cgroup.clone_children  cgroup.procs  cpuacct.usage         cpu.cfs_period_us  cpu.rt_period_us   cpu.shares  notify_on_release</span><br><span class="line">cgroup.event_control   cpuacct.stat  cpuacct.usage_percpu  cpu.cfs_quota_us   cpu.rt_runtime_us  cpu.stat    tasks</span><br></pre></td></tr></table></figure>
+
+<p>我们可以修改period和quota文件，配置进程能够占用的CPU百分比，然后将需要应用这组限制的进程的ID写入tasks文件，即可完成cpu的限制。</p>
+<h3 id="2-3-rootfs"><a href="#2-3-rootfs" class="headerlink" title="2.3 rootfs"></a>2.3 rootfs</h3><p>Namespace对应用进行了隔离，而cgroup则完成了资源的分配和限制，现在一个针对应用程序的沙盒已经成型。接下来就是考虑一致性问题了？</p>
+<p>一致性主要是为了解决应用跑在不同的宿主机上不受宿主机环境的差异影响的问题。容器技术出来之前，手动或脚本迁移应用的时候，往往会遇到新的宿主机缺少某个关键组件、或是某些依赖版本差异甚至是操作系统内核差异等因素导致的不一致问题。现在我们来看看docker是怎么解决这个问题的。</p>
+<p>对于单个应用程序进程来说，对环境的依赖，关键体现在对操作系统所提供的文件系统的依赖，所以docker所要做的就是通过以下3步给你一套想要的文件系统：</p>
+<ul>
+<li>通过mount namespace（2.1章节）将应用的文件系统隔离开</li>
+<li>将应用所需要的文件系统（比如centos:7的所有文件）拷贝到某个目录D下</li>
+<li>调用chroot将应用的根目录调整为目录D（mount namespace的隔离作用在这里体现出来了，chroot只对在当前namespace下的应用生效，应用在这个“根目录”下可以随便折腾，而不会影响到真实的宿主机根目录。）</li>
+</ul>
+<p>上面这3步所构造出来的文件系统，我们称之为rootfs（根文件系统）。应用程序执行“cd /“指令进入的根目录，将被限定在上述目录D下。下面我们简单验证一下这个rootfs。<br>这里我们在容器的根目录新建一个文件jo1，然后在宿主机上查找这个文件，定位到如下位置：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> <span class="built_in">cd</span> /var/lib/docker/overlay2/b2231f9f15050ae8d609726d308c2ead60114df3fc5404a24c688d805d4a9883/merged/</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> ls</span></span><br><span class="line">anaconda-post.log  bin  business-manager  data  dev  etc  home  jo1  lib  lib64  lost+found  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，上面这个文件夹正是我们的容器所在的“根目录”。</p>
+<p>我们也可以用mount指令查看当前宿主机的挂载情况，限于篇幅，这里就不展开解析mount了，下面是mount的输出节选：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># mount|grep overlay2</span></span><br><span class="line">overlay on /var/lib/docker/overlay2/be512d9faf97c7d860fa16ecc4ecd5057e12feffc8b0804115923f0795bb9f75/merged <span class="built_in">type</span> overlay (rw,relatime,seclabel,lowerdir=/var/lib/docker/overlay2/l/ZSXN3J4UXRRBMRG3F3RNUZGWUB:/var/lib/docker/overlay2/l/2CCAOTBFIGCYNR73TQEE333CO6:/var/lib/docker/overlay2/l/6Y5GTV75CBUR4WORCMOHYJZQ7Y:/var/lib/docker/overlay2/l/VWENHOE7X3WDA4NK5P7DTTPSIX,upperdir=/var/lib/docker/overlay2/be512d9faf97c7d860fa16ecc4ecd5057e12feffc8b0804115923f0795bb9f75/diff,workdir=/var/lib/docker/overlay2/be512d9faf97c7d860fa16ecc4ecd5057e12feffc8b0804115923f0795bb9f75/work)</span><br><span class="line">overlay on /var/lib/docker/overlay2/8a7546027e2e354bf0bba12600fdb6ac87c199d09589ba90952f28aed74d13b6/merged <span class="built_in">type</span> overlay (rw,relatime,seclabel,lowerdir=/var/lib/docker/overlay2/l/KOZRXUFTWITQUNAKOZMWSYWTSH:/var/lib/docker/overlay2/l/2CCAOTBFIGCYNR73TQEE333CO6:/var/lib/docker/overlay2/l/6Y5GTV75CBUR4WORCMOHYJZQ7Y:/var/lib/docker/overlay2/l/VWENHOE7X3WDA4NK5P7DTTPSIX,upperdir=/var/lib/docker/overlay2/8a7546027e2e354bf0bba12600fdb6ac87c199d09589ba90952f28aed74d13b6/diff,workdir=/var/lib/docker/overlay2/8a7546027e2e354bf0bba12600fdb6ac87c199d09589ba90952f28aed74d13b6/work)</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-4-镜像分层"><a href="#2-4-镜像分层" class="headerlink" title="2.4 镜像分层"></a>2.4 镜像分层</h3><p>上面3节已经可以实现一个基本的容器了。接下来的问题是，我们这么多应用的docker镜像如果全部都包含了整个操作系统的文件，势必给镜像的传播下载带来不便，所以docker为我们实现了镜像分层来解决镜像大小问题。</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> reg.miz.so/library/centos:<span class="number">7</span></span><br><span class="line"><span class="keyword">MAINTAINER</span> <span class="string">"maizuo &lt;aura@hyx.com&gt;"</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> rm /etc/localtime &amp;&amp; \</span></span><br><span class="line"><span class="bash">ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime</span></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="bash"> /business-manager</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> ./build/main /business-manager/business-manager</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> ./build/resource /business-manager/resource</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> mkdir /data &amp;&amp; <span class="built_in">cd</span> /data &amp;&amp; mkdir logs</span></span><br></pre></td></tr></table></figure>
+
+<p>查看上面这个典型的dockerfile文件，其中FROM字段表示我们当前打包的镜像是基于reg.miz.so/library/centos:7来创建的，dockerfile文件里每条指令均会创建一个新的镜像层，这些层合在一起就是一个完整的镜像。</p>
+<p>镜像分层的应用，简单的举个例子，比如我们的business-manager和data-product都是基于reg.miz.so/library/centos:7这个镜像建立的，那么我们第一次下载data-product镜像时，需要把reg.miz.so/library/centos:7也下载下来，但当我们再次下载其他的镜像比如business-manager，已经存在的镜像层如reg.miz.so/library/centos:7镜像则无需重复下载，只需要下载增量部分即可，所以多个应用如果基于同样的基础层创建，除第1次外，后面的镜像下载往往只需要下几十M的应用程序即可，这就很大程度上解决了镜像大小的问题。</p>
+<p>不同的容器镜像共用相同的层，那么容器如果修改了底层的文件，会不会影响到其他容器呢？</p>
+<p>答案是不会，docker在这里运用了copy-on-write的手法，在后面存储驱动会有介绍</p>
+<h3 id="2-5-网络"><a href="#2-5-网络" class="headerlink" title="2.5 网络"></a>2.5 网络</h3><p>如果 Docker 的容器通过 Linux 的命名空间完成了与宿主机进程的网络隔离，但是却有没有办法通过宿主机的网络与整个互联网相连，就会产生很多限制，所以 Docker 虽然可以通过命名空间创建一个隔离的网络环境，但是 Docker 中的服务仍然需要与外界相连才能发挥作用。<br>每一个使用 docker run 启动的容器其实都具有单独的网络命名空间，Docker 为我们提供了四种不同的网络模式，Host、Container、None 和 Bridge 模式。</p>
+<p>在这一部分，我们将介绍 Docker 默认的网络设置模式：网桥模式。在这种模式下，除了分配隔离的网络命名空间之外，Docker 还会为所有的容器设置 IP 地址。当 Docker 服务器在主机上启动之后会创建新的虚拟网桥 docker0，随后在该主机上启动的全部服务在默认情况下都与该网桥相连。</p>
+<img src="/img/image-20221212161734964.png" alt="image-20221212161734964" style="zoom:50%;" />
+
+<p>在默认情况下，每一个容器在创建时都会创建一对虚拟网卡，两个虚拟网卡组成了数据的通道，其中一个会放在创建的容器中，会加入到名为 docker0 网桥中。我们可以使用如下的命令来查看当前网桥的接口：</p>
+<p>docker0 会为每一个容器分配一个新的 IP 地址并将 docker0 的 IP 地址设置为默认的网关。网桥 docker0 通过 iptables 中的配置与宿主机器上的网卡相连，所有符合条件的请求都会通过 iptables 转发到 docker0 并由网桥分发给对应的机器。</p>
+<p>我们在当前的机器上使用 docker run -d -p 6379:6379 redis 命令启动了一个新的 Redis 容器，在这之后我们再查看当前 iptables 的 NAT 配置就会看到在 DOCKER 的链中出现了一条新的规则：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DNAT       tcp  --  anywhere             anywhere             tcp dpt:6379 to:192.168.0.4:6379</span><br></pre></td></tr></table></figure>
+
+<p>上述规则会将从任意源发送到当前机器 6379 端口的 TCP 包转发到 192.168.0.4:6379 所在的地址上。</p>
+<p>Docker 通过 Linux 的命名空间实现了网络的隔离，又通过 iptables 进行数据包转发，让 Docker 容器能够优雅地为宿主机器或者其他容器提供服务。</p>
+<h3 id="2-6-Libnetwork"><a href="#2-6-Libnetwork" class="headerlink" title="2.6 Libnetwork"></a>2.6 Libnetwork</h3><p>整个网络部分的功能都是通过 Docker 拆分出来的 libnetwork 实现的，它提供了一个连接不同容器的实现，同时也能够为应用给出一个能够提供一致的编程接口和网络层抽象的容器网络模型。</p>
+<p>libnetwork 中最重要的概念，容器网络模型由以下的几个主要组件组成，分别是 Sandbox、Endpoint 和 Network：</p>
+<img src="/img/image-20221212162618226.png" alt="image-20221212162618226" style="zoom:50%;" />
+
+<p>endpoint可以理解为容器中的多个虚拟网卡。</p>
+<p>在容器网络模型中，每一个容器内部都包含一个 Sandbox，其中存储着当前容器的网络栈配置，包括容器的接口、路由表和 DNS 设置，Linux 使用网络命名空间实现这个 Sandbox，每一个 Sandbox 中都可能会有一个或多个 Endpoint，在 Linux 上就是一个虚拟的网卡 veth，Sandbox 通过 Endpoint 加入到对应的网络中，这里的网络可能就是我们在上面提到的 Linux 网桥或者 VLAN。</p>
+<h3 id="2-7-存储驱动"><a href="#2-7-存储驱动" class="headerlink" title="2.7 存储驱动"></a>2.7 存储驱动</h3><p>Docker 使用了一系列不同的存储驱动管理镜像内的文件系统并运行容器，这些存储驱动与 Docker 卷（volume）有些不同，存储引擎管理着能够在多个容器之间共享的存储。</p>
+<p>想要理解 Docker 使用的存储驱动，我们首先需要理解 Docker 是如何构建并且存储镜像的，也需要明白 Docker 的镜像是如何被每一个容器所使用的；Docker 中的每一个镜像都是由一系列只读的层组成的，Dockerfile 中的每一个命令都会在已有的只读层上创建一个新的层：</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> ubuntu:<span class="number">15.04</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> . /app</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> make /app</span></span><br><span class="line"><span class="keyword">CMD</span><span class="bash"> python /app/app.py</span></span><br></pre></td></tr></table></figure>
+
+<p>容器中的每一层都只对当前容器进行了非常小的修改，上述的 Dockerfile 文件会构建一个拥有四层 layer 的镜像：</p>
+<img src="/img/image-20221212163700397.png" alt="image-20221212163700397" style="zoom:50%;" />
+
+<p>当镜像被 docker run 命令创建时就会在镜像的最上层添加一个可写的层，也就是容器层，所有对于运行时容器的修改其实都是对这个容器读写层的修改。</p>
+<p>容器和镜像的区别就在于，所有的镜像都是只读的，而每一个容器其实等于镜像加上一个可读写的层，也就是同一个镜像可以对应多个容器。</p>
+<h2 id="3-容器与虚拟机"><a href="#3-容器与虚拟机" class="headerlink" title="3. 容器与虚拟机"></a>3. 容器与虚拟机</h2><h3 id="3-1-虚拟机"><a href="#3-1-虚拟机" class="headerlink" title="3.1 虚拟机"></a>3.1 虚拟机</h3><p>使用虚拟机时，需要使用虚拟机管理程序来创建虚拟机。此虚拟机是真实的，需要运行来宾操作系统来执行用户的应用程序过程，这将不可避免地导致额外的资源消耗和占用。</p>
+<p>虚拟机本身的操作将占用一定数量的资源。同时，虚拟机对主机文件的调用将不可避免地需要由虚拟化软件进行连接和处理。这本身就是一个性能消耗层，特别是对于计算资源、网络和磁盘I/O。</p>
+<h3 id="3-2-容器"><a href="#3-2-容器" class="headerlink" title="3.2. 容器"></a>3.2. 容器</h3><p>容器化应用程序仍然是主机上的一个常见进程。虚拟化不会造成性能损失。同时，容器使用命名空间隔离，因此不需要单独的来宾操作系统。这使得容器的额外资源消耗几乎可以忽略不计。</p>
+<p><strong>但是容器也存在一些缺点：</strong></p>
+<ol>
+<li><p>与虚拟化技术相比，基于Linux命名空间的隔离机制也有许多缺点。主要问题是隔离不完整。容器只是在主机中运行的一个特殊进程，容器时间仍然由同一主机的操作系统内核使用；</p>
+<p>尽管您可以通过容器中的mount Namespace分别装载不同版本的其他操作系统文件，如CentOS或Ubuntu，但这不会改变主机内核共享的事实。这意味着，如果您想在Windows主机上运行Linux容器，或者在较低版本的Linux主机上运行更高版本的Linux容器，它将无法工作。</p>
+</li>
+<li><p>在Linux内核中，有许多资源和对象无法命名空间化。最典型的例子是：时间；</p>
+<p>如果容器中的程序使用 settimeofday 系统调用来修改时间，则整个主机时间将相应地修改，因此我们应该尽量避免在容器中执行此操作。</p>
+</li>
+<li><p>共享主机内核的容器将向应用程序暴露更大的攻击面。</p>
+<p>在生产环境中，物理机器中的Linux容器不会直接暴露于公共网络。root</p>
+</li>
+</ol>
+<h3 id="3-3-虚拟机和容器之间的区别"><a href="#3-3-虚拟机和容器之间的区别" class="headerlink" title="3.3 虚拟机和容器之间的区别"></a>3.3 虚拟机和容器之间的区别</h3><table>
+<thead>
+<tr>
+<th align="left">特性或原理</th>
+<th align="right">Docker Container</th>
+<th align="center">虚拟机</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">核心原理</td>
+<td align="right">进程隔离，共享操作系统内核</td>
+<td align="center">硬件虚拟化，在宿主操作系统上再跑一个操作系统</td>
+</tr>
+<tr>
+<td align="left">如何保证一致性</td>
+<td align="right">镜像（rootfs）</td>
+<td align="center">安装一个相同的操作系统</td>
+</tr>
+<tr>
+<td align="left">启动速度</td>
+<td align="right">秒级-进程级启动</td>
+<td align="center">分钟级-系统级启动</td>
+</tr>
+<tr>
+<td align="left">硬盘使用</td>
+<td align="right">MB-镜像分层的优势</td>
+<td align="center">GB</td>
+</tr>
+<tr>
+<td align="left">性能</td>
+<td align="right">几乎无损耗</td>
+<td align="center">有损耗</td>
+</tr>
+<tr>
+<td align="left">单机支持量</td>
+<td align="right">单机支持上千个容器</td>
+<td align="center">一般几十个</td>
+</tr>
+</tbody></table>
+<p>当然，docker也存在一些弊端，主要是隔离性不足以及隔离不足所带来的安全风险。虚拟机基于硬件虚拟化，每个虚拟机上都运行着独立的系统内核，可以保证与宿主机和其他虚拟机有强隔离，跑在虚拟机内的应用可以随便折腾而无需担心影响到“邻居”。而docker所依赖的namespace提供的是有限的隔离，典型的是系统时间没有被隔离，容器内修改系统时间会直接体现在宿主机上；所以开发过程中，当我们的应用需要修改内核参数时，务必谨慎，明确自己在干啥。</p>
+
+        
+      </div>
+      
+      
+      
+    </div>
+    
+
+
+  
+  
+  <ul class="breadcrumb">
+    
+      
+      
+        
+          <li><a href="/schedule/">SCHEDULE</a></li>
+          
+            
+          
+        
+      
+    
+      
+      
+        
+          <li>面试总结</li>
+        
+      
+    
+      
+      
+        
+          <li><a href="/schedule/1.docker.html/">1.DOCKER.HTML</a></li>
+          
+            
+          
+        
+      
+    
+  </ul>
+
+
+    
+    
+    
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%20%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">326</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">93</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-docker工作原理"><span class="nav-text">1. docker工作原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-docker容器核心技术"><span class="nav-text">2.  docker容器核心技术</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-隔离：Namespace"><span class="nav-text">2.1 隔离：Namespace</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-限制：Cgroup"><span class="nav-text">2.2 限制：Cgroup</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-rootfs"><span class="nav-text">2.3 rootfs</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-镜像分层"><span class="nav-text">2.4 镜像分层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-网络"><span class="nav-text">2.5 网络</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-6-Libnetwork"><span class="nav-text">2.6 Libnetwork</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-7-存储驱动"><span class="nav-text">2.7 存储驱动</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-容器与虚拟机"><span class="nav-text">3. 容器与虚拟机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-虚拟机"><span class="nav-text">3.1 虚拟机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-容器"><span class="nav-text">3.2. 容器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-虚拟机和容器之间的区别"><span class="nav-text">3.3 虚拟机和容器之间的区别</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

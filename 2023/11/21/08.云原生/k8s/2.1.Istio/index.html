@@ -1,0 +1,1823 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="ServiceMeshService Mesh服务网格(Service Mesh) 这个术语通常用于描述构成这些应用程序的微服务网络以及应用之间的交互。 随着规模和复杂性的增长，服务网格越来越难以理解和管理。 它的需求包括服务发现、负载均衡、故障恢复、指标收集和监控以及通常更加复杂的运维需求，例如A&#x2F;B 测试、金丝雀发布、限流、访问控制和端到端认证等。 可以理解为服务调用链路上的所有能力， 加起来">
+<meta property="og:type" content="article">
+<meta property="og:title" content="istio">
+<meta property="og:url" content="http://blog.kyleliu.cn/2023/11/21/08.%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/2.1.Istio/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle)的云笔记">
+<meta property="og:description" content="ServiceMeshService Mesh服务网格(Service Mesh) 这个术语通常用于描述构成这些应用程序的微服务网络以及应用之间的交互。 随着规模和复杂性的增长，服务网格越来越难以理解和管理。 它的需求包括服务发现、负载均衡、故障恢复、指标收集和监控以及通常更加复杂的运维需求，例如A&#x2F;B 测试、金丝雀发布、限流、访问控制和端到端认证等。 可以理解为服务调用链路上的所有能力， 加起来">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/1700527201495.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/1700526427912.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/1700526398414.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/1700526522161.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/1700526755366.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/1700527609633.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/1700527662962.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/1700527977466.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/1700528019329.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/1700528361306.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/1700528954131.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/1700529227250.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/1700616123027.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/1700785487127.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/1700786815224.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/1700786847659.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/image-20231125084057152.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/image-20231125084230503.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/image-20231125084254833.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/image-20231125084345693.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/image-20231125084438621.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/image-20231125084510866.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/image-20231125090701989.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/image-20231125090732131.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/image-20231125091158293.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/image-20231125091355721.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2023/11/21/img/image-20231125091638566.png">
+<meta property="article:published_time" content="2023-11-20T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-02-08T12:23:49.934Z">
+<meta property="article:author" content="刘小恺(Kyle)">
+<meta property="article:tag" content="k8s">
+<meta property="article:tag" content="Istio">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/2023/11/21/img/1700527201495.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2023/11/21/08.云原生/k8s/2.1.Istio/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>istio | 刘小恺(Kyle)的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle)的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2023/11/21/08.%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/2.1.Istio/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">istio
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2023-11-21 00:00:00" itemprop="dateCreated datePublished" datetime="2023-11-21T00:00:00+08:00">2023-11-21</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/" itemprop="url" rel="index"><span itemprop="name">云原生</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/11/21/08.%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/2.1.Istio/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2023/11/21/08.%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/2.1.Istio/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="ServiceMesh"><a href="#ServiceMesh" class="headerlink" title="ServiceMesh"></a>ServiceMesh</h1><h3 id="Service-Mesh"><a href="#Service-Mesh" class="headerlink" title="Service Mesh"></a>Service Mesh</h3><p>服务网格(Service Mesh) 这个术语通常用于描述构成这些应用程序的微服务网络以及应用之间的交互。</p>
+<p>随着规模和复杂性的增长，服务网格越来越难以理解和管理。 它的需求包括服务发现、负载均衡、故障恢复、指标收集和监控以及通常更加复杂的运维需求，例如A/B 测试、金丝雀发布、限流、访问控制和端到端认证等。</p>
+<p>可以理解为服务调用链路上的所有能力， 加起来组成的网格状的结构</p>
+<p><img src="../../../img/1700527201495.png" alt="1700527201495"></p>
+<p><img src="../../../img/1700526427912.png" alt="1700526427912"></p>
+<h3 id="serviceMesh-（sidecar模式）工作原理"><a href="#serviceMesh-（sidecar模式）工作原理" class="headerlink" title="serviceMesh （sidecar模式）工作原理"></a>serviceMesh （sidecar模式）工作原理</h3><p><img src="../../../img/1700526398414.png" alt="1700526398414"></p>
+<p>SD:服务发现</p>
+<p>CB: 熔断</p>
+<p>LB：负载均衡</p>
+<p>AU：认证鉴权</p>
+<h3 id="为什么用Service-Mesh"><a href="#为什么用Service-Mesh" class="headerlink" title="为什么用Service Mesh"></a>为什么用Service Mesh</h3><p><img src="../../../img/1700526522161.png" alt="1700526522161"></p>
+<ul>
+<li><p>Http、Grpc 和TCP流量的自动负载均衡。</p>
+</li>
+<li><p>通过丰富的路由规则、重试、故障转移和故障注入，可以对流量进行细粒度的控制。</p>
+</li>
+<li><p>可插入的策略层和配置API，支持访问控制、速率限制和配额。</p>
+</li>
+<li><p>对出入集群入口和出口中所有流量的自动度量指标、日志记录和跟踪。</p>
+</li>
+<li><p>通过强大的基于身份验证和授权，在集群中实现安全的服务间通信。</p>
+<h3 id="Service-Mesh-的优劣"><a href="#Service-Mesh-的优劣" class="headerlink" title="Service Mesh 的优劣"></a>Service Mesh 的优劣</h3></li>
+</ul>
+<p><img src="../../../img/1700526755366.png" alt="1700526755366"></p>
+<h2 id="Istio-功能概览"><a href="#Istio-功能概览" class="headerlink" title="Istio 功能概览"></a>Istio 功能概览</h2><p><img src="../../../img/1700527609633.png" alt="1700527609633"></p>
+<h3 id="流量管理"><a href="#流量管理" class="headerlink" title="流量管理"></a>流量管理</h3><p><img src="../../../img/1700527662962.png" alt="1700527662962"></p>
+<h3 id="安全"><a href="#安全" class="headerlink" title="安全"></a>安全</h3><p><img src="../../../img/1700527977466.png" alt="1700527977466"></p>
+<h3 id="可观察性"><a href="#可观察性" class="headerlink" title="可观察性"></a>可观察性</h3><p><img src="../../../img/1700528019329.png" alt="1700528019329"></p>
+<h2 id="Istio-架构"><a href="#Istio-架构" class="headerlink" title="Istio 架构"></a>Istio 架构</h2><h3 id="Istio-架构演进"><a href="#Istio-架构演进" class="headerlink" title="Istio 架构演进"></a>Istio 架构演进</h3><ul>
+<li>数据平面： SideCar 方式部署的 Proxy， 负责网络通信（上面介绍的服务网格， 其实是通过数据面实现的）；</li>
+<li>控制平面： 负责管理和配置代理来进行路由流量，就是负责控制数据面的部署和配置；</li>
+</ul>
+<p><img src="../../../img/1700528361306.png" alt="1700528361306"></p>
+<p>watch api service， 监控state信息： Service 、 Pod、 Endpoint 等信息， 将Istio 配置和 State 信息结合后下发给Envoy， 作为各Pod的Proxy。</p>
+<h2 id="数据面的-Envoy"><a href="#数据面的-Envoy" class="headerlink" title="数据面的-Envoy"></a>数据面的-Envoy</h2><h3 id="主流七层代理的比较"><a href="#主流七层代理的比较" class="headerlink" title="主流七层代理的比较"></a>主流七层代理的比较</h3><p><img src="../../../img/1700528954131.png" alt="1700528954131"></p>
+<h3 id="Envoy-的优势"><a href="#Envoy-的优势" class="headerlink" title="Envoy 的优势"></a>Envoy 的优势</h3><p><img src="../../../img/1700529227250.png" alt="1700529227250"></p>
+<h2 id="Istio-的原理"><a href="#Istio-的原理" class="headerlink" title="Istio 的原理"></a>Istio 的原理</h2><h3 id="部署istio-后会有三个pod"><a href="#部署istio-后会有三个pod" class="headerlink" title="部署istio 后会有三个pod"></a>部署istio 后会有三个pod</h3><ul>
+<li>istiod: 负责监听集群所有service 、pod、 endpoint 、secret、以及istio自身对象的变化，并负责将集群的信息push给envoy实例</li>
+<li>istio-ingressgateway：进入网络的所有流量都会通过ingress-envoy进行传输</li>
+<li>istio-egressgateway ：离开网络的所有流量都会通过egress-envoy进行传输</li>
+<li><img src="../../../img/1700616123027.png" alt="1700616123027"></li>
+</ul>
+<h3 id="Istio-流量劫持是如何实现"><a href="#Istio-流量劫持是如何实现" class="headerlink" title="Istio 流量劫持是如何实现"></a>Istio 流量劫持是如何实现</h3><ul>
+<li>先为pod注入sidecar， 注入Istio side car 的结果是会有  istio-init  和  istio-proxy 两个pod</li>
+<li>通过istio-init， 修改iptable， 将应用容器的所有流量都转发哦到Envoy的容器中</li>
+<li>通过istio-proxy， 实际为envoy容器， 用来进行虚拟路由， 将流量转发给实际的endpoint。</li>
+</ul>
+<h3 id="Istio-流量管理如何实现"><a href="#Istio-流量管理如何实现" class="headerlink" title="Istio 流量管理如何实现"></a>Istio 流量管理如何实现</h3><ul>
+<li>通过比例分流</li>
+<li>通过请求header 分流</li>
+</ul>
+<p><img src="../../../img/1700785487127.png" alt="1700785487127"></p>
+<ul>
+<li><p>服务的客户端不知道服务不同版本之间的差异。他们可以使用服务的主机名或者ip地址继续访问服务。Envoy sidecar 代理拦截并转发客户端和服务器之间的所有请求。</p>
+</li>
+<li><p>istio还为统一服务版本的多个实例提供流量的负载均衡。可以在服务发现和负载均衡中找到更多信息</p>
+</li>
+<li><p>istio不提供DNS。应用程序可以尝试使用底层平台（kube-dns、mesos-dns等）中存在的DNS服务来解析FQDN。</p>
+<h3 id="Ingress-和Egress介绍"><a href="#Ingress-和Egress介绍" class="headerlink" title="Ingress 和Egress介绍"></a>Ingress 和Egress介绍</h3></li>
+</ul>
+<p>通过将Envoy 代理部署在服务之前， 运维人员可以针对面向用户的服务进行A/测试、部署金丝雀服务等。</p>
+<p>类似的， 通过使用Envoy将流量路由到外部的web服务，例如， 方位Maps API 或者视频服务API的方式， 运维人员可以为这些服务添加超时控制、重试、断路器等功能，同时还能从服务连接中获取各种细节指标。</p>
+<h3 id="服务发现和负载均衡"><a href="#服务发现和负载均衡" class="headerlink" title="服务发现和负载均衡"></a>服务发现和负载均衡</h3><p><img src="../../../img/1700786815224.png" alt="1700786815224"></p>
+<h3 id="故障处理"><a href="#故障处理" class="headerlink" title="故障处理"></a>故障处理</h3><p><img src="../../../img/1700786847659.png" alt="1700786847659"></p>
+<h2 id="Istio-的规则配置"><a href="#Istio-的规则配置" class="headerlink" title="Istio 的规则配置"></a>Istio 的规则配置</h2><h3 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h3><ul>
+<li>VirtualService: 在Istio 服务网络中定义路由规则， 控制路由如何路由到服务上</li>
+<li>DestinationRule VirtualService 路由生效后， 配置应用与请求的策略集</li>
+<li>ServiceEntry 是通常用于在Istio服务网格之外启动对服务的请求</li>
+<li>Gateway 为Http/Tcp 流量配置负载均衡器，最常见的是在网格边缘的操作，以启用应用程序的入口流量。</li>
+</ul>
+<h3 id="VirtualService"><a href="#VirtualService" class="headerlink" title="VirtualService"></a>VirtualService</h3><p>是在Istio 服务网格内对服务的请求如何进行路由进行控制。</p>
+<p><strong>规则的目标描述</strong></p>
+<p><img src="../../../img/image-20231125084057152.png" alt="image-20231125084057152"></p>
+<p><strong>在服务之间流量拆分</strong></p>
+<p><img src="../../../img/image-20231125084230503.png" alt="image-20231125084230503"></p>
+<p><strong>超时和重试</strong></p>
+<p><img src="../../../img/image-20231125084254833.png" alt="image-20231125084254833"></p>
+<p><strong>匹配规则条件</strong></p>
+<p><img src="../../../img/image-20231125084345693.png" alt="image-20231125084345693"></p>
+<p><strong>流量镜像</strong></p>
+<p><img src="../../../img/image-20231125084438621.png" alt="image-20231125084438621"></p>
+<p><strong>规则委托</strong></p>
+<p>用于将代理规则的分机， 分组治理</p>
+<p><img src="../../../img/image-20231125084510866.png" alt="image-20231125084510866"></p>
+<p><strong>匹配规则优先级</strong></p>
+<p>当对同一目标有多个规则时，会按照在VirtualService 中的顺序进行应用，换句话中， 列表中的第一条规则具有最高的优先级。</p>
+<h3 id="DestinationRule"><a href="#DestinationRule" class="headerlink" title="DestinationRule"></a>DestinationRule</h3><p>用来管理流量从envoy流量离开envoy到对端的时候， 的流量管理规则， 需要被VirtualService引用。</p>
+<p><strong>示例</strong></p>
+<p><img src="../../../img/image-20231125090701989.png" alt="image-20231125090701989"></p>
+<p><strong>连接池和断路器（熔断器）</strong></p>
+<p><img src="../../../img/image-20231125090732131.png" alt="image-20231125090732131"></p>
+<h3 id="ServiceEntry"><a href="#ServiceEntry" class="headerlink" title="ServiceEntry"></a>ServiceEntry</h3><p> 用于将流量转发到在服务网格之外的服务</p>
+<p><img src="../../../img/image-20231125091158293.png" alt="image-20231125091158293"></p>
+<h3 id="WorkloadEntry"><a href="#WorkloadEntry" class="headerlink" title="WorkloadEntry"></a>WorkloadEntry</h3><p>用来给ServiceEntry提供一种发现外部cluster的集群endpoint信息的方式</p>
+<p><img src="../../../img/image-20231125091355721.png" alt="image-20231125091355721"></p>
+<h3 id="Gateway"><a href="#Gateway" class="headerlink" title="Gateway"></a>Gateway</h3><p>用来将服务网格内部的服务， 可以代理到外部访问， 核心还是通过istio-ingress 组件</p>
+<p>注意：如果在配置VirtualService的时候， 指定了gateways， 那规则将只会下发给gateway节点， 否则适用于所有envoy节点。 </p>
+<p><img src="../../../img/image-20231125091638566.png" alt="image-20231125091638566"></p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>微服务架构是当前业界普遍认可的架构模式，容器的封装性， 隔离性为微服务架构的兴盛提供了有力的保障。</p>
+<p>Kubenetes 作为声明式集群管理系统，代表了分布式系统架构的大方向：</p>
+<ul>
+<li>kube-proxy 本身提供了基于iptable/ipvs 的四层 Service Mesh 方案；</li>
+<li>Istio/linked 作为基于Kubernetes 的七层 Service Mesh 方案， 近期会有比较多的部署案例；</li>
+</ul>
+<p>生产系统需要考虑的，除了Service Mesh 架构带来的便利性，还需要考虑：</p>
+<ul>
+<li>配置一致性检查；</li>
+<li>endpoint的健康检查；</li>
+<li>海量转发规则情况下的scalability；</li>
+</ul>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/k8s/" rel="tag"><i class="fa fa-tag"></i> k8s</a>
+          
+            <a href="/tags/Istio/" rel="tag"><i class="fa fa-tag"></i> Istio</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2023/11/01/08.%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/1.6.Pod%E8%B5%84%E6%BA%90%E6%A8%A1%E5%9E%8B/" rel="next" title="Pod资源模型">
+                <i class="fa fa-chevron-left"></i> Pod资源模型
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2023/12/15/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/3.%E4%BA%91%E5%8E%9F%E7%94%9F/" rel="prev" title="云原生面试整理">
+                云原生面试整理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%20%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">326</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">93</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#ServiceMesh"><span class="nav-text">ServiceMesh</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Service-Mesh"><span class="nav-text">Service Mesh</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#serviceMesh-（sidecar模式）工作原理"><span class="nav-text">serviceMesh （sidecar模式）工作原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么用Service-Mesh"><span class="nav-text">为什么用Service Mesh</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Service-Mesh-的优劣"><span class="nav-text">Service Mesh 的优劣</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Istio-功能概览"><span class="nav-text">Istio 功能概览</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#流量管理"><span class="nav-text">流量管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安全"><span class="nav-text">安全</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#可观察性"><span class="nav-text">可观察性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Istio-架构"><span class="nav-text">Istio 架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Istio-架构演进"><span class="nav-text">Istio 架构演进</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据面的-Envoy"><span class="nav-text">数据面的-Envoy</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#主流七层代理的比较"><span class="nav-text">主流七层代理的比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Envoy-的优势"><span class="nav-text">Envoy 的优势</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Istio-的原理"><span class="nav-text">Istio 的原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#部署istio-后会有三个pod"><span class="nav-text">部署istio 后会有三个pod</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Istio-流量劫持是如何实现"><span class="nav-text">Istio 流量劫持是如何实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Istio-流量管理如何实现"><span class="nav-text">Istio 流量管理如何实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ingress-和Egress介绍"><span class="nav-text">Ingress 和Egress介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#服务发现和负载均衡"><span class="nav-text">服务发现和负载均衡</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#故障处理"><span class="nav-text">故障处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Istio-的规则配置"><span class="nav-text">Istio 的规则配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#名词解释"><span class="nav-text">名词解释</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VirtualService"><span class="nav-text">VirtualService</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DestinationRule"><span class="nav-text">DestinationRule</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ServiceEntry"><span class="nav-text">ServiceEntry</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#WorkloadEntry"><span class="nav-text">WorkloadEntry</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Gateway"><span class="nav-text">Gateway</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结"><span class="nav-text">小结</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

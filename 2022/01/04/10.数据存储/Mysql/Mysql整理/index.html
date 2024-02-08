@@ -151,12 +151,11 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220104143800491.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230107135340658.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220104143227586.png">
-<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220104144314614.png">
-<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220104144339834.png">
-<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220104144934140.png">
-<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220104150525890.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230507170604277.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230507170639856.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230507170849038.png">
 <meta property="article:published_time" content="2022-01-03T16:00:00.000Z">
-<meta property="article:modified_time" content="2023-02-13T14:13:58.211Z">
+<meta property="article:modified_time" content="2023-05-07T09:28:04.076Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="Mysql">
 <meta name="twitter:card" content="summary">
@@ -765,7 +764,7 @@
 <blockquote>
 <p>备注: m为阶数</p>
 </blockquote>
-<h2 id="索引失效场景"><a href="#索引失效场景" class="headerlink" title="索引失效场景"></a>索引失效场景</h2><ol>
+<h3 id="索引失效场景"><a href="#索引失效场景" class="headerlink" title="索引失效场景"></a>索引失效场景</h3><ol>
 <li><p>A=xx OR B=xx</p>
 <p>5.1开始，引入Index merge技术<br>对同一个表可以使用多个索引分别扫描</p>
 </li>
@@ -793,8 +792,8 @@
 </li>
 <li>隔离并发读取问题<ul>
 <li>脏读(Drity Read)：读取到未提交的数据</li>
-<li>不可重复读(Non-repatble rad)：两次读取结果不同</li>
-<li>幻读(Phantom Read)：selct 操作得到的结果所表征的数据状态无法支撑后续的业务操作</li>
+<li>不可重复读(Non-repatble rad)：前后读取的数据不一致；</li>
+<li>幻读(Phantom Read)：前后读取的记录数量不一致。</li>
 </ul>
 </li>
 <li>隔离级别<ul>
@@ -924,57 +923,117 @@
 <li>事物的持久性: redo log 来实现</li>
 <li>事物的一致性: 是所有事物特性的共同来实现</li>
 </ul>
-<h2 id="mysql-锁"><a href="#mysql-锁" class="headerlink" title="mysql 锁"></a>mysql 锁</h2><h3 id="mysql锁的种类"><a href="#mysql锁的种类" class="headerlink" title="mysql锁的种类"></a>mysql锁的种类</h3><p>锁粒度划分</p>
-<ul>
-<li>行级锁</li>
-<li>间隙锁</li>
-<li>表级锁</li>
-<li>临键锁：即行锁+间隙锁的合称，用来解决innodb的可重复度隔离级别的幻读问题</li>
-</ul>
-<p>类型划分</p>
-<ul>
+<h2 id="mysql-锁"><a href="#mysql-锁" class="headerlink" title="mysql 锁"></a>mysql 锁</h2><h3 id="mysql锁的种类"><a href="#mysql锁的种类" class="headerlink" title="mysql锁的种类"></a>mysql锁的种类</h3><h4 id="类型划分"><a href="#类型划分" class="headerlink" title="类型划分"></a>类型划分</h4><ul>
 <li>共享锁（S）<br>读锁，可以同时被多个事务获取，阻止其他事务对记录的修改；</li>
-<li>排他锁（X）<br>写锁，只能被一个事物获取，允许获得锁的事物修改数据；</li>
+<li>排他锁/独占锁（X）<br>写锁，只能被一个事物获取，允许获得锁的事物修改数据；</li>
 </ul>
-<h3 id="各种锁介绍"><a href="#各种锁介绍" class="headerlink" title="各种锁介绍"></a>各种锁介绍</h3><ul>
-<li><p>行级锁</p>
-<ul>
-<li>作用在索引上</li>
-<li>聚簇索引&amp;二级索引</li>
-<li><img src="/img/image-20220104144314614.png" alt="image-20220104144314614" style="zoom: 33%;" /><img src="/img/image-20220104144339834.png" alt="image-20220104144339834" style="zoom:33%;" />  </li>
-</ul>
-</li>
-<li><p>间隙锁</p>
-<ul>
-<li>解决可重复读模式下的幻读问题（实际上为临键锁）；</li>
-<li>GAP锁不是加在记录上；</li>
-<li>GAP锁住的位置，是两条记录之间的GAP；</li>
-<li>保证两次当前读返回一致的记录；</li>
-</ul>
-<p>两次当前读之间，其他的事物不会插入新的满足条件的记录</p>
-<img src="/img/image-20220104144934140.png" alt="image-20220104144934140" style="zoom: 33%;" />
-</li>
-<li><p>表级锁</p>
-<ul>
-<li>lock tables</li>
-<li>元数据锁（meta dat lock，MDL)</li>
-<li><img src="/img/image-20220104150525890.png" alt="image-20220104150525890" style="zoom:33%;" />
+<h4 id="锁粒度划分"><a href="#锁粒度划分" class="headerlink" title="锁粒度划分"></a>锁粒度划分</h4><h5 id="全局锁"><a href="#全局锁" class="headerlink" title="全局锁"></a>全局锁</h5><p>要使用全局锁，则要执行这条命令：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">flush</span> <span class="keyword">tables</span> <span class="keyword">with</span> <span class="keyword">read</span> <span class="keyword">lock</span></span><br></pre></td></tr></table></figure>
 
-</li>
-</ul>
-<p>全表扫描 ”表锁“</p>
-</li>
-<li><p>临键锁</p>
-<p>RR 级别下 innodb默认使用的其实是临键锁。即 行锁+间隙锁</p>
+<p>执行后，<strong>整个数据库就处于只读状态了</strong>，这时其他线程执行以下操作，都会被阻塞：</p>
 <ul>
-<li>如果查询没有命中索引，则退化为表锁;、</li>
-<li>如果等值查询唯一索引且命中唯一1条记录，则退化为行锁;</li>
-<li>如果等值查询唯一索引且没有命中记录，则退化为临近结点的间隙锁;</li>
-<li>如果范围查询唯一索引或查询非唯一索引且命中记录，则锁定所有命中行的临键锁 ，并同时锁定最大记录行下一个区间的间隙锁。</li>
-<li>如果范围查询非唯一索引且没有命中记录，退化为临近结点的间隙锁(包括结点也被锁定)。</li>
+<li>对数据的增删改操作，比如 insert、delete、update等语句；</li>
+<li>对表结构的更改操作，比如 alter table、drop table 等语句。</li>
 </ul>
-</li>
+<p>如果要释放全局锁，则要执行这条命令：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">unlock</span> <span class="keyword">tables</span></span><br></pre></td></tr></table></figure>
+
+<p>当然，当会话断开了，全局锁会被自动释放。</p>
+<blockquote>
+<p>全局锁应用场景是什么？</p>
+</blockquote>
+<p>全局锁主要应用于做<strong>全库逻辑备份</strong>，这样在备份数据库期间，不会因为数据或表结构的更新，而出现备份文件的数据与预期的不一样。</p>
+<h5 id="表级锁"><a href="#表级锁" class="headerlink" title="表级锁"></a>表级锁</h5><p>MySQL 里面表级别的锁有这几种：</p>
+<ul>
+<li>表锁；</li>
+<li>元数据锁（MDL）;</li>
+<li>意向锁；</li>
+<li>AUTO-INC 锁；</li>
 </ul>
+<p><strong>表锁</strong></p>
+<p>先来说说<strong>表锁</strong>。</p>
+<p>如果我们想对学生表（t_student）加表锁，可以使用下面的命令：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">//表级别的共享锁，也就是读锁；</span><br><span class="line"><span class="keyword">lock</span> <span class="keyword">tables</span> t_student <span class="keyword">read</span>;</span><br><span class="line"></span><br><span class="line">//表级别的独占锁，也就是写锁；</span><br><span class="line"><span class="keyword">lock</span> <span class="keyword">tables</span> t_stuent write;</span><br></pre></td></tr></table></figure>
+
+<p>需要注意的是，表锁除了会限制别的线程的读写外，也会限制本线程接下来的读写操作。</p>
+<p>也就是说如果本线程对学生表加了「共享表锁」，那么本线程接下来如果要对学生表执行写操作的语句，是会被阻塞的，当然其他线程对学生表进行写操作时也会被阻塞，直到锁被释放。</p>
+<p>要释放表锁，可以使用下面这条命令，会释放当前会话的所有表锁：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">unlock</span> <span class="keyword">tables</span></span><br></pre></td></tr></table></figure>
+
+<p>另外，当会话退出后，也会释放所有表锁。</p>
+<p><strong>元数据锁</strong></p>
+<p>我们不需要显示的使用 MDL，因为当我们对数据库表进行操作时，会自动给这个表加上 MDL：</p>
+<ul>
+<li>对一张表进行 CRUD 操作时，加的是 <strong>MDL 读锁</strong>；</li>
+<li>对一张表做结构变更操作的时候，加的是 <strong>MDL 写锁</strong>；</li>
+</ul>
+<p>MDL 是为了保证当用户对表执行 CRUD 操作时，防止其他线程对这个表结构做了变更。</p>
+<p>当有线程在执行 select 语句（ 加 MDL 读锁）的期间，如果有其他线程要更改该表的结构（ 申请 MDL 写锁），那么将会被阻塞，直到执行完 select 语句（ 释放 MDL 读锁）。</p>
+<p>反之，当有线程对表结构进行变更（ 加 MDL 写锁）的期间，如果有其他线程执行了 CRUD 操作（ 申请 MDL 读锁），那么就会被阻塞，直到表结构变更完成（ 释放 MDL 写锁）。</p>
+<blockquote>
+<p>MDL 不需要显示调用，那它是在什么时候释放的?</p>
+</blockquote>
+<p>MDL 是在事务提交后才会释放，这意味着<strong>事务执行期间，MDL 是一直持有的</strong>。</p>
+<p>那如果数据库有一个长事务（所谓的长事务，就是开启了事务，但是一直还没提交），那在对表结构做变更操作的时候，可能会发生意想不到的事情，比如下面这个顺序的场景：</p>
+<ol>
+<li>首先，线程 A 先启用了事务（但是一直不提交），然后执行一条 select 语句，此时就先对该表加上 MDL 读锁；</li>
+<li>然后，线程 B 也执行了同样的 select 语句，此时并不会阻塞，因为「读读」并不冲突；</li>
+<li>接着，线程 C 修改了表字段，此时由于线程 A 的事务并没有提交，也就是 MDL 读锁还在占用着，这时线程 C 就无法申请到 MDL 写锁，就会被阻塞，</li>
+</ol>
+<p>那么在线程 C 阻塞后，后续有对该表的 select 语句，就都会被阻塞，如果此时有大量该表的 select 语句的请求到来，就会有大量的线程被阻塞住，这时数据库的线程很快就会爆满了。</p>
+<blockquote>
+<p>为什么线程 C 因为申请不到 MDL 写锁，而导致后续的申请读锁的查询操作也会被阻塞？</p>
+</blockquote>
+<p>这是因为申请 MDL 锁的操作会形成一个队列，队列中<strong>写锁获取优先级高于读锁</strong>，一旦出现 MDL 写锁等待，会阻塞后续该表的所有 CRUD 操作。</p>
+<p>所以为了能安全的对表结构进行变更，在对表结构变更前，先要看看数据库中的长事务，是否有事务已经对表加上了 MDL 读锁，如果可以考虑 kill 掉这个长事务，然后再做表结构的变更。</p>
+<p><strong>意向锁</strong></p>
+<ul>
+<li>在使用 InnoDB 引擎的表里对某些记录加上「共享锁」之前，需要先在表级别加上一个「意向共享锁」；</li>
+<li>在使用 InnoDB 引擎的表里对某些纪录加上「独占锁」之前，需要先在表级别加上一个「意向独占锁」；</li>
+</ul>
+<p>也就是，当执行插入、更新、删除操作，需要先对表加上「意向独占锁」，然后对该记录加独占锁。</p>
+<p>而普通的 select 是不会加行级锁的，普通的 select 语句是利用 MVCC 实现一致性读，是无锁的。</p>
+<p>不过，select 也是可以对记录加共享锁和独占锁的，具体方式如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">//先在表上加上意向共享锁，然后对读取的记录加共享锁</span><br><span class="line"><span class="keyword">select</span> ... <span class="keyword">lock</span> <span class="keyword">in</span> <span class="keyword">share</span> <span class="keyword">mode</span>;</span><br><span class="line"></span><br><span class="line">//先表上加上意向独占锁，然后对读取的记录加独占锁</span><br><span class="line"><span class="keyword">select</span> ... <span class="keyword">for</span> <span class="keyword">update</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>意向共享锁和意向独占锁是表级锁，不会和行级的共享锁和独占锁发生冲突，而且意向锁之间也不会发生冲突，只会和共享表锁（*lock tables … read*）和独占表锁（*lock tables … write*）发生冲突。</strong></p>
+<p>表锁和行锁是满足读读共享、读写互斥、写写互斥的。</p>
+<p>如果没有「意向锁」，那么加「独占表锁」时，就需要遍历表里所有记录，查看是否有记录存在独占锁，这样效率会很慢。</p>
+<p>那么有了「意向锁」，由于在对记录加独占锁前，先会加上表级别的意向独占锁，那么在加「独占表锁」时，直接查该表是否有意向独占锁，如果有就意味着表里已经有记录被加了独占锁，这样就不用去遍历表里的记录。</p>
+<p>所以，<strong>意向锁的目的是为了快速判断表里是否有记录被加锁</strong>。</p>
+<h5 id="行级锁"><a href="#行级锁" class="headerlink" title="行级锁"></a>行级锁</h5><p><strong>记录锁 Record Lock</strong></p>
+<p>Record Lock 称为记录锁，锁住的是一条记录。而且记录锁是有 S 锁和 X 锁之分的：</p>
+<ul>
+<li>当一个事务对一条记录加了 S 型记录锁后，其他事务也可以继续对该记录加 S 型记录锁（S 型与 S 锁兼容），但是不可以对该记录加 X 型记录锁（S 型与 X 锁不兼容）;</li>
+<li>当一个事务对一条记录加了 X 型记录锁后，其他事务既不可以对该记录加 S 型记录锁（S 型与 X 锁不兼容），也不可以对该记录加 X 型记录锁（X 型与 X 锁不兼容）。</li>
+</ul>
+<p>举个例子，当一个事务执行了下面这条语句：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql &gt; begin;</span><br><span class="line">mysql &gt; select * from t_test where id = 1 for update;</span><br></pre></td></tr></table></figure>
+
+<p>就是对 t_test 表中主键 id 为 1 的这条记录加上 X 型的记录锁，这样其他事务就无法对这条记录进行修改了。</p>
+<p><strong>间隙锁 Gap Lock</strong></p>
+<p>Gap Lock 称为间隙锁，只存在于可重复读隔离级别，目的是为了解决可重复读隔离级别下幻读的现象。</p>
+<p>假设，表中有一个范围 id 为（3，5）间隙锁，那么其他事务就无法插入 id = 4 这条记录了，这样就有效的防止幻读现象的发生。</p>
+<p><img src="/img/image-20230507170604277.png" alt="image-20230507170604277"></p>
+<p>间隙锁虽然存在 X 型间隙锁和 S 型间隙锁，但是并没有什么区别，<strong>间隙锁之间是兼容的，即两个事务可以同时持有包含共同间隙范围的间隙锁，并不存在互斥关系，因为间隙锁的目的是防止插入幻影记录而提出的</strong>。</p>
+<p><strong>临键锁 Next-Key Lock</strong></p>
+<p>Next-Key Lock 称为临键锁，是 Record Lock + Gap Lock 的组合，锁定一个范围，并且锁定记录本身。</p>
+<p>假设，表中有一个范围 id 为（3，5] 的 next-key lock，那么其他事务即不能插入 id = 4 记录，也不能修改 id = 5 这条记录。</p>
+<p><img src="/img/image-20230507170639856.png" alt="image-20230507170639856"></p>
+<p>所以，next-key lock 即能保护该记录，又能阻止其他事务将新纪录插入到被保护记录前面的间隙中。</p>
+<p><strong>next-key lock 是包含间隙锁+记录锁的，如果一个事务获取了 X 型的 next-key lock，那么另外一个事务在获取相同范围的 X 型的 next-key lock 时，是会被阻塞的</strong>。</p>
+<p>比如，一个事务持有了范围为 (1, 10] 的 X 型的 next-key lock，那么另外一个事务在获取相同范围的 X 型的 next-key lock 时，就会被阻塞。</p>
+<p>虽然相同范围的间隙锁是多个事务相互兼容的，但对于记录锁，我们是要考虑 X 型与 S 型关系，X 型的记录锁与 X 型的记录锁是冲突的。</p>
+<p><strong>插入意向锁</strong></p>
+<p>一个事务在插入一条记录的时候，需要判断插入位置是否已被其他事务加了间隙锁（next-key lock 也包含间隙锁）。</p>
+<p>如果有的话，插入操作就会发生<strong>阻塞</strong>，直到拥有间隙锁的那个事务提交为止（释放间隙锁的时刻），在此期间会生成一个<strong>插入意向锁</strong>，表明有事务想在某个区间插入新记录，但是现在处于等待状态。</p>
+<p>举个例子，假设事务 A 已经对表加了一个范围 id 为（3，5）间隙锁。</p>
+<p><img src="/img/image-20230507170849038.png" alt="image-20230507170849038"></p>
+<p>当事务 A 还没提交的时候，事务 B 向该表插入一条 id = 4 的新记录，这时会判断到插入的位置已经被事务 A 加了间隙锁，于是事物 B 会生成一个插入意向锁，然后将锁的状态设置为等待状态（<em>PS：MySQL 加锁时，是先生成锁结构，然后设置锁的状态，如果锁状态是等待状态，并不是意味着事务成功获取到了锁，只有当锁状态为正常状态时，才代表事务成功获取到了锁</em>），此时事务 B 就会发生阻塞，直到事务 A 提交了事务。</p>
+<p>插入意向锁名字虽然有意向锁，但是它并<strong>不是意向锁，它是一种特殊的间隙锁，属于行级别锁</strong>。</p>
+<p>如果说间隙锁锁住的是一个区间，那么「插入意向锁」锁住的就是一个点。因而从这个角度来说，插入意向锁确实是一种特殊的间隙锁。</p>
+<p>插入意向锁与间隙锁的另一个非常重要的差别是：尽管「插入意向锁」也属于间隙锁，但两个事务却不能在同一时间内，一个拥有间隙锁，另一个拥有该间隙区间内的插入意向锁（当然，插入意向锁如果不在间隙锁区间内则是可以的）。</p>
+<p>插入意向锁是一种特殊的间隙锁，和间隙锁互斥，但不同于间隙锁的是，该锁只用于并发插入操作。</p>
 <h4 id="临键锁加锁原则"><a href="#临键锁加锁原则" class="headerlink" title="临键锁加锁原则"></a>临键锁加锁原则</h4><ul>
 <li>原则1：加锁的基本单位是next-key lock。next-key lock是前开后闭区间。</li>
 <li>原则2：查找过程中访问到的对象才会加锁。</li>
@@ -982,6 +1041,10 @@
 <li>原则4：索引上的等值查询，向右遍历时且最后一个值不满足等值条件的时候，next-key lock退化为间隙锁。</li>
 <li>原则5：唯一索引上的范围查询会访问到不满足条件的第一个值为止。【注释：其实我不认为这是bug，只是唯一索引和非唯一索引保持一致】</li>
 </ul>
+<h3 id="Mysql-是怎么加行级锁的"><a href="#Mysql-是怎么加行级锁的" class="headerlink" title="Mysql 是怎么加行级锁的"></a>Mysql 是怎么加行级锁的</h3><p>行级锁加锁规则比较复杂，不同的场景，加锁的形式是不同的。</p>
+<p><strong>加锁的对象是索引，加锁的基本单位是 next-key lock</strong>，它是由记录锁和间隙锁组合而成的，<strong>next-key lock 是前开后闭区间，而间隙锁是前开后开区间</strong>。</p>
+<p>但是，next-key lock 在一些场景下会退化成记录锁或间隙锁。</p>
+<p>那到底是什么场景呢？总结一句，<strong>在能使用记录锁或者间隙锁就能避免幻读现象的场景下， next-key lock 就会退化成记录锁或间隙锁</strong>。</p>
 <h3 id="死锁解决策略"><a href="#死锁解决策略" class="headerlink" title="死锁解决策略"></a>死锁解决策略</h3><p>当出现死锁以后，有两种策略：</p>
 <ul>
 <li>一种策略是，直接进入等待，直到超时。这个超时时间可以通过参数 innodb_lock_wait_timeout 来设置。</li>
@@ -1121,6 +1184,9 @@
 <li>DISTINCT 查询并且加上 ORDER BY 时;</li>
 <li>SQL 中用到 SQL_SMALL_RESULT 选项时;如果查询结果比较小的时候，可以加上 SQL SMALL RESULT 来优化，产生临时表</li>
 </ul>
+<h3 id="Mysql-count-效率"><a href="#Mysql-count-效率" class="headerlink" title="Mysql count 效率"></a>Mysql count 效率</h3><p>count(1)、 count(*)、 count(主键字段)在执行的时候，如果表里存在二级索引，优化器就会选择二级索引进行扫描。如果没有二级索引会进行主键扫描。</p>
+<p>所以，如果要执行 count(1)、 count(*)、 count(主键字段) 时，尽量在数据表上建立二级索引，这样优化器会自动采用 key_len 最小的二级索引进行扫描，相比于扫描主键索引效率会高一些。</p>
+<p>再来，就是不要使用 count(字段) 来统计记录个数，因为它的效率是最差的，会采用全表扫描的方式来统计。如果你非要统计表中该字段不为 NULL 的记录个数，建议给这个字段建立一个二级索引。</p>
 
       
     </div>
@@ -1275,7 +1341,7 @@
                 
                   <a href="/archives/%20%7C%7C%20archive">
                 
-                    <span class="site-state-item-count">310</span>
+                    <span class="site-state-item-count">326</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -1454,7 +1520,13 @@
                     
                       
                     
-                    <span class="site-state-item-count">83</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -1651,7 +1723,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">92</span>
+                      
+                    
+                    <span class="site-state-item-count">93</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -1701,7 +1775,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql架构介绍"><span class="nav-text">Mysql架构介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql架构设计"><span class="nav-text">mysql架构设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql数据存储目录结构"><span class="nav-text">mysql数据存储目录结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql数据存储方式"><span class="nav-text">mysql数据存储方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-页的物理存储结构"><span class="nav-text">mysql 页的物理存储结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql页、行结构"><span class="nav-text">Mysql页、行结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#页的组成"><span class="nav-text">页的组成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql页内数据维护方式"><span class="nav-text">mysql页内数据维护方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#溢出页-BLOB页"><span class="nav-text">溢出页(BLOB页)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mysql的行结构"><span class="nav-text">Mysql的行结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Innodb内存管理"><span class="nav-text">Innodb内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Innodb内存管理-1"><span class="nav-text">Innodb内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#脏页刷盘时机"><span class="nav-text">脏页刷盘时机</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#索引原理分析"><span class="nav-text">索引原理分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#聚簇索引"><span class="nav-text">聚簇索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二级索引"><span class="nav-text">二级索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#联合索引"><span class="nav-text">联合索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#索引使用优化"><span class="nav-text">索引使用优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在group-by-和-order-by-上使用联合索引"><span class="nav-text">在group by  和 order  by 上使用联合索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-允许null-的字段设置索引哪些需要注意"><span class="nav-text">mysql 允许null 的字段设置索引哪些需要注意</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#B-树"><span class="nav-text">B 树</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#B树特征"><span class="nav-text">B树特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#B-树特征"><span class="nav-text">B+ 树特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#B-树的优势："><span class="nav-text">B+树的优势：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#索引失效场景"><span class="nav-text">索引失效场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql-事务"><span class="nav-text">mysql 事务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-事务基本概念"><span class="nav-text">mysql 事务基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事物的实现原理"><span class="nav-text">事物的实现原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undo-log-版本链"><span class="nav-text">undo log(版本链)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Read-View"><span class="nav-text">Read View</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redo-log"><span class="nav-text">redo log</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redo-log-、-binlog-区别"><span class="nav-text">redo log 、 binlog 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redolog、binlog-的2阶段提交"><span class="nav-text">redolog、binlog 的2阶段提交</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MVCC-多版本并发控制"><span class="nav-text">MVCC 多版本并发控制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事物的实现总结"><span class="nav-text">事物的实现总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql-锁"><span class="nav-text">mysql 锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql锁的种类"><span class="nav-text">mysql锁的种类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#各种锁介绍"><span class="nav-text">各种锁介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#临键锁加锁原则"><span class="nav-text">临键锁加锁原则</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#死锁解决策略"><span class="nav-text">死锁解决策略</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql-其他"><span class="nav-text">Mysql 其他</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Mysql-引擎"><span class="nav-text">Mysql 引擎</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#两种存储引擎区别"><span class="nav-text">两种存储引擎区别</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#InnoDB"><span class="nav-text">InnoDB:</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#MySIAM"><span class="nav-text">MySIAM:</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#引擎选择"><span class="nav-text">引擎选择</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mysql-主从同步过程"><span class="nav-text">Mysql 主从同步过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#在master机器上的操作"><span class="nav-text">在master机器上的操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在slave机器上的操作"><span class="nav-text">在slave机器上的操作</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#执行计划"><span class="nav-text">执行计划</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#mysql-exlain-各参数解释"><span class="nav-text">mysql  exlain 各参数解释</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-datetime-和timestamp-的区别"><span class="nav-text">mysql datetime  和timestamp 的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一条SQL语句在MySQL中如何执行的？"><span class="nav-text">一条SQL语句在MySQL中如何执行的？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一张表，里面有ID自增主键，当insert了17条记录之后，删除了第15-16-17条记录，再把Mysql重启，再insert一条记录，这条记录的ID是18还是15-？"><span class="nav-text">一张表，里面有ID自增主键，当insert了17条记录之后，删除了第15,16,17条记录，再把Mysql重启，再insert一条记录，这条记录的ID是18还是15 ？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-utf8-和-utf8mb4-区别"><span class="nav-text">mysql utf8 和 utf8mb4 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#磁盘中数据的存取"><span class="nav-text">磁盘中数据的存取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#B-树的扇出系数、高度、存储容量-、io次数"><span class="nav-text">B+树的扇出系数、高度、存储容量 、io次数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-binlog-里的内容和作用"><span class="nav-text">mysql  binlog 里的内容和作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MySQL-里记录货币用什么字段类型好"><span class="nav-text">MySQL 里记录货币用什么字段类型好</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是临时表，何时删除临时表？"><span class="nav-text">什么是临时表，何时删除临时表？</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql架构介绍"><span class="nav-text">Mysql架构介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql架构设计"><span class="nav-text">mysql架构设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql数据存储目录结构"><span class="nav-text">mysql数据存储目录结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql数据存储方式"><span class="nav-text">mysql数据存储方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-页的物理存储结构"><span class="nav-text">mysql 页的物理存储结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql页、行结构"><span class="nav-text">Mysql页、行结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#页的组成"><span class="nav-text">页的组成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql页内数据维护方式"><span class="nav-text">mysql页内数据维护方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#溢出页-BLOB页"><span class="nav-text">溢出页(BLOB页)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mysql的行结构"><span class="nav-text">Mysql的行结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Innodb内存管理"><span class="nav-text">Innodb内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Innodb内存管理-1"><span class="nav-text">Innodb内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#脏页刷盘时机"><span class="nav-text">脏页刷盘时机</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#索引原理分析"><span class="nav-text">索引原理分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#聚簇索引"><span class="nav-text">聚簇索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二级索引"><span class="nav-text">二级索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#联合索引"><span class="nav-text">联合索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#索引使用优化"><span class="nav-text">索引使用优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在group-by-和-order-by-上使用联合索引"><span class="nav-text">在group by  和 order  by 上使用联合索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-允许null-的字段设置索引哪些需要注意"><span class="nav-text">mysql 允许null 的字段设置索引哪些需要注意</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#B-树"><span class="nav-text">B 树</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#B树特征"><span class="nav-text">B树特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#B-树特征"><span class="nav-text">B+ 树特征</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#B-树的优势："><span class="nav-text">B+树的优势：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#索引失效场景"><span class="nav-text">索引失效场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql-事务"><span class="nav-text">mysql 事务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-事务基本概念"><span class="nav-text">mysql 事务基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事物的实现原理"><span class="nav-text">事物的实现原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undo-log-版本链"><span class="nav-text">undo log(版本链)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Read-View"><span class="nav-text">Read View</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redo-log"><span class="nav-text">redo log</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redo-log-、-binlog-区别"><span class="nav-text">redo log 、 binlog 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redolog、binlog-的2阶段提交"><span class="nav-text">redolog、binlog 的2阶段提交</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MVCC-多版本并发控制"><span class="nav-text">MVCC 多版本并发控制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事物的实现总结"><span class="nav-text">事物的实现总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql-锁"><span class="nav-text">mysql 锁</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql锁的种类"><span class="nav-text">mysql锁的种类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#类型划分"><span class="nav-text">类型划分</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#锁粒度划分"><span class="nav-text">锁粒度划分</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#全局锁"><span class="nav-text">全局锁</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#表级锁"><span class="nav-text">表级锁</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#行级锁"><span class="nav-text">行级锁</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#临键锁加锁原则"><span class="nav-text">临键锁加锁原则</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mysql-是怎么加行级锁的"><span class="nav-text">Mysql 是怎么加行级锁的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#死锁解决策略"><span class="nav-text">死锁解决策略</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mysql-其他"><span class="nav-text">Mysql 其他</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Mysql-引擎"><span class="nav-text">Mysql 引擎</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#两种存储引擎区别"><span class="nav-text">两种存储引擎区别</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#InnoDB"><span class="nav-text">InnoDB:</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#MySIAM"><span class="nav-text">MySIAM:</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#引擎选择"><span class="nav-text">引擎选择</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mysql-主从同步过程"><span class="nav-text">Mysql 主从同步过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#在master机器上的操作"><span class="nav-text">在master机器上的操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在slave机器上的操作"><span class="nav-text">在slave机器上的操作</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#执行计划"><span class="nav-text">执行计划</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#mysql-exlain-各参数解释"><span class="nav-text">mysql  exlain 各参数解释</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-datetime-和timestamp-的区别"><span class="nav-text">mysql datetime  和timestamp 的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一条SQL语句在MySQL中如何执行的？"><span class="nav-text">一条SQL语句在MySQL中如何执行的？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一张表，里面有ID自增主键，当insert了17条记录之后，删除了第15-16-17条记录，再把Mysql重启，再insert一条记录，这条记录的ID是18还是15-？"><span class="nav-text">一张表，里面有ID自增主键，当insert了17条记录之后，删除了第15,16,17条记录，再把Mysql重启，再insert一条记录，这条记录的ID是18还是15 ？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-utf8-和-utf8mb4-区别"><span class="nav-text">mysql utf8 和 utf8mb4 区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#磁盘中数据的存取"><span class="nav-text">磁盘中数据的存取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#B-树的扇出系数、高度、存储容量-、io次数"><span class="nav-text">B+树的扇出系数、高度、存储容量 、io次数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql-binlog-里的内容和作用"><span class="nav-text">mysql  binlog 里的内容和作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MySQL-里记录货币用什么字段类型好"><span class="nav-text">MySQL 里记录货币用什么字段类型好</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是临时表，何时删除临时表？"><span class="nav-text">什么是临时表，何时删除临时表？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mysql-count-效率"><span class="nav-text">Mysql count 效率</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -1728,7 +1802,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>

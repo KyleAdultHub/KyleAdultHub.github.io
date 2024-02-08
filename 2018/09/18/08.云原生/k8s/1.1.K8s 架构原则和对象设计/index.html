@@ -1,0 +1,1927 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="云计算什么是云计算云计算：是对计算资源、网络资源、存储资源的抽象  云计算平台的分类 以 Openstack 为典型的虚拟化平台   虚拟机构建和业务代码部署分离。  可变的基础架构使后续维护风险变大。    以谷歌 borg 为典型的基于进程的作业调度平台 - 现在的主流为docker  技术的迭代引发 borg 的换代需求。  早期的隔离依靠 chroot jail 实现，一些不合理的设计需要">
+<meta property="og:type" content="article">
+<meta property="og:title" content="K8s 架构原则和对象设计">
+<meta property="og:url" content="http://blog.kyleliu.cn/2018/09/18/08.%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/1.1.K8s%20%E6%9E%B6%E6%9E%84%E5%8E%9F%E5%88%99%E5%92%8C%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle)的云笔记">
+<meta property="og:description" content="云计算什么是云计算云计算：是对计算资源、网络资源、存储资源的抽象  云计算平台的分类 以 Openstack 为典型的虚拟化平台   虚拟机构建和业务代码部署分离。  可变的基础架构使后续维护风险变大。    以谷歌 borg 为典型的基于进程的作业调度平台 - 现在的主流为docker  技术的迭代引发 borg 的换代需求。  早期的隔离依靠 chroot jail 实现，一些不合理的设计需要">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/1695041746913.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/1695042191211.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/1695042786957.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/1695043693039.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/1695046995115.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/1695128928389.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/1695128967704.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/1695131651452.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/1695131454182.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/1695131950421.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/1695132723654.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/1695133481740.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/1695133600631.png">
+<meta property="article:published_time" content="2018-09-17T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-02-08T12:23:49.931Z">
+<meta property="article:author" content="刘小恺(Kyle)">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/2018/09/18/img/1695041746913.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2018/09/18/08.云原生/k8s/1.1.K8s 架构原则和对象设计/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>K8s 架构原则和对象设计 | 刘小恺(Kyle)的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle)的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2018/09/18/08.%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/1.1.K8s%20%E6%9E%B6%E6%9E%84%E5%8E%9F%E5%88%99%E5%92%8C%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">K8s 架构原则和对象设计
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-09-18 00:00:00" itemprop="dateCreated datePublished" datetime="2018-09-18T00:00:00+08:00">2018-09-18</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/" itemprop="url" rel="index"><span itemprop="name">云原生</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/09/18/08.%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/1.1.K8s%20%E6%9E%B6%E6%9E%84%E5%8E%9F%E5%88%99%E5%92%8C%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2018/09/18/08.%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/1.1.K8s%20%E6%9E%B6%E6%9E%84%E5%8E%9F%E5%88%99%E5%92%8C%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="云计算"><a href="#云计算" class="headerlink" title="云计算"></a>云计算</h2><h3 id="什么是云计算"><a href="#什么是云计算" class="headerlink" title="什么是云计算"></a>什么是云计算</h3><p>云计算：是对计算资源、网络资源、存储资源的抽象</p>
+<p><img src="../../../img/1695041746913.png" alt="1695041746913"></p>
+<h3 id="云计算平台的分类"><a href="#云计算平台的分类" class="headerlink" title="云计算平台的分类"></a>云计算平台的分类</h3><ul>
+<li><p>以 Openstack 为典型的虚拟化平台 </p>
+<ul>
+<li>虚拟机构建和业务代码部署分离。 </li>
+<li>可变的基础架构使后续维护风险变大。 </li>
+</ul>
+</li>
+<li><p>以谷歌 borg 为典型的基于进程的作业调度平台 - 现在的主流为docker</p>
+<ul>
+<li>技术的迭代引发 borg 的换代需求。 </li>
+<li>早期的隔离依靠 chroot jail 实现，一些不合理的设计需要在新产品中改进。 <ul>
+<li>对象之间的强依赖 job 和 task 是强包含关系，不利于重组。 </li>
+<li>所有容器共享 IP，会导致端口冲突，隔离困难等问题。 </li>
+<li>为超级用户添加复杂逻辑导致系统过于复杂</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="Borg基础架构"><a href="#Borg基础架构" class="headerlink" title="Borg基础架构"></a>Borg基础架构</h2><h3 id="Google-Borg-简介"><a href="#Google-Borg-简介" class="headerlink" title="Google Borg 简介"></a>Google Borg 简介</h3><img src="../../../img/1695042191211.png" alt="1695042191211" style="zoom: 80%;" />
+
+<p><strong>特性</strong> </p>
+<ul>
+<li>物理资源利用率高。 </li>
+<li>服务器共享，在进程级别做隔离。 </li>
+<li>应用高可用，故障恢复时间短。 </li>
+<li>调度策略灵活。 </li>
+<li>应用接入和使用方便，提供了完备的 Job 描述语言，服务发现，实时状态监控和诊断工具。 </li>
+</ul>
+<p><strong>优势</strong> </p>
+<ul>
+<li>对外隐藏底层资源管理和调度、故障处理等。 </li>
+<li>实现应用的高可靠和高可用。 </li>
+<li>足够弹性，支持应用跑在成千上万的机器上。</li>
+</ul>
+<h3 id="Borg-基本概念"><a href="#Borg-基本概念" class="headerlink" title="Borg 基本概念"></a>Borg 基本概念</h3><p><strong>Workload</strong> </p>
+<ul>
+<li>prod：在线任务，长期运行、对延时敏感、 面向终端用户等，比如 Gmail, Google Docs, Web Search 服务等。 </li>
+<li>non-prod ：离线任务，也称为批处理任务 （Batch），比如一些 分布式计算服务等。 </li>
+</ul>
+<p><strong>Cell</strong> </p>
+<ul>
+<li>一个 Cell 上跑一个集 群管理系统 Borg。 </li>
+<li>通过定义 Cell 可以让 Borg 对服务器资源进 行统一抽象，作为用户就无需知道自己的应用跑在哪台机器上，也不用关心资源分配、程序安装、依赖管理、健康 检查及故障恢复等。 </li>
+</ul>
+<p><strong>Job 和 Task</strong> </p>
+<ul>
+<li>用户以 Job 的形式提 交应用部署 请求。一个 Job 包含一个或多个相同的 Task，每个 Task 运行相同的应用程序， Task 数量就是应用的 副本数。 </li>
+<li>每个 Job 可以定义属性、元信息和优先级， 优先级涉及到抢占式调 度过程。 </li>
+</ul>
+<p><strong>Naming</strong> </p>
+<ul>
+<li>Borg 的服务发现通过 BNS （ Borg Name Service）来实现。 </li>
+<li>50.jfoo.ubar.cc.borg.google.com 可表示 在一个名为 cc 的 Cell 中由用户 uBar 部署的一个名为 jFoo 的 Job 下的第50个 Task。</li>
+</ul>
+<h3 id="Borg-架构"><a href="#Borg-架构" class="headerlink" title="Borg 架构"></a>Borg 架构</h3><p><img src="../../../img/1695042786957.png" alt="1695042786957"></p>
+<p><strong>Borgmaster 主进程：</strong> </p>
+<ul>
+<li>处理客户端 RPC 请求，比如创建 Job，查询 Job 等。 </li>
+<li>维护系统组件和服务的状态，比如服务器、Task 等。 </li>
+<li>负责与 Borglet 通信。 </li>
+</ul>
+<p><strong>Scheduler 进程：</strong> </p>
+<ul>
+<li>调度策略 <ul>
+<li>Worst Fit: 尽量选择最空闲的机器</li>
+<li>Best Fit: 尽量填满某个节点</li>
+<li>Hybrid: </li>
+</ul>
+</li>
+<li>调度优化 <ul>
+<li>Score caching: 当服务器或者任务的状态未发生变更或者变更很少时，直接采用缓存数据，避免重复计算。 </li>
+<li>Equivalence classes: 调度同一 Job 下多个相同的 Task 只需计算一次。 </li>
+<li>Relaxed randomization: 引入一些随机性，即每次随机选择一些机器，只要符合需求的服务器数量达到一定值时，就可 以停止计算，无需每次对 Cell 中所有服务器进行 feasibility checking。 </li>
+</ul>
+</li>
+</ul>
+<p><strong>Borglet：</strong> </p>
+<ul>
+<li>Borglet 是部署在所有服务器上的 Agent，负责接收 Borg</li>
+</ul>
+<h3 id="Borg应用高可用"><a href="#Borg应用高可用" class="headerlink" title="Borg应用高可用"></a>Borg应用高可用</h3><ul>
+<li>被抢占的 non-prod 任务放回 pending queue，等待重新调度。 </li>
+<li>多副本应用跨故障域部署。所谓故障域有大有小，比如相同机器、相同机架或相同电源插座等，一挂全挂。 </li>
+<li>对于类似服务器或操作系统升级的维护操作，避免大量服务器同时进行。 </li>
+<li>支持幂等性，支持客户端重复操作。 </li>
+<li>当服务器状态变为不可用时，要控制重新调度任务的速率。因为 Borg 无法区分是节点故障还是出现了短暂的 网络分区，如果是后者，静静地等待网络恢复更利于保障服务可用性。 </li>
+<li>当某种“任务 @ 服务器”的组合出现故障时，下次重新调度时需避免这种组合再次出现，因为极大可能会再 次出现相同故障。 </li>
+<li>记录详细的内部信息，便于故障排查和分析。 </li>
+<li>保障应用高可用的关键性设计原则：无论何种原因，即使 Borgmaster 或者 Borglet 挂掉、失联，都不能杀 掉正在运行的服务（Task）</li>
+</ul>
+<h3 id="Borg-系统自身的高可用"><a href="#Borg-系统自身的高可用" class="headerlink" title="Borg 系统自身的高可用"></a>Borg 系统自身的高可用</h3><ul>
+<li>Borgmaster 组件多副本设计。 </li>
+<li>采用一些简单的和底层（low-level）的工具来部署 Borg 系统实例，避免引入过多的外部依赖。 </li>
+<li>每个 Cell 的 Borg 均独立部署，避免不同 Borg 系统相互影响。</li>
+</ul>
+<h3 id="Borg隔离性"><a href="#Borg隔离性" class="headerlink" title="Borg隔离性"></a>Borg隔离性</h3><p><strong>安全性隔离：</strong> </p>
+<ul>
+<li>早期采用 Chroot jail，后期版本基于 Namespace。 </li>
+</ul>
+<p><strong>性能隔离：</strong> </p>
+<ul>
+<li>采用基于 Cgroup 的容器技术实现。 </li>
+<li>在线任务（prod）是延时敏感（latency-sensitive）型的，优先级高，而离线任务（non-prod， Batch）优先级低。 </li>
+<li>Borg 通过不同优先级之间的抢占式调度来优先保障在线任务的性能，牺牲离线任务。 </li>
+<li>Borg 将资源类型分成两类： <ul>
+<li>可压榨的（compressible），CPU 是可压榨资源，资源耗尽不会终止进程； </li>
+<li>不可压榨的（non-compressible），内存是不可压榨资源，</li>
+</ul>
+</li>
+</ul>
+<h2 id="Kubernetes简介"><a href="#Kubernetes简介" class="headerlink" title="Kubernetes简介"></a>Kubernetes简介</h2><h3 id="什么是Kubernetes"><a href="#什么是Kubernetes" class="headerlink" title="什么是Kubernetes"></a>什么是Kubernetes</h3><p><img src="../../../img/1695043693039.png" alt="1695043693039"></p>
+<p>Kubernetes 是谷歌开源的容器集群管理系统，是 Google 多年大规模容器管理技术 Borg 的开源版本，主要功能包括： </p>
+<ul>
+<li>基于容器的应用部署、维护和滚动升级； </li>
+<li>负载均衡和服务发现； </li>
+<li>跨机器和跨地区的集群调度； </li>
+<li>自动伸缩； </li>
+<li>无状态服务和有状态服务； </li>
+<li>插件机制保证扩展性。</li>
+</ul>
+<h3 id="K8s声明的系统"><a href="#K8s声明的系统" class="headerlink" title="K8s声明的系统"></a>K8s声明的系统</h3><p>Kubernetes 的所有管理能力构建在对象抽象的基础上，核心对象包括： </p>
+<ul>
+<li>Node：计算节点的抽象，用来描述计算节点的资源抽象、健康状态等。 </li>
+<li>Namespace：资源隔离的基本单位，可以简单理解为文件系统中的目录结构。 </li>
+<li>Pod：用来描述应用实例，包括镜像地址、资源需求等。 Kubernetes 中最核心的对象，也是打通应用和基础架构的秘密武器。 </li>
+<li>Service：服务如何将应用发布成服务，本质上是负载均衡和域名服务的声明。</li>
+</ul>
+<h2 id="Kubenetes-的架构"><a href="#Kubenetes-的架构" class="headerlink" title="Kubenetes 的架构"></a>Kubenetes 的架构</h2><h3 id="kubenetes-架构介绍"><a href="#kubenetes-架构介绍" class="headerlink" title="kubenetes 架构介绍"></a>kubenetes 架构介绍</h3><p>和Borg类似</p>
+<p><img src="../../../img/1695046995115.png" alt="1695046995115"></p>
+<h3 id="Kubenetes-的主节点（控制平面）"><a href="#Kubenetes-的主节点（控制平面）" class="headerlink" title="Kubenetes 的主节点（控制平面）"></a>Kubenetes 的主节点（控制平面）</h3><p><strong>Api Server</strong></p>
+<p>这是 Kubernetes 控制面板中唯一带有用户可访问 API 以及用户可交互的组件。API 服 务器会暴露一个 RESTful 的 Kubernetes API 并使用 JSON 格式的清单文件（manifest  files）。 </p>
+<p><strong>Cluster Data Store（数据存储）</strong></p>
+<p>Kubernetes 使用“etcd”。这是一个强大的、稳定的、高可用的键值存储，被 Kubernetes 用于长久储存所有的 API 对象。 </p>
+<p><strong>Controller Mangager</strong></p>
+<p>被称为“kube-controller manager”，它运行着所有处理集群日常任务的控制器。包括了节点控制器、副本控制器、端点（endpoint）控制器以及服务账户等。 </p>
+<p><strong>Scheduler</strong></p>
+<p>调度器会监控新建的 pods（一组或一个容器）并将其分配给节点。</p>
+<p><strong>ETCD</strong></p>
+<p>etcd 是 CoreOS 基于 Raft 开发的分布式 key-value 存储，可用于服务发现、共享配置以及一致性保障（如数据库选主、分布式锁等）。 </p>
+<ul>
+<li>基本的 key-value 存储； </li>
+<li>监听机制； </li>
+<li>key 的过期及续约机制，用于监控和服务发现； </li>
+<li>原子 CAS 和 CAD，用于分布式锁和 leader 选举。</li>
+</ul>
+<blockquote>
+<p><strong>直接访问etcd的数据</strong></p>
+<p>export ETCDCTL_API=3   #设置etcdctl为v3版本</p>
+<p><strong>获取key</strong></p>
+<p>etcdctl –endpoints <a href="https://localhost:2379" target="_blank" rel="noopener">https://localhost:2379</a> –cert /etc/kubernetes/pki/etcd/server.crt –key  /etc/kubernetes/pki/etcd/server.key –cacert /etc/kubernetes/pki/etcd/ca.crt get –keys-only –prefix / </p>
+<p><strong>监听对象变化</strong> </p>
+<p>etcdctl –endpoints <a href="https://localhost:2379" target="_blank" rel="noopener">https://localhost:2379</a> –cert /etc/kubernetes/pki/etcd/server.crt –key  /etc/kubernetes/pki/etcd/server.key –cacert /etc/kubernetes/pki/etcd/ca.crt watch –prefix  /registry/services/specs/default/mynginx</p>
+</blockquote>
+<h3 id="Kubenetes-工作节点"><a href="#Kubenetes-工作节点" class="headerlink" title="Kubenetes 工作节点"></a>Kubenetes 工作节点</h3><p><strong>Kubelet</strong></p>
+<p>负责调度到对应节点的 Pod 的生命周期管理，执行任务并将 Pod 状态报告给主节点的渠道，通过容器运行时（拉取镜像、启动和停止容器等）来运行这些容器。它 还会定期执行被请求的容器的健康探测程序。 </p>
+<p><strong>Kube-proxy</strong></p>
+<p>它负责节点的网络，在主机上维护网络规则并执行连接转发。它还负责对正在服务的 pods 进行负载平衡。</p>
+<h3 id="APIServer"><a href="#APIServer" class="headerlink" title="APIServer"></a>APIServer</h3><p>Kube-APIServer 是 Kubernetes 最重要的核心组件之一，主要提供以下功能： </p>
+<ul>
+<li>提供集群管理的 REST API 接口，包括: </li>
+<li>认证 Authentication； </li>
+<li>授权 Authorization； </li>
+<li>准入 Admission（Mutating &amp; Valiating）。 </li>
+<li>提供其他模块之间的数据交互和通信的枢纽（其他模块通过 APIServer 查询或 修改数据，只有 APIServer 才直接操作 etcd）。 </li>
+<li>APIServer 提供 etcd 数据缓存以减少集群对 etcd 的访问。</li>
+</ul>
+<p><img src="../../../img/1695128928389.png" alt="1695128928389"></p>
+<h4 id="APIServer展开"><a href="#APIServer展开" class="headerlink" title="APIServer展开"></a>APIServer展开</h4><p><img src="../../../img/1695128967704.png" alt="1695128967704"></p>
+<p>auditing:访问日志</p>
+<h3 id="Controller-Manager"><a href="#Controller-Manager" class="headerlink" title="Controller Manager"></a>Controller Manager</h3><ul>
+<li>Controller Manager 是集群的大脑，是确保整个集群动起来的关键； </li>
+<li>作用是确保 Kubernetes 遵循声明式系统规范，确保系统的真实状态（Actual State）与用户定义的期望状态（Desired State）一致； </li>
+<li>Controller Manager 是多个控制器的组合，每个 Controller 事实上都是一个 control loop，负责侦听其管控的对象，当对象发生变更时完成配置； </li>
+<li>Controller 配置失败通常会触发自动重试，整个集群会在控制器不断重试的机制下确保最终一致性（ Eventual Consistency）。</li>
+</ul>
+<h4 id="Controller-的工作流程"><a href="#Controller-的工作流程" class="headerlink" title="Controller 的工作流程"></a>Controller 的工作流程</h4><p>核心还是生产者消费者模型， 通过Informer 和Lister 进行 监听和全量的消息获取</p>
+<p>获取到消息(task) 后， 基于不同的EventHandler， 将时间放到不同的生产队列里面， 然后通过多个worker并发的进行事件消费完成最终的配置；</p>
+<p><img src="../../../img/1695131651452.png" alt="1695131651452"></p>
+<h4 id="Informer-的内部机制"><a href="#Informer-的内部机制" class="headerlink" title="Informer 的内部机制"></a>Informer 的内部机制</h4><p>Informer提供了controller进行事件消费的框架 or 模型</p>
+<p><img src="../../../img/1695131454182.png" alt="1695131454182"></p>
+<ul>
+<li>Reflector： 解析数据为内存struct对象</li>
+<li>Delta Fifo Queue： 环形内存对象</li>
+<li>Indexer: informer 为对象创建的索引， 用来提供键值读取</li>
+<li>Tread Safe Store: 线程安全的存储结构，数据 与apiserver保持一致性</li>
+<li>Informer：接收事件，并分配事件到对应EventHandler</li>
+</ul>
+<h4 id="控制器的协同工作原理"><a href="#控制器的协同工作原理" class="headerlink" title="控制器的协同工作原理"></a>控制器的协同工作原理</h4><p>以Deployment的创建为例</p>
+<ul>
+<li>Api Server进行认证鉴权准入后， 将Deployment对象放入etcd</li>
+<li>Deployment Controller 会监听到Deployment对象， 创建ReplicaSet 副本集，并发送给apiserver</li>
+<li>ReplicaSet  Controller 监听到ReplicaSet对象， 创建Pod对象，并发送给apiserver</li>
+<li>Scheduler 监听到未被调度的Pod对象， 根据当前集群的所有节点， 调度器会按某种算法，选择适合部署的节点，将Pod对象和Node绑定，并重新发送给apiserver</li>
+<li>Kubelet会关注当前ApiServer和本Node相关的Pod有哪些，并通过docker进行create pod，后续还需要挂载网络和磁盘。</li>
+</ul>
+<p><img src="../../../img/1695131950421.png" alt="1695131950421"></p>
+<h3 id="Scheduler"><a href="#Scheduler" class="headerlink" title="Scheduler"></a>Scheduler</h3><p>特殊的 Controller，工作原理与其他控制器无差别。 </p>
+<p>Scheduler 的特殊职责在于监控当前集群所有未调度的 Pod，并且获取当前集群所有节点的健康状况和资源使用情况，为待调度 Pod 选择最佳计算节点，完成调度。 </p>
+<p>调度阶段分为： </p>
+<ul>
+<li>Predict：过滤不能满足业务需求的节点，如资源不足、端口冲突等。 </li>
+<li>Priority：按既定要素将满足调度需求的节点评分，选择最佳节点。 </li>
+<li>Bind：将计算节点与 Pod 绑定，完成调度。</li>
+</ul>
+<p><img src="../../../img/1695132723654.png" alt="1695132723654"></p>
+<h3 id="Kubelet"><a href="#Kubelet" class="headerlink" title="Kubelet"></a>Kubelet</h3><p>Kubernetes 的初始化系统（init system） </p>
+<ul>
+<li>从不同源获取 Pod 清单，并按需求启停 Pod 的核心组件： </li>
+<li>Pod 清单可从本地文件目录，给定的 HTTPServer 或 Kube-APIServer 等源头获取； </li>
+<li>Kubelet 将运行时，网络和存储抽象成了 CRI，CNI，CSI。 </li>
+<li>负责汇报当前节点的资源信息和健康状态；</li>
+<li>负责 Pod 的健康检查和状态汇报。</li>
+</ul>
+<p><img src="../../../img/1695133481740.png" alt="1695133481740"></p>
+<h3 id="Kube-Proxy"><a href="#Kube-Proxy" class="headerlink" title="Kube-Proxy"></a>Kube-Proxy</h3><ul>
+<li>监控集群中用户发布的服务Service，并完成负载均衡配置。 </li>
+<li>每个节点的 Kube-Proxy 都会配置相同的负载均衡策略，使得整个集群的服务发现建立在分布式负载均衡器之上，服务调用无需经过额外的网络跳转（Network Hop）。 </li>
+<li>负载均衡配置基于不同插件实现： <ul>
+<li>userspace。 </li>
+<li>操作系统网络协议栈不同的 Hooks 点和插件： <ul>
+<li>iptables； </li>
+<li>ipvs。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><img src="../../../img/1695133600631.png" alt="1695133600631"></p>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/k8s/" rel="tag"><i class="fa fa-tag"></i> k8s</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/18/08.%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/1.9.kubelet/" rel="next" title="kubelet">
+                <i class="fa fa-chevron-left"></i> kubelet
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/18/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Kafka/Kafka%20%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2%E5%8F%8A%E4%BD%BF%E7%94%A8/" rel="prev" title="Kafka安装部署及使用">
+                Kafka安装部署及使用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%20%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">326</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">93</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#云计算"><span class="nav-text">云计算</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是云计算"><span class="nav-text">什么是云计算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#云计算平台的分类"><span class="nav-text">云计算平台的分类</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Borg基础架构"><span class="nav-text">Borg基础架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Google-Borg-简介"><span class="nav-text">Google Borg 简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Borg-基本概念"><span class="nav-text">Borg 基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Borg-架构"><span class="nav-text">Borg 架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Borg应用高可用"><span class="nav-text">Borg应用高可用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Borg-系统自身的高可用"><span class="nav-text">Borg 系统自身的高可用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Borg隔离性"><span class="nav-text">Borg隔离性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kubernetes简介"><span class="nav-text">Kubernetes简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是Kubernetes"><span class="nav-text">什么是Kubernetes</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#K8s声明的系统"><span class="nav-text">K8s声明的系统</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kubenetes-的架构"><span class="nav-text">Kubenetes 的架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#kubenetes-架构介绍"><span class="nav-text">kubenetes 架构介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubenetes-的主节点（控制平面）"><span class="nav-text">Kubenetes 的主节点（控制平面）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubenetes-工作节点"><span class="nav-text">Kubenetes 工作节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#APIServer"><span class="nav-text">APIServer</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#APIServer展开"><span class="nav-text">APIServer展开</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Controller-Manager"><span class="nav-text">Controller Manager</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Controller-的工作流程"><span class="nav-text">Controller 的工作流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Informer-的内部机制"><span class="nav-text">Informer 的内部机制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#控制器的协同工作原理"><span class="nav-text">控制器的协同工作原理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Scheduler"><span class="nav-text">Scheduler</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kubelet"><span class="nav-text">Kubelet</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kube-Proxy"><span class="nav-text">Kube-Proxy</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

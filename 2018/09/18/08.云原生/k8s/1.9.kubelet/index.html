@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+  <link rel="stylesheet" href="/lib/needsharebutton/needsharebutton.css">
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.4.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/images/favicon.jpg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","width":280,"display":"always","offset":25,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="kubelet 架构详情 kubelet pod 核心管理流程 syncLoop： 从队列不断监听update事件 computePodActions：进行计算pod动作： delete&#x2F;uodate&#x2F;create PLEG： 收集当前节点所有pod的信息， 通过CRI查询所有pod的清单， 获取所有pod的运行状态， 通过events形式上报给master节点 kubelete作用 节点管理 p">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kubelet">
+<meta property="og:url" content="http://blog.kyleliu.cn/2018/09/18/08.%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/1.9.kubelet/index.html">
+<meta property="og:site_name" content="刘小恺(Kyle)的云笔记">
+<meta property="og:description" content="kubelet 架构详情 kubelet pod 核心管理流程 syncLoop： 从队列不断监听update事件 computePodActions：进行计算pod动作： delete&#x2F;uodate&#x2F;create PLEG： 收集当前节点所有pod的信息， 通过CRI查询所有pod的清单， 获取所有pod的运行状态， 通过events形式上报给master节点 kubelete作用 节点管理 p">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/1697675821404.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231020144403731.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231020144801268.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231020144817252.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231020144934910.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231022085139073.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231020145218198.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231020151742368.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231020151827496.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231020152130927.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231020152438308.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231020152706267.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231020160130596.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231020160614723.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231020161257839.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231020163615906.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231020164105982.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231020164206296.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231022085244213.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231022085550294.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231022085613966.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231022090226994.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231022090256015.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231022091035079.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231022091757050.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231022091926463.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231022091955392.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231022092052119.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231022092340102.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/2018/09/18/img/image-20231022102615995.png">
+<meta property="article:published_time" content="2018-09-17T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-02-08T12:23:49.933Z">
+<meta property="article:author" content="刘小恺(Kyle)">
+<meta property="article:tag" content="k8s">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/2018/09/18/img/1697675821404.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://blog.kyleliu.cn/2018/09/18/08.云原生/k8s/1.9.kubelet/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>kubelet | 刘小恺(Kyle)的云笔记</title>
+  
+
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?61af49e7933cbd35801eb5e4ca789a8d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">刘小恺(Kyle)的云笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://blog.kyleliu.cn/2018/09/18/08.%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/1.9.kubelet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="刘小恺(Kyle)">
+      <meta itemprop="description" content="吃喝玩乐、好吃懒做、醉生梦死、不劳而获">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="刘小恺(Kyle)的云笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">kubelet
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-09-18 00:00:00" itemprop="dateCreated datePublished" datetime="2018-09-18T00:00:00+08:00">2018-09-18</time>
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/" itemprop="url" rel="index"><span itemprop="name">云原生</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/09/18/08.%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/1.9.kubelet/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2018/09/18/08.%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/1.9.kubelet/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="kubelet-架构详情"><a href="#kubelet-架构详情" class="headerlink" title="kubelet 架构详情"></a>kubelet 架构详情</h2><p><img src="../../../img/1697675821404.png" alt="1697675821404"></p>
+<h3 id="kubelet-pod-核心管理流程"><a href="#kubelet-pod-核心管理流程" class="headerlink" title="kubelet pod 核心管理流程"></a>kubelet pod 核心管理流程</h3><p><img src="../../../img/image-20231020144403731.png" alt="image-20231020144403731"></p>
+<p>syncLoop： 从队列不断监听update事件</p>
+<p>computePodActions：进行计算pod动作： delete/uodate/create</p>
+<p>PLEG： 收集当前节点所有pod的信息， 通过CRI查询所有pod的清单， 获取所有pod的运行状态， 通过events形式上报给master节点</p>
+<h3 id="kubelete作用"><a href="#kubelete作用" class="headerlink" title="kubelete作用"></a>kubelete作用</h3><p><img src="../../../img/image-20231020144801268.png" alt="image-20231020144801268"></p>
+<h3 id="节点管理"><a href="#节点管理" class="headerlink" title="节点管理"></a>节点管理</h3><p><img src="../../../img/image-20231020144817252.png" alt="image-20231020144817252"></p>
+<h3 id="pod管理"><a href="#pod管理" class="headerlink" title="pod管理"></a>pod管理</h3><p><img src="../../../img/image-20231020144934910.png" alt="image-20231020144934910"></p>
+<h3 id="pod-启动流程"><a href="#pod-启动流程" class="headerlink" title="pod 启动流程"></a>pod 启动流程</h3><p><img src="../../../img/image-20231022085139073.png" alt="image-20231022085139073"></p>
+<p><img src="../../../img/image-20231020145218198.png" alt="image-20231020145218198"></p>
+<ul>
+<li>RunPodSandbox： 为什么要先启动一个sandbox容器，  其本身不消耗任何资源，可以将网络namespace 和网络相关配置配置到sandbox上， 作为正式应用pod的底座。 sandbox的稳定， 可以确保网络的稳定性，防止pod进程退出了， 网络配置丢失掉， 也可以在应用pod 启动前， 为其提供已经配置好的网络环境。</li>
+</ul>
+<h2 id="CRI"><a href="#CRI" class="headerlink" title="CRI"></a>CRI</h2><p><img src="../../../img/image-20231020151742368.png" alt="image-20231020151742368"></p>
+<p><img src="../../../img/image-20231020151827496.png" alt="image-20231020151827496"></p>
+<p><img src="../../../img/image-20231020152130927.png" alt="image-20231020152130927"></p>
+<h3 id="CRI的接口"><a href="#CRI的接口" class="headerlink" title="CRI的接口"></a>CRI的接口</h3><p><img src="../../../img/image-20231020152438308.png" alt="image-20231020152438308"></p>
+<h3 id="Runtime比较"><a href="#Runtime比较" class="headerlink" title="Runtime比较"></a>Runtime比较</h3><p><img src="../../../img/image-20231020152706267.png" alt="image-20231020152706267"></p>
+<h2 id="CNI"><a href="#CNI" class="headerlink" title="CNI"></a>CNI</h2><h3 id="CNI-的网络分类"><a href="#CNI-的网络分类" class="headerlink" title="CNI 的网络分类"></a>CNI 的网络分类</h3><ul>
+<li>pod  to pod 、 node  to pod： 通过CNI去实现</li>
+<li>Service  to  pod：  借助于kube-proxy生成的iptables或ipvs规则完成;</li>
+<li>外部流量到Pod： 借助hostPort 、ingress</li>
+</ul>
+<h3 id="CNI-网络模型设计原则"><a href="#CNI-网络模型设计原则" class="headerlink" title="CNI 网络模型设计原则"></a>CNI 网络模型设计原则</h3><p><img src="../../../img/image-20231020160130596.png" alt="image-20231020160130596"></p>
+<h3 id="CNI插件分类和常见插件"><a href="#CNI插件分类和常见插件" class="headerlink" title="CNI插件分类和常见插件"></a>CNI插件分类和常见插件</h3><p><img src="../../../img/image-20231020160614723.png" alt="image-20231020160614723"></p>
+<h3 id="CNI-的运行机制"><a href="#CNI-的运行机制" class="headerlink" title="CNI 的运行机制"></a>CNI 的运行机制</h3><p><img src="../../../img/image-20231020161257839.png" alt="image-20231020161257839"></p>
+<h3 id="container-之间的网络通信"><a href="#container-之间的网络通信" class="headerlink" title="container 之间的网络通信"></a>container 之间的网络通信</h3><p><img src="../../../img/image-20231020163615906.png" alt="image-20231020163615906"></p>
+<h2 id="CNI-Plugin"><a href="#CNI-Plugin" class="headerlink" title="CNI Plugin"></a>CNI Plugin</h2><h3 id="Flannel"><a href="#Flannel" class="headerlink" title="Flannel"></a>Flannel</h3><p><img src="../../../img/image-20231020164105982.png" alt="image-20231020164105982"></p>
+<h3 id="Calico"><a href="#Calico" class="headerlink" title="Calico"></a>Calico</h3><p><img src="../../../img/image-20231020164206296.png" alt="image-20231020164206296"></p>
+<h2 id="CSI"><a href="#CSI" class="headerlink" title="CSI"></a>CSI</h2><h3 id="容器运行时存储"><a href="#容器运行时存储" class="headerlink" title="容器运行时存储"></a>容器运行时存储</h3><p><img src="../../../img/image-20231022085244213.png" alt="image-20231022085244213"></p>
+<h3 id="存储插件管理"><a href="#存储插件管理" class="headerlink" title="存储插件管理"></a>存储插件管理</h3><p><img src="../../../img/image-20231022085550294.png" alt="image-20231022085550294"></p>
+<h3 id="oiut-of-tree-CSI-插件"><a href="#oiut-of-tree-CSI-插件" class="headerlink" title="oiut-of-tree CSI 插件"></a>oiut-of-tree CSI 插件</h3><p><img src="../../../img/image-20231022085613966.png" alt="image-20231022085613966"></p>
+<h3 id="CSI-驱动"><a href="#CSI-驱动" class="headerlink" title="CSI 驱动"></a>CSI 驱动</h3><p><img src="../../../img/image-20231022090226994.png" alt="image-20231022090226994"></p>
+<h3 id="常用存储卷"><a href="#常用存储卷" class="headerlink" title="常用存储卷"></a>常用存储卷</h3><h4 id="临时存储"><a href="#临时存储" class="headerlink" title="临时存储"></a>临时存储</h4><p><img src="../../../img/image-20231022090256015.png" alt="image-20231022090256015"></p>
+<h3 id="持久化存储"><a href="#持久化存储" class="headerlink" title="持久化存储"></a>持久化存储</h3><h4 id="hostPath"><a href="#hostPath" class="headerlink" title="hostPath"></a><strong>hostPath</strong></h4><p><img src="../../../img/image-20231022091035079.png" alt="image-20231022091035079"></p>
+<p><strong>hostpath需要注意</strong></p>
+<p><img src="../../../img/image-20231022091757050.png" alt="image-20231022091757050"></p>
+<p><strong>持久化存储</strong></p>
+<p><img src="../../../img/image-20231022091926463.png" alt="image-20231022091926463"></p>
+<h4 id="PV-amp-PVC"><a href="#PV-amp-PVC" class="headerlink" title="PV &amp; PVC"></a>PV &amp; PVC</h4><p><strong>StorageClass</strong></p>
+<p>用来定义提供的存储类型</p>
+<p><img src="../../../img/image-20231022091955392.png" alt="image-20231022091955392"></p>
+<p><strong>PVC</strong></p>
+<p>用户来定义， 从使用层面定义使用需求</p>
+<p><img src="../../../img/image-20231022092052119.png" alt="image-20231022092052119"></p>
+<p><strong>PV</strong></p>
+<p>集群管理员提前创建， 或者根据PV的申请需求动态创建， 它代表系统后端的真实存储空间， 可以称之为卷空间。</p>
+<p><strong>存储对象关系</strong>  </p>
+<p><img src="../../../img/image-20231022092340102.png" alt="image-20231022092340102"></p>
+<h3 id="PV、PVC-的完整生命周期"><a href="#PV、PVC-的完整生命周期" class="headerlink" title="PV、PVC 的完整生命周期"></a>PV、PVC 的完整生命周期</h3><ol>
+<li><p>资源供应</p>
+<p>k8s支持两种资源的供应模式： 静态模式和冬天模式。资源供应的结果就是创建好的PV.</p>
+<ul>
+<li>静态模式：集群管理员手工创建许多PV， 在定义PV时需要将后端存储的特性 StorageClassName进行设置。</li>
+<li>动态模式： 中级群管理员无需要手动创建PV， 而是通过StorageClass的设置对后端存储进行描述。标记为魔种类型。此时需求PVC对存储的类型进行生命，系统自动完成PV的创建以及PVC的绑定。PVC可以生命Class为“”， 说明该PVC禁止使用动态模式。</li>
+</ul>
+</li>
+<li><p>资源绑定</p>
+<p>在定义好PVC之后， 系统将根据PVC对存储资源的需求在已存在的PV中选择一个满足PVC要求的PV，一旦找到， 就将PV与定义的PVC进行绑定，应用就可以使用这个PVC了。当PVC申请的存储空间比PV的少时候， 真个PV的空间就都可以被PVC使用， 所以会造成资源浪费。如果资源供应使用的是动态模式， 则系统在为PVC找到合适的StorageClass后， 将自动创建一个PV并完成与PVC的绑定。</p>
+</li>
+<li><p>资源使用‘</p>
+<p>在POD使用Volumn定义， 将PVC挂在到容器内的某个路径进行使用。Volume的类型为Persisten VolumeClaim, 在容器挂在了一个PVC后，就能被持续独占使用。多个Pod可以挂在到同一个PVC上。</p>
+<p><img src="../../../img/image-20231022102615995.png" alt="image-20231022102615995"></p>
+</li>
+<li><p>资源释放</p>
+<p>当存储资源使用完毕后， 可以删除PVC， 与该PVC绑定的PV会被标记为 已释放， 但还不能立刻与其他PVC进行绑定。通过之前PVC写入的数据可能还被保留在存储设备上，只有在清除之后该PV才能被再次使用。</p>
+</li>
+<li><p>资源回收</p>
+<p>对于PV， 管理员可以设定回收策略， 用于设置与之绑定的PVC释放资源后如何处理遗留数据的问题。之后PV的存储空间完全回收， 才能供新的PVC绑定和使用。</p>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/images/weixin.jpg" alt="刘小恺(Kyle) wechat" style="width: 200px; max-width: 100%;"/>
+    <div>如有疑问可联系博主</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/k8s/" rel="tag"><i class="fa fa-tag"></i> k8s</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/17/15.%E5%A4%A7%E6%95%B0%E6%8D%AE/Kafka/%E4%BD%BF%E7%94%A8pykafka%EF%BC%8Ckafka-python%E5%BC%80%E5%8F%91/" rel="next" title="使用pykafka, kafka-python开发">
+                <i class="fa fa-chevron-left"></i> 使用pykafka, kafka-python开发
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/18/08.%E4%BA%91%E5%8E%9F%E7%94%9F/k8s/1.1.K8s%20%E6%9E%B6%E6%9E%84%E5%8E%9F%E5%88%99%E5%92%8C%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1/" rel="prev" title="K8s 架构原则和对象设计">
+                K8s 架构原则和对象设计 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.jpg"
+                alt="刘小恺(Kyle)" />
+            
+              <p class="site-author-name" itemprop="name">刘小恺(Kyle)</p>
+              <p class="site-description motion-element" itemprop="description">吃喝玩乐、好吃懒做、醉生梦死、不劳而获</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/%20%7C%7C%20archive">
+                
+                    <span class="site-state-item-count">326</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">93</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/KyleAdultHub" target="_blank" title="GitHub" rel="external nofollow"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:liukaijian45@163.com" target="_blank" title="E-Mail" rel="external nofollow"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#kubelet-架构详情"><span class="nav-text">kubelet 架构详情</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#kubelet-pod-核心管理流程"><span class="nav-text">kubelet pod 核心管理流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kubelete作用"><span class="nav-text">kubelete作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#节点管理"><span class="nav-text">节点管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pod管理"><span class="nav-text">pod管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pod-启动流程"><span class="nav-text">pod 启动流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CRI"><span class="nav-text">CRI</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CRI的接口"><span class="nav-text">CRI的接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Runtime比较"><span class="nav-text">Runtime比较</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CNI"><span class="nav-text">CNI</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CNI-的网络分类"><span class="nav-text">CNI 的网络分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CNI-网络模型设计原则"><span class="nav-text">CNI 网络模型设计原则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CNI插件分类和常见插件"><span class="nav-text">CNI插件分类和常见插件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CNI-的运行机制"><span class="nav-text">CNI 的运行机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#container-之间的网络通信"><span class="nav-text">container 之间的网络通信</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CNI-Plugin"><span class="nav-text">CNI Plugin</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Flannel"><span class="nav-text">Flannel</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Calico"><span class="nav-text">Calico</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CSI"><span class="nav-text">CSI</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#容器运行时存储"><span class="nav-text">容器运行时存储</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#存储插件管理"><span class="nav-text">存储插件管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#oiut-of-tree-CSI-插件"><span class="nav-text">oiut-of-tree CSI 插件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CSI-驱动"><span class="nav-text">CSI 驱动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#常用存储卷"><span class="nav-text">常用存储卷</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#临时存储"><span class="nav-text">临时存储</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#持久化存储"><span class="nav-text">持久化存储</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#hostPath"><span class="nav-text">hostPath</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PV-amp-PVC"><span class="nav-text">PV &amp; PVC</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PV、PVC-的完整生命周期"><span class="nav-text">PV、PVC 的完整生命周期</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">刘小恺(Kyle)</span>
+
+  
+
+  
+</div>
+
+
+  
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'V62wzdGpgPV7y1tPnu1v1KYX-gzGzoHsz',
+        appKey: 'SkJs3cwXAUsdgr6BkxmW2ctm',
+        placeholder: '客观(*╹▽╹*)，请留下您的宝贵意见...   \n 请用浏览器打开进行评论, 在微信或其他客户端可能导致作者收不到提醒 \n 信息栏作用:\n 昵称: 在评论中显示的昵称 \n 邮箱: 可以在收到您评论的回复后通知到您邮箱 \n 网址: 评论需要跳转链接可填写, 将可以通过点击您评论中的昵称进行跳转 \n',
+        avatar:'monsterid',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('100');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+  
+  <script src="/lib/needsharebutton/needsharebutton.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Wechat,Weibo,QQZone";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</body>
+</html>

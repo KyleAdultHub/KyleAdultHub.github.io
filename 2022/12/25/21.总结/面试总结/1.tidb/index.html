@@ -146,7 +146,7 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220723171205445.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20220723171341922.png">
 <meta property="article:published_time" content="2022-12-24T16:00:00.000Z">
-<meta property="article:modified_time" content="2023-02-15T02:41:17.224Z">
+<meta property="article:modified_time" content="2024-02-08T12:23:49.936Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="tidb">
 <meta name="twitter:card" content="summary">
@@ -701,15 +701,21 @@
 <li>降序索引</li>
 </ul>
 <h4 id="与MySQL不同处"><a href="#与MySQL不同处" class="headerlink" title="与MySQL不同处"></a>与MySQL不同处</h4><ol>
-<li><p>AUTO_INCREMENT<br>自增编号是系统批量分配给每台 TiDB 服务器的值（默认 3 万个值）<br>每个 TiDB 节点在分配 ID 时，都申请一段 ID 作为缓存，用完之后再去取下一段，而不是每次分配都向存储节点申请<br>值的顺序不具有全局单调性</p>
-</li>
-<li><p>DDL<br>不能在单条 ALTER TABLE 语句中完成多个操作。例如，不能在单个语句中添加多个列或索引，否则，可能会输出 Unsupported multi schema change 的错误<br>不支持修改分区表上的列类型</p>
-</li>
-<li><p>分区表<br>分区表支持 Hash、Range 和 Add/Drop/Truncate/Coalesce。其他分区操作将被忽略，可能会报 Warning: Unsupported partition type, treat as normal table 错误。不支持以下分区表语法：<br>PARTITION BY LIST<br>PARTITION BY KEY<br>SUBPARTITION<br>{CHECK|EXCHANGE|TRUNCATE|OPTIMIZE|REPAIR|IMPORT|DISCARD|REBUILD|REORGANIZE} PARTITION</p>
-</li>
-<li><p>锁<br>TiDB 当前不支持 gap locking（间隙锁）</p>
-</li>
+<li>AUTO_INCREMENT<br>自增编号是系统批量分配给每台 TiDB 服务器的值（默认 3 万个值）<br>每个 TiDB 节点在分配 ID 时，都申请一段 ID 作为缓存，用完之后再去取下一段，而不是每次分配都向存储节点申请<br>值的顺序不具有全局单调性</li>
+<li>DDL<br>不能在单条 ALTER TABLE 语句中完成多个操作。例如，不能在单个语句中添加多个列或索引，否则，可能会输出 Unsupported multi schema change 的错误<br>不支持修改分区表上的列类型</li>
+<li>分区表<br>分区表支持 Hash、Range 和 Add/Drop/Truncate/Coalesce。其他分区操作将被忽略，可能会报 Warning: Unsupported partition type, treat as normal table 错误。不支持以下分区表语法：<br>PARTITION BY LIST<br>PARTITION BY KEY<br>SUBPARTITION<br>{CHECK|EXCHANGE|TRUNCATE|OPTIMIZE|REPAIR|IMPORT|DISCARD|REBUILD|REORGANIZE} PARTITION</li>
+<li>锁<br>TiDB 当前不支持 gap locking（间隙锁）</li>
 </ol>
+<h2 id="MyISAM-和-innoDB的区别"><a href="#MyISAM-和-innoDB的区别" class="headerlink" title="MyISAM  和 innoDB的区别"></a>MyISAM  和 innoDB的区别</h2><ul>
+<li>InnoDB支持事务, MyISAM不支持InnoDB支持外键，而MylSAM不支持。对一个包含外键的InnoDB表转为MYISAM会失败;</li>
+<li>InnoDB是聚集索引，数据文件是和索引绑在一起，必须要有主键，通过主键索引效率高。InnoDB不保存 表的具体行数,执行select count(*) from table时需要全表扫描。</li>
+<li>Innodb不支持全文索引，而MyISAM支持全文索引,查询效率上MyISAM要高;</li>
+</ul>
+<h1 id="Tidb-常见问题解决"><a href="#Tidb-常见问题解决" class="headerlink" title="Tidb 常见问题解决"></a>Tidb 常见问题解决</h1><h2 id="TiDB线上报-“pd-server-timeout”"><a href="#TiDB线上报-“pd-server-timeout”" class="headerlink" title="TiDB线上报 “pd server timeout”"></a>TiDB线上报 “pd server timeout”</h2><p>业务测在代码中加上相关超时重试的处理，将 TiDB 机器上 min_free_kbytes 从默认的 66M 调成 512M，留更多内存给内核用。</p>
+<p>当请求分配内存时，如果有足够的内存，则分配成功。如果没有，则要阻塞，释放内存，再来分配内存。原子请求不能被阻塞，如果分配不到，则失败。内核为了尽量避免原子请求失败，预留了一个页池框，在内存不足时使用。这个页池框的大小就是min_free_kbytes。</p>
+<h2 id="TIDB-生产环境发生-OOM问题。"><a href="#TIDB-生产环境发生-OOM问题。" class="headerlink" title="TIDB 生产环境发生 OOM问题。"></a>TIDB 生产环境发生 OOM问题。</h2><p>处理方案1：将OLAP频繁的SQL业务放到一个单独的TiDB集群，与现有的一套TiDB集群进行隔离，防止一个业务的OLAP SQL 影响到其他的业务；</p>
+<p>处理方案2：oom-action 配置为 cancel，kill 使用内存超过阈值的 SQL，单条SQL使用的内存阈值调整配置文件；</p>
+<h2 id="tidb-某些-sql-会出现索引失效"><a href="#tidb-某些-sql-会出现索引失效" class="headerlink" title="tidb 某些 sql 会出现索引失效"></a>tidb 某些 sql 会出现索引失效</h2><p>对于发现失效的SQL，使用HINT这种方式强制指定索引解决。</p>
 
       
     </div>
@@ -775,8 +781,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2022/12/21/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.docker/" rel="next" title="docker">
-                <i class="fa fa-chevron-left"></i> docker
+              <a href="/2022/12/21/21.%E6%80%BB%E7%BB%93/%E9%9D%A2%E8%AF%95%E6%80%BB%E7%BB%93/1.%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95/" rel="next" title="一致性算法">
+                <i class="fa fa-chevron-left"></i> 一致性算法
               </a>
             
           </div>
@@ -864,7 +870,7 @@
                 
                   <a href="/archives/%20%7C%7C%20archive">
                 
-                    <span class="site-state-item-count">310</span>
+                    <span class="site-state-item-count">326</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -1043,7 +1049,13 @@
                     
                       
                     
-                    <span class="site-state-item-count">83</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -1240,7 +1252,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">92</span>
+                      
+                    
+                    <span class="site-state-item-count">93</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -1290,7 +1304,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Tidb-架构"><span class="nav-text">Tidb 架构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Tidb-组件介绍"><span class="nav-text">Tidb 组件介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TiDB-架构图"><span class="nav-text">TiDB 架构图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TiDB-Server"><span class="nav-text">TiDB Server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PD-Server"><span class="nav-text">PD Server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TiKVServer"><span class="nav-text">TiKVServer</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一、Tidb-核心组件介绍"><span class="nav-text">一、Tidb 核心组件介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-TiDB-Server"><span class="nav-text">1. TiDB Server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-TiKV"><span class="nav-text">2.TiKV</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tidb-数据存储与调度"><span class="nav-text">Tidb 数据存储与调度</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-索引数据"><span class="nav-text">1.索引数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-存储细节"><span class="nav-text">2.存储细节</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Region"><span class="nav-text">3.Region</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-PD"><span class="nav-text">4.PD</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-调度"><span class="nav-text">5.调度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-心跳"><span class="nav-text">6.心跳</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Tidb-索引"><span class="nav-text">Tidb 索引</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql-ACID机制"><span class="nav-text">mysql ACID机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RUM-定理"><span class="nav-text">RUM 定理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LSM-TREE"><span class="nav-text">LSM TREE</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么要有LSM-Tree？"><span class="nav-text">为什么要有LSM Tree？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LSM-Tree读数据"><span class="nav-text">LSM Tree读数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LSM-Tree写数据"><span class="nav-text">LSM Tree写数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LSM-Tree优化策略"><span class="nav-text">LSM Tree优化策略</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#点读的优化"><span class="nav-text">点读的优化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#范围读的优化"><span class="nav-text">范围读的优化</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TiDB与MySQL索引区别"><span class="nav-text">TiDB与MySQL索引区别</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#数据写入方面"><span class="nav-text">数据写入方面</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数据更新和删除方面"><span class="nav-text">数据更新和删除方面</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Tidb的读取优势"><span class="nav-text">Tidb的读取优势</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Tidb-索引类型"><span class="nav-text">Tidb 索引类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#与MySQL不同处"><span class="nav-text">与MySQL不同处</span></a></li></ol></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Tidb-架构"><span class="nav-text">Tidb 架构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Tidb-组件介绍"><span class="nav-text">Tidb 组件介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TiDB-架构图"><span class="nav-text">TiDB 架构图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TiDB-Server"><span class="nav-text">TiDB Server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PD-Server"><span class="nav-text">PD Server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TiKVServer"><span class="nav-text">TiKVServer</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一、Tidb-核心组件介绍"><span class="nav-text">一、Tidb 核心组件介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-TiDB-Server"><span class="nav-text">1. TiDB Server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-TiKV"><span class="nav-text">2.TiKV</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tidb-数据存储与调度"><span class="nav-text">Tidb 数据存储与调度</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-索引数据"><span class="nav-text">1.索引数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-存储细节"><span class="nav-text">2.存储细节</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Region"><span class="nav-text">3.Region</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-PD"><span class="nav-text">4.PD</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-调度"><span class="nav-text">5.调度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-心跳"><span class="nav-text">6.心跳</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Tidb-索引"><span class="nav-text">Tidb 索引</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql-ACID机制"><span class="nav-text">mysql ACID机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RUM-定理"><span class="nav-text">RUM 定理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LSM-TREE"><span class="nav-text">LSM TREE</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么要有LSM-Tree？"><span class="nav-text">为什么要有LSM Tree？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LSM-Tree读数据"><span class="nav-text">LSM Tree读数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LSM-Tree写数据"><span class="nav-text">LSM Tree写数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LSM-Tree优化策略"><span class="nav-text">LSM Tree优化策略</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#点读的优化"><span class="nav-text">点读的优化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#范围读的优化"><span class="nav-text">范围读的优化</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TiDB与MySQL索引区别"><span class="nav-text">TiDB与MySQL索引区别</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#数据写入方面"><span class="nav-text">数据写入方面</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数据更新和删除方面"><span class="nav-text">数据更新和删除方面</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Tidb的读取优势"><span class="nav-text">Tidb的读取优势</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Tidb-索引类型"><span class="nav-text">Tidb 索引类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#与MySQL不同处"><span class="nav-text">与MySQL不同处</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MyISAM-和-innoDB的区别"><span class="nav-text">MyISAM  和 innoDB的区别</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Tidb-常见问题解决"><span class="nav-text">Tidb 常见问题解决</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#TiDB线上报-“pd-server-timeout”"><span class="nav-text">TiDB线上报 “pd server timeout”</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TIDB-生产环境发生-OOM问题。"><span class="nav-text">TIDB 生产环境发生 OOM问题。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#tidb-某些-sql-会出现索引失效"><span class="nav-text">tidb 某些 sql 会出现索引失效</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -1317,7 +1331,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>

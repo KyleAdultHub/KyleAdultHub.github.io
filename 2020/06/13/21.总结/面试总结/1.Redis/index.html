@@ -119,6 +119,14 @@
 <meta property="og:site_name" content="刘小恺(Kyle)的云笔记">
 <meta property="og:description" content="Redis基础单线程的redis为什么这么快 纯内存操作 单线程操作，避免了频繁的上下文切换 采用了非阻塞I&#x2F;O多路复用机制  Redis 优点 速度快，因为数据存在内存中，类似于HashMap，HashMap的优势就是查找和操作的时间复杂度都是O(1) 支持丰富数据类型，支持string，list，set，sorted set，hash 支持事务，操作都是原子性，所谓的原子性就是对数据的更改要么">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230507173135110.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230507181051892.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230507181146011.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230507181312015.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230507181545125.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230507181719242.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230507182206701.png">
+<meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230507182808943.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/1592038125957.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/1592038134671.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/1592038145769.png">
@@ -141,11 +149,11 @@
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230110110144015.png">
 <meta property="og:image" content="http://blog.kyleliu.cn/img/image-20230110110301288.png">
 <meta property="article:published_time" content="2020-06-13T03:00:00.000Z">
-<meta property="article:modified_time" content="2023-02-13T13:57:23.042Z">
+<meta property="article:modified_time" content="2023-05-07T10:28:22.867Z">
 <meta property="article:author" content="刘小恺(Kyle)">
 <meta property="article:tag" content="面试">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://blog.kyleliu.cn/img/1592038125957.png">
+<meta name="twitter:image" content="http://blog.kyleliu.cn/img/image-20230507173135110.png">
 
 
 
@@ -512,6 +520,43 @@
 <p>概率数据结构</p>
 </li>
 </ol>
+<h3 id="Redis数据类型实现"><a href="#Redis数据类型实现" class="headerlink" title="Redis数据类型实现"></a>Redis数据类型实现</h3><p>左边是 Redis 3.0版本的，右边是现在 Redis 7.0 版本的。</p>
+<p><img src="/img/image-20230507173135110.png" alt="image-20230507173135110"></p>
+<h4 id="string-内部实现"><a href="#string-内部实现" class="headerlink" title="string 内部实现"></a>string 内部实现</h4><p>String 类型的底层的数据结构实现主要是 SDS（简单动态字符串）。 SDS 和我们认识的 C 字符串不太一样，之所以没有使用 C 语言的字符串表示，因为 SDS 相比于 C 的原生字符串：</p>
+<ul>
+<li><strong>SDS 不仅可以保存文本数据，还可以保存二进制数据</strong>。因为 SDS 使用 len 属性的值而不是空字符来判断字符串是否结束，并且 SDS 的所有 API 都会以处理二进制的方式来处理 SDS 存放在 buf[] 数组里的数据。所以 SDS 不光能存放文本数据，而且能保存图片、音频、视频、压缩文件这样的二进制数据。</li>
+<li><strong>SDS 获取字符串长度的时间复杂度是 O(1)</strong>。因为 C 语言的字符串并不记录自身长度，所以获取长度的复杂度为 O(n)；而 SDS 结构里用 len 属性记录了字符串长度，所以复杂度为 O(1)。</li>
+<li><strong>Redis 的 SDS API 是安全的，拼接字符串不会造成缓冲区溢出</strong>。因为 SDS 在拼接字符串之前会检查 SDS 空间是否满足要求，如果空间不够会自动扩容，所以不会导致缓冲区溢出的问题。</li>
+</ul>
+<h4 id="List-内部实现"><a href="#List-内部实现" class="headerlink" title="List 内部实现"></a>List 内部实现</h4><p>List 类型的底层数据结构是由<strong>双向链表或压缩列表</strong>实现的：</p>
+<ul>
+<li>如果列表的元素个数小于 512 个（默认值，可由 list-max-ziplist-entries 配置），列表每个元素的值都小于 64 字节（默认值，可由 list-max-ziplist-value 配置），Redis 会使用<strong>压缩列表</strong>作为 List 类型的底层数据结构；</li>
+<li>如果列表的元素不满足上面的条件，Redis 会使用<strong>双向链表</strong>作为 List 类型的底层数据结构；</li>
+</ul>
+<p>但是<strong>在 Redis 3.2 版本之后，List 数据类型底层数据结构就只由 quicklist 实现了，替代了双向链表和压缩列表</strong>。</p>
+<h4 id="Hash内部实现"><a href="#Hash内部实现" class="headerlink" title="Hash内部实现"></a>Hash内部实现</h4><p>Hash 类型的底层数据结构是由<strong>压缩列表或哈希表</strong>实现的：</p>
+<ul>
+<li>如果哈希类型元素个数小于 512 个（默认值，可由 hash-max-ziplist-entries 配置），所有值小于 64 字节（默认值，可由 hash-max-ziplist-value 配置）的话，Redis 会使用<strong>压缩列表</strong>作为 Hash 类型的底层数据结构；</li>
+<li>如果哈希类型元素不满足上面条件，Redis 会使用<strong>哈希表</strong>作为 Hash 类型的底层数据结构。</li>
+</ul>
+<p><strong>在 Redis 7.0 中，压缩列表数据结构已经废弃了，交由 listpack 数据结构来实现了</strong>。</p>
+<h4 id="Set-内部实现"><a href="#Set-内部实现" class="headerlink" title="Set 内部实现"></a>Set 内部实现</h4><p>Set 类型的底层数据结构是由<strong>哈希表或整数集合</strong>实现的：</p>
+<ul>
+<li>如果集合中的元素都是整数且元素个数小于 512 （默认值，set-maxintset-entries配置）个，Redis 会使用<strong>整数集合</strong>作为 Set 类型的底层数据结构；</li>
+<li>如果集合中的元素不满足上面条件，则 Redis 使用<strong>哈希表</strong>作为 Set 类型的底层数据结构。</li>
+</ul>
+<h4 id="Zset-内部实现"><a href="#Zset-内部实现" class="headerlink" title="Zset 内部实现"></a>Zset 内部实现</h4><p>Zset 类型的底层数据结构是由<strong>压缩列表或跳表</strong>实现的：</p>
+<ul>
+<li>如果有序集合的元素个数小于 128 个，并且每个元素的值小于 64 字节时，Redis 会使用<strong>压缩列表</strong>作为 Zset 类型的底层数据结构；</li>
+<li>如果有序集合的元素不满足上面的条件，Redis 会使用<strong>跳表</strong>skiplist作为 Zset 类型的底层数据结构；</li>
+</ul>
+<p>redis 的 skiplist（组合了<strong>hash</strong>和<strong>skipList</strong>）</p>
+<ul>
+<li>hash用来存储value到score的映射，这样就可以在O(1)时间内找到value对应的分数；</li>
+<li>skipList按照从小到大的顺序存储分数；</li>
+<li>skipList每个元素的值都是[score,value]对</li>
+</ul>
+<p><strong>在 Redis 7.0 中，压缩列表数据结构已经废弃了，交由 listpack 数据结构来实现了。</strong></p>
 <h3 id="Redis-内部结构"><a href="#Redis-内部结构" class="headerlink" title="Redis 内部结构"></a>Redis 内部结构</h3><ul>
 <li>dict：  本质上是为了解决算法中的查找问题（Searching）是一个用于维护key和value映射关系的数据结构，与很多语言中的Map或dictionary类似。 本质上是为了解决算法中的查找问题（Searching）</li>
 <li>sds：  sds就等同于char * 它可以存储任意二进制数据，不能像C语言字符串那样以字符’\0’来标识字符串的结 束，因此它必然有个长度字段。</li>
@@ -522,34 +567,122 @@
 <h3 id="Redis-原子性"><a href="#Redis-原子性" class="headerlink" title="Redis 原子性"></a>Redis 原子性</h3><p>对于Redis而言，命令的原子性指的是：一个操作的不可以再分，操作要么执行，要么不执行。</p>
 <p>Redis的操作之所以是原子性的，是因为Redis是单线程的。</p>
 <p>Redis本身提供的所有API都是原子操作，Redis中的事务其实是要保证批量操作的原子性。</p>
-<h3 id="Redis-Zset-数据结构"><a href="#Redis-Zset-数据结构" class="headerlink" title="Redis Zset 数据结构"></a>Redis Zset 数据结构</h3><p> zset底层的存储结构包括ziplist或skiplist，在同时满足以下两个条件的时候使用ziplist，其他时候使用skiplist，两个条件如下：</p>
-<ul>
-<li>有序集合保存的元素数量小于128个</li>
-<li>有序集合保存的每个元素的长度小于64字节</li>
-</ul>
-<p>不满足以上两个条件时使用跳表 skiplist（组合了<strong>hash</strong>和<strong>skipList</strong>）</p>
-<ul>
-<li>hash用来存储value到score的映射，这样就可以在O(1)时间内找到value对应的分数；</li>
-<li>skipList按照从小到大的顺序存储分数；</li>
-<li>skipList每个元素的值都是[score,value]对</li>
-</ul>
 <h2 id="Redis持久化"><a href="#Redis持久化" class="headerlink" title="Redis持久化"></a>Redis持久化</h2><h3 id="Redis-持久化机制"><a href="#Redis-持久化机制" class="headerlink" title="Redis 持久化机制"></a>Redis 持久化机制</h3><p>Redis是一个支持持久化的内存数据库，通过持久化机制把内存中的数据同步到硬盘文件来保证数据持久化。当Redis重启后通过把硬盘文件重新加载到内存，就能达到恢复数据的目的。</p>
-<h3 id="持久化实现方式"><a href="#持久化实现方式" class="headerlink" title="持久化实现方式"></a>持久化实现方式</h3><p>单独创建fork()一个子进程，将当前父进程的数据库数据复制到子进程的内存中，然后由子进程写入到临时文件中，持久化的过程结束了，再用这个临时文件替换上次的快照文件，然后子进程退出，内存释放。</p>
 <h3 id="持久化两种方式"><a href="#持久化两种方式" class="headerlink" title="持久化两种方式"></a>持久化两种方式</h3><ul>
 <li>RDB： 是Redis默认的持久化方式,按照一定的时间周期策略把内存的数据以快照的形式保存到硬盘的二进制文件。即Snapshot快照存储，对应产生的数据文件为dump.rdb，通过配置文件中的save参数来定义快照的周期。（ 快照可以是其所表示的数据的一个副本，也可以是数据的一个复制品。）</li>
 <li>AOF：Redis会将每一个收到的写命令都通过Write函数追加到文件最后，类似于MySQL的binlog。当Redis重启是会通过重新执行文件中保存的写命令来在内存中重建整个数据库的内容。<br>当两种方式同时开启时，数据恢复Redis会优先选择AOF恢复。</li>
 </ul>
+<h3 id="AOF-日志"><a href="#AOF-日志" class="headerlink" title="AOF 日志"></a>AOF 日志</h3><p>在 Redis 中 AOF 持久化功能默认是不开启的，需要我们修改 <code>redis.conf</code> 配置文件中的以下参数：</p>
+<p><img src="/img/image-20230507181051892.png" alt="image-20230507181051892"></p>
+<h4 id="AOF-写入过程"><a href="#AOF-写入过程" class="headerlink" title="AOF 写入过程"></a>AOF 写入过程</h4><p><img src="/img/image-20230507181146011.png" alt="image-20230507181146011"></p>
+<ol>
+<li>Redis 执行完写操作命令后，会将命令追加到 <code>server.aof_buf</code> 缓冲区；</li>
+<li>然后通过 write() 系统调用，将 aof_buf 缓冲区的数据写入到 AOF 文件，此时数据并没有写入到硬盘，而是拷贝到了内核缓冲区 page cache，等待内核将数据写入硬盘；</li>
+<li>具体内核缓冲区的数据什么时候写入到硬盘，由内核决定。</li>
+</ol>
+<h4 id="AOF-写回策略"><a href="#AOF-写回策略" class="headerlink" title="AOF 写回策略"></a>AOF 写回策略</h4><p>Redis 提供了 3 种写回硬盘的策略，控制的就是上面说的第三步的过程。</p>
+<p>在 <code>redis.conf</code> 配置文件中的 <code>appendfsync</code> 配置项可以有以下 3 种参数可填：</p>
+<ul>
+<li><strong>Always</strong>，这个单词的意思是「总是」，所以它的意思是每次写操作命令执行完后，同步将 AOF 日志数据写回硬盘；</li>
+<li><strong>Everysec</strong>，这个单词的意思是「每秒」，所以它的意思是每次写操作命令执行完后，先将命令写入到 AOF 文件的内核缓冲区，然后每隔一秒将缓冲区里的内容写回到硬盘；</li>
+<li><strong>No</strong>，意味着不由 Redis 控制写回硬盘的时机，转交给操作系统控制写回的时机，也就是每次写操作命令执行完后，先将命令写入到 AOF 文件的内核缓冲区，再由操作系统决定何时将缓冲区内容写回硬盘。</li>
+</ul>
+<p>深入到源码后，你就会发现这三种策略只是在控制 <code>fsync()</code> 函数的调用时机。</p>
+<p>当应用程序向文件写入数据时，内核通常先将数据复制到内核缓冲区中，然后排入队列，然后由内核决定何时写入硬盘。</p>
+<p><img src="/img/image-20230507181312015.png" alt="image-20230507181312015"></p>
+<p>如果想要应用程序向文件写入数据后，能立马将数据同步到硬盘，就可以调用 <code>fsync()</code> 函数，这样内核就会将内核缓冲区的数据直接写入到硬盘，等到硬盘写操作完成后，该函数才会返回。</p>
+<ul>
+<li>Always 策略就是每次写入 AOF 文件数据后，就执行 fsync() 函数；</li>
+<li>Everysec 策略就会创建一个异步任务来执行 fsync() 函数；</li>
+<li>No 策略就是永不执行 fsync() 函数</li>
+</ul>
+<h4 id="AOF重写机制"><a href="#AOF重写机制" class="headerlink" title="AOF重写机制"></a>AOF重写机制</h4><p>OF 日志是一个文件，随着执行的写操作命令越来越多，文件的大小会越来越大。</p>
+<p>如果当 AOF 日志文件过大就会带来性能问题，比如重启 Redis 后，需要读 AOF 文件的内容以恢复数据，如果文件过大，整个恢复的过程就会很慢。</p>
+<p>所以，Redis 为了避免 AOF 文件越写越大，提供了 <strong>AOF 重写机制</strong>，当 AOF 文件的大小超过所设定的阈值后，Redis 就会启用 AOF 重写机制，来压缩 AOF 文件。</p>
+<h4 id="AOF-后台重写"><a href="#AOF-后台重写" class="headerlink" title="AOF 后台重写"></a>AOF 后台重写</h4><p>写入 AOF 日志的操作虽然是在主进程完成的，因为它写入的内容不多，所以一般不太影响命令的操作。</p>
+<p>但是在触发 AOF 重写时，比如当 AOF 文件大于 64M 时，就会对 AOF 文件进行重写，这时是需要读取所有缓存的键值对数据，并为每个键值对生成一条命令，然后将其写入到新的 AOF 文件，重写完后，就把现在的 AOF 文件替换掉。</p>
+<p>这个过程其实是很耗时的，所以重写的操作不能放在主进程里。</p>
+<p>所以，Redis 的<strong>重写 AOF 过程是由后台子进程 *bgrewriteaof* 来完成的</strong>，这么做可以达到两个好处：</p>
+<ul>
+<li>子进程进行 AOF 重写期间，主进程可以继续处理命令请求，从而避免阻塞主进程；</li>
+<li>子进程带有主进程的数据副本（<em>数据副本怎么产生的后面会说</em>），这里使用子进程而不是线程，因为如果是使用线程，多线程之间会共享内存，那么在修改共享内存数据的时候，需要通过加锁来保证数据的安全，而这样就会降低性能。而使用子进程，创建子进程时，父子进程是共享内存数据的，不过这个共享的内存只能以只读的方式，而当父子进程任意一方修改了该共享内存，就会发生「写时复制」，于是父子进程就有了独立的数据副本，就不用加锁来保证数据安全。</li>
+</ul>
+<p>子进程是怎么拥有主进程一样的数据副本的呢？</p>
+<p>主进程在通过 <code>fork</code> 系统调用生成 bgrewriteaof 子进程时，操作系统会把主进程的「<strong>页表</strong>」复制一份给子进程，这个页表记录着虚拟地址和物理地址映射关系，而不会复制物理内存，也就是说，两者的虚拟空间不同，但其对应的物理空间是同一个。</p>
+<p><img src="/img/image-20230507181545125.png" alt="image-20230507181545125"></p>
+<p>这样一来，子进程就共享了父进程的物理内存数据了，这样能够<strong>节约物理内存资源</strong>，页表对应的页表项的属性会标记该物理内存的权限为<strong>只读</strong>。</p>
+<p>不过，当父进程或者子进程在向这个内存发起写操作时，CPU 就会触发<strong>写保护中断</strong>，这个写保护中断是由于违反权限导致的，然后操作系统会在「写保护中断处理函数」里进行<strong>物理内存的复制</strong>，并重新设置其内存映射关系，将父子进程的内存读写权限设置为<strong>可读写</strong>，最后才会对内存进行写操作，这个过程被称为「<strong>写时复制(*Copy On Write*)</strong>」。</p>
+<p><img src="/img/image-20230507181719242.png" alt="image-20230507181719242"></p>
+<p>写时复制顾名思义，<strong>在发生写操作的时候，操作系统才会去复制物理内存</strong>，这样是为了防止 fork 创建子进程时，由于物理内存数据的复制时间过长而导致父进程长时间阻塞的问题。</p>
+<p>当然，操作系统复制父进程页表的时候，父进程也是阻塞中的，不过页表的大小相比实际的物理内存小很多，所以通常复制页表的过程是比较快的。</p>
+<p>不过，如果父进程的内存数据非常大，那自然页表也会很大，这时父进程在通过 fork 创建子进程的时候，阻塞的时间也越久。</p>
+<p>所以，有两个阶段会导致阻塞父进程：</p>
+<ul>
+<li>创建子进程的途中，由于要复制父进程的页表等数据结构，阻塞的时间跟页表的大小有关，页表越大，阻塞的时间也越长；</li>
+<li>创建完子进程后，如果子进程或者父进程修改了共享数据，就会发生写时复制，这期间会拷贝物理内存，如果内存越大，自然阻塞的时间也越长；</li>
+</ul>
+<p>触发重写机制后，主进程就会创建重写 AOF 的子进程，此时父子进程共享物理内存，重写子进程只会对这个内存进行只读，重写 AOF 子进程会读取数据库里的所有数据，并逐一把内存数据的键值对转换成一条命令，再将命令记录到重写日志（新的 AOF 文件）。</p>
+<p>但是子进程重写过程中，主进程依然可以正常处理命令。</p>
+<p>如果此时<strong>主进程修改了已经存在 key-value，就会发生写时复制，注意这里只会复制主进程修改的物理内存数据，没修改物理内存还是与子进程共享的</strong>。</p>
+<p>所以如果这个阶段修改的是一个 bigkey，也就是数据量比较大的 key-value 的时候，这时复制的物理内存数据的过程就会比较耗时，有阻塞主进程的风险。</p>
+<p>还有个问题，重写 AOF 日志过程中，如果主进程修改了已经存在 key-value，此时这个 key-value 数据在子进程的内存数据就跟主进程的内存数据不一致了，这时要怎么办呢？</p>
+<p>为了解决这种数据不一致问题，Redis 设置了一个 <strong>AOF 重写缓冲区</strong>，这个缓冲区在创建 bgrewriteaof 子进程之后开始使用。</p>
+<p>在重写 AOF 期间，当 Redis 执行完一个写命令之后，它会<strong>同时将这个写命令写入到 「AOF 缓冲区」和 「AOF 重写缓冲区」</strong>。</p>
+<p><img src="/img/image-20230507182206701.png" alt="image-20230507182206701"></p>
+<p>也就是说，在 bgrewriteaof 子进程执行 AOF 重写期间，主进程需要执行以下三个工作:</p>
+<ul>
+<li>执行客户端发来的命令；</li>
+<li>将执行后的写命令追加到 「AOF 缓冲区」；</li>
+<li>将执行后的写命令追加到 「AOF 重写缓冲区」；</li>
+</ul>
+<p>当子进程完成 AOF 重写工作（<em>扫描数据库中所有数据，逐一把内存数据的键值对转换成一条命令，再将命令记录到重写日志</em>）后，会向主进程发送一条信号，信号是进程间通讯的一种方式，且是异步的。</p>
+<p>主进程收到该信号后，会调用一个信号处理函数，该函数主要做以下工作：</p>
+<ul>
+<li>将 AOF 重写缓冲区中的所有内容追加到新的 AOF 的文件中，使得新旧两个 AOF 文件所保存的数据库状态一致；</li>
+<li>新的 AOF 的文件进行改名，覆盖现有的 AOF 文件。</li>
+</ul>
+<p>信号函数执行完后，主进程就可以继续像往常一样处理命令了。</p>
+<p>在整个 AOF 后台重写过程中，除了发生写时复制会对主进程造成阻塞，还有信号处理函数执行时也会对主进程造成阻塞，在其他时候，AOF 后台重写都不会阻塞主进程。</p>
+<h3 id="RDB持久化实现方式"><a href="#RDB持久化实现方式" class="headerlink" title="RDB持久化实现方式"></a>RDB持久化实现方式</h3><p>Redis 提供了两个命令来生成 RDB 文件，分别是 <code>save</code> 和 <code>bgsave</code>，他们的区别就在于是否在「主线程」里执行：</p>
+<ul>
+<li>执行了 save 命令，就会在主线程生成 RDB 文件，由于和执行操作命令在同一个线程，所以如果写入 RDB 文件的时间太长，<strong>会阻塞主线程</strong>；</li>
+<li>执行了 bgsave 命令，会创建一个子进程来生成 RDB 文件，这样可以<strong>避免主线程的阻塞</strong>；</li>
+</ul>
+<p>RDB 文件的加载工作是在服务器启动时自动执行的，Redis 并没有提供专门用于加载 RDB 文件的命令。</p>
+<p>Redis 还可以通过配置文件的选项来实现每隔一段时间自动执行一次 bgsave 命令，默认会提供以下配置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">save 900 1</span><br><span class="line">save 300 10</span><br><span class="line">save 60 10000</span><br></pre></td></tr></table></figure>
+
+<p>别看选项名叫 save，实际上执行的是 bgsave 命令，也就是会创建子进程来生成 RDB 快照文件。</p>
+<p>只要满足上面条件的任意一个，就会执行 bgsave，它们的意思分别是：</p>
+<ul>
+<li>900 秒之内，对数据库进行了至少 1 次修改；</li>
+<li>300 秒之内，对数据库进行了至少 10 次修改；</li>
+<li>60 秒之内，对数据库进行了至少 10000 次修改。</li>
+</ul>
+<p>这里提一点，Redis 的快照是<strong>全量快照</strong>，也就是说每次执行快照，都是把内存中的「所有数据」都记录到磁盘中。</p>
+<p>所以可以认为，执行快照是一个比较重的操作，如果频率太频繁，可能会对 Redis 性能产生影响。如果频率太低，服务器故障时，丢失的数据会更多。</p>
+<p>RDB的写入也应用到了COPY ON WRITE 技术，和AOF进行重写的时候原理很相似。</p>
+<h3 id="RDB-和AOF-合体"><a href="#RDB-和AOF-合体" class="headerlink" title="RDB 和AOF 合体"></a>RDB 和AOF 合体</h3><p>尽管 RDB 比 AOF 的数据恢复速度快，但是快照的频率不好把握：</p>
+<ul>
+<li>如果频率太低，两次快照间一旦服务器发生宕机，就可能会比较多的数据丢失；</li>
+<li>如果频率太高，频繁写入磁盘和创建子进程会带来额外的性能开销。</li>
+</ul>
+<p>那有没有什么方法不仅有 RDB 恢复速度快的优点和，又有 AOF 丢失数据少的优点呢？</p>
+<p>当然有，那就是将 RDB 和 AOF 合体使用，这个方法是在 Redis 4.0 提出的，该方法叫<strong>混合使用 AOF 日志和内存快照</strong>，也叫混合持久化。</p>
+<p>如果想要开启混合持久化功能，可以在 Redis 配置文件将下面这个配置项设置成 yes：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aof-use-rdb-preamble yes</span><br></pre></td></tr></table></figure>
+
+<p>混合持久化工作在 <strong>AOF 日志重写过程</strong>。</p>
+<p>当开启了混合持久化时，在 AOF 重写日志时，<code>fork</code> 出来的重写子进程会先将与主线程共享的内存数据以 RDB 方式写入到 AOF 文件，然后主线程处理的操作命令会被记录在重写缓冲区里，重写缓冲区里的增量命令会以 AOF 方式写入到 AOF 文件，写入完成后通知主进程将新的含有 RDB 格式和 AOF 格式的 AOF 文件替换旧的的 AOF 文件。</p>
+<p>也就是说，使用了混合持久化，AOF 文件的<strong>前半部分是 RDB 格式的全量数据，后半部分是 AOF 格式的增量数据</strong>。</p>
+<p><img src="/img/image-20230507182808943.png" alt="image-20230507182808943"></p>
+<p>这样的好处在于，重启 Redis 加载数据的时候，由于前半部分是 RDB 内容，这样<strong>加载的时候速度会很快</strong>。</p>
+<p>加载完 RDB 的内容后，才会加载后半部分的 AOF 内容，这里的内容是 Redis 后台子进程重写 AOF 期间，主线程处理的操作命令，可以使得<strong>数据更少的丢失</strong>。</p>
 <h3 id="两种持久化方式区别"><a href="#两种持久化方式区别" class="headerlink" title="两种持久化方式区别"></a>两种持久化方式区别</h3><p>AOF文件比RDB更新频率高，优先使用AOF还原数据。</p>
 <p>AOF比RDB更安全也更大</p>
 <p>RDB性能比AOF好</p>
 <p>如果两个都配了优先加载AOF</p>
-<h3 id="flushAppendOnlyFile-函数的-appendfsync-选项的值："><a href="#flushAppendOnlyFile-函数的-appendfsync-选项的值：" class="headerlink" title="flushAppendOnlyFile 函数的 appendfsync 选项的值："></a>flushAppendOnlyFile 函数的 appendfsync 选项的值：</h3><p>appendfsync 可以决定AOF内容，从aof_buf 刷新到 AOF文件的刷新策略</p>
-<ul>
-<li>always 就是上面所说的，每次写操作刷一次磁盘，他可能保证数据不丢失，但是性能很差</li>
-<li>everysec(默认) Redis每一秒刷一次磁盘</li>
-<li>no 标识Redis不执行刷磁盘的操作，只是将数据写到OS Cache中，具体什么时候刷磁盘由操作系统决定</li>
-</ul>
-<h3 id="Redis实现分布式锁"><a href="#Redis实现分布式锁" class="headerlink" title="Redis实现分布式锁"></a>Redis实现分布式锁</h3><p>Redis为单进程单线程模式，采用队列模式将并发访问变成串行访问，且多客户端对Redis的连接并不存在竞争关系Redis中可以使用SETNX命令实现分布式锁。<br>将 key 的值设为 value ，当且仅当 key 不存在。 若给定的 key 已经存在，则 SETNX 不做任何动作</p>
+<h2 id="Redis实现分布式锁"><a href="#Redis实现分布式锁" class="headerlink" title="Redis实现分布式锁"></a>Redis实现分布式锁</h2><p>Redis为单进程单线程模式，采用队列模式将并发访问变成串行访问，且多客户端对Redis的连接并不存在竞争关系Redis中可以使用SETNX命令实现分布式锁。<br>将 key 的值设为 value ，当且仅当 key 不存在。 若给定的 key 已经存在，则 SETNX 不做任何动作</p>
 <p>解锁：使用 del key 命令就能释放锁<br>解决死锁：<br>1）通过Redis中expire()给锁设定最大持有时间，如果超过，则Redis来帮我们释放锁。<br>2 )  使用 setnx key “当前系统时间+锁持有的时间”和getset key “当前系统时间+锁持有的时间”组合的命令就可以实现。</p>
 <h2 id="Redis-常见线上问题"><a href="#Redis-常见线上问题" class="headerlink" title="Redis 常见线上问题"></a>Redis 常见线上问题</h2><h4 id="缓存雪崩"><a href="#缓存雪崩" class="headerlink" title="缓存雪崩"></a>缓存雪崩</h4><p><strong>问题解释</strong></p>
 <p>缓存雪崩我们可以简单的理解为：由于原有缓存失效，新缓存未到期间</p>
@@ -878,6 +1011,52 @@
 <p><strong>总结</strong></p>
 <p>本文从 redis 架构演进开始讲起，从单线程模型 =&gt; 单线程 + 后台线程 =&gt; 多线程 + 后台线程 演进。</p>
 <p>每一次演进，都是为了解决某一类特殊问题；后台线程的出现，解决了一些耗时长的重操作。同样，多线程的出现，解决了网络模块的性能瓶颈。</p>
+<h2 id="大Key问题如何处理"><a href="#大Key问题如何处理" class="headerlink" title="大Key问题如何处理"></a>大Key问题如何处理</h2><h3 id="什么是大key"><a href="#什么是大key" class="headerlink" title="什么是大key"></a>什么是大key</h3><p>一般而言，下面这两种情况被称为大 key：</p>
+<ul>
+<li>String 类型的值大于 10 KB；</li>
+<li>Hash、List、Set、ZSet 类型的元素的个数超过 5000个；</li>
+</ul>
+<p>大 key 会带来以下四种影响：</p>
+<ul>
+<li><strong>客户端超时阻塞</strong>。由于 Redis 执行命令是单线程处理，然后在操作大 key 时会比较耗时，那么就会阻塞 Redis，从客户端这一视角看，就是很久很久都没有响应。</li>
+<li><strong>引发网络阻塞</strong>。每次获取大 key 产生的网络流量较大，如果一个 key 的大小是 1 MB，每秒访问量为 1000，那么每秒会产生 1000MB 的流量，这对于普通千兆网卡的服务器来说是灾难性的。</li>
+<li><strong>阻塞工作线程</strong>。如果使用 del 删除大 key 时，会阻塞工作线程，这样就没办法处理后续的命令。</li>
+<li><strong>内存分布不均</strong>。集群模型在 slot 分片均匀情况下，会出现数据和查询倾斜情况，部分有大 key 的 Redis 节点占用内存多，QPS 也会比较大。</li>
+</ul>
+<h3 id="如何找到大key"><a href="#如何找到大key" class="headerlink" title="如何找到大key"></a>如何找到大key</h3><p><strong>使用 RdbTools 工具查找大 key</strong></p>
+<ul>
+<li><p>使用 RdbTools 第三方开源工具，可以用来解析 Redis 快照（RDB）文件，找到其中的大 key。</p>
+<p>比如，下面这条命令，将大于 10 kb 的  key  输出到一个表格文件。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rdb dump.rdb -c memory --bytes 10240 -f redis.csv</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="如何删除大key"><a href="#如何删除大key" class="headerlink" title="如何删除大key"></a>如何删除大key</h3><p>删除操作的本质是要释放键值对占用的内存空间，不要小瞧内存的释放过程。</p>
+<p>释放内存只是第一步，为了更加高效地管理内存空间，在应用程序释放内存时，操作系统需要把释放掉的内存块插入一个空闲内存块的链表，以便后续进行管理和再分配。这个过程本身需要一定时间，而且会阻塞当前释放内存的应用程序。</p>
+<p>所以，如果一下子释放了大量内存，空闲内存块链表操作时间就会增加，相应地就会造成 Redis 主线程的阻塞，如果主线程发生了阻塞，其他所有请求可能都会超时，超时越来越多，会造成 Redis 连接耗尽，产生各种异常。</p>
+<p>因此，删除大 key 这一个动作，我们要小心。具体要怎么做呢？这里给出两种方法：</p>
+<ul>
+<li>分批次删除</li>
+<li>异步删除（Redis 4.0版本以上）</li>
+</ul>
+<h3 id="分批次删除"><a href="#分批次删除" class="headerlink" title="分批次删除"></a>分批次删除</h3><p>对于<strong>删除大 Hash</strong>，使用 <code>hscan</code> 命令，每次获取 100 个字段，再用 <code>hdel</code> 命令，每次删除 1 个字段。</p>
+<p>对于<strong>删除大 List</strong>，通过 <code>ltrim</code> 命令，每次删除少量元素。</p>
+<p>对于<strong>删除大 Set</strong>，使用 <code>sscan</code> 命令，每次扫描集合中 100 个元素，再用 <code>srem</code> 命令每次删除一个键。</p>
+<p>对于<strong>删除大 ZSet</strong>，使用 <code>zremrangebyrank</code> 命令，每次删除 top 100个元素。</p>
+<h4 id="异步删除"><a href="#异步删除" class="headerlink" title="异步删除"></a>异步删除</h4><p>从 Redis 4.0 版本开始，可以采用<strong>异步删除</strong>法，<strong>用 unlink 命令代替 del 来删除</strong>。</p>
+<p>这样 Redis 会将这个 key 放入到一个异步线程中进行删除，这样不会阻塞主线程。</p>
+<p>除了主动调用 unlink 命令实现异步删除之外，我们还可以通过配置参数，达到某些条件的时候自动进行异步删除。</p>
+<p>主要有 4 种场景，默认都是关闭的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">lazyfree-lazy-eviction no</span><br><span class="line">lazyfree-lazy-expire no</span><br><span class="line">lazyfree-lazy-server-del no</span><br><span class="line">noslave-lazy-flush no</span><br></pre></td></tr></table></figure>
+
+<p>它们代表的含义如下：</p>
+<ul>
+<li>lazyfree-lazy-eviction：表示当 Redis 运行内存超过 maxmeory 时，是否开启 lazy free 机制删除；</li>
+<li>lazyfree-lazy-expire：表示设置了过期时间的键值，当过期之后是否开启 lazy free 机制删除；</li>
+<li>lazyfree-lazy-server-del：有些指令在处理已存在的键时，会带有一个隐式的 del 键的操作，比如 rename 命令，当目标键已存在，Redis 会先删除目标键，如果这些目标键是一个 big key，就会造成阻塞删除的问题，此配置表示在这种场景中是否开启 lazy free 机制删除；</li>
+<li>slave-lazy-flush：针对 slave (从节点) 进行全量数据同步，slave 在加载 master 的 RDB 文件前，会运行 flushall 来清理自己的数据，它表示此时是否开启 lazy free 机制删除。</li>
+</ul>
+<p>建议开启其中的 lazyfree-lazy-eviction、lazyfree-lazy-expire、lazyfree-lazy-server-del 等配置，这样就可以有效的提高主线程的执行效率。</p>
 
       
     </div>
@@ -1032,7 +1211,7 @@
                 
                   <a href="/archives/%20%7C%7C%20archive">
                 
-                    <span class="site-state-item-count">310</span>
+                    <span class="site-state-item-count">326</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -1211,7 +1390,13 @@
                     
                       
                     
-                    <span class="site-state-item-count">83</span>
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">86</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
@@ -1408,7 +1593,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">92</span>
+                      
+                    
+                    <span class="site-state-item-count">93</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -1458,7 +1645,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis基础"><span class="nav-text">Redis基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#单线程的redis为什么这么快"><span class="nav-text">单线程的redis为什么这么快</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-优点"><span class="nav-text">Redis 优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-为什么是单线程的"><span class="nav-text">Redis 为什么是单线程的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redis的数据类型"><span class="nav-text">redis的数据类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-内部结构"><span class="nav-text">Redis 内部结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-原子性"><span class="nav-text">Redis 原子性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-Zset-数据结构"><span class="nav-text">Redis Zset 数据结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis持久化"><span class="nav-text">Redis持久化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-持久化机制"><span class="nav-text">Redis 持久化机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#持久化实现方式"><span class="nav-text">持久化实现方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#持久化两种方式"><span class="nav-text">持久化两种方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#两种持久化方式区别"><span class="nav-text">两种持久化方式区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#flushAppendOnlyFile-函数的-appendfsync-选项的值："><span class="nav-text">flushAppendOnlyFile 函数的 appendfsync 选项的值：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis实现分布式锁"><span class="nav-text">Redis实现分布式锁</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-常见线上问题"><span class="nav-text">Redis 常见线上问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#缓存雪崩"><span class="nav-text">缓存雪崩</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#缓存穿透"><span class="nav-text">缓存穿透</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#缓存击穿"><span class="nav-text">缓存击穿</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#缓存预热"><span class="nav-text">缓存预热</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#缓存降级"><span class="nav-text">缓存降级</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#redis-事物和pipeline"><span class="nav-text">redis 事物和pipeline</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#redis-的pipeline"><span class="nav-text">redis 的pipeline</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#pipeline出现的背景"><span class="nav-text">pipeline出现的背景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pepeline的性能"><span class="nav-text">pepeline的性能</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#原生批操作和pipeline对比"><span class="nav-text">原生批操作和pipeline对比</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis事务"><span class="nav-text">Redis事务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#redis的过期策略、内存淘汰机制"><span class="nav-text">redis的过期策略、内存淘汰机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#redis-的过期策略"><span class="nav-text">redis 的过期策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redis-内存淘汰机制"><span class="nav-text">redis 内存淘汰机制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-并发问题"><span class="nav-text">Redis 并发问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#同时有多个子系统去set一个key。这个时候要注意什么呢？"><span class="nav-text">同时有多个子系统去set一个key。这个时候要注意什么呢？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redis遇到高并发，如果保证读写key的一致性"><span class="nav-text">redis遇到高并发，如果保证读写key的一致性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-常见性能问题和解决方案？"><span class="nav-text">Redis 常见性能问题和解决方案？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-主从数据同步过程"><span class="nav-text">Redis 主从数据同步过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#主从复制的方式"><span class="nav-text">主从复制的方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#持续复制"><span class="nav-text">持续复制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#全量复制"><span class="nav-text">全量复制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#部分复制"><span class="nav-text">部分复制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#积压缓冲区"><span class="nav-text">积压缓冲区</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#复制积压缓冲区的特点："><span class="nav-text">复制积压缓冲区的特点：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#复制积压缓冲区索引"><span class="nav-text">复制积压缓冲区索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#偏移量在复制积压缓冲区的作用"><span class="nav-text">偏移量在复制积压缓冲区的作用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-Cluster-模式"><span class="nav-text">Redis Cluster 模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-Cluster-集群介绍"><span class="nav-text">Redis  Cluster 集群介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#一、概述"><span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#二、redis集群的特点"><span class="nav-text">二、redis集群的特点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#节点间内部通讯机制"><span class="nav-text">节点间内部通讯机制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#基础通讯原理"><span class="nav-text">基础通讯原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#gossip协议"><span class="nav-text">gossip协议</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ping消息深入"><span class="nav-text">ping消息深入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基于重定向的客户端"><span class="nav-text">基于重定向的客户端</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#smart-jedis"><span class="nav-text">smart jedis</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-Cluster-集群伸缩"><span class="nav-text">Redis Cluster 集群伸缩</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#槽和数据与节点的对应关系"><span class="nav-text">槽和数据与节点的对应关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#扩容操作"><span class="nav-text">扩容操作</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据分步"><span class="nav-text">数据分步</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#数据分步理论"><span class="nav-text">数据分步理论</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#节点取余分区"><span class="nav-text">节点取余分区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#一致性哈希分区"><span class="nav-text">一致性哈希分区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#虚拟槽分区"><span class="nav-text">虚拟槽分区</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redus-Cluster-故障转移与恢复"><span class="nav-text">Redus Cluster 故障转移与恢复</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#redis-多线程与后台线程"><span class="nav-text">redis 多线程与后台线程</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis基础"><span class="nav-text">Redis基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#单线程的redis为什么这么快"><span class="nav-text">单线程的redis为什么这么快</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-优点"><span class="nav-text">Redis 优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-为什么是单线程的"><span class="nav-text">Redis 为什么是单线程的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redis的数据类型"><span class="nav-text">redis的数据类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis数据类型实现"><span class="nav-text">Redis数据类型实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#string-内部实现"><span class="nav-text">string 内部实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#List-内部实现"><span class="nav-text">List 内部实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Hash内部实现"><span class="nav-text">Hash内部实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Set-内部实现"><span class="nav-text">Set 内部实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Zset-内部实现"><span class="nav-text">Zset 内部实现</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-内部结构"><span class="nav-text">Redis 内部结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-原子性"><span class="nav-text">Redis 原子性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis持久化"><span class="nav-text">Redis持久化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-持久化机制"><span class="nav-text">Redis 持久化机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#持久化两种方式"><span class="nav-text">持久化两种方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AOF-日志"><span class="nav-text">AOF 日志</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#AOF-写入过程"><span class="nav-text">AOF 写入过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AOF-写回策略"><span class="nav-text">AOF 写回策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AOF重写机制"><span class="nav-text">AOF重写机制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AOF-后台重写"><span class="nav-text">AOF 后台重写</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RDB持久化实现方式"><span class="nav-text">RDB持久化实现方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RDB-和AOF-合体"><span class="nav-text">RDB 和AOF 合体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#两种持久化方式区别"><span class="nav-text">两种持久化方式区别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis实现分布式锁"><span class="nav-text">Redis实现分布式锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-常见线上问题"><span class="nav-text">Redis 常见线上问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#缓存雪崩"><span class="nav-text">缓存雪崩</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#缓存穿透"><span class="nav-text">缓存穿透</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#缓存击穿"><span class="nav-text">缓存击穿</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#缓存预热"><span class="nav-text">缓存预热</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#缓存降级"><span class="nav-text">缓存降级</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#redis-事物和pipeline"><span class="nav-text">redis 事物和pipeline</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#redis-的pipeline"><span class="nav-text">redis 的pipeline</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#pipeline出现的背景"><span class="nav-text">pipeline出现的背景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pepeline的性能"><span class="nav-text">pepeline的性能</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#原生批操作和pipeline对比"><span class="nav-text">原生批操作和pipeline对比</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis事务"><span class="nav-text">Redis事务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#redis的过期策略、内存淘汰机制"><span class="nav-text">redis的过期策略、内存淘汰机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#redis-的过期策略"><span class="nav-text">redis 的过期策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redis-内存淘汰机制"><span class="nav-text">redis 内存淘汰机制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-并发问题"><span class="nav-text">Redis 并发问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#同时有多个子系统去set一个key。这个时候要注意什么呢？"><span class="nav-text">同时有多个子系统去set一个key。这个时候要注意什么呢？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redis遇到高并发，如果保证读写key的一致性"><span class="nav-text">redis遇到高并发，如果保证读写key的一致性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-常见性能问题和解决方案？"><span class="nav-text">Redis 常见性能问题和解决方案？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-主从数据同步过程"><span class="nav-text">Redis 主从数据同步过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#主从复制的方式"><span class="nav-text">主从复制的方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#持续复制"><span class="nav-text">持续复制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#全量复制"><span class="nav-text">全量复制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#部分复制"><span class="nav-text">部分复制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#积压缓冲区"><span class="nav-text">积压缓冲区</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#复制积压缓冲区的特点："><span class="nav-text">复制积压缓冲区的特点：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#复制积压缓冲区索引"><span class="nav-text">复制积压缓冲区索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#偏移量在复制积压缓冲区的作用"><span class="nav-text">偏移量在复制积压缓冲区的作用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis-Cluster-模式"><span class="nav-text">Redis Cluster 模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-Cluster-集群介绍"><span class="nav-text">Redis  Cluster 集群介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#一、概述"><span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#二、redis集群的特点"><span class="nav-text">二、redis集群的特点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#节点间内部通讯机制"><span class="nav-text">节点间内部通讯机制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#基础通讯原理"><span class="nav-text">基础通讯原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#gossip协议"><span class="nav-text">gossip协议</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ping消息深入"><span class="nav-text">ping消息深入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基于重定向的客户端"><span class="nav-text">基于重定向的客户端</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#smart-jedis"><span class="nav-text">smart jedis</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis-Cluster-集群伸缩"><span class="nav-text">Redis Cluster 集群伸缩</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#槽和数据与节点的对应关系"><span class="nav-text">槽和数据与节点的对应关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#扩容操作"><span class="nav-text">扩容操作</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据分步"><span class="nav-text">数据分步</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#数据分步理论"><span class="nav-text">数据分步理论</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#节点取余分区"><span class="nav-text">节点取余分区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#一致性哈希分区"><span class="nav-text">一致性哈希分区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#虚拟槽分区"><span class="nav-text">虚拟槽分区</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redus-Cluster-故障转移与恢复"><span class="nav-text">Redus Cluster 故障转移与恢复</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#redis-多线程与后台线程"><span class="nav-text">redis 多线程与后台线程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#大Key问题如何处理"><span class="nav-text">大Key问题如何处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是大key"><span class="nav-text">什么是大key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何找到大key"><span class="nav-text">如何找到大key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何删除大key"><span class="nav-text">如何删除大key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分批次删除"><span class="nav-text">分批次删除</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#异步删除"><span class="nav-text">异步删除</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
@@ -1485,7 +1672,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
